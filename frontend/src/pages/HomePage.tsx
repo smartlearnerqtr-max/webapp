@@ -41,6 +41,38 @@ export function HomePage() {
 
   return (
     <div className="page-stack">
+      {user ? (
+        <>
+          <section className="roadmap-panel" style={{ background: 'linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #818cf8 100%)', color: '#ffffff', padding: '2rem' }}>
+            <p className="eyebrow" style={{ color: 'rgba(255,255,255,0.9)' }}>Chào mừng quay trở lại</p>
+            <h2 style={{ margin: '0.5rem 0 0 0', fontSize: '2rem', fontWeight: 800 }}>Học tập thông minh</h2>
+            <p style={{ marginTop: '0.5rem', fontSize: '1rem', color: 'rgba(255,255,255,0.85)' }}>Nâng cao kỹ năng của bạn với sự hỗ trợ của AI và các hoạt động tương tác</p>
+          </section>
+
+          <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+            <div className="mini-card">
+              <span>Giờ học</span>
+              <strong>1.5</strong>
+              <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>Hoàn thành</p>
+            </div>
+            <div className="mini-card">
+              <span>Bài học</span>
+              <strong>10</strong>
+              <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>Trong khóa</p>
+            </div>
+            <div className="mini-card">
+              <span>Điểm thành tích</span>
+              <strong>850</strong>
+              <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>Tổng cộng</p>
+            </div>
+            <div className="mini-card">
+              <span>Chuỗi học</span>
+              <strong>7</strong>
+              <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>Ngày liên tiếp</p>
+            </div>
+          </section>
+        </>
+      ) : null}
       <section className="auth-layout">
         <article className="roadmap-panel">
           <p className="eyebrow">Đăng nhập</p>

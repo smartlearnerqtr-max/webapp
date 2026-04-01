@@ -1,14 +1,17 @@
 :root {
-  --primary: #22c55e;
-  --primary-light: #86efac;
-  --primary-dark: #16a34a;
-  --bg: #f8fafc;
+  --primary: #a78bfa;
+  --primary-light: #ede9fe;
+  --primary-dark: #9333ea;
+  --secondary: #60a5fa;
+  --accent: #06b6d4;
+  --bg: #faf8ff;
+  --bg-light: #fcfbff;
   --card: #ffffff;
-  --text: #1e293b;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --text: #2d1b69;
+  --text-muted: #7c3aed;
+  --border: #f3e8ff;
+  --shadow: 0 4px 6px rgba(167, 139, 250, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px rgba(167, 139, 250, 0.15), 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -36,7 +39,7 @@ body {
   justify-content: space-between;
   gap: 2rem;
   padding: 2rem 1.5rem;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  background: linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #818cf8 100%);
   color: #ffffff;
   box-shadow: var(--shadow-lg);
 }
@@ -90,9 +93,9 @@ body {
 
 .nav-item-active {
   background: #ffffff;
-  color: #22c55e;
+  color: #a78bfa;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(167, 139, 250, 0.25);
 }
 
 .sidebar-card {
@@ -221,17 +224,17 @@ body {
 .form-stack input:hover,
 .form-stack select:hover,
 .form-stack textarea:hover {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
 }
 
 .form-stack input:focus,
 .form-stack select:focus,
 .form-stack textarea:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
-  background: rgba(34, 197, 94, 0.02);
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+  background: rgba(167, 139, 250, 0.02);
 }
 
 .checkbox-row {
@@ -264,14 +267,14 @@ body {
 }
 
 .action-button {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(135deg, #b794f6 0%, #a78bfa 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
 }
 
 .action-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+  box-shadow: 0 6px 16px rgba(167, 139, 250, 0.4);
 }
 
 .action-button:active:not(:disabled) {
@@ -285,12 +288,12 @@ body {
 
 .ghost-button {
   background: transparent;
-  color: var(--primary);
-  border: 1.5px solid var(--primary);
+  color: #a78bfa;
+  border: 1.5px solid #a78bfa;
 }
 
 .ghost-button:hover:not(:disabled) {
-  background: rgba(34, 197, 94, 0.1);
+  background: rgba(167, 139, 250, 0.1);
   transform: translateY(-1px);
 }
 
@@ -350,9 +353,9 @@ body {
 .pill-button {
   padding: 0.6rem 1rem;
   border-radius: 2rem;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
-  color: var(--primary-dark);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(217, 191, 255, 0.05));
+  color: #a78bfa;
+  border: 1px solid rgba(167, 139, 250, 0.3);
   white-space: nowrap;
   font-weight: 600;
   font-size: 0.9rem;
@@ -363,8 +366,8 @@ body {
 
 .subject-pill:hover,
 .pill-button:hover {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
-  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(217, 191, 255, 0.1));
+  border-color: #a78bfa;
 }
 
 .pill-button {
@@ -372,10 +375,10 @@ body {
 }
 
 .pill-button-active {
-  background: var(--primary);
+  background: #a78bfa;
   color: white;
-  border-color: var(--primary);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  border-color: #a78bfa;
+  box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
 }
 
 .info-card,
@@ -390,8 +393,8 @@ body {
 
 .info-card:hover,
 .mini-card:hover {
-  border-color: var(--primary);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+  border-color: #a78bfa;
+  box-shadow: 0 4px 12px rgba(167, 139, 250, 0.15);
   transform: translateY(-2px);
 }
 
@@ -409,7 +412,7 @@ body {
   display: block;
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--primary);
+  color: #a78bfa;
 }
 
 .settings-grid {

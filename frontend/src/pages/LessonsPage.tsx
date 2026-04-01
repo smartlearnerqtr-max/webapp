@@ -201,7 +201,7 @@ export function LessonsPage() {
                 marginBottom: '1rem',
                 border: 'none',
                 borderRadius: '0.75rem',
-                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                background: 'linear-gradient(135deg, #b794f6 0%, #a78bfa 100%)',
                 color: 'white',
                 fontSize: '1.1rem',
                 fontWeight: 700,
@@ -213,11 +213,11 @@ export function LessonsPage() {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(34, 197, 94, 0.4)'
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(167, 139, 250, 0.4)'
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.3)'
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(167, 139, 250, 0.3)'
               }}
             >
               <span>Thêm hoạt động vào bài học</span>
