@@ -1,5 +1,5 @@
 import './App.css'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 
 import { AISettingsPage } from './pages/AISettingsPage'
@@ -26,6 +26,7 @@ const navItems = [
 function App() {
   const hydrate = useAuthStore((state) => state.hydrate)
   const user = useAuthStore((state) => state.user)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
     hydrate()
@@ -33,10 +34,23 @@ function App() {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
+      <button
+        className="menu-toggle-fixed"
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        aria-label="Toggle navigation"
+        aria-expanded={isMenuOpen}
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {isMenuOpen && <div className="backdrop" onClick={() => setIsMenuOpen(false)}></div>}
+
+      <aside className={`sidebar ${isMenuOpen ? 'sidebar-open' : ''}`}>
         <div>
           <p className="eyebrow">Bạn học thông minh</p>
-          <h1>Hệ thống hỗ trợ học tập</h1>
+          <h2 style={{ margin: '0.5rem 0 0 0', fontSize: '1.5rem' }}>Hệ thống hỗ trợ học tập</h2>
           <p className="sidebar-copy">
             Nền tảng học tập dành cho học sinh khuyết tật với hỗ trợ AI và công nghệ tiên tiến.
           </p>
@@ -44,7 +58,12 @@ function App() {
 
         <nav className="nav-list" aria-label="Điều hướng chính">
           {navItems.map((item) => (
-            <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'nav-item nav-item-active' : 'nav-item')}>
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => (isActive ? 'nav-item nav-item-active' : 'nav-item')}
+              onClick={() => setIsMenuOpen(false)}
+            >
               {item.label}
             </NavLink>
           ))}
