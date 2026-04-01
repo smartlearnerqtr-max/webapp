@@ -9,20 +9,49 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['app-icon.svg'],
       manifest: {
-        name: 'Ban hoc thong minh',
-        short_name: 'Ban hoc',
-        description:
-          'Webapp/PWA ho tro hoc tap, giao tiep AAC va theo doi tien do hoc sinh.',
-        theme_color: '#14532d',
-        background_color: '#f4efe2',
+        name: 'Bạn học thông minh',
+        short_name: 'Bạn học',
+        description: 'Webapp/PWA hỗ trợ học tập, giao tiếp AAC và theo dõi tiến độ học sinh.',
+        theme_color: '#a78bfa',
+        background_color: '#faf8ff',
         display: 'standalone',
         start_url: '/',
+        scope: '/',
         icons: [
           {
             src: '/app-icon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
-            purpose: 'any',
+            purpose: 'any maskable',
+          },
+        ],
+        screenshots: [
+          {
+            src: '/app-icon.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            form_factor: 'wide',
+          },
+          {
+            src: '/app-icon.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml',
+            form_factor: 'narrow',
+          },
+        ],
+      },
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/api\./,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 5 * 60,
+              },
+            },
           },
         ],
       },

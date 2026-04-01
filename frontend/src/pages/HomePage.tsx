@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { fetchHealth, login } from '../services/api'
 import { useAuthStore } from '../store/authStore'
+import { PWAInstallButton } from '../components/PWAInstallButton'
 
 export function HomePage() {
   const setSession = useAuthStore((state) => state.setSession)
@@ -96,6 +97,7 @@ export function HomePage() {
                 </button>
               ) : null}
             </div>
+            <PWAInstallButton />
             {error ? <p className="error-text">{error}</p> : null}
           </form>
         </article>
