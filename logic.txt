@@ -1,0 +1,255 @@
+﻿LOGIC NGHIEP VU
+
+1. Dinh huong san pham
+- San pham duoc xay dung theo mo hinh webapp responsive.
+- Webapp phai dung tot tren desktop va cai dat duoc tren Android qua trinh duyet theo chuan PWA.
+- Cung mot nen tang phuc vu 3 doi tuong: Giao vien, Phu huynh, Hoc sinh.
+- Muc tieu chinh la de hoc, de giao tiep, de theo doi, de mo rong them dinh huong nghe nghiep.
+- Mo hinh to chuc lop hoc gan giong Classroom: moi giao vien tu quan ly cac lop cua minh, giao bai va theo doi hoc sinh trong lop.
+- Cau truc noi dung nen theo truc: Lop -> Mon hoc -> Bai hoc -> Hoat dong.
+
+2. Vai tro va quan he nghiep vu
+- Giao vien la nguoi quan tri noi dung va van hanh cac lop do minh tao.
+- Phu huynh chi duoc xem du lieu cua cac con da duoc giao vien lien ket.
+- Hoc sinh chi duoc hoc cac bai hoc duoc giao trong cac lop ma minh tham gia.
+- Mot giao vien co the quan ly nhieu lop.
+- Mot lop co nhieu hoc sinh.
+- Mot lop co nhieu mon hoc.
+- Mot bai hoc co nhieu hoat dong.
+- Mot hoc sinh co the tham gia mot hoac nhieu lop tuy theo cach giao vien to chuc, tuong tu Classroom.
+- Mot phu huynh co the lien ket voi nhieu hoc sinh.
+- Moi lien ket phu huynh-hoc sinh duoc tao boi giao vien.
+- Khong co vai tro Admin rieng.
+
+3. Phan loai muc do hoc sinh
+- Hoc sinh duoc giao vien danh gia va gan 1 trong 3 muc do: Nang, Trung binh, Nhe.
+- Muc Nang: noi dung cuc ky don gian, 1-2 buoc, uu tien hinh anh lon, am thanh ro, AAC toi gian.
+- Muc Trung binh: noi dung co the gom doc/viet/tinh co ban, ky nang song va giao tiep don gian.
+- Muc Nhe: noi dung hoc tap gan binh thuong hon, tang cuong ky nang xa hoi va dinh huong nghe nghiep.
+- Muc do cua hoc sinh anh huong truc tiep den bai hoc duoc de xuat, giao dien hien thi, kieu AAC, cach AI phan hoi, cach thuc hien hoat dong va noi dung nghe nghiep.
+
+4. Logic phan quyen
+- Giao vien co quyen tao/sua/xoa noi dung, tao lop, cau hinh mon hoc, them hoc sinh, lien ket phu huynh, phan cong bai hoc, xem bao cao.
+- Phu huynh chi co quyen xem tien do, bao cao, thong bao, goi y ho tro tai nha cua cac con da duoc lien ket.
+- Hoc sinh chi co quyen hoc bai, thuc hien hoat dong, dung AAC, tro chuyen voi AI trong pham vi hoc tap/giao tiep.
+- Khong ai ngoai giao vien duoc phep sua noi dung hoc tap.
+
+5. Logic lop hoc va cau truc Classroom
+- Giao vien tu tao cac lop cua minh, co the dat ten theo khoi 6, 7, 8, 9 hoac lop chuyen de.
+- Moi lop thuoc quyen quan ly cua giao vien tao lop.
+- Trong moi lop, giao vien cau hinh danh sach mon hoc se day hoc nhu Toan, Van, Khoa hoc tu nhien, Ky nang song...
+- Hoc sinh co the duoc them vao lop nay hoac lop khac theo nhu cau hoc tap.
+- He thong nen cho phep mot hoc sinh tham gia nhieu lop neu can, vi luong van hanh gan giong Classroom.
+- Trong moi lop, giao vien giao bai hoc, theo doi tien do, gui nhan xet va xem lich su hoc tap theo tung mon hoc.
+- Man hinh tong quan lop phai hien thi tong so hoc sinh, so mon hoc, bai dang hoc, bai da hoan thanh, hoc sinh cham tien do, hoc sinh noi bat.
+
+6. Logic mon hoc
+- Mon hoc la cap phan loai nam duoi lop va nam tren bai hoc.
+- Bai hoc khi duoc giao can xac dinh ro thuoc lop nao va mon hoc nao.
+- Mot bai hoc co the duoc tai su dung cho nhieu lop hoac nhieu mon hoc neu giao vien cho phep, nhung khi giao bai van can co ban ghi phan cong cu the.
+- Bao cao can co kha nang tong hop theo lop, theo mon hoc va theo hoc sinh.
+- Du lieu bao cao phai du de ho tro giao vien danh gia khi nao nen giu nguyen, ho tro them hoac nang do kho.
+
+7. Logic quan ly hoc sinh
+- Khi them hoc sinh, giao vien tao ho so hoc sinh hoac chon hoc sinh da co san trong he thong.
+- Giao vien gan muc do khuyet tat cho tung hoc sinh.
+- Neu hoc sinh tham gia nhieu lop, thong tin muc do va ho so co ban van la mot ban ghi dung chung.
+- Tien do hoc tap duoc luu theo tung bai hoc va co the tong hop theo hoc sinh, theo lop, theo mon hoc va theo giao vien.
+
+8. Logic quan ly noi dung hoc tap
+- Moi bai hoc phai thuoc it nhat 1 chu de.
+- Moi bai hoc phai co gan mon hoc chinh.
+- Moi bai hoc co the duoc gan cho 1 hoac nhieu muc do hoc sinh.
+- Moi bai hoc gom nhieu hoat dong duoc sap xep theo thu tu.
+- Moi hoat dong co 1 loai hinh chinh va co the su dung tai nguyen nhu hinh anh, video, audio, PDF.
+- Giao vien sap xep thu tu bai hoc theo lo trinh trong tung lop hoac theo bo noi dung.
+- Khi bai hoc bi sua, hoc sinh nhin thay phien ban moi nhat.
+- Khi bai hoc bi xoa, bai hoc khong con duoc giao moi, nhung can giu lich su hoc da phat sinh de bao cao khong bi mat.
+- He thong khong tu sinh noi dung hoc; moi noi dung do giao vien cung cap.
+
+9. Logic loai hinh hoat dong trong bai hoc
+- Hoat dong chon dap an:
+  Hoc sinh tra loi bang cham. Neu giao vien bat tinh nang voice answer thi hoc sinh co the tra loi bang giong noi.
+- Hoat dong ghep noi:
+  Hoc sinh ghep cap doi tuong dung voi nhau.
+- Hoat dong keo tha:
+  Hoc sinh keo doi tuong vao dung vi tri hoac dung trinh tu.
+- Hoat dong nghe va chon:
+  He thong phat am thanh, hoc sinh nghe va chon dap an.
+- Hoat dong xem va tra loi:
+  Hoc sinh xem hinh/video ngan roi tra loi cau hoi.
+- Hoat dong theo buoc:
+  Hoc sinh thuc hien tung buoc cua mot ky nang song hoac thao tac nghe.
+- Hoat dong AAC:
+  Hoc sinh chon bieu tuong de bieu dat nhu cau, y muon hoac cau ngan.
+- Hoat dong mo phong nghe nghiep:
+  Hoc sinh thao tac mini game/tinh huong don gian theo nghe.
+- Hoat dong tro chuyen voi AI:
+  Phuc vu luyen noi, luyen giao tiep va hoi dap.
+
+10. Logic voice answer cho hoat dong chon dap an
+- Voice answer la phuong thuc nhap cau tra loi bo sung, khong phai loai hoat dong rieng.
+- Chi nen ap dung cho nhung hoat dong co dap an ro rang, de map duoc tu loi noi sang dap an.
+- Giao vien co the bat/tat voice answer theo tung hoat dong.
+- Hoc sinh co the tra loi bang cac cach nhu: noi ten dap an, noi mau sac, noi ten con vat, noi so, noi chu cai...
+- He thong can chuyen ket qua nhan dien giong noi thanh dap an tuong ung.
+- Neu do tin cay nhan dien thap, he thong nen yeu cau nhac lai hoac cho hoc sinh chon bang cham.
+- Voice answer dac biet huu ich voi hoc sinh chi noi duoc nhung thao tac cham kho khan.
+- He thong nen luu cach tra loi: touch hoac voice.
+- Neu co the, he thong luu them van ban nhan dien duoc va do tin cay de phuc vu bao cao/kiem tra.
+
+11. Logic phan cong bai hoc
+- Giao vien co the giao bai hoc cho toan lop, nhom hoc sinh hoac tung hoc sinh.
+- Bai hoc khi giao can gan voi lop va mon hoc cu the.
+- Hoc sinh sau khi dang nhap se thay danh sach lop minh tham gia, mon hoc trong lop va bai hoc duoc giao trong tung mon.
+- Moi bai hoc hien theo thu tu giao vien da sap xep.
+- Trong moi bai hoc, hoc sinh thuc hien lan luot tung hoat dong theo cau truc ma giao vien da tao.
+- Neu bai hoc khong phu hop muc do hoc sinh, he thong nen canh bao giao vien truoc khi giao.
+
+12. Logic moi va lien ket phu huynh
+- Giao vien tao tai khoan hoac gui loi moi cho phu huynh bang email hoac so dien thoai.
+- Loi moi co trang thai: cho chap nhan, da chap nhan, het han, da thu hoi.
+- Sau khi phu huynh dang ky/xac nhan, giao vien lien ket phu huynh voi hoc sinh cu the.
+- Mot phu huynh co 2 con thi giao vien lien ket 2 lan voi 2 hoc sinh tuong ung.
+- Phu huynh chi nhin thay du lieu cua nhung hoc sinh da duoc lien ket.
+- Giao vien co the thu hoi lien ket bat ky luc nao.
+- Khi thu hoi lien ket, phu huynh mat quyen xem du lieu moi cua hoc sinh ngay lap tuc.
+
+13. Logic hoc bai cua hoc sinh
+- Giao dien hoc sinh uu tien it chu, nhieu hinh, nut lon, thao tac don gian, am thanh doc tu dong.
+- Moi bai hoc co the gom cac buoc: gioi thieu, thuc hien cac hoat dong, xac nhan hoan thanh.
+- Moi hoat dong co the la xem, nghe, chon, keo tha, noi, AAC hoac AI.
+- He thong ghi nhan thoi gian bat dau, thoi gian ket thuc, tong thoi luong hoc, so lan hoc lai, ket qua bai hoc va ket qua tung hoat dong.
+- Bai hoc co the duoc xem la hoan thanh khi hoc sinh di het cac hoat dong bat buoc hoac dat nguong toi thieu do giao vien quy dinh.
+- Sau khi hoan thanh, hoc sinh nhan phan thuong nhu sao, huy hieu, am thanh khich le.
+- Phan thuong mang tinh dong vien, khong dung de so sanh ap luc giua cac hoc sinh.
+
+14. Logic bao cao va tien do
+- Bao cao hoc sinh gom danh sach bai da hoc, ty le hoan thanh, thoi gian hoc, so lan hoc lai, nhan xet cua giao vien.
+- Bao cao co the loc theo lop, mon hoc, bai hoc, loai hoat dong va cach tra loi.
+- Bao cao nen xem duoc ca muc tong quan bai hoc va chi tiet tung hoat dong khi can.
+- Bao cao lop gom tong quan muc do hoan thanh, hoc sinh gap kho khan, hoc sinh dat moc tot.
+- Bao cao giao vien la tong hop tu cac lop do giao vien quan ly.
+- Giao vien duoc them ghi chu thu cong vao ho so hoc sinh.
+- Phu huynh chi duoc xem bao cao cua cac con minh da duoc lien ket.
+- He thong co the tao thong bao khi hoc sinh hoan thanh chu de, dat huy hieu, dat moc moi.
+
+15. Logic theo doi tien do va de xuat nang do kho
+- He thong khong chi theo doi dung/sai, ma can theo doi xu huong tien bo cua hoc sinh qua nhieu bai hoc va nhieu buoi hoc.
+- Du lieu can theo doi de danh gia tien do gom: ty le hoan thanh bai hoc, ty le dung cua tung hoat dong, thoi gian hoan thanh, so lan hoc lai, so lan can goi y/ho tro, cach tra loi touch/voice/AAC, muc do on dinh qua nhieu buoi.
+- Tien do can xem duoc theo cac chieu: theo hoc sinh, theo lop, theo mon hoc, theo loai hoat dong, theo muc do khuyet tat.
+- He thong nen co chi so noi bo de goi y muc do san sang nang do kho cho tung hoc sinh.
+- Chi so goi y nay co the dua tren cac dieu kien nhu: hoan thanh tot 3-5 bai hoc lien tiep, ty le dung tu 80% tro len, thoi gian thuc hien on dinh, so lan can tro giup giam dan, ket qua lap lai on dinh trong nhieu buoi.
+- Neu hoc sinh dung nhieu nhung van can rat nhieu goi y hoac mat qua nhieu thoi gian, he thong khong nen goi y nang do kho qua som.
+- He thong nen phan nhom trang thai hoc sinh thanh: Can ho tro them, Dang phu hop, San sang nang do kho.
+- He thong chi dua ra goi y, khong tu dong nang do kho cho hoc sinh.
+- Quyet dinh cuoi cung ve viec nang muc, doi loai hoat dong hoac tang do kho van do giao vien xac nhan.
+- Giao vien can xem duoc ly do tai sao he thong dua ra goi y, vi du: hoc sinh dat 85% trong 4 bai lien tiep, so lan can goi y giam, thoi gian hoan thanh on dinh.
+- Giao vien co the bo qua goi y cua he thong va ghi chu ly do de theo doi sau.
+- Khi giao vien nang do kho, he thong nen luu lich su thay doi de biet thoi diem nao hoc sinh chuyen muc bai hoc hoac muc do hoat dong.
+- Viec nang do kho co the xay ra theo nhieu cach: tang so buoc trong hoat dong, giam goi y, tang so lua chon dap an, chuyen tu cham sang voice/AAC ket hop, tang tinh thuc te cua tinh huong.
+- He thong cung nen phat hien chieu nguoc lai: neu hoc sinh lien tuc gap kho khan, canh bao giao vien de giam do kho hoac tro giup them.
+
+16. Logic AAC
+- AAC la cong cu giao tiep thay the/bo tro cho hoc sinh kho khan ngon ngu.
+- Muc Nang: hien thi bieu tuong rat lon, so lua chon it, uu tien nhu cau thiet yeu.
+- Muc Trung binh: cho phep ghep 2-3 bieu tuong thanh cau don gian.
+- Muc Nhe: ho tro cau day du, luyen phat am, giao tiep tinh huong.
+- Khi hoc sinh chon bieu tuong, he thong phat am thanh/noi dung tuong ung neu co.
+- AAC phai dung duoc bang cham de thao tac nhanh va de hieu.
+
+17. Logic AI tro ly hoc tap Gemini
+- AI dong vai tro "ban hoc", khong dong vai tro giao vien danh gia.
+- AI uu tien hoi dap bang giong noi tieng Viet.
+- Hoc sinh co the goi AI trong bai hoc de hoi lai, yeu cau giai thich lai, doc cham hon, nhac lai tu/cau.
+- Hoc sinh co the tro chuyen voi AI ngoai gio hoc de luyen giao tiep.
+- AI phai dieu chinh cach tra loi theo muc do hoc sinh:
+  Muc Nang: 1-3 tu, rat cham, rat ro, khong ep noi cau dai.
+  Muc Trung binh: cau ngan, co nhac lai va goi mo them.
+  Muc Nhe: hoi thoai tu nhien hon, co cau hoi mo, on tap kien thuc.
+- AI can uu tien cau ngan, tu de hieu, giong than thien, khich le tich cuc.
+- AI khong nen cham diem, phe binh, dua noi dung gay ap luc, dua huong dan nguy hiem.
+- Neu mat internet, tinh nang AI voice to voice tam thoi khong dung duoc va he thong can thong bao ro.
+
+18. Logic dinh huong nghe nghiep
+- Doi tuong uu tien la hoc sinh muc Nhe va mot phan muc Trung binh.
+- Thu vien nghe nghiep gom toi thieu 30 nghe/co viec phu hop.
+- Moi nghe co ten nghe, mo ta ngan, hinh anh, video gioi thieu, ky nang lien quan, muc do phu hop.
+- He thong goi y nghe dua tren muc do hoc sinh, so thich, kha nang, lich su tuong tac.
+- Muc Nang han che o muc nhan biet cong cu va moi truong.
+- Muc Trung binh nhan biet nghe va trai nghiem hoat dong don gian.
+- Muc Nhe duoc kham pha day du hon, thuc hanh ky nang, ren thai do lam viec.
+
+19. Logic thong bao va goi y cho phu huynh
+- Phu huynh nhan thong bao khi con hoan thanh bai hoc, dat huy hieu, hoan thanh chu de, co ghi chu moi tu giao vien.
+- Giao vien co the dang goi y hoat dong tai nha theo tung hoc sinh hoac theo chu de.
+- Phu huynh xem duoc noi dung goi y, nhung khong sua duoc.
+
+20. Logic offline va dong bo cho webapp/PWA
+- Webapp can ho tro cai dat qua browser tren Android bang manifest + service worker.
+- Bai hoc da duoc tai truoc co the hoc offline.
+- Du lieu nen cache offline: giao dien co ban, danh sach lop, danh sach mon hoc, danh sach bai hoc da duoc giao, cau truc hoat dong cua bai hoc, tai nguyen bai hoc da tai, AAC co ban.
+- Du lieu can internet: dang nhap lan dau, dong bo du lieu moi, AI voice to voice, nhan dien giong noi, tai noi dung moi neu chua cache.
+- Khi hoc offline, he thong tam luu tien do tren thiet bi.
+- Khi co mang tro lai, he thong dong bo tien do len server.
+- Neu xay ra xung dot dong bo, uu tien du lieu tien do moi nhat theo thoi gian, nhung can ghi log de giao vien co the kiem tra.
+
+21. Logic logging va theo doi loi server
+- He thong can ghi log o backend cho cac nhom loi chinh: auth, upload file, bai hoc, dong bo, AI Gemini, voice answer, speech-to-text, API, database, background job.
+- Moi ban ghi log loi nen co cac truong toi thieu: thoi gian, muc do loi, module, endpoint/chuc nang, user_id neu co, class_id/student_id neu lien quan, ma loi, thong diep loi, stack trace, request_id/trace_id, metadata bo sung.
+- Can phan cap muc do log: info, warning, error, critical.
+- Loi Gemini can ghi ro: model dang dung, loai request, ma loi tra ve, thong diep loi, thoi gian timeout, nhung tuyet doi khong log plaintext API key.
+- Loi voice/speech can ghi ro: nguon loi la microphone, speech-to-text, map dap an, hay ket noi mang.
+- Loi dong bo can ghi du lieu lien quan de co the truy vet: assignment_id, student_id, thoi diem sync, ket qua truoc/sau neu can.
+- Moi request quan trong nen co request_id de co the doi chieu giua frontend log va backend log.
+- He thong nen co co che log exception tu dong khi API tra ve 5xx.
+- He thong nen co dashboard hoac trang xem log ky thuat de ban quan tri he thong/dev co the loc theo ngay, module, muc do, user, hoc sinh, lop.
+- Can co co che an/mask du lieu nhay cam trong log nhu API key, password, token, thong tin rieng tu qua nhay cam.
+- Log khong duoc anh huong den trai nghiem hoc cua hoc sinh; neu ghi log that bai thi khong duoc lam sap chuc nang chinh.
+- Co the bo sung thong bao canh bao cho developer/quan tri khi loi critical lap lai nhieu lan.
+
+22. Logic giao dien va tro nang
+- Giao dien hoc sinh phai uu tien kha nang tiep can: nut lon, do tuong phan cao, it chu, doc am thanh tu dong, ho tro switch access.
+- Cho phep ca nhan hoa: co chu, mau nen, toc do doc, am luong.
+- Desktop uu tien dashboard va quan tri cho giao vien.
+- Mobile/Android uu tien hoc bai nhanh, thao tac 1 tay, co the cai len man hinh chinh.
+- Tinh nang voice answer chi la bo sung, khong duoc lam mat kha nang thao tac bang cham.
+
+23. Du lieu cot loi can co
+- Nguoi dung: giao vien, phu huynh, hoc sinh.
+- Lop hoc.
+- Mon hoc.
+- Quan he giao vien - lop.
+- Quan he hoc sinh - lop.
+- Quan he lop - mon hoc.
+- Quan he phu huynh - hoc sinh.
+- Ho so hoc sinh va muc do khuyet tat.
+- Bai hoc.
+- Hoat dong trong bai hoc.
+- Tai nguyen bai hoc.
+- Phan cong bai hoc.
+- Tien do hoc tap.
+- Lich su danh gia muc do san sang nang do kho.
+- Ket qua tung hoat dong.
+- Ghi chu/nhan xet giao vien.
+- Lich su thay doi muc do kho/goi y hoc tap.
+- Cai dat AI/API key theo nguoi dung.
+- Log loi server/log ky thuat.
+- Loi moi phu huynh.
+- AAC item/bieu tuong.
+- Nghe nghiep, noi dung gioi thieu nghe, hoat dong nghe nghiep.
+- Thong bao.
+
+24. Nguyen tac nghiep vu quan trong
+- Moi noi dung hoc phai phu hop muc do nhan thuc cua hoc sinh.
+- Moi du lieu phu huynh xem duoc phai dung voi hoc sinh da duoc lien ket.
+- He thong uu tien su don gian, an toan tam ly va tinh khich le.
+- Moi tinh nang AI chi la cong cu dong hanh, khong thay the giao vien va phu huynh.
+- Voice answer la tinh nang bo sung de ho tro hoc sinh dac thu, khong phai cach tra loi duy nhat.
+- Gemini API key do nguoi dung tu cau hinh trong app, nhung viec goi Gemini nen thuc hien qua backend de tranh lo khoa tren web/PWA.
+- Don vi giao cho hoc sinh la bai hoc; cac kieu tuong tac nhu video, keo tha, ghep noi, chon dap an la cac hoat dong ben trong bai hoc.
+- He thong phai theo doi du de giao vien danh gia dung thoi diem nang do kho hoac giu on dinh lo trinh hoc cho hoc sinh.
+- He thong phai ghi du log o backend de co the truy vet loi va sua nhanh khi van hanh that te.
+- Phan he webapp/PWA phai duoc thiet ke de co the mo rong thanh san pham thuc te tren desktop va Android ma khong can viet 2 ung dung rieng.
+
+

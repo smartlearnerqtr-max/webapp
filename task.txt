@@ -1,0 +1,343 @@
+﻿DANH SACH TASK TRIỂN KHAI
+
+Du an: Ban hoc thong minh
+Muc tieu: chia task theo giai doan de trien khai webapp/PWA cho desktop va Android.
+
+NGUYEN TAC CHIA TASK
+- Uu tien xong luong cot loi truoc: auth, lop hoc, mon hoc, bai hoc, hoat dong, phan cong, tien do.
+- AI, AAC nang, nghe nghiep va voice nang se dua sau khi he thong hoc tap cot loi on dinh.
+- Moi task nen co dau ra ro rang, test duoc, demo duoc.
+
+PHAN 1. KHOI DONG DU AN
+Task 1. Tao cau truc du an
+- Chon stack frontend, backend, database.
+- Tao repo/cau truc thu muc cho webapp, backend API, database migration.
+- Cau hinh env, build, lint, format.
+
+Task 2. Cau hinh PWA
+- Tao manifest.
+- Tao service worker.
+- Cau hinh icon, install prompt, cache shell co ban.
+- Dam bao cai dat duoc tren Android va dung tot tren desktop.
+
+Task 3. Cau hinh database va migration
+- Tao ket noi PostgreSQL.
+- Cau hinh migration tool.
+- Tao seed data co ban cho mon hoc, chu de, vai tro.
+
+PHAN 2. AUTH VA NGUOI DUNG
+Task 4. Xay dung auth
+- Dang nhap.
+- Dang xuat.
+- Doi mat khau.
+- Phan quyen theo role: teacher, parent, student.
+
+Task 5. Quan ly profile giao vien
+- Tao/sua ho so giao vien.
+- Hien dashboard giao vien co ban.
+
+Task 6. Quan ly profile phu huynh
+- Tao/sua ho so phu huynh.
+- Hien danh sach con duoc lien ket.
+
+Task 7. Quan ly profile hoc sinh
+- Tao/sua ho so hoc sinh.
+- Gan muc do khuyet tat: nang, trung_binh, nhe.
+- Cau hinh uu tien hoc tap: touch, voice, aac, mixed.
+
+PHAN 3. LOP HOC VA MON HOC
+Task 8. Quan ly lop hoc
+- Giao vien tao lop.
+- Sua/xoa/luu tru lop.
+- Hien danh sach lop cua giao vien.
+
+Task 9. Quan ly hoc sinh trong lop
+- Them hoc sinh vao lop.
+- Xoa hoc sinh khoi lop.
+- Ho tro mot hoc sinh tham gia nhieu lop.
+
+Task 10. Quan ly mon hoc trong lop
+- Tao danh muc mon hoc co ban: Toan, Van, KHTN, Ky nang song...
+- Cau hinh mon hoc trong tung lop.
+- Sap xep thu tu mon hoc.
+
+PHAN 4. NOI DUNG HOC TAP
+Task 11. Quan ly chu de hoc tap
+- Tao/sua/xoa chu de.
+- Gan chu de cho bai hoc.
+
+Task 12. Quan ly bai hoc
+- Giao vien tao bai hoc.
+- Gan mon hoc, muc do, chu de.
+- Cau hinh thu tu bai hoc.
+- Luu trang thai draft/published.
+
+Task 13. Quan ly hoat dong trong bai hoc
+- Tao nhieu hoat dong trong 1 bai hoc.
+- Sap xep thu tu hoat dong.
+- Danh dau hoat dong bat buoc/khong bat buoc.
+- Cau hinh difficulty_stage cho tung hoat dong.
+
+Task 14. Ho tro cac loai hoat dong cot loi
+- multiple_choice
+- matching
+- drag_drop
+- listen_choose
+- watch_answer
+- step_by_step
+
+Task 15. Upload tai nguyen da phuong tien
+- Upload image/video/audio/pdf.
+- Gan tai nguyen vao bai hoc va hoat dong.
+- Tao thumbnail neu can.
+
+PHAN 5. PHAN CONG HOC TAP
+Task 16. Giao bai hoc theo lop
+- Giao bai cho ca lop.
+- Gan bai hoc voi lop va mon hoc.
+- Dat han hoan thanh neu can.
+
+Task 17. Giao bai hoc theo nhom/ca nhan
+- Giao bai cho nhom hoc sinh.
+- Giao bai cho tung hoc sinh.
+- Tao danh sach hoc sinh muc tieu cho assignment.
+
+Task 18. Hien danh sach bai hoc duoc giao cho hoc sinh
+- Theo lop.
+- Theo mon hoc.
+- Theo trang thai chua hoc/dang hoc/da xong.
+
+PHAN 6. TRAI NGHIEM HOC SINH
+Task 19. Xay dung UI hoc sinh
+- Nut lon, it chu, de thao tac.
+- Ho tro mobile va desktop.
+- Ho tro doc am thanh tu dong neu can.
+
+Task 20. Luong hoc bai
+- Vao bai hoc.
+- Chay tung hoat dong theo thu tu.
+- Xac nhan hoan thanh bai hoc.
+
+Task 21. Ghi nhan ket qua hoat dong
+- Luu attempts_count, correct_count, wrong_count.
+- Luu duration_seconds.
+- Luu response_mode: touch/voice/aac/mixed.
+
+Task 22. Thuong va dong vien
+- Sao.
+- Huy hieu.
+- Am thanh khich le.
+
+PHAN 7. VOICE VA AI
+Task 23. Cai dat Gemini API key
+- Tao man hinh settings cho nguoi dung nhap key.
+- Luu key ma hoa o backend.
+- Hien model dang dung: gemini-2.5-flash.
+- Tao nut kiem tra key hop le.
+
+Task 24. Tich hop AI Gemini text/voice co ban
+- Goi Gemini qua backend.
+- Tao luong hoi dap co ban theo bai hoc.
+- Dieu chinh prompt theo muc do hoc sinh.
+
+Task 25. Voice answer cho hoat dong chon dap an
+- Bat/tat theo tung hoat dong.
+- Speech-to-text.
+- Map cau noi thanh dap an.
+- Luu speech_transcript va speech_confidence.
+
+Task 26. AI voice support/Llive API neu can
+- Hoi thoai giong noi.
+- Xu ly timeout, mat mang, key invalid.
+- Co fallback khi tinh nang voice loi.
+
+PHAN 8. AAC
+Task 27. Xay dung danh muc AAC
+- Nhom bieu tuong.
+- Bieu tuong AAC.
+- Audio cua bieu tuong.
+
+Task 28. UI AAC theo muc do hoc sinh
+- Muc nang.
+- Muc trung binh.
+- Muc nhe.
+
+Task 29. Gan AAC vao bai hoc/hoat dong
+- Cho phep dung AAC trong bai hoc.
+- Ghi nhan cach hoc sinh tuong tac.
+
+PHAN 9. PHU HUYNH
+Task 30. Moi phu huynh
+- Moi bang email/phone.
+- Tao token moi.
+- Trang thai pending/accepted/expired/revoked.
+
+Task 31. Lien ket phu huynh voi hoc sinh
+- Mot phu huynh co the lien ket nhieu hoc sinh.
+- Thu hoi lien ket khi can.
+
+Task 32. Dashboard phu huynh
+- Xem tien do tung con.
+- Xem theo lop, mon hoc, bai hoc.
+- Xem nhan xet va goi y tai nha.
+
+PHAN 10. TIEN DO VA BAO CAO
+Task 33. Bao cao tien do bai hoc
+- Ty le hoan thanh.
+- So bai da hoc.
+- Thoi gian hoc.
+- So lan hoc lai.
+
+Task 34. Bao cao chi tiet theo hoat dong
+- Loc theo loai hoat dong.
+- Loc theo cach tra loi touch/voice/aac.
+- Xem chi tiet theo hoc sinh.
+
+Task 35. Dashboard giao vien
+- Tong quan theo lop.
+- Tong quan theo mon hoc.
+- Hoc sinh cham tien do.
+- Hoc sinh noi bat.
+
+Task 36. Theo doi xu huong hoc tap
+- Tinh trung binh nhieu buoi.
+- Do on dinh ket qua.
+- So lan can tro giup.
+- Xu huong tien bo/thoai lui.
+
+Task 37. Goi y nang do kho
+- Tinh readiness_status: can_ho_tro_them, dang_phu_hop, san_sang_nang_do_kho.
+- Dua ra ly do goi y.
+- Khong tu dong nang do kho.
+
+Task 38. Lich su thay doi do kho
+- Giao vien xac nhan tang/giam/giu nguyen.
+- Luu lich su thay doi.
+- Luu ghi chu cua giao vien.
+
+PHAN 11. LOGGING VA VAN HANH
+Task 39. Logging backend
+- Ghi log loi API.
+- Ghi log loi Gemini.
+- Ghi log loi voice.
+- Ghi log loi dong bo.
+- Ghi log loi upload/database.
+
+Task 40. Dashboard log ky thuat
+- Loc theo level.
+- Loc theo module.
+- Loc theo user, hoc sinh, lop.
+- Tim theo request_id.
+
+Task 41. Bao mat log va du lieu nhay cam
+- Mask API key.
+- Khong log password/token plaintext.
+- Gioi han quyen xem log.
+
+PHAN 12. OFFLINE VA DONG BO
+Task 42. Cache bai hoc offline
+- Cache shell app.
+- Cache tai nguyen bai hoc.
+- Cache danh sach bai hoc duoc giao.
+
+Task 43. Tam luu tien do offline
+- Luu local khi mat mang.
+- Danh dau du lieu cho dong bo lai.
+
+Task 44. Dong bo lai khi co mang
+- Day tien do len server.
+- Xu ly xung dot.
+- Ghi log loi dong bo.
+
+PHAN 13. NGHE NGHIEP
+Task 45. Danh muc nghe nghiep
+- Tao danh sach 30+ nghe.
+- Upload tai nguyen nghe nghiep.
+
+Task 46. Hoat dong mo phong nghe nghiep
+- Video gioi thieu.
+- Tinh huong mini game.
+- Gan muc do phu hop.
+
+Task 47. Goi y nghe nghiep
+- Goi y theo muc do.
+- Goi y theo so thich/nang luc.
+- Hien trong dashboard giao vien/phu huynh neu can.
+
+PHAN 14. API VA KIEM THU
+Task 48. Xay dung API backend
+- Auth API.
+- Class API.
+- Subject API.
+- Lesson API.
+- Assignment API.
+- Progress API.
+- Parent API.
+- AI settings API.
+- Logs API.
+
+Task 49. Viet test
+- Unit test cho logic cot loi.
+- API test.
+- Test phan quyen.
+- Test logging.
+
+Task 50. Test nghiep vu thuc te
+- Teacher tao lop -> them hoc sinh -> giao bai.
+- Hoc sinh hoc bai -> luu tien do.
+- Phu huynh xem tien do.
+- Giao vien xem goi y nang do kho.
+- Kiem tra loi Gemini/key invalid/log server.
+
+PHAN 15. GOI Y THU TU LAM THUC TE
+Sprint 1
+- Task 1 -> 10
+
+Sprint 2
+- Task 11 -> 18
+
+Sprint 3
+- Task 19 -> 22, 33 -> 35
+
+Sprint 4
+- Task 23 -> 26, 39 -> 41
+
+Sprint 5
+- Task 27 -> 32, 36 -> 38
+
+Sprint 6
+- Task 42 -> 50
+
+PHAN 16. CAC TASK BAT BUOC CHO MVP
+- Task 1
+- Task 2
+- Task 3
+- Task 4
+- Task 7
+- Task 8
+- Task 9
+- Task 10
+- Task 12
+- Task 13
+- Task 14
+- Task 15
+- Task 16
+- Task 18
+- Task 19
+- Task 20
+- Task 21
+- Task 23
+- Task 24
+- Task 30
+- Task 31
+- Task 32
+- Task 33
+- Task 35
+- Task 36
+- Task 37
+- Task 39
+- Task 42
+- Task 43
+- Task 44
+- Task 48
+- Task 50

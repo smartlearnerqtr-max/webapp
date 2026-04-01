@@ -1,0 +1,132 @@
+﻿TOM TAT CHUC NANG CAN LAM
+
+Du an: Ban hoc thong minh
+Huong trien khai: Webapp responsive, dung tot tren desktop va co the cai dat tu trinh duyet tren Android theo mo hinh PWA (Progressive Web App).
+
+1. Muc tieu he thong
+- Ho tro hoc sinh khuyet tat tri tue hoc tap, giao tiep va dinh huong nghe nghiep.
+- Toan bo noi dung hoc tap do giao vien tao va quan ly.
+- He thong co 3 nhom nguoi dung: Giao vien, Phu huynh, Hoc sinh.
+- Hoc sinh duoc phan loai theo 3 muc do: Nang, Trung binh, Nhe.
+- Mo hinh lop hoc van hanh gan giong Classroom: giao vien tao lop, them hoc sinh, giao bai, theo doi tien do.
+- He thong co the phan loai theo lop va theo mon hoc, vi du: Toan, Van, Khoa hoc tu nhien...
+- Don vi duoc giao cho hoc sinh la bai hoc. Moi bai hoc co the gom nhieu hoat dong nho ben trong.
+
+2. Chuc nang giao vien
+- Dang nhap va quan ly tai khoan giao vien.
+- Tao, sua, xoa noi dung hoc tap.
+- Tao bai hoc va sap xep nhieu hoat dong ben trong bai hoc.
+- Upload hinh anh, video, am thanh, PDF cho bai hoc/hoat dong.
+- Gan chu de cho bai hoc: mau sac, so dem, chu cai, con vat, thuc pham, ky nang song...
+- Gan mon hoc cho bai hoc: Toan, Van, Khoa hoc tu nhien, Ky nang song...
+- Gan muc do phu hop cho bai hoc: Nang, Trung binh, Nhe.
+- Sap xep thu tu bai hoc va thu tu hoat dong trong bai hoc.
+- Tao lop hoc theo khoi/lop nhu 6, 7, 8, 9 hoac lop chuyen de rieng.
+- Quan ly danh sach lop do minh tao.
+- Cau hinh mon hoc trong tung lop.
+- Them hoc sinh vao lop va danh gia muc do khuyet tat cho tung hoc sinh.
+- Mot hoc sinh co the duoc giao vao lop nay hoac lop khac, tuy cach to chuc nhu Classroom.
+- Phan cong bai hoc cho tung hoc sinh hoac cho ca lop theo tung mon hoc.
+- Theo doi tong quan tien do cua tung lop va tung mon hoc.
+- Theo doi xu huong hoc tap cua tung hoc sinh de co co so nang do kho bai hoc.
+- Them phu huynh vao he thong de theo doi hoc sinh.
+- Lien ket mot phu huynh voi mot hoac nhieu hoc sinh.
+- Xem bao cao tien do tung hoc sinh.
+- Them nhan xet/ghi chu vao ho so hoc sinh.
+- Nhan thong bao ve cac moc hoc tap de theo doi va ho tro.
+
+3. Chuc nang hoc sinh
+- Dang nhap vao tai khoan hoc sinh.
+- Chi xem duoc cac lop minh tham gia va cac bai hoc duoc giao.
+- Xem bai hoc theo tung lop va tung mon hoc.
+- Trong moi bai hoc, hoc sinh thuc hien lan luot cac hoat dong duoc giao.
+- Giao dien don gian: nut lon, hinh anh ro rang, de thao tac.
+- Hoc bai bang noi dung da phuong tien: hinh anh, video ngan, am thanh.
+- Tuong tac bang cham, chon dap an, keo tha, nghe va chon, xem video, lam theo buoc.
+- Mot so hoat dong chon dap an co the tra loi bang giong noi nhu mot cach bo sung.
+- Nhan thuong sau khi hoan thanh bai hoc: sao, huy hieu, am thanh khich le.
+- Su dung bang giao tiep AAC phu hop theo muc do.
+- Goi tro ly AI de hoi dap bang giong noi tieng Viet.
+- Tro chuyen voi AI trong bai hoc va ngoai gio hoc.
+- Tuy chinh co chu, mau nen, toc do doc am thanh neu can.
+
+4. Loai hinh hoat dong trong bai hoc
+- Chon dap an: hoc sinh chon 1 dap an dung bang cham hoac bang giong noi neu giao vien bat tinh nang voice.
+- Ghep noi: ghep hinh voi chu, bieu tuong voi y nghia, do vat voi cong dung.
+- Keo tha: keo doi tuong vao dung vi tri hoac dung thu tu.
+- Nghe va chon: nghe am thanh roi chon dap an dung.
+- Xem va tra loi: xem hinh/video ngan roi tra loi cau hoi.
+- Thuc hanh theo buoc: lam theo tung buoc nhu rua tay, mac ao, danh rang.
+- AAC giao tiep: chon bieu tuong de bieu dat nhu cau hoac tao cau don gian.
+- Mo phong nghe nghiep: mini game va tinh huong theo nghe.
+- Tro chuyen voi AI: hoi dap, luyen noi, luyen phan xa giao tiep.
+
+5. Chuc nang AAC
+- Muc Nang: bang bieu tuong co ban cho nhu cau thiet yeu: an, uong, ve sinh, dau...
+- Muc Trung binh: bang bieu tuong mo rong, ghep 2-3 bieu tuong thanh cau.
+- Muc Nhe: xay dung cau day du, luyen phat am va giao tiep tinh huong.
+
+6. Chuc nang AI tro ly hoc tap
+- Tich hop Gemini API voi model gemini-2.5-flash cho cac tinh nang AI van ban/hinh anh co lien quan.
+- Tich hop Gemini Voice to Voice hoac Live API khi can cho tinh nang hoi thoai giong noi.
+- Phan hoi tieng Viet ngan gon, de hieu, than thien, kien nhan.
+- Phu hop muc do nhan thuc cua hoc sinh.
+- Khong cham diem, khong danh gia hoc sinh.
+- Ho tro hoi lai, giai thich lai, on tap kien thuc va luyen giao tiep.
+- Cho phep nguoi dung tu nhap Gemini API key trong phan cai dat cua app.
+- Co chuc nang kiem tra ket noi API, cap nhat key moi, an/hien trang thai da cau hinh.
+
+7. Chuc nang phu huynh
+- Dang nhap va xem thong tin cac con duoc lien ket.
+- Mot phu huynh co the theo doi nhieu hoc sinh neu giao vien lien ket nhieu lan.
+- Xem tien do hoc tap hang ngay cua tung con.
+- Xem ket qua bai hoc, ty le hoan thanh, moc phat trien.
+- Xem lich su tien bo theo thoi gian va muc do san sang nang do kho do giao vien danh gia.
+- Xem tien do theo lop va theo mon hoc.
+- Nhan thong bao khi con dat huy hieu, hoan thanh chu de, dat moc moi.
+- Xem goi y hoat dong tai nha do giao vien dua ra.
+- Xem bao cao dinh ky tu giao vien.
+- Khong co quyen sua noi dung, lop hoc hay cai dat he thong.
+
+8. Chuc nang dinh huong nghe nghiep
+- Thu vien hon 30 nghe phu hop voi hoc sinh khuyet tat.
+- Moi nghe co video gioi thieu, hinh anh moi truong lam viec, mo ta don gian.
+- AI/goi y he thong de xuat nghe phu hop dua tren so thich, nang luc va muc do.
+- Mo phong nghe nghiep bang video huong dan va mini game tuong tac.
+- Ren luyen thai do lam viec: dung gio, can than, lang nghe, hop tac.
+- Muc Nang: chi nhan biet cong cu, moi truong don gian hoac khong ap dung.
+- Muc Trung binh: nhan biet nghe, trai nghiem mini game co ban.
+- Muc Nhe: trai nghiem day du hon, huong den dinh huong tuong lai.
+
+9. Chuc nang chung cua he thong
+- Dang nhap/phan quyen theo vai tro.
+- Quan ly ho so nguoi dung.
+- Dashboard tong quan cho giao vien.
+- Quan ly lop hoc, mon hoc, bai hoc, hoat dong trong bai hoc.
+- Luu tien do hoc tap, thoi gian hoc, lich su hoan thanh.
+- Quan ly cai dat AI: Gemini API key, model dang dung, trang thai ket noi.
+- Ghi log loi server, loi AI, loi dong bo, loi voice, loi upload de de theo doi va fix.
+- Co man hinh/bao cao log ky thuat danh cho ban quan tri he thong hoac nha phat trien.
+- Thong bao moc hoc tap.
+- Ho tro offline voi bai hoc da tai xuong.
+- Dong bo du lieu len dam may khi co internet.
+- Giao dien than thien voi tre khuyet tat tri tue va ho tro tro nang.
+
+10. Yeu cau nen tang webapp/PWA
+- Chay tot tren trinh duyet desktop (Windows, laptop, PC).
+- Responsive de dung tren dien thoai Android va may tinh bang.
+- Co the "Add to Home Screen" / cai dat tu trinh duyet Android.
+- Co icon ung dung, manifest, service worker va che do offline co ban.
+- Uu tien toc do tai nhanh, nut bam lon, thao tac it buoc.
+- Giao dien hoc sinh phai toi gian, de nhin, de nghe, de cham.
+- Tinh nang nhan giong noi chi la bo sung, khong thay the hoan toan thao tac cham.
+
+11. Thu tu uu tien de trien khai
+- Giai doan 1: dang nhap, phan quyen, quan ly lop, quan ly mon hoc, quan ly hoc sinh, lien ket phu huynh, quan ly bai hoc, quan ly hoat dong trong bai hoc, hoc bai, theo doi tien do.
+- Giai doan 2: AAC, bao cao chi tiet, theo doi xu huong hoc tap, goi y nang do kho, logging loi server, thong bao, goi y tai nha, offline/dong bo, mot so hoat dong dac thu.
+- Giai doan 3: AI voice to voice, tra loi bang giong noi cho hoat dong chon dap an, dinh huong nghe nghiep, goi y nghe phu hop.
+
+12. Pham vi khong uu tien o ban dau
+- Chua can dua thong tin gia goi vao he thong van hanh.
+- Cac tinh nang AI nang co the dua vao sau khi hoan thanh nen tang hoc tap cot loi.
+
