@@ -7,18 +7,18 @@ import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
 const LEVEL_OPTIONS = [
-  { value: 'nang', label: 'Nang' },
-  { value: 'trung_binh', label: 'Trung binh' },
-  { value: 'nhe', label: 'Nhe' },
+  { value: 'nang', label: 'Nặng' },
+  { value: 'trung_binh', label: 'Trung bình' },
+  { value: 'nhe', label: 'Nhẹ' },
 ]
 
 const ACTIVITY_TYPES = [
-  { value: 'multiple_choice', label: 'Chon dap an' },
-  { value: 'matching', label: 'Noi cap' },
-  { value: 'drag_drop', label: 'Keo tha' },
-  { value: 'listen_choose', label: 'Nghe va chon' },
-  { value: 'watch_answer', label: 'Xem video va tra loi' },
-  { value: 'step_by_step', label: 'Tung buoc' },
+  { value: 'multiple_choice', label: 'Chọn đáp án' },
+  { value: 'matching', label: 'Nối cặp' },
+  { value: 'drag_drop', label: 'Kéo thả' },
+  { value: 'listen_choose', label: 'Nghe và chọn' },
+  { value: 'watch_answer', label: 'Xem video và trả lời' },
+  { value: 'step_by_step', label: 'Từng bước' },
 ]
 
 export function LessonsPage() {
@@ -35,6 +35,7 @@ export function LessonsPage() {
   const [instructionText, setInstructionText] = useState('')
   const [voiceAnswerEnabled, setVoiceAnswerEnabled] = useState(true)
   const [configJson, setConfigJson] = useState('{"choices": ["A", "B"], "correct": "A"}')
+  const [isActivityFormOpen, setIsActivityFormOpen] = useState(false)
 
   const subjectsQuery = useQuery({
     queryKey: ['subjects'],
@@ -127,30 +128,29 @@ export function LessonsPage() {
     <RequireAuth>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Task 12 + 13 + 14</p>
-          <h2>Bai hoc va hoat dong ben trong bai hoc</h2>
-          <p>Moi bai hoc gan voi mon hoc, muc do khuyet tat chinh va chua nhieu activity nhu chon dap an, keo tha, video hoac voice.</p>
+          <h2>Bài học và hoạt động bên trong bài học</h2>
+          <p>Mỗi bài học gắn với môn học, mức độ khuyết tật chính và chứa nhiều activity như chọn đáp án, kéo thả, video hoặc voice.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tao bai hoc</h3>
+            <h3>Tạo bài học</h3>
             <form className="form-stack" onSubmit={handleLessonSubmit}>
               <label>
-                Tieu de bai hoc
-                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhan biet hinh tron" />
+                Tiêu đề bài học
+                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhận biết hình tròn" />
               </label>
               <label>
-                Mon hoc
+                Môn học
                 <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)}>
-                  <option value="">Chon mon hoc</option>
+                  <option value="">Chọn môn học</option>
                   {subjectsQuery.data?.map((subject) => (
                     <option key={subject.id} value={subject.id}>{subject.name}</option>
                   ))}
                 </select>
               </label>
               <label>
-                Muc do chinh
+                Mức độ chính
                 <select value={primaryLevel} onChange={(event) => setPrimaryLevel(event.target.value)}>
                   {LEVEL_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -158,22 +158,22 @@ export function LessonsPage() {
                 </select>
               </label>
               <label>
-                Mo ta ngan
-                <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bai hoc co ho tro voice" />
+                Mô tả ngăn
+                <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bài học có hỗ trợ voice" />
               </label>
               <label>
-                So phut du kien
+                Số phút dự kiến
                 <input value={estimatedMinutes} onChange={(event) => setEstimatedMinutes(event.target.value)} inputMode="numeric" />
               </label>
               <button className="action-button" type="submit" disabled={createLessonMutation.isPending}>
-                {createLessonMutation.isPending ? 'Dang tao...' : 'Tao bai hoc'}
+                {createLessonMutation.isPending ? 'Đang tạo...' : 'Tạo bài học'}
               </button>
               {createLessonMutation.error ? <p className="error-text">{(createLessonMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chon bai hoc dang chinh</h3>
+            <h3>Chọn bài học đang chỉnh</h3>
             <div className="tag-wrap">
               {lessonsQuery.data?.map((lesson) => (
                 <button
@@ -186,13 +186,44 @@ export function LessonsPage() {
                 </button>
               ))}
             </div>
-            {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Chua co bai hoc nao, hay tao bai hoc dau tien.</p> : null}
+            {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Chưa có bài học nào, hãy tạo bài học đầu tiên.</p> : null}
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Them hoat dong vao bai hoc</h3>
+            <button
+              type="button"
+              onClick={() => setIsActivityFormOpen(!isActivityFormOpen)}
+              style={{
+                width: '100%',
+                padding: '1rem',
+                marginBottom: '1rem',
+                border: 'none',
+                borderRadius: '0.75rem',
+                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                color: 'white',
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                transition: 'all 200ms ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(34, 197, 94, 0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.3)'
+              }}
+            >
+              <span>Thêm hoạt động vào bài học</span>
+              <span style={{ fontSize: '1.3rem' }}>{isActivityFormOpen ? '−' : '+'}</span>
+            </button>
+            {isActivityFormOpen && (
             <form className="form-stack" onSubmit={handleActivitySubmit}>
               <label>
                 Ten hoat dong
@@ -223,6 +254,7 @@ export function LessonsPage() {
               </button>
               {createActivityMutation.error ? <p className="error-text">{(createActivityMutation.error as Error).message}</p> : null}
             </form>
+            )}
           </article>
 
           <article className="roadmap-panel">
@@ -241,7 +273,7 @@ export function LessonsPage() {
                       <span>{activity.activity_type} {activity.voice_answer_enabled ? '/ voice' : ''}</span>
                     </div>
                   ))}
-                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>Bai hoc nay chua co hoat dong nao.</p> : null}
+                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>Bài học này chưa có hoạt động nào.</p> : null}
                 </div>
               </div>
             ) : (

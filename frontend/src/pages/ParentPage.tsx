@@ -18,15 +18,14 @@ export function ParentPage() {
     <RequireAuth>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Task 32</p>
-          <h2>Dashboard phu huynh</h2>
-          <p>Phu huynh co the duoc giao vien add vao theo doi nhieu con. Man nay tong hop nhanh tinh hinh hoc tap hien tai cua tung con.</p>
+          <h2>Dashboard phụ huynh</h2>
+          <p>Phụ huynh có thể được giáo viên thêm vào theo dõi nhiều con. Màn hình này tổng hợp nhanh tình hình học tập hiện tại của từng con.</p>
         </section>
 
         {user?.role !== 'parent' ? (
           <section className="placeholder-panel">
-            <h3>Man nay danh cho tai khoan phu huynh</h3>
-            <p>Dang nhap bang parent@example.com / 123456 de xem dashboard phu huynh mau da duoc seed.</p>
+            <h3>Màn hình này dành cho tài khoản phụ huynh</h3>
+            <p>Đăng nhập bằng parent@example.com / 123456 để xem dashboard phụ huynh mẫu đã được seed.</p>
           </section>
         ) : (
           <section className="dashboard-grid">
@@ -38,35 +37,35 @@ export function ParentPage() {
                 </div>
                 <div className="metrics-grid">
                   <div className="info-card mini-card">
-                    <span>Tong assignment</span>
+                    <span>Tổng assignment</span>
                     <strong>{item.progress_summary.total_assignments}</strong>
                   </div>
                   <div className="info-card mini-card">
-                    <span>Da xong</span>
+                    <span>Đã xong</span>
                     <strong>{item.progress_summary.completed_count}</strong>
                   </div>
                   <div className="info-card mini-card">
-                    <span>Dang hoc</span>
+                    <span>Đang học</span>
                     <strong>{item.progress_summary.in_progress_count}</strong>
                   </div>
                   <div className="info-card mini-card">
-                    <span>Tien do gan nhat</span>
+                    <span>Tiến độ gần nhất</span>
                     <strong>{item.progress_summary.last_progress_percent}%</strong>
                   </div>
                 </div>
-                <p>Bai hoc gan nhat: {item.progress_summary.last_assignment_title ?? 'Chua co assignment nao'}</p>
+                <p>Bài học gần nhất: {item.progress_summary.last_assignment_title ?? 'Chưa có assignment nào'}</p>
                 <div className="tag-wrap">
                   {item.classes.map((classroom) => (
                     <span key={classroom.id} className="subject-pill">{classroom.name}</span>
                   ))}
-                  {!item.classes.length ? <p>Chua duoc gan lop hoc nao.</p> : null}
+                  {!item.classes.length ? <p>Chưa được gán lớp học nào.</p> : null}
                 </div>
               </article>
             ))}
             {!childrenQuery.data?.length && !childrenQuery.isLoading ? (
               <article className="roadmap-panel">
-                <h3>Chua co lien ket nao</h3>
-                <p>Giao vien can add phu huynh vao hoc sinh truoc khi dashboard co du lieu.</p>
+                <h3>Chưa có liên kết nào</h3>
+                <p>Giáo viên cần add phụ huynh vào học sinh trước khi dashboard có dữ liệu.</p>
               </article>
             ) : null}
           </section>

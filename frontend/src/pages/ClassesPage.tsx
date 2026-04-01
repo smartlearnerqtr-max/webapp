@@ -102,32 +102,31 @@ export function ClassesPage() {
     <RequireAuth>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Task 8 + 9 + 10</p>
-          <h2>Quan ly lop hoc, hoc sinh va mon hoc</h2>
-          <p>Tai man nay giao vien co the tao lop, dua hoc sinh vao lop va cau hinh mon hoc de chuan bi cho assignment.</p>
+          <h2>Quản lý lớp học, học sinh và môn học</h2>
+          <p>Tại màn hình này giáo viên có thể tạo lớp, đưa học sinh vào lớp và cấu hình môn học để chuẩn bị cho assignment.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tao lop moi</h3>
+            <h3>Tạo lớp mới</h3>
             <form className="form-stack" onSubmit={handleSubmit}>
               <label>
-                Ten lop
-                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Lop 6A ho tro" />
+                Tên lớp
+                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Lớp 6A hỗ trợ" />
               </label>
               <label>
-                Khoi/lop
+                Khối/lớp
                 <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder="6" />
               </label>
               <button className="action-button" type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Dang tao...' : 'Tao lop'}
+                {createMutation.isPending ? 'Đang tạo...' : 'Tạo lớp'}
               </button>
               {createMutation.error ? <p className="error-text">{(createMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chon lop de quan ly</h3>
+            <h3>Chọn lớp để quản lý</h3>
             <div className="tag-wrap">
               {classesQuery.data?.map((classItem) => (
                 <button
@@ -140,25 +139,25 @@ export function ClassesPage() {
                 </button>
               ))}
             </div>
-            {!classesQuery.data?.length && !classesQuery.isLoading ? <p>Chua co lop nao. Tao lop dau tien de bat dau.</p> : null}
+            {!classesQuery.data?.length && !classesQuery.isLoading ? <p>Chưa có lớp nào. Tạo lớp đầu tiên để bắt đầu.</p> : null}
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Them hoc sinh vao lop</h3>
+            <h3>Thêm học sinh vào lớp</h3>
             <div className="form-stack">
               <label>
-                Hoc sinh chua nam trong lop
+                Học sinh chưa nằm trong lớp
                 <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)} disabled={!selectedClassId}>
-                  <option value="">Chon hoc sinh</option>
+                  <option value="">Chọn học sinh</option>
                   {availableStudents.map((student) => (
                     <option key={student.id} value={student.id}>{student.full_name} - {student.disability_level}</option>
                   ))}
                 </select>
               </label>
               <button className="action-button" type="button" disabled={!selectedClassId || !selectedStudentId || addStudentMutation.isPending} onClick={() => addStudentMutation.mutate()}>
-                {addStudentMutation.isPending ? 'Dang them...' : 'Them vao lop'}
+                {addStudentMutation.isPending ? 'Đang thêm...' : 'Thêm vào lớp'}
               </button>
               {addStudentMutation.error ? <p className="error-text">{(addStudentMutation.error as Error).message}</p> : null}
             </div>
@@ -166,37 +165,37 @@ export function ClassesPage() {
             <div className="student-list compact-list">
               {classStudentsQuery.data?.map((item) => (
                 <div key={item.id} className="student-row">
-                  <strong>{item.student?.full_name ?? `Hoc sinh #${item.student_id}`}</strong>
-                  <span>{item.student?.preferred_input ?? 'touch'} / {item.student?.disability_level ?? 'khong ro'}</span>
+                  <strong>{item.student?.full_name ?? `Học sinh #${item.student_id}`}</strong>
+                  <span>{item.student?.preferred_input ?? 'touch'} / {item.student?.disability_level ?? 'không rõ'}</span>
                 </div>
               ))}
-              {selectedClassId && !classStudentsQuery.data?.length && !classStudentsQuery.isLoading ? <p>Lop nay chua co hoc sinh nao.</p> : null}
+              {selectedClassId && !classStudentsQuery.data?.length && !classStudentsQuery.isLoading ? <p>Lớp này chưa có học sinh nào.</p> : null}
             </div>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Gan mon hoc cho lop</h3>
+            <h3>Gán môn học cho lớp</h3>
             <div className="form-stack">
               <label>
-                Mon hoc chua gan
+                Môn học chưa gán
                 <select value={selectedSubjectId} onChange={(event) => setSelectedSubjectId(event.target.value)} disabled={!selectedClassId}>
-                  <option value="">Chon mon hoc</option>
+                  <option value="">Chọn môn học</option>
                   {availableSubjects.map((subject) => (
                     <option key={subject.id} value={subject.id}>{subject.name}</option>
                   ))}
                 </select>
               </label>
               <button className="action-button" type="button" disabled={!selectedClassId || !selectedSubjectId || addSubjectMutation.isPending} onClick={() => addSubjectMutation.mutate()}>
-                {addSubjectMutation.isPending ? 'Dang gan...' : 'Gan mon hoc'}
+                {addSubjectMutation.isPending ? 'Đang gán...' : 'Gán môn học'}
               </button>
               {addSubjectMutation.error ? <p className="error-text">{(addSubjectMutation.error as Error).message}</p> : null}
             </div>
 
             <div className="tag-wrap">
               {classSubjectsQuery.data?.map((item) => (
-                <span key={item.id} className="subject-pill">{item.subject?.name ?? `Mon #${item.subject_id}`}</span>
+                <span key={item.id} className="subject-pill">{item.subject?.name ?? `Môn #${item.subject_id}`}</span>
               ))}
-              {selectedClassId && !classSubjectsQuery.data?.length && !classSubjectsQuery.isLoading ? <p>Lop nay chua co mon hoc nao.</p> : null}
+              {selectedClassId && !classSubjectsQuery.data?.length && !classSubjectsQuery.isLoading ? <p>Lớp này chưa có môn học nào.</p> : null}
             </div>
           </article>
         </section>

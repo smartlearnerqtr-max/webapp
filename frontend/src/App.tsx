@@ -7,22 +7,20 @@ import { AssignmentsPage } from './pages/AssignmentsPage'
 import { ClassesPage } from './pages/ClassesPage'
 import { HomePage } from './pages/HomePage'
 import { LessonsPage } from './pages/LessonsPage'
-import { LogsPage } from './pages/LogsPage'
 import { ParentPage } from './pages/ParentPage'
 import { ProgressPage } from './pages/ProgressPage'
 import { StudentsPage } from './pages/StudentsPage'
 import { useAuthStore } from './store/authStore'
 
 const navItems = [
-  { to: '/', label: 'Tong quan' },
-  { to: '/hoc-sinh', label: 'Hoc sinh' },
-  { to: '/lop-hoc', label: 'Lop hoc' },
-  { to: '/bai-hoc', label: 'Bai hoc' },
-  { to: '/giao-bai', label: 'Giao bai' },
-  { to: '/tien-do', label: 'Tien do' },
-  { to: '/phu-huynh', label: 'Phu huynh' },
-  { to: '/cai-dat-ai', label: 'Cai dat AI' },
-  { to: '/logs', label: 'Logs' },
+  { to: '/', label: 'Tổng quan' },
+  { to: '/hoc-sinh', label: 'Học sinh' },
+  { to: '/lop-hoc', label: 'Lớp học' },
+  { to: '/bai-hoc', label: 'Bài học' },
+  { to: '/giao-bai', label: 'Giao bài' },
+  { to: '/tien-do', label: 'Tiến độ' },
+  { to: '/phu-huynh', label: 'Phụ huynh' },
+  { to: '/cai-dat-ai', label: 'Cài đặt AI' },
 ]
 
 function App() {
@@ -37,14 +35,14 @@ function App() {
     <div className="app-shell">
       <aside className="sidebar">
         <div>
-          <p className="eyebrow">Ban hoc thong minh</p>
-          <h1>He thong hoc tap ho tro</h1>
+          <p className="eyebrow">Bạn học thông minh</p>
+          <h1>Hệ thống hỗ trợ học tập</h1>
           <p className="sidebar-copy">
-            Luong cot loi da co auth, hoc sinh, lop hoc, bai hoc, giao bai, readiness, phu huynh va Gemini settings tren Flask + PWA.
+            Nền tảng học tập dành cho học sinh khuyết tật với hỗ trợ AI và công nghệ tiên tiến.
           </p>
         </div>
 
-        <nav className="nav-list" aria-label="Dieu huong chinh">
+        <nav className="nav-list" aria-label="Điều hướng chính">
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'nav-item nav-item-active' : 'nav-item')}>
               {item.label}
@@ -53,9 +51,9 @@ function App() {
         </nav>
 
         <div className="sidebar-card">
-          <span className="sidebar-card-label">Trang thai session</span>
-          <strong>{user ? `${user.email ?? user.phone} (${user.role})` : 'Chua dang nhap'}</strong>
-          <p>PWA san sang cho Android, backend Flask dang duoc day tiep theo task MVP.</p>
+          <span className="sidebar-card-label">Trạng thái</span>
+          <strong>{user ? `${user.email ?? user.phone} (${user.role})` : 'Chưa đăng nhập'}</strong>
+          <p></p>
         </div>
       </aside>
 
@@ -69,7 +67,6 @@ function App() {
           <Route path="/tien-do" element={<ProgressPage />} />
           <Route path="/phu-huynh" element={<ParentPage />} />
           <Route path="/cai-dat-ai" element={<AISettingsPage />} />
-          <Route path="/logs" element={<LogsPage />} />
         </Routes>
       </main>
     </div>

@@ -13,9 +13,9 @@ export function AISettingsPage() {
   const queryClient = useQueryClient()
   const [apiKey, setApiKey] = useState('')
   const [modelName, setModelName] = useState('gemini-2.5-flash')
-  const [message, setMessage] = useState('Hay giai thich ngan gon cach hoc bai nay cho hoc sinh bang cau ngan de hieu.')
-  const [lessonTitle, setLessonTitle] = useState('Bai hoc demo')
-  const [subjectName, setSubjectName] = useState('Toan')
+  const [message, setMessage] = useState('Hãy giải thích ngắn gọn cách học bài này cho học sinh bằng câu ngắn dễ hiểu.')
+  const [lessonTitle, setLessonTitle] = useState('Bài học demo')
+  const [subjectName, setSubjectName] = useState('Toán')
   const [activityType, setActivityType] = useState('multiple_choice')
   const [aiReply, setAiReply] = useState('')
 
@@ -74,14 +74,13 @@ export function AISettingsPage() {
     <RequireAuth>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Task 23 + 24</p>
-          <h2>Cai dat Gemini va hoi dap AI co ban</h2>
-          <p>Key duoc gui ve backend Flask, ma hoa truoc khi luu. M?i request Gemini di qua server de tranh lo key ra frontend va co log de debug.</p>
+          <h2>Cấu hình Gemini và hỏi đáp AI cơ bản</h2>
+          <p>Key được gửi về backend Flask, mã hóa trước khi lưu. Mỗi request Gemini đi qua server để tránh lộ key ra frontend và có log để debug.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Luu cau hinh AI</h3>
+            <h3>Lưu cấu hình AI</h3>
             <form className="form-stack" onSubmit={handleSubmit}>
               <label>
                 Model
@@ -93,10 +92,10 @@ export function AISettingsPage() {
               </label>
               <div className="button-row">
                 <button className="action-button" type="submit" disabled={saveMutation.isPending}>
-                  {saveMutation.isPending ? 'Dang luu...' : 'Luu cau hinh'}
+                  {saveMutation.isPending ? 'Đang lưu...' : 'Lưu cấu hình'}
                 </button>
                 <button className="ghost-button" type="button" onClick={() => testMutation.mutate()} disabled={testMutation.isPending}>
-                  {testMutation.isPending ? 'Dang test...' : 'Test key that'}
+                  {testMutation.isPending ? 'Đang test...' : 'Test key thật'}
                 </button>
               </div>
               {saveMutation.error ? <p className="error-text">{(saveMutation.error as Error).message}</p> : null}
@@ -105,31 +104,31 @@ export function AISettingsPage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Trang thai hien tai</h3>
+            <h3>Trạng thái hiện tại</h3>
             <div className="settings-grid">
               <div><span>Provider</span><strong>{settingsQuery.data?.provider ?? 'gemini'}</strong></div>
               <div><span>Model</span><strong>{settingsQuery.data?.model_name ?? 'gemini-2.5-flash'}</strong></div>
-              <div><span>API key</span><strong>{settingsQuery.data?.api_key_masked ?? 'Chua luu'}</strong></div>
-              <div><span>Status</span><strong>{settingsQuery.data?.status ?? 'chua_cau_hinh'}</strong></div>
-              <div><span>Last error</span><strong>{settingsQuery.data?.last_error_message ?? 'Khong co'}</strong></div>
+              <div><span>API key</span><strong>{settingsQuery.data?.api_key_masked ?? 'Chưa lưu'}</strong></div>
+              <div><span>Status</span><strong>{settingsQuery.data?.status ?? 'chưa_cấu_hình'}</strong></div>
+              <div><span>Last error</span><strong>{settingsQuery.data?.last_error_message ?? 'Không có'}</strong></div>
             </div>
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Test hoi dap AI</h3>
+            <h3>Test hỏi đáp AI</h3>
             <form className="form-stack" onSubmit={handleChatSubmit}>
               <label>
-                Mon hoc
-                <input value={subjectName} onChange={(event) => setSubjectName(event.target.value)} placeholder="Toan" />
+                Môn học
+                <input value={subjectName} onChange={(event) => setSubjectName(event.target.value)} placeholder="Toán" />
               </label>
               <label>
-                Bai hoc
-                <input value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)} placeholder="Nhan biet hinh tron" />
+                Bài học
+                <input value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)} placeholder="Nhận biết hình tròn" />
               </label>
               <label>
-                Loai hoat dong
+                Loại hoạt động
                 <input value={activityType} onChange={(event) => setActivityType(event.target.value)} placeholder="multiple_choice" />
               </label>
               <label>
@@ -137,16 +136,16 @@ export function AISettingsPage() {
                 <textarea value={message} onChange={(event) => setMessage(event.target.value)} rows={6} />
               </label>
               <button className="action-button" type="submit" disabled={chatMutation.isPending || !settingsQuery.data}>
-                {chatMutation.isPending ? 'Dang goi Gemini...' : 'Gui prompt'}
+                {chatMutation.isPending ? 'Đang gọi Gemini...' : 'Gửi prompt'}
               </button>
               {chatMutation.error ? <p className="error-text">{(chatMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Phan hoi AI</h3>
+            <h3>Phản hồi AI</h3>
             <div className="response-box">
-              {aiReply ? <p>{aiReply}</p> : <p>Chua co phan hoi nao. Hay test key hoac gui prompt de kiem tra luong Gemini.</p>}
+              {aiReply ? <p>{aiReply}</p> : <p>Chưa có phản hồi nào. Hãy test key hoặc gửi prompt để kiểm tra luồng Gemini.</p>}
             </div>
           </article>
         </section>

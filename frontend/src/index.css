@@ -1,21 +1,24 @@
 :root {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #142013;
-  background: #f4efe2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  
+  --primary: #22c55e;
+  --primary-light: #86efac;
+  --primary-dark: #16a34a;
+  --secondary: #0ea5e9;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  
+  color: var(--text);
+  background: var(--bg);
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  --forest: #14532d;
-  --moss: #4d7c0f;
-  --cream: #f4efe2;
-  --ink: #1f2937;
-  --card: rgba(255, 251, 240, 0.88);
-  --line: rgba(20, 32, 19, 0.12);
-  --shadow: 0 24px 60px rgba(20, 32, 19, 0.14);
 }
 
 * {
@@ -26,10 +29,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(132, 204, 22, 0.18), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(20, 83, 45, 0.22), transparent 24%),
-    var(--cream);
+  background: var(--bg);
 }
 
 a {

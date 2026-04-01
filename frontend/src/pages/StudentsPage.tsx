@@ -7,9 +7,9 @@ import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
 const LEVEL_OPTIONS = [
-  { value: 'nang', label: 'Nang' },
-  { value: 'trung_binh', label: 'Trung binh' },
-  { value: 'nhe', label: 'Nhe' },
+  { value: 'nang', label: 'Nặng' },
+  { value: 'trung_binh', label: 'Trung bình' },
+  { value: 'nhe', label: 'Nhẹ' },
 ]
 
 export function StudentsPage() {
@@ -43,21 +43,20 @@ export function StudentsPage() {
     <RequireAuth>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Task 7</p>
-          <h2>Quan ly ho so hoc sinh</h2>
-          <p>Tao hoc sinh va gan muc do khuyet tat de backend co du lieu cho lop hoc va readiness.</p>
+          <h2>Quản lý hồ sơ học sinh</h2>
+          <p>Tạo học sinh và gán mức độ khuyết tật để backend có dữ liệu cho lớp học và readiness.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tao hoc sinh moi</h3>
+            <h3>Tạo học sinh mới</h3>
             <form className="form-stack" onSubmit={handleSubmit}>
               <label>
-                Ho ten hoc sinh
-                <input value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Nguyen Van A" />
+                Họ tên học sinh
+                <input value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Nguyễn Văn A" />
               </label>
               <label>
-                Muc do khuyet tat
+                Mức độ khuyết tật
                 <select value={disabilityLevel} onChange={(event) => setDisabilityLevel(event.target.value)}>
                   {LEVEL_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -65,14 +64,14 @@ export function StudentsPage() {
                 </select>
               </label>
               <button className="action-button" type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Dang tao...' : 'Tao hoc sinh'}
+                {createMutation.isPending ? 'Đang tạo...' : 'Tạo học sinh'}
               </button>
               {createMutation.error ? <p className="error-text">{(createMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Danh sach hoc sinh</h3>
+            <h3>Danh sách học sinh</h3>
             <div className="student-list">
               {studentsQuery.data?.map((student) => (
                 <div key={student.id} className="student-row">
@@ -80,7 +79,7 @@ export function StudentsPage() {
                   <span>{student.disability_level}</span>
                 </div>
               ))}
-              {!studentsQuery.data?.length && !studentsQuery.isLoading ? <p>Chua co hoc sinh nao.</p> : null}
+              {!studentsQuery.data?.length && !studentsQuery.isLoading ? <p>Chưa có học sinh nào.</p> : null}
             </div>
           </article>
         </section>
