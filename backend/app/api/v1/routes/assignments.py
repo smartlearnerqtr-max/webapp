@@ -307,3 +307,4 @@ def complete_my_assignment(assignment_id: int):
     progress.completed_at = datetime.now(UTC).isoformat()
     db.session.commit()
     return success_response(progress.to_dict(), 'Da hoan thanh bai hoc')
+

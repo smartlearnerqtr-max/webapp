@@ -1,56 +1,19 @@
-from __future__ import annotations
-
-import os
 import random
 from datetime import datetime, timedelta
+import os
 
-from ..extensions import db
-from ..models import (
+from app import create_app
+from app.extensions import db
+from app.models import (
     User, TeacherProfile, StudentProfile, ParentProfile, 
     Classroom, ClassStudent, Subject, ClassSubject,
     Lesson, LessonActivity, LessonAssignment, LessonAssignmentStudent,
     StudentLessonProgress, ParentDailyReport, ParentStudentLink
 )
-from ..utils.security import hash_password
-
-BASE_SUBJECTS = [('TOAN', 'Toan'), ('VAN', 'Van'), ('KHTN', 'Khoa hoc tu nhien'), ('KY_NANG_SONG', 'Ky nang song')]
-DEFAULT_ADMIN_EMAIL = 'admin@example.com'
-DEFAULT_ADMIN_PASSWORD = 'admin123456'
-
-
-def seed_subjects() -> int:
-    created = 0
-    for index, (code, name) in enumerate(BASE_SUBJECTS, start=1):
-        if Subject.query.filter_by(code=code).first():
-            continue
-        db.session.add(Subject(code=code, name=name, sort_order=index, is_active=True))
-        created += 1
-    db.session.commit()
-    return created
-
-
-def seed_admin_user(email: str | None = None, password: str | None = None) -> User:
-    admin_email = (email or os.getenv('ADMIN_EMAIL') or DEFAULT_ADMIN_EMAIL).strip().lower()
-    admin_password = (password or os.getenv('ADMIN_PASSWORD') or DEFAULT_ADMIN_PASSWORD).strip()
-
-    existing = User.query.filter_by(email=admin_email).first()
-    if existing:
-        return existing
-
-    user = User(
-        email=admin_email,
-        phone=None,
-        password_hash=hash_password(admin_password),
-        role='admin',
-        status='active',
-    )
-    db.session.add(user)
-    db.session.commit()
-    return user
-
+from app.utils.security import hash_password
 
 def seed_test_scenario():
-    print("Starting test scenario seeding...")
+    print("Starting test scenario seeding with hardcoded relative path...")
     
     # 1. Ensure subjects exist
     subjects = Subject.query.all()
@@ -66,6 +29,7 @@ def seed_test_scenario():
     
     teachers = []
     for data in teachers_data:
+        print(f"Creating/Checking teacher: {data['email']}")
         user = User.query.filter_by(email=data["email"]).first()
         if not user:
             user = User(
@@ -89,11 +53,12 @@ def seed_test_scenario():
             teachers.append(user.teacher_profile)
 
     db.session.commit()
-    print(f"Created {len(teachers)} Teachers.")
+    print(f"Verified {len(teachers)} Teachers.")
 
     # 3. For each teacher, create 10 Students and 10 Parents
     all_students = []
     for teacher in teachers:
+        print(f"Adding students for {teacher.full_name}")
         classroom = Classroom.query.filter_by(teacher_id=teacher.id, name=f"Lop cua {teacher.full_name}").first()
         if not classroom:
             classroom = Classroom(
@@ -164,9 +129,10 @@ def seed_test_scenario():
             all_students.append((student, p_profile, teacher, classroom))
 
     db.session.commit()
-    print("Created 20 Students and 20 Parents, and linked them.")
+    print("Created Students and Parents.")
 
     # 4. Create Lessons and Assignments
+    print("Creating lessons...")
     lessons = []
     for teacher in teachers:
         for sub in subjects:
@@ -194,9 +160,9 @@ def seed_test_scenario():
             lessons.append((lesson, teacher))
 
     db.session.commit()
-    print("Created Lessons and Activities.")
 
     # 5. Assign and Progress
+    print("Assigning and creating progress...")
     for teacher in teachers:
         teacher_lessons = [l for l, t in lessons if t.id == teacher.id]
         classroom = Classroom.query.filter_by(teacher_id=teacher.id).first()
@@ -236,9 +202,9 @@ def seed_test_scenario():
                 db.session.add(progress)
 
     db.session.commit()
-    print("Created Assignments and Progress.")
 
     # 6. Daily Reports
+    print("Generating reports...")
     for student, parent, teacher, classroom in all_students:
         report = ParentDailyReport(
             teacher_id=teacher.id,
@@ -258,4 +224,9 @@ def seed_test_scenario():
         db.session.add(report)
 
     db.session.commit()
-    print("Generated Daily Reports for all parents.")
+    print("Full test scenario seeding completed!")
+
+if __name__ == "__main__":
+    app = create_app()
+    with app.app_context():
+        seed_test_scenario()

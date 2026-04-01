@@ -13,7 +13,7 @@ export function LogsPage() {
   })
 
   return (
-    <RequireAuth>
+    <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
           <p className="eyebrow">Task 39 + 40</p>
@@ -37,3 +37,4 @@ export function LogsPage() {
     </RequireAuth>
   )
 }
+

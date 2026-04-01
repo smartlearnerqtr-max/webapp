@@ -71,7 +71,7 @@ export function AISettingsPage() {
   }
 
   return (
-    <RequireAuth>
+    <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
           <h2>Cấu hình Gemini và hỏi đáp AI cơ bản</h2>
@@ -153,3 +153,4 @@ export function AISettingsPage() {
     </RequireAuth>
   )
 }
+

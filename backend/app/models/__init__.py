@@ -1,11 +1,12 @@
 from .ai import UserAISetting
 from .base import TimestampMixin
-from .classroom import ClassStudent, Classroom
+from .classroom import ClassJoinCredential, ClassStudent, Classroom
 from .lesson import Lesson, LessonActivity, LessonAssignment, LessonAssignmentStudent, StudentLessonProgress
 from .log import ServerLog
-from .parent_student import ParentStudentLink
+from .parent_student import ParentDailyReport, ParentStudentLink
 from .profiles import ParentProfile, StudentProfile, TeacherProfile
 from .subject import ClassSubject, Subject
+from .teacher_relationships import TeacherParentStudentLink, TeacherStudentLink
 from .user import User
 
 __all__ = [
@@ -14,8 +15,11 @@ __all__ = [
     "TeacherProfile",
     "ParentProfile",
     "StudentProfile",
+    "TeacherStudentLink",
+    "TeacherParentStudentLink",
     "Classroom",
     "ClassStudent",
+    "ClassJoinCredential",
     "Subject",
     "ClassSubject",
     "UserAISetting",
@@ -26,4 +30,5 @@ __all__ = [
     "StudentLessonProgress",
     "ServerLog",
     "ParentStudentLink",
+    "ParentDailyReport",
 ]

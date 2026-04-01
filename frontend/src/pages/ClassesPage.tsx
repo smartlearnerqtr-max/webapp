@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -32,23 +32,24 @@ export function ClassesPage() {
     queryFn: fetchSubjects,
   })
 
+  const resolvedSelectedClassId = selectedClassId ?? classesQuery.data?.[0]?.id ?? null
+
   const classStudentsQuery = useQuery({
-    queryKey: ['class-students', token, selectedClassId],
-    queryFn: () => fetchClassStudents(token!, selectedClassId!),
-    enabled: Boolean(token && selectedClassId),
+    queryKey: ['class-students', token, resolvedSelectedClassId],
+    queryFn: () => fetchClassStudents(token!, resolvedSelectedClassId!),
+    enabled: Boolean(token && resolvedSelectedClassId),
   })
 
   const classSubjectsQuery = useQuery({
-    queryKey: ['class-subjects', token, selectedClassId],
-    queryFn: () => fetchClassSubjects(token!, selectedClassId!),
-    enabled: Boolean(token && selectedClassId),
+    queryKey: ['class-subjects', token, resolvedSelectedClassId],
+    queryFn: () => fetchClassSubjects(token!, resolvedSelectedClassId!),
+    enabled: Boolean(token && resolvedSelectedClassId),
   })
 
-  useEffect(() => {
-    if (!selectedClassId && classesQuery.data?.length) {
-      setSelectedClassId(classesQuery.data[0].id)
-    }
-  }, [classesQuery.data, selectedClassId])
+  const selectedClass = useMemo(
+    () => classesQuery.data?.find((item) => item.id === resolvedSelectedClassId) ?? null,
+    [classesQuery.data, resolvedSelectedClassId],
+  )
 
   const availableStudents = useMemo(() => {
     const linkedIds = new Set(classStudentsQuery.data?.map((item) => item.student_id) ?? [])
@@ -71,23 +72,23 @@ export function ClassesPage() {
   })
 
   const addStudentMutation = useMutation({
-    mutationFn: () => addStudentsToClass(token!, selectedClassId!, { student_ids: [Number(selectedStudentId)] }),
+    mutationFn: () => addStudentsToClass(token!, resolvedSelectedClassId!, { student_ids: [Number(selectedStudentId)] }),
     onSuccess: async () => {
       setSelectedStudentId('')
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['classes', token] }),
-        queryClient.invalidateQueries({ queryKey: ['class-students', token, selectedClassId] }),
+        queryClient.invalidateQueries({ queryKey: ['class-students', token, resolvedSelectedClassId] }),
       ])
     },
   })
 
   const addSubjectMutation = useMutation({
-    mutationFn: () => addSubjectToClass(token!, selectedClassId!, { subject_id: Number(selectedSubjectId) }),
+    mutationFn: () => addSubjectToClass(token!, resolvedSelectedClassId!, { subject_id: Number(selectedSubjectId) }),
     onSuccess: async () => {
       setSelectedSubjectId('')
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['classes', token] }),
-        queryClient.invalidateQueries({ queryKey: ['class-subjects', token, selectedClassId] }),
+        queryClient.invalidateQueries({ queryKey: ['class-subjects', token, resolvedSelectedClassId] }),
       ])
     },
   })
@@ -99,65 +100,103 @@ export function ClassesPage() {
   }
 
   return (
-    <RequireAuth>
+    <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Quản lý lớp học, học sinh và môn học</h2>
-          <p>Tại màn hình này giáo viên có thể tạo lớp, đưa học sinh vào lớp và cấu hình môn học để chuẩn bị cho assignment.</p>
+          <h2>Quan ly lop hoc</h2>
+          <p>
+            Khi giao vien tao lop, he thong sinh san <strong>ID lop</strong> va <strong>mat khau vao lop</strong>.
+            Hoc sinh co the tu dang nhap vao lop bang hai thong tin nay, con giao vien van co the them hoc sinh thu cong neu can.
+          </p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tạo lớp mới</h3>
+            <h3>Tao lop moi</h3>
             <form className="form-stack" onSubmit={handleSubmit}>
               <label>
-                Tên lớp
-                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Lớp 6A hỗ trợ" />
+                Ten lop
+                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Lop 6A ho tro" />
               </label>
               <label>
-                Khối/lớp
+                Khoi lop
                 <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder="6" />
               </label>
               <button className="action-button" type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Đang tạo...' : 'Tạo lớp'}
+                {createMutation.isPending ? 'Dang tao...' : 'Tao lop'}
               </button>
               {createMutation.error ? <p className="error-text">{(createMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chọn lớp để quản lý</h3>
+            <h3>Chon lop de quan ly</h3>
             <div className="tag-wrap">
               {classesQuery.data?.map((classItem) => (
                 <button
                   key={classItem.id}
                   type="button"
-                  className={selectedClassId === classItem.id ? 'subject-pill pill-button pill-button-active' : 'subject-pill pill-button'}
+                  className={resolvedSelectedClassId === classItem.id ? 'subject-pill pill-button pill-button-active' : 'subject-pill pill-button'}
                   onClick={() => setSelectedClassId(classItem.id)}
                 >
                   {classItem.name}
                 </button>
               ))}
             </div>
-            {!classesQuery.data?.length && !classesQuery.isLoading ? <p>Chưa có lớp nào. Tạo lớp đầu tiên để bắt đầu.</p> : null}
+            {!classesQuery.data?.length && !classesQuery.isLoading ? <p>Chua co lop nao. Tao lop dau tien de bat dau.</p> : null}
           </article>
         </section>
 
+        {selectedClass ? (
+          <section className="dashboard-grid">
+            <article className="roadmap-panel">
+              <h3>Thong tin vao lop cho hoc sinh</h3>
+              <div className="metrics-grid">
+                <div className="mini-card">
+                  <span>ID lop</span>
+                  <strong>{selectedClass.id}</strong>
+                </div>
+                <div className="mini-card">
+                  <span>Mat khau vao lop</span>
+                  <strong>{selectedClass.join_credential?.class_password ?? 'Dang cap nhat'}</strong>
+                </div>
+                <div className="mini-card">
+                  <span>Giao vien</span>
+                  <strong>{selectedClass.teacher_id}</strong>
+                </div>
+              </div>
+              <p>Gui ID lop va mat khau nay cho hoc sinh de cac em tu vao lop tu trang hoc sinh.</p>
+            </article>
+
+            <article className="roadmap-panel">
+              <h3>Tong quan lop dang chon</h3>
+              <div className="detail-stack">
+                <div className="student-row">
+                  <strong>{selectedClass.name}</strong>
+                  <span>{selectedClass.grade_label ? `Khoi ${selectedClass.grade_label}` : 'Chua gan khoi'}</span>
+                </div>
+                <p>Trang thai: {selectedClass.status}</p>
+                <p>{selectedClass.student_count} hoc sinh, {selectedClass.subject_count} mon hoc.</p>
+              </div>
+            </article>
+          </section>
+        ) : null}
+
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Thêm học sinh vào lớp</h3>
+            <h3>Them hoc sinh vao lop</h3>
             <div className="form-stack">
               <label>
-                Học sinh chưa nằm trong lớp
-                <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)} disabled={!selectedClassId}>
-                  <option value="">Chọn học sinh</option>
+                Hoc sinh chua nam trong lop
+                <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)} disabled={!resolvedSelectedClassId}>
+                  <option value="">Chon hoc sinh</option>
                   {availableStudents.map((student) => (
                     <option key={student.id} value={student.id}>{student.full_name} - {student.disability_level}</option>
                   ))}
                 </select>
               </label>
-              <button className="action-button" type="button" disabled={!selectedClassId || !selectedStudentId || addStudentMutation.isPending} onClick={() => addStudentMutation.mutate()}>
-                {addStudentMutation.isPending ? 'Đang thêm...' : 'Thêm vào lớp'}
+              <button className="action-button" type="button" disabled={!resolvedSelectedClassId || !selectedStudentId || addStudentMutation.isPending} onClick={() => addStudentMutation.mutate()}>
+                {addStudentMutation.isPending ? 'Dang them...' : 'Them vao lop'}
               </button>
               {addStudentMutation.error ? <p className="error-text">{(addStudentMutation.error as Error).message}</p> : null}
             </div>
@@ -165,37 +204,37 @@ export function ClassesPage() {
             <div className="student-list compact-list">
               {classStudentsQuery.data?.map((item) => (
                 <div key={item.id} className="student-row">
-                  <strong>{item.student?.full_name ?? `Học sinh #${item.student_id}`}</strong>
-                  <span>{item.student?.preferred_input ?? 'touch'} / {item.student?.disability_level ?? 'không rõ'}</span>
+                  <strong>{item.student?.full_name ?? `Hoc sinh #${item.student_id}`}</strong>
+                  <span>{item.student?.preferred_input ?? 'touch'} / {item.student?.disability_level ?? 'khong ro'}</span>
                 </div>
               ))}
-              {selectedClassId && !classStudentsQuery.data?.length && !classStudentsQuery.isLoading ? <p>Lớp này chưa có học sinh nào.</p> : null}
+              {resolvedSelectedClassId && !classStudentsQuery.data?.length && !classStudentsQuery.isLoading ? <p>Lop nay chua co hoc sinh nao.</p> : null}
             </div>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Gán môn học cho lớp</h3>
+            <h3>Gan mon hoc cho lop</h3>
             <div className="form-stack">
               <label>
-                Môn học chưa gán
-                <select value={selectedSubjectId} onChange={(event) => setSelectedSubjectId(event.target.value)} disabled={!selectedClassId}>
-                  <option value="">Chọn môn học</option>
+                Mon hoc chua gan
+                <select value={selectedSubjectId} onChange={(event) => setSelectedSubjectId(event.target.value)} disabled={!resolvedSelectedClassId}>
+                  <option value="">Chon mon hoc</option>
                   {availableSubjects.map((subject) => (
                     <option key={subject.id} value={subject.id}>{subject.name}</option>
                   ))}
                 </select>
               </label>
-              <button className="action-button" type="button" disabled={!selectedClassId || !selectedSubjectId || addSubjectMutation.isPending} onClick={() => addSubjectMutation.mutate()}>
-                {addSubjectMutation.isPending ? 'Đang gán...' : 'Gán môn học'}
+              <button className="action-button" type="button" disabled={!resolvedSelectedClassId || !selectedSubjectId || addSubjectMutation.isPending} onClick={() => addSubjectMutation.mutate()}>
+                {addSubjectMutation.isPending ? 'Dang gan...' : 'Gan mon hoc'}
               </button>
               {addSubjectMutation.error ? <p className="error-text">{(addSubjectMutation.error as Error).message}</p> : null}
             </div>
 
             <div className="tag-wrap">
               {classSubjectsQuery.data?.map((item) => (
-                <span key={item.id} className="subject-pill">{item.subject?.name ?? `Môn #${item.subject_id}`}</span>
+                <span key={item.id} className="subject-pill">{item.subject?.name ?? `Mon #${item.subject_id}`}</span>
               ))}
-              {selectedClassId && !classSubjectsQuery.data?.length && !classSubjectsQuery.isLoading ? <p>Lớp này chưa có môn học nào.</p> : null}
+              {resolvedSelectedClassId && !classSubjectsQuery.data?.length && !classSubjectsQuery.isLoading ? <p>Lop nay chua co mon hoc nao.</p> : null}
             </div>
           </article>
         </section>
@@ -205,6 +244,7 @@ export function ClassesPage() {
             <article key={classItem.id} className="info-card">
               <span>{classItem.grade_label ? `Khoi ${classItem.grade_label}` : 'Lop hoc'}</span>
               <strong>{classItem.name}</strong>
+              <p>ID {classItem.id} | mat khau {classItem.join_credential?.class_password ?? 'dang cap nhat'}</p>
               <p>{classItem.student_count} hoc sinh, {classItem.subject_count} mon hoc</p>
             </article>
           ))}

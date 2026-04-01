@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { fetchAssignmentProgress, fetchAssignments } from '../services/api'
@@ -6,9 +6,9 @@ import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
 const readinessLabelMap: Record<string, string> = {
-  can_ho_tro_them: 'Cần hỗ trợ thêm',
-  dang_phu_hop: 'Đang phù hợp',
-  san_sang_nang_do_kho: 'Sẵn sàng nâng độ khó',
+  can_ho_tro_them: 'Can ho tro them',
+  dang_phu_hop: 'Dang phu hop',
+  san_sang_nang_do_kho: 'San sang nang do kho',
 }
 
 export function ProgressPage() {
@@ -21,34 +21,30 @@ export function ProgressPage() {
     enabled: Boolean(token),
   })
 
-  useEffect(() => {
-    if (!selectedAssignmentId && assignmentsQuery.data?.length) {
-      setSelectedAssignmentId(String(assignmentsQuery.data[0].id))
-    }
-  }, [assignmentsQuery.data, selectedAssignmentId])
+  const resolvedSelectedAssignmentId = selectedAssignmentId || String(assignmentsQuery.data?.[0]?.id ?? '')
 
   const progressQuery = useQuery({
-    queryKey: ['assignment-progress', token, selectedAssignmentId],
-    queryFn: () => fetchAssignmentProgress(token!, Number(selectedAssignmentId)),
-    enabled: Boolean(token && selectedAssignmentId),
+    queryKey: ['assignment-progress', token, resolvedSelectedAssignmentId],
+    queryFn: () => fetchAssignmentProgress(token!, Number(resolvedSelectedAssignmentId)),
+    enabled: Boolean(token && resolvedSelectedAssignmentId),
   })
 
   return (
-    <RequireAuth>
+    <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Tiến độ học tập và gợi ý nâng độ khó</h2>
-          <p>Readiness chỉ là gợi ý cho giáo viên. Hệ thống không tự động nâng độ khó, nhưng sẽ tổng hợp những dấu hiệu để bạn quyết định.</p>
+          <h2>Tien do hoc tap va goi y nang do kho</h2>
+          <p>Readiness chi la goi y cho giao vien. He thong khong tu dong nang do kho, nhung se tong hop nhung dau hieu de ban quyet dinh.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Chọn assignment</h3>
+            <h3>Chon assignment</h3>
             <div className="form-stack">
               <label>
-                Assignment cần xem
-                <select value={selectedAssignmentId} onChange={(event) => setSelectedAssignmentId(event.target.value)}>
-                  <option value="">Chọn assignment</option>
+                Assignment can xem
+                <select value={resolvedSelectedAssignmentId} onChange={(event) => setSelectedAssignmentId(event.target.value)}>
+                  <option value="">Chon assignment</option>
                   {assignmentsQuery.data?.map((assignment) => (
                     <option key={assignment.id} value={assignment.id}>{assignment.lesson?.title ?? `Assignment #${assignment.id}`} - {assignment.classroom?.name ?? 'Khong ro lop'}</option>
                   ))}
@@ -58,23 +54,23 @@ export function ProgressPage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Tổng quan</h3>
+            <h3>Tong quan</h3>
             {progressQuery.data ? (
               <div className="metrics-grid">
                 <div className="info-card mini-card">
-                  <span>Học sinh</span>
+                  <span>Hoc sinh</span>
                   <strong>{progressQuery.data.summary.student_count}</strong>
                 </div>
                 <div className="info-card mini-card">
-                  <span>Đã xong</span>
+                  <span>Da xong</span>
                   <strong>{progressQuery.data.summary.completed_count}</strong>
                 </div>
                 <div className="info-card mini-card">
-                  <span>Cần hỗ trợ</span>
+                  <span>Can ho tro</span>
                   <strong>{progressQuery.data.summary.need_support_count}</strong>
                 </div>
                 <div className="info-card mini-card">
-                  <span>Sẵn sàng tăng mức</span>
+                  <span>San sang tang muc</span>
                   <strong>{progressQuery.data.summary.ready_to_increase_count}</strong>
                 </div>
               </div>

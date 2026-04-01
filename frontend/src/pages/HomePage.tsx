@@ -1,19 +1,35 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 
-import { fetchHealth, login } from '../services/api'
+import { fetchHealth, login, registerAccount } from '../services/api'
 import { useAuthStore } from '../store/authStore'
+import { getDefaultRouteForRole } from '../utils/roleRoutes'
 import { PWAInstallButton } from '../components/PWAInstallButton'
 
+type AuthMode = 'login' | 'register'
+type RegisterRole = 'student' | 'parent'
+
 export function HomePage() {
+  const navigate = useNavigate()
   const setSession = useAuthStore((state) => state.setSession)
   const clearSession = useAuthStore((state) => state.clearSession)
   const user = useAuthStore((state) => state.user)
-  const [identity, setIdentity] = useState('teacher@example.com')
-  const [password, setPassword] = useState('123456')
+
+  const [mode, setMode] = useState<AuthMode>('login')
+  const [identity, setIdentity] = useState('')
+  const [password, setPassword] = useState('')
   const [submitState, setSubmitState] = useState<'idle' | 'submitting'>('idle')
   const [error, setError] = useState<string | null>(null)
+
+  const [registerRole, setRegisterRole] = useState<RegisterRole>('student')
+  const [registerName, setRegisterName] = useState('')
+  const [registerEmail, setRegisterEmail] = useState('')
+  const [registerPhone, setRegisterPhone] = useState('')
+  const [registerPassword, setRegisterPassword] = useState('')
+  const [registerDisabilityLevel, setRegisterDisabilityLevel] = useState('trung_binh')
+  const [relationshipLabel, setRelationshipLabel] = useState('')
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['health'],
@@ -21,7 +37,13 @@ export function HomePage() {
     retry: 1,
   })
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    if (user) {
+      navigate(getDefaultRouteForRole(user.role), { replace: true })
+    }
+  }, [navigate, user])
+
+  async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSubmitState('submitting')
     setError(null)
@@ -33,8 +55,37 @@ export function HomePage() {
         user: payload.user,
         profile: payload.profile,
       })
+      navigate(getDefaultRouteForRole(payload.user.role), { replace: true })
     } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : 'Đăng nhập thất bại')
+      setError(submissionError instanceof Error ? submissionError.message : 'Dang nhap that bai')
+    } finally {
+      setSubmitState('idle')
+    }
+  }
+
+  async function handleRegisterSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setSubmitState('submitting')
+    setError(null)
+    try {
+      const payload = await registerAccount({
+        role: registerRole,
+        full_name: registerName,
+        email: registerEmail || undefined,
+        phone: registerPhone || undefined,
+        password: registerPassword,
+        disability_level: registerRole === 'student' ? registerDisabilityLevel : undefined,
+        relationship_label: registerRole === 'parent' ? relationshipLabel || undefined : undefined,
+      })
+      setSession({
+        accessToken: payload.access_token,
+        refreshToken: payload.refresh_token,
+        user: payload.user,
+        profile: payload.profile,
+      })
+      navigate(getDefaultRouteForRole(payload.user.role), { replace: true })
+    } catch (submissionError) {
+      setError(submissionError instanceof Error ? submissionError.message : 'Dang ky that bai')
     } finally {
       setSubmitState('idle')
     }
@@ -42,74 +93,115 @@ export function HomePage() {
 
   return (
     <div className="page-stack">
-      {user ? (
-        <>
-          <section className="roadmap-panel" style={{ background: 'linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #818cf8 100%)', color: '#ffffff', padding: '2rem' }}>
-            <p className="eyebrow" style={{ color: 'rgba(255,255,255,0.9)' }}>Chào mừng quay trở lại</p>
-            <h2 style={{ margin: '0.5rem 0 0 0', fontSize: '2rem', fontWeight: 800 }}>Học tập thông minh</h2>
-            <p style={{ marginTop: '0.5rem', fontSize: '1rem', color: 'rgba(255,255,255,0.85)' }}>Nâng cao kỹ năng của bạn với sự hỗ trợ của AI và các hoạt động tương tác</p>
-          </section>
-
-          <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
-            <div className="mini-card">
-              <span>Giờ học</span>
-              <strong>1.5</strong>
-              <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>Hoàn thành</p>
-            </div>
-            <div className="mini-card">
-              <span>Bài học</span>
-              <strong>10</strong>
-              <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>Trong khóa</p>
-            </div>
-            <div className="mini-card">
-              <span>Điểm thành tích</span>
-              <strong>850</strong>
-              <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>Tổng cộng</p>
-            </div>
-            <div className="mini-card">
-              <span>Chuỗi học</span>
-              <strong>7</strong>
-              <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>Ngày liên tiếp</p>
-            </div>
-          </section>
-        </>
-      ) : null}
       <section className="auth-layout">
         <article className="roadmap-panel">
-          <p className="eyebrow">Đăng nhập</p>
-          <h3>Bạn học thông minh</h3>
-          <form className="form-stack" onSubmit={handleSubmit}>
-            <label>
-              Email hoặc số điện thoại
-              <input value={identity} onChange={(event) => setIdentity(event.target.value)} placeholder="teacher@example.com" />
-            </label>
-            <label>
-              Mật khẩu
-              <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="123456" />
-            </label>
-            <div className="button-row">
-              <button className="action-button" type="submit" disabled={submitState === 'submitting'}>
-                {submitState === 'submitting' ? 'Đang xử lý...' : 'Đăng nhập'}
-              </button>
-              {user ? (
-                <button className="ghost-button" type="button" onClick={clearSession}>
-                  Đăng xuất
+          <p className="eyebrow">Tai khoan</p>
+          <h3>Dang nhap va dang ky</h3>
+          <p>Hoc sinh va phu huynh co the tu tao tai khoan. Giao vien chi dang nhap bang tai khoan do admin cap. Admin dung tai khoan bootstrap de cap giao vien moi.</p>
+
+          <div className="button-row">
+            <button className={mode === 'login' ? 'action-button' : 'ghost-button'} type="button" onClick={() => setMode('login')}>
+              Dang nhap
+            </button>
+            <button className={mode === 'register' ? 'action-button' : 'ghost-button'} type="button" onClick={() => setMode('register')}>
+              Dang ky
+            </button>
+          </div>
+
+          {mode === 'login' ? (
+            <form className="form-stack" onSubmit={handleLoginSubmit} style={{ marginTop: '1rem' }}>
+              <label>
+                Email hoac so dien thoai
+                <input value={identity} onChange={(event) => setIdentity(event.target.value)} placeholder="Nhap email hoac so dien thoai" />
+              </label>
+              <label>
+                Mat khau
+                <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Nhap mat khau" />
+              </label>
+              <div className="button-row">
+                <button className="action-button" type="submit" disabled={submitState === 'submitting'}>
+                  {submitState === 'submitting' ? 'Dang xu ly...' : 'Dang nhap'}
                 </button>
+                {user ? (
+                  <button className="ghost-button" type="button" onClick={clearSession}>
+                    Dang xuat
+                  </button>
+                ) : null}
+              </div>
+            </form>
+          ) : (
+            <form className="form-stack" onSubmit={handleRegisterSubmit} style={{ marginTop: '1rem' }}>
+              <label>
+                Vai tro tu dang ky
+                <select value={registerRole} onChange={(event) => setRegisterRole(event.target.value as RegisterRole)}>
+                  <option value="student">Hoc sinh</option>
+                  <option value="parent">Phu huynh</option>
+                </select>
+              </label>
+              <label>
+                Ho ten
+                <input value={registerName} onChange={(event) => setRegisterName(event.target.value)} placeholder="Nhap ho ten" />
+              </label>
+              <label>
+                Email
+                <input value={registerEmail} onChange={(event) => setRegisterEmail(event.target.value)} placeholder="co the de trong neu dung so dien thoai" />
+              </label>
+              <label>
+                So dien thoai
+                <input value={registerPhone} onChange={(event) => setRegisterPhone(event.target.value)} placeholder="co the de trong neu dung email" />
+              </label>
+              <label>
+                Mat khau
+                <input type="password" value={registerPassword} onChange={(event) => setRegisterPassword(event.target.value)} placeholder="Tu dat mat khau" />
+              </label>
+              {registerRole === 'student' ? (
+                <label>
+                  Muc do khuyet tat
+                  <select value={registerDisabilityLevel} onChange={(event) => setRegisterDisabilityLevel(event.target.value)}>
+                    <option value="nhe">Nhe</option>
+                    <option value="trung_binh">Trung binh</option>
+                    <option value="nang">Nang</option>
+                  </select>
+                </label>
               ) : null}
-            </div>
-            <PWAInstallButton />
-            {error ? <p className="error-text">{error}</p> : null}
-          </form>
+              {registerRole === 'parent' ? (
+                <label>
+                  Moi quan he
+                  <input value={relationshipLabel} onChange={(event) => setRelationshipLabel(event.target.value)} placeholder="Me, Ba, Nguoi giam ho..." />
+                </label>
+              ) : null}
+              <button className="action-button" type="submit" disabled={submitState === 'submitting'}>
+                {submitState === 'submitting' ? 'Dang tao tai khoan...' : 'Dang ky va vao he thong'}
+              </button>
+            </form>
+          )}
+
+          <PWAInstallButton />
+          {error ? <p className="error-text">{error}</p> : null}
         </article>
 
         <article className="roadmap-panel">
-          <p className="eyebrow">Trạng thái</p>
+          <p className="eyebrow">Trang thai</p>
           <h3>Backend</h3>
           <div>
-            {isLoading && <p>Đang kiểm tra...</p>}
-            {isError && <p style={{ color: '#d32f2f' }}>Chưa kết nối</p>}
-            {data?.status === 'ok' && <p style={{ color: '#388e3c' }}>✓ Đang hoạt động</p>}
+            {isLoading && <p>Dang kiem tra...</p>}
+            {isError && <p style={{ color: '#d32f2f' }}>Chua ket noi</p>}
+            {data?.status === 'ok' && <p style={{ color: '#388e3c' }}>Dang hoat dong</p>}
             {data?.app_name && <p>{data.app_name}</p>}
+          </div>
+          <div className="detail-stack" style={{ marginTop: '1rem' }}>
+            <div className="student-row">
+              <strong>Hoc sinh / phu huynh</strong>
+              <span>Tu dang ky tai khoan ngay tai man hinh nay</span>
+            </div>
+            <div className="student-row">
+              <strong>Giao vien</strong>
+              <span>Chi dang nhap sau khi duoc admin cap tai khoan</span>
+            </div>
+            <div className="student-row">
+              <strong>Admin</strong>
+              <span>Chi dung de tao va cap tai khoan giao vien</span>
+            </div>
           </div>
         </article>
       </section>

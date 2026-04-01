@@ -10,13 +10,22 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _sqlite_database_url(path_value: str) -> str:
+    candidate = Path(path_value)
+    if not candidate.is_absolute():
+        candidate = BASE_DIR / candidate
+    return f"sqlite:///{candidate.resolve().as_posix()}"
+
+
 def _normalize_database_url(raw_url: str | None) -> str:
     if not raw_url:
-        return f"sqlite:///{(BASE_DIR / 'instance' / 'dev.db').as_posix()}"
+        return _sqlite_database_url('instance/dev.db')
     if raw_url.startswith('postgres://'):
         return raw_url.replace('postgres://', 'postgresql+psycopg://', 1)
     if raw_url.startswith('postgresql://') and '+psycopg' not in raw_url:
         return raw_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+    if raw_url.startswith('sqlite:///') and raw_url != 'sqlite:///:memory:':
+        return _sqlite_database_url(raw_url.removeprefix('sqlite:///'))
     return raw_url
 
 

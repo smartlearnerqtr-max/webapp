@@ -19,11 +19,46 @@ class Classroom(TimestampMixin, db.Model):
     status: Mapped[str] = mapped_column(String(30), nullable=False, default="active")
 
     teacher = relationship("TeacherProfile", back_populates="classes")
+    join_credential = relationship("ClassJoinCredential", back_populates="classroom", cascade="all, delete-orphan", uselist=False)
     students = relationship("ClassStudent", back_populates="classroom", cascade="all, delete-orphan")
     subjects = relationship("ClassSubject", back_populates="classroom", cascade="all, delete-orphan")
 
+    def to_dict(self, include_join_credentials: bool = False) -> dict[str, object]:
+        payload = {
+            "id": self.id,
+            "teacher_id": self.teacher_id,
+            "name": self.name,
+            "grade_label": self.grade_label,
+            "description": self.description,
+            "default_disability_level": self.default_disability_level,
+            "status": self.status,
+            "student_count": len([item for item in self.students if item.status == "active"]),
+            "subject_count": len([item for item in self.subjects if item.is_active]),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+        if include_join_credentials:
+            payload["join_credential"] = self.join_credential.to_dict() if self.join_credential else None
+        return payload
+
+
+class ClassJoinCredential(TimestampMixin, db.Model):
+    __tablename__ = "class_join_credentials"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    class_id: Mapped[int] = mapped_column(ForeignKey("classes.id"), nullable=False, unique=True, index=True)
+    join_password: Mapped[str] = mapped_column(String(32), nullable=False)
+
+    classroom = relationship("Classroom", back_populates="join_credential")
+
     def to_dict(self) -> dict[str, object]:
-        return {"id": self.id, "teacher_id": self.teacher_id, "name": self.name, "grade_label": self.grade_label, "description": self.description, "default_disability_level": self.default_disability_level, "status": self.status, "student_count": len([item for item in self.students if item.status == "active"]), "subject_count": len([item for item in self.subjects if item.is_active]), "created_at": self.created_at.isoformat() if self.created_at else None, "updated_at": self.updated_at.isoformat() if self.updated_at else None}
+        return {
+            "id": self.id,
+            "class_id": self.class_id,
+            "class_password": self.join_password,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
 
 
 class ClassStudent(TimestampMixin, db.Model):

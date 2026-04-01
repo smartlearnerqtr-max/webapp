@@ -19,6 +19,10 @@ class TeacherProfile(TimestampMixin, db.Model):
 
     user = relationship("User", back_populates="teacher_profile")
     classes = relationship("Classroom", back_populates="teacher")
+    student_links = relationship("TeacherStudentLink", back_populates="teacher", cascade="all, delete-orphan")
+    parent_links = relationship("ParentStudentLink", back_populates="teacher", foreign_keys="ParentStudentLink.linked_by_teacher_id")
+    parent_group_links = relationship("TeacherParentStudentLink", back_populates="teacher", cascade="all, delete-orphan")
+    parent_reports = relationship("ParentDailyReport", back_populates="teacher", foreign_keys="ParentDailyReport.teacher_id")
 
     def to_dict(self) -> dict[str, object]:
         return {"id": self.id, "user_id": self.user_id, "full_name": self.full_name, "school_name": self.school_name, "avatar_url": self.avatar_url, "note": self.note}
@@ -36,6 +40,8 @@ class ParentProfile(TimestampMixin, db.Model):
 
     user = relationship("User", back_populates="parent_profile")
     student_links = relationship("ParentStudentLink", back_populates="parent", cascade="all, delete-orphan")
+    teacher_group_links = relationship("TeacherParentStudentLink", back_populates="parent", cascade="all, delete-orphan")
+    reports = relationship("ParentDailyReport", back_populates="parent", cascade="all, delete-orphan")
 
     def to_dict(self) -> dict[str, object]:
         return {"id": self.id, "user_id": self.user_id, "full_name": self.full_name, "relationship_label": self.relationship_label, "avatar_url": self.avatar_url, "note": self.note}
@@ -58,7 +64,10 @@ class StudentProfile(TimestampMixin, db.Model):
 
     user = relationship("User", back_populates="student_profile")
     classrooms = relationship("ClassStudent", back_populates="student", cascade="all, delete-orphan")
+    teacher_links = relationship("TeacherStudentLink", back_populates="student", cascade="all, delete-orphan")
     parent_links = relationship("ParentStudentLink", back_populates="student", cascade="all, delete-orphan")
+    teacher_parent_links = relationship("TeacherParentStudentLink", back_populates="student", cascade="all, delete-orphan")
+    daily_reports = relationship("ParentDailyReport", back_populates="student", cascade="all, delete-orphan")
 
     def to_dict(self) -> dict[str, object]:
         return {"id": self.id, "user_id": self.user_id, "full_name": self.full_name, "disability_level": self.disability_level, "support_note": self.support_note, "preferred_input": self.preferred_input, "preferred_read_speed": self.preferred_read_speed, "preferred_font_size": self.preferred_font_size, "preferred_bg_color": self.preferred_bg_color, "avatar_url": self.avatar_url, "created_by_teacher_id": self.created_by_teacher_id}

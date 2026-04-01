@@ -1,22 +1,13 @@
 # Ban hoc thong minh
 
-Webapp/PWA ho tro hoc tap cho hoc sinh khuyet tat, co 3 vai tro `teacher`, `student`, `parent`, backend Flask va frontend React/Vite.
+Webapp/PWA ho tro hoc tap cho hoc sinh khuyet tat, backend Flask va frontend React/Vite.
 
-## Chuc nang MVP da co
+## Vai tro he thong
 
-- Dang nhap theo role.
-- Giao vien tao hoc sinh, lop hoc, mon hoc, bai hoc, activity, assignment.
-- Hoc sinh nhan bai, cap nhat tien do, hoan thanh bai hoc.
-- Phu huynh xem dashboard con duoc lien ket.
-- Gemini API key luu ma hoa o backend va co luong AI chat/test.
-- Dashboard log ky thuat.
-- Frontend build duoc thanh PWA dung tren desktop va Android.
-
-## Demo account
-
-- `teacher@example.com / 123456`
-- `student@example.com / 123456`
-- `parent@example.com / 123456`
+- `admin`: chi tao va cap tai khoan giao vien
+- `teacher`: quan ly ho so hoc sinh, lop hoc, bai hoc, assignment va tien do
+- `student`: tu dang ky tai khoan, dang nhap, xem bai duoc giao va cap nhat tien do
+- `parent`: tu dang ky tai khoan, dang nhap va xem dashboard cua con sau khi duoc lien ket
 
 ## Chay local
 
@@ -31,6 +22,11 @@ flask --app run.py seed-base
 python run.py
 ```
 
+`seed-base` hien chi tao mon hoc co ban va 1 tai khoan `admin` bootstrap.
+Mac dinh theo [.env.example](d:/webapp/backend/.env.example):
+
+- `admin@example.com / admin123456`
+
 ### Frontend
 
 ```powershell
@@ -43,87 +39,43 @@ Frontend local mac dinh: `http://localhost:5173`
 
 Backend local mac dinh: `http://localhost:5000`
 
+## Luong tai khoan moi
+
+- Hoc sinh va phu huynh tu dang ky ngay tren man hinh auth cua frontend.
+- Giao vien khong tu dang ky; admin dang nhap vao khu vuc `/admin` de cap tai khoan giao vien.
+- Sau khi dang nhap, moi role duoc dua thang vao khu vuc rieng cua minh.
+
 ## Smoke test truoc deploy
 
 ```powershell
 cd backend
 .\.venv\Scripts\activate
 python smoke_test.py
+python persona_test.py
 ```
 
-Script nay test nhanh cac luong chinh:
+`smoke_test.py` test nhanh luong:
 
-- auth teacher, student, parent
-- class + subject + lesson + activity + assignment
-- progress/readiness
-- parent dashboard
+- admin tao teacher
+- student va parent tu dang ky
+- teacher tao class, lesson, activity, assignment
+- student hoc bai va cap nhat tien do
+- parent xem dashboard
 - AI settings + AI chat bang mock response
+
+`persona_test.py` mo phong:
+
+- 1 admin
+- 3 giao vien
+- 10 hoc sinh
+- 10 phu huynh
 
 ## Deploy len Render
 
-Project da duoc chuan bi san file [render.yaml](d:/webapp/render.yaml) de deploy bang Render Blueprint.
+Project da co san file [render.yaml](d:/webapp/render.yaml).
 
-### 1. Day code len GitHub
+Luu y:
 
-Render se lay source tu repo GitHub/GitLab.
-
-### 2. Tao Blueprint tren Render
-
-- Vao Render Dashboard.
-- Chon `New +` -> `Blueprint`.
-- Chon repo cua du an.
-- Render se doc `render.yaml` va tao 3 resource:
-  - `ban-hoc-backend`
-  - `ban-hoc-frontend`
-  - `ban-hoc-db`
-
-### 3. Bien moi truong da duoc setup san
-
-Backend:
-
-- `SECRET_KEY`: generate tu Render
-- `JWT_SECRET_KEY`: generate tu Render
-- `ENCRYPTION_SECRET`: generate tu Render
-- `DATABASE_URL`: lay tu Render Postgres
-- `CORS_ORIGINS`: lay tu URL frontend service
-- `FLASK_ENV=production`
-
-Frontend:
-
-- `VITE_API_BASE_URL`: lay tu URL backend service
-
-### 4. Luu y ky thuat quan trong
-
-- Render Postgres thuong tra ve `postgresql://...`; backend da duoc sua de tu dong doi sang `postgresql+psycopg://...` trong [backend/app/config.py](d:/webapp/backend/app/config.py).
-- Backend start command tren Render se chay `flask --app run.py init-db` truoc khi mo Gunicorn.
-- Gunicorn la server production cho Render/Linux. Neu test truc tiep bang Gunicorn tren Windows local, ban co the gap loi `fcntl`; khi do hay dung `python run.py` de dev local hoac deploy tren Render/WSL de test production runtime.
-- Frontend static site da co rule rewrite `/* -> /index.html` de React Router hoat dong dung.
+- Backend start command dang chay `seed-base`, nhung gio chi bootstrap admin va mon hoc co ban, khong tao demo teacher/student/parent nua.
+- `ADMIN_EMAIL` va `ADMIN_PASSWORD` duoc doc tu env var de tao admin bootstrap.
 - Health check backend dung `/api/v1/health`.
-
-### 5. Seed demo sau deploy (tuy chon)
-
-Neu muon kiem tra nhanh tren moi truong Render bang tai khoan demo, mo Render Shell cua backend va chay:
-
-```powershell
-flask --app run.py seed-base
-```
-
-### 6. Lenh build/start tren Render
-
-Backend:
-
-- Build: `pip install -r requirements.txt`
-- Start: `flask --app run.py init-db && gunicorn run:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120`
-
-Frontend:
-
-- Build: `npm install && npm run build`
-- Publish dir: `dist`
-
-## Tai lieu tham khao chinh thuc
-
-- Render Blueprint Spec: https://render.com/docs/blueprint-spec
-- Render Python/Flask deployment docs: https://render.com/docs/deploy-flask
-- Render Static Site docs: https://render.com/docs/static-sites
-- Render default environment variables: https://render.com/docs/environment-variables#default-environment-variables
-- Google Gemini text generation docs: https://ai.google.dev/gemini-api/docs/text-generation

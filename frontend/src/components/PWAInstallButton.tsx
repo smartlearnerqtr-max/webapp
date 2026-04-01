@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
+}
+
 export function PWAInstallButton() {
   const [isInstallable, setIsInstallable] = useState(false)
-  const deferredPromptRef = useRef<any>(null)
+  const deferredPromptRef = useRef<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault()
-      deferredPromptRef.current = e
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault()
+      deferredPromptRef.current = event as BeforeInstallPromptEvent
       setIsInstallable(true)
     }
 
@@ -19,14 +24,11 @@ export function PWAInstallButton() {
   }, [])
 
   const handleInstall = async () => {
-    if (!deferredPromptRef.current) return
+    const promptEvent = deferredPromptRef.current
+    if (!promptEvent) return
 
-    deferredPromptRef.current.prompt()
-    const { outcome } = await deferredPromptRef.current.userChoice
-
-    if (outcome === 'accepted') {
-      console.log('PWA installed')
-    }
+    await promptEvent.prompt()
+    await promptEvent.userChoice
     deferredPromptRef.current = null
     setIsInstallable(false)
   }
@@ -39,7 +41,7 @@ export function PWAInstallButton() {
       onClick={handleInstall}
       style={{ width: '100%', marginTop: '0.5rem' }}
     >
-      📱 Tải ứng dụng
+      Tai ung dung
     </button>
   )
 }

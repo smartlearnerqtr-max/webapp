@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -7,18 +7,18 @@ import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
 const LEVEL_OPTIONS = [
-  { value: 'nang', label: 'Nặng' },
-  { value: 'trung_binh', label: 'Trung bình' },
-  { value: 'nhe', label: 'Nhẹ' },
+  { value: 'nang', label: 'Nang' },
+  { value: 'trung_binh', label: 'Trung binh' },
+  { value: 'nhe', label: 'Nhe' },
 ]
 
 const ACTIVITY_TYPES = [
-  { value: 'multiple_choice', label: 'Chọn đáp án' },
-  { value: 'matching', label: 'Nối cặp' },
-  { value: 'drag_drop', label: 'Kéo thả' },
-  { value: 'listen_choose', label: 'Nghe và chọn' },
-  { value: 'watch_answer', label: 'Xem video và trả lời' },
-  { value: 'step_by_step', label: 'Từng bước' },
+  { value: 'multiple_choice', label: 'Chon dap an' },
+  { value: 'matching', label: 'Noi cap' },
+  { value: 'drag_drop', label: 'Keo tha' },
+  { value: 'listen_choose', label: 'Nghe va chon' },
+  { value: 'watch_answer', label: 'Xem video va tra loi' },
+  { value: 'step_by_step', label: 'Tung buoc' },
 ]
 
 export function LessonsPage() {
@@ -48,34 +48,25 @@ export function LessonsPage() {
     enabled: Boolean(token),
   })
 
+  const resolvedSubjectId = subjectId || String(subjectsQuery.data?.[0]?.id ?? '')
+  const resolvedSelectedLessonId = selectedLessonId ?? lessonsQuery.data?.[0]?.id ?? null
+
   const lessonDetailQuery = useQuery({
-    queryKey: ['lesson-detail', token, selectedLessonId],
-    queryFn: () => fetchLesson(token!, selectedLessonId!),
-    enabled: Boolean(token && selectedLessonId),
+    queryKey: ['lesson-detail', token, resolvedSelectedLessonId],
+    queryFn: () => fetchLesson(token!, resolvedSelectedLessonId!),
+    enabled: Boolean(token && resolvedSelectedLessonId),
   })
 
-  useEffect(() => {
-    if (!subjectId && subjectsQuery.data?.length) {
-      setSubjectId(String(subjectsQuery.data[0].id))
-    }
-  }, [subjectId, subjectsQuery.data])
-
-  useEffect(() => {
-    if (!selectedLessonId && lessonsQuery.data?.length) {
-      setSelectedLessonId(lessonsQuery.data[0].id)
-    }
-  }, [lessonsQuery.data, selectedLessonId])
-
   const selectedLesson = useMemo(
-    () => lessonsQuery.data?.find((lesson) => lesson.id === selectedLessonId) ?? null,
-    [lessonsQuery.data, selectedLessonId],
+    () => lessonsQuery.data?.find((lesson) => lesson.id === resolvedSelectedLessonId) ?? null,
+    [lessonsQuery.data, resolvedSelectedLessonId],
   )
 
   const createLessonMutation = useMutation({
     mutationFn: () => createLesson(token!, {
       title,
       description,
-      subject_id: Number(subjectId),
+      subject_id: Number(resolvedSubjectId),
       primary_level: primaryLevel,
       estimated_minutes: Number(estimatedMinutes),
       difficulty_stage: 1,
@@ -91,7 +82,7 @@ export function LessonsPage() {
   })
 
   const createActivityMutation = useMutation({
-    mutationFn: () => createLessonActivity(token!, selectedLessonId!, {
+    mutationFn: () => createLessonActivity(token!, resolvedSelectedLessonId!, {
       title: activityTitle,
       activity_type: activityType,
       instruction_text: instructionText,
@@ -107,50 +98,50 @@ export function LessonsPage() {
       setConfigJson('{"choices": ["A", "B"], "correct": "A"}')
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['lessons', token] }),
-        queryClient.invalidateQueries({ queryKey: ['lesson-detail', token, selectedLessonId] }),
+        queryClient.invalidateQueries({ queryKey: ['lesson-detail', token, resolvedSelectedLessonId] }),
       ])
     },
   })
 
   function handleLessonSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!title.trim() || !subjectId) return
+    if (!title.trim() || !resolvedSubjectId) return
     createLessonMutation.mutate()
   }
 
   function handleActivitySubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!activityTitle.trim() || !selectedLessonId) return
+    if (!activityTitle.trim() || !resolvedSelectedLessonId) return
     createActivityMutation.mutate()
   }
 
   return (
-    <RequireAuth>
+    <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Bài học và hoạt động bên trong bài học</h2>
-          <p>Mỗi bài học gắn với môn học, mức độ khuyết tật chính và chứa nhiều activity như chọn đáp án, kéo thả, video hoặc voice.</p>
+          <h2>Bai hoc va hoat dong ben trong bai hoc</h2>
+          <p>Moi bai hoc gan voi mon hoc, muc do khuyet tat chinh va chua nhieu activity nhu chon dap an, keo tha, video hoac voice.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tạo bài học</h3>
+            <h3>Tao bai hoc</h3>
             <form className="form-stack" onSubmit={handleLessonSubmit}>
               <label>
-                Tiêu đề bài học
-                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhận biết hình tròn" />
+                Tieu de bai hoc
+                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhan biet hinh tron" />
               </label>
               <label>
-                Môn học
-                <select value={subjectId} onChange={(event) => setSubjectId(event.target.value)}>
-                  <option value="">Chọn môn học</option>
+                Mon hoc
+                <select value={resolvedSubjectId} onChange={(event) => setSubjectId(event.target.value)}>
+                  <option value="">Chon mon hoc</option>
                   {subjectsQuery.data?.map((subject) => (
                     <option key={subject.id} value={subject.id}>{subject.name}</option>
                   ))}
                 </select>
               </label>
               <label>
-                Mức độ chính
+                Muc do chinh
                 <select value={primaryLevel} onChange={(event) => setPrimaryLevel(event.target.value)}>
                   {LEVEL_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -158,35 +149,35 @@ export function LessonsPage() {
                 </select>
               </label>
               <label>
-                Mô tả ngăn
-                <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bài học có hỗ trợ voice" />
+                Mo ta ngan
+                <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bai hoc co ho tro voice" />
               </label>
               <label>
-                Số phút dự kiến
+                So phut du kien
                 <input value={estimatedMinutes} onChange={(event) => setEstimatedMinutes(event.target.value)} inputMode="numeric" />
               </label>
               <button className="action-button" type="submit" disabled={createLessonMutation.isPending}>
-                {createLessonMutation.isPending ? 'Đang tạo...' : 'Tạo bài học'}
+                {createLessonMutation.isPending ? 'Dang tao...' : 'Tao bai hoc'}
               </button>
               {createLessonMutation.error ? <p className="error-text">{(createLessonMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chọn bài học đang chỉnh</h3>
+            <h3>Chon bai hoc dang chinh</h3>
             <div className="tag-wrap">
               {lessonsQuery.data?.map((lesson) => (
                 <button
                   key={lesson.id}
                   type="button"
-                  className={selectedLessonId === lesson.id ? 'subject-pill pill-button pill-button-active' : 'subject-pill pill-button'}
+                  className={resolvedSelectedLessonId === lesson.id ? 'subject-pill pill-button pill-button-active' : 'subject-pill pill-button'}
                   onClick={() => setSelectedLessonId(lesson.id)}
                 >
                   {lesson.title}
                 </button>
               ))}
             </div>
-            {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Chưa có bài học nào, hãy tạo bài học đầu tiên.</p> : null}
+            {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Chua co bai hoc nao, hay tao bai hoc dau tien.</p> : null}
           </article>
         </section>
 
@@ -211,50 +202,50 @@ export function LessonsPage() {
                 alignItems: 'center',
                 transition: 'all 200ms ease',
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(167, 139, 250, 0.4)'
+              onMouseEnter={(event) => {
+                event.currentTarget.style.transform = 'translateY(-2px)'
+                event.currentTarget.style.boxShadow = '0 6px 16px rgba(167, 139, 250, 0.4)'
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(167, 139, 250, 0.3)'
+              onMouseLeave={(event) => {
+                event.currentTarget.style.transform = 'translateY(0)'
+                event.currentTarget.style.boxShadow = '0 4px 12px rgba(167, 139, 250, 0.3)'
               }}
             >
-              <span>Thêm hoạt động vào bài học</span>
-              <span style={{ fontSize: '1.3rem' }}>{isActivityFormOpen ? '−' : '+'}</span>
+              <span>Them hoat dong vao bai hoc</span>
+              <span style={{ fontSize: '1.3rem' }}>{isActivityFormOpen ? '-' : '+'}</span>
             </button>
-            {isActivityFormOpen && (
-            <form className="form-stack" onSubmit={handleActivitySubmit}>
-              <label>
-                Ten hoat dong
-                <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder="Chon dap an bang giong noi" />
-              </label>
-              <label>
-                Loai hoat dong
-                <select value={activityType} onChange={(event) => setActivityType(event.target.value)}>
-                  {ACTIVITY_TYPES.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Huong dan
-                <input value={instructionText} onChange={(event) => setInstructionText(event.target.value)} placeholder="Hay doc dap an dung" />
-              </label>
-              <label>
-                Config JSON
-                <textarea value={configJson} onChange={(event) => setConfigJson(event.target.value)} rows={5} />
-              </label>
-              <label className="checkbox-row">
-                <input type="checkbox" checked={voiceAnswerEnabled} onChange={(event) => setVoiceAnswerEnabled(event.target.checked)} />
-                Bat voice answer cho hoat dong nay
-              </label>
-              <button className="action-button" type="submit" disabled={!selectedLessonId || createActivityMutation.isPending}>
-                {createActivityMutation.isPending ? 'Dang them...' : 'Them hoat dong'}
-              </button>
-              {createActivityMutation.error ? <p className="error-text">{(createActivityMutation.error as Error).message}</p> : null}
-            </form>
-            )}
+            {isActivityFormOpen ? (
+              <form className="form-stack" onSubmit={handleActivitySubmit}>
+                <label>
+                  Ten hoat dong
+                  <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder="Chon dap an bang giong noi" />
+                </label>
+                <label>
+                  Loai hoat dong
+                  <select value={activityType} onChange={(event) => setActivityType(event.target.value)}>
+                    {ACTIVITY_TYPES.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Huong dan
+                  <input value={instructionText} onChange={(event) => setInstructionText(event.target.value)} placeholder="Hay doc dap an dung" />
+                </label>
+                <label>
+                  Config JSON
+                  <textarea value={configJson} onChange={(event) => setConfigJson(event.target.value)} rows={5} />
+                </label>
+                <label className="checkbox-row">
+                  <input type="checkbox" checked={voiceAnswerEnabled} onChange={(event) => setVoiceAnswerEnabled(event.target.checked)} />
+                  Bat voice answer cho hoat dong nay
+                </label>
+                <button className="action-button" type="submit" disabled={!resolvedSelectedLessonId || createActivityMutation.isPending}>
+                  {createActivityMutation.isPending ? 'Dang them...' : 'Them hoat dong'}
+                </button>
+                {createActivityMutation.error ? <p className="error-text">{(createActivityMutation.error as Error).message}</p> : null}
+              </form>
+            ) : null}
           </article>
 
           <article className="roadmap-panel">
@@ -273,7 +264,7 @@ export function LessonsPage() {
                       <span>{activity.activity_type} {activity.voice_answer_enabled ? '/ voice' : ''}</span>
                     </div>
                   ))}
-                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>Bài học này chưa có hoạt động nào.</p> : null}
+                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>Bai hoc nay chua co hoat dong nao.</p> : null}
                 </div>
               </div>
             ) : (

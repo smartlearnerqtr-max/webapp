@@ -24,6 +24,14 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   return json.data as T
 }
 
+export type AuthUser = {
+  id: number
+  email: string | null
+  phone: string | null
+  role: string
+  status: string
+}
+
 export type HealthResponse = {
   service: string
   status: string
@@ -31,26 +39,65 @@ export type HealthResponse = {
 }
 
 export type LoginResponse = {
-  user: {
-    id: number
-    email: string | null
-    phone: string | null
-    role: string
-    status: string
-  }
+  user: AuthUser
   profile: Record<string, unknown> | null
   access_token: string
   refresh_token: string
 }
 
+export type RegisterPayload = {
+  role: 'student' | 'parent'
+  full_name: string
+  email?: string
+  phone?: string
+  password: string
+  disability_level?: string
+  support_note?: string
+  preferred_input?: string
+  preferred_read_speed?: string
+  preferred_font_size?: string
+  preferred_bg_color?: string
+  relationship_label?: string
+}
+
+export type TeacherContactItem = {
+  id: number
+  user_id: number
+  full_name: string
+  school_name: string | null
+  avatar_url: string | null
+  note: string | null
+  email: string | null
+  phone: string | null
+}
+
+export type StudentTeacherLinkItem = {
+  link_id: number
+  teacher: TeacherContactItem
+  source: string | null
+  active_class_count: number
+}
+
 export type ClassItem = {
   id: number
+  teacher_id: number
   name: string
   grade_label: string | null
   description: string | null
+  default_disability_level?: string | null
   status: string
   student_count: number
   subject_count: number
+  created_at?: string | null
+  updated_at?: string | null
+  teacher?: TeacherContactItem | null
+  join_credential?: {
+    id: number
+    class_id: number
+    class_password: string | null
+    created_at?: string | null
+    updated_at?: string | null
+  } | null
 }
 
 export type StudentItem = {
@@ -60,6 +107,10 @@ export type StudentItem = {
   disability_level: string
   preferred_input: string
   support_note: string | null
+  preferred_read_speed?: string | null
+  preferred_font_size?: string | null
+  preferred_bg_color?: string | null
+  created_by_teacher_id?: number | null
 }
 
 export type ClassStudentLink = {
@@ -161,16 +212,99 @@ export type AssignmentProgressResponse = {
   }
 }
 
+export type MyAssignmentItem = {
+  id: number
+  assignment_id: number
+  student_id: number
+  status: string
+  progress_percent: number
+  total_learning_seconds: number
+  retry_count: number
+  help_count: number
+  reward_star_count: number
+  completion_score: number
+  completed_at: string | null
+  readiness_status: string
+  readiness_reasons: string[]
+  assignment: AssignmentItem | null
+  lesson?: LessonItem | null
+}
+
+export type MyAssignmentDetail = MyAssignmentItem & {
+  lesson: LessonItem | null
+}
+
+export type ParentProgressSummary = {
+  total_assignments: number
+  completed_count: number
+  in_progress_count: number
+  last_assignment_title: string | null
+  last_progress_percent: number
+  readiness_status: string
+  help_count: number
+  retry_count: number
+  completion_score: number
+}
+
+export type ParentAccountItem = {
+  id: number
+  user_id: number
+  full_name: string
+  relationship_label: string | null
+  avatar_url: string | null
+  note: string | null
+  email: string | null
+  phone: string | null
+  students: StudentItem[]
+}
+
+export type ParentReportItem = {
+  id: number
+  teacher_id: number
+  parent_id: number
+  student_id: number
+  report_date: string
+  title: string
+  teacher_note: string | null
+  summary_text: string
+  recommendation: string | null
+  total_assignments: number
+  completed_count: number
+  in_progress_count: number
+  last_assignment_title: string | null
+  last_progress_percent: number
+  readiness_status: string
+  help_count: number
+  retry_count: number
+  completion_score: number
+  created_at?: string | null
+  updated_at?: string | null
+  parent?: ParentAccountItem | null
+  student?: StudentItem | null
+  teacher?: TeacherContactItem | null
+}
+
+export type TeacherParentGroupItem = {
+  link_id: number
+  status: string
+  parent: ParentAccountItem | null
+  student: StudentItem | null
+  classes: ClassItem[]
+  progress_summary: ParentProgressSummary
+  latest_report: ParentReportItem | null
+}
+
 export type ParentChildDashboardItem = {
   student: StudentItem
   classes: ClassItem[]
-  progress_summary: {
-    total_assignments: number
-    completed_count: number
-    in_progress_count: number
-    last_assignment_title: string | null
-    last_progress_percent: number
-  }
+  teachers: TeacherContactItem[]
+  progress_summary: ParentProgressSummary
+}
+
+export type JoinClassResponse = {
+  classroom: ClassItem
+  student: StudentItem
+  class_join_status: string
 }
 
 export type AISettings = {
@@ -208,6 +342,63 @@ export type LogItem = {
   created_at: string | null
 }
 
+export type AdminTeacherItem = {
+  user: AuthUser
+  profile: {
+    id: number
+    user_id: number
+    full_name: string
+    school_name: string | null
+    avatar_url: string | null
+    note: string | null
+  } | null
+}
+
+export type AdminRelationshipOverview = {
+  summary: {
+    teacher_count: number
+    teacher_student_link_count: number
+    teacher_parent_group_count: number
+    shared_student_count: number
+  }
+  teachers: Array<{
+    teacher: AdminTeacherItem
+    student_count: number
+    parent_group_count: number
+    shared_student_count: number
+  }>
+  shared_students: Array<{
+    student: StudentItem
+    teachers: Array<{
+      id: number
+      full_name: string
+      school_name: string | null
+    }>
+  }>
+}
+
+export type TeacherSharedStudentItem = {
+  student: StudentItem
+  teachers: Array<{
+    id: number
+    full_name: string
+    school_name: string | null
+    email: string | null
+    phone: string | null
+    is_current_teacher: boolean
+  }>
+  peer_teachers: Array<{
+    id: number
+    full_name: string
+    school_name: string | null
+    email: string | null
+    phone: string | null
+    is_current_teacher: boolean
+  }>
+  my_active_class_count: number
+  parent_group_count: number
+}
+
 export async function fetchHealth(): Promise<HealthResponse> {
   return request<HealthResponse>('/api/v1/health')
 }
@@ -219,12 +410,53 @@ export async function login(identity: string, password: string): Promise<LoginRe
   })
 }
 
+export async function registerAccount(payload: RegisterPayload): Promise<LoginResponse> {
+  return request<LoginResponse>('/api/v1/auth/register', {
+    method: 'POST',
+    body: payload,
+  })
+}
+
+export async function fetchAdminTeachers(token: string): Promise<AdminTeacherItem[]> {
+  return request<AdminTeacherItem[]>('/api/v1/admin/teachers', { token })
+}
+
+export async function fetchAdminRelationshipOverview(token: string): Promise<AdminRelationshipOverview> {
+  return request<AdminRelationshipOverview>('/api/v1/admin/relationships/overview', { token })
+}
+
+export async function createTeacherByAdmin(token: string, payload: {
+  full_name: string
+  email?: string
+  phone?: string
+  password: string
+  school_name?: string
+}) {
+  return request<AdminTeacherItem>('/api/v1/admin/teachers', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
 export async function fetchClasses(token: string): Promise<ClassItem[]> {
   return request<ClassItem[]>('/api/v1/classes', { token })
 }
 
-export async function createClass(token: string, payload: { name: string; grade_label?: string }) {
+export async function createClass(token: string, payload: { name: string; grade_label?: string; description?: string }) {
   return request<ClassItem>('/api/v1/classes', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function fetchMyClasses(token: string): Promise<ClassItem[]> {
+  return request<ClassItem[]>('/api/v1/my/classes', { token })
+}
+
+export async function joinClassByCredential(token: string, payload: { class_id: number; class_password: string }) {
+  return request<JoinClassResponse>('/api/v1/my/classes/join', {
     method: 'POST',
     token,
     body: payload,
@@ -259,8 +491,48 @@ export async function fetchStudents(token: string): Promise<StudentItem[]> {
   return request<StudentItem[]>('/api/v1/students', { token })
 }
 
+export async function fetchStudentTeachers(token: string, studentId: number): Promise<StudentTeacherLinkItem[]> {
+  return request<StudentTeacherLinkItem[]>(`/api/v1/students/${studentId}/teachers`, { token })
+}
+
+export async function fetchMyTeachers(token: string): Promise<StudentTeacherLinkItem[]> {
+  return request<StudentTeacherLinkItem[]>('/api/v1/my/teachers', { token })
+}
+
+export async function fetchTeacherSharedStudents(token: string): Promise<TeacherSharedStudentItem[]> {
+  return request<TeacherSharedStudentItem[]>('/api/v1/teacher/shared-students', { token })
+}
+
 export async function createStudent(token: string, payload: { full_name: string; disability_level: string }) {
   return request<StudentItem>('/api/v1/students', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function fetchParents(token: string): Promise<ParentAccountItem[]> {
+  return request<ParentAccountItem[]>('/api/v1/parents', { token })
+}
+
+export async function linkParentToStudent(token: string, studentId: number, payload: { parent_id: number }) {
+  return request<{ link_id: number; student: StudentItem; parent: ParentAccountItem }>(`/api/v1/students/${studentId}/parents/link`, {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function fetchTeacherParentGroups(token: string): Promise<TeacherParentGroupItem[]> {
+  return request<TeacherParentGroupItem[]>('/api/v1/teacher/parent-groups', { token })
+}
+
+export async function fetchTeacherReports(token: string): Promise<ParentReportItem[]> {
+  return request<ParentReportItem[]>('/api/v1/teacher/reports', { token })
+}
+
+export async function sendDailyReports(token: string, payload: { student_id?: number; note?: string; title?: string; report_date?: string }) {
+  return request<ParentReportItem[]>('/api/v1/teacher/reports/send', {
     method: 'POST',
     token,
     body: payload,
@@ -336,8 +608,54 @@ export async function fetchAssignmentProgress(token: string, assignmentId: numbe
   return request<AssignmentProgressResponse>(`/api/v1/assignments/${assignmentId}/progress`, { token })
 }
 
+export async function fetchMyAssignments(token: string): Promise<MyAssignmentItem[]> {
+  return request<MyAssignmentItem[]>('/api/v1/my/assignments', { token })
+}
+
+export async function fetchMyAssignment(token: string, assignmentId: number): Promise<MyAssignmentDetail> {
+  return request<MyAssignmentDetail>(`/api/v1/my/assignments/${assignmentId}`, { token })
+}
+
+export async function startMyAssignment(token: string, assignmentId: number): Promise<MyAssignmentItem> {
+  return request<MyAssignmentItem>(`/api/v1/my/assignments/${assignmentId}/start`, {
+    method: 'POST',
+    token,
+  })
+}
+
+export async function updateMyAssignmentProgress(token: string, assignmentId: number, payload: {
+  progress_percent?: number
+  total_learning_seconds?: number
+  retry_count?: number
+  help_count?: number
+  reward_star_count?: number
+  completion_score?: number
+  status?: 'not_started' | 'in_progress' | 'completed'
+}) {
+  return request<MyAssignmentItem>(`/api/v1/my/assignments/${assignmentId}/progress`, {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function completeMyAssignment(token: string, assignmentId: number): Promise<MyAssignmentItem> {
+  return request<MyAssignmentItem>(`/api/v1/my/assignments/${assignmentId}/complete`, {
+    method: 'POST',
+    token,
+  })
+}
+
 export async function fetchParentChildren(token: string): Promise<ParentChildDashboardItem[]> {
   return request<ParentChildDashboardItem[]>('/api/v1/parent/my-children', { token })
+}
+
+export async function fetchTeacherByIdForParent(token: string, teacherId: number): Promise<TeacherContactItem> {
+  return request<TeacherContactItem>(`/api/v1/parent/teachers/${teacherId}`, { token })
+}
+
+export async function fetchParentReports(token: string): Promise<ParentReportItem[]> {
+  return request<ParentReportItem[]>('/api/v1/parent/reports', { token })
 }
 
 export async function fetchAISettings(token: string): Promise<AISettings | null> {
