@@ -1,7 +1,10 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import os
+import subprocess
+import sys
 import time
+from pathlib import Path
 
 from sqlalchemy.exc import OperationalError
 
@@ -10,6 +13,7 @@ from app.extensions import db
 from app.services.seed_service import seed_admin_user, seed_subjects
 
 app = create_app()
+BASE_DIR = Path(__file__).resolve().parent
 
 
 def _int_env(name: str, default: int) -> int:
@@ -17,6 +21,26 @@ def _int_env(name: str, default: int) -> int:
         return int(os.getenv(name, str(default)))
     except ValueError:
         return default
+
+
+def _bool_env(name: str, default: bool = False) -> bool:
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    return raw_value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _maybe_seed_persona_data() -> None:
+    if not _bool_env("SEED_PERSONA_DATA", False):
+        return
+
+    command = [sys.executable, "local_persona_seed.py"]
+    if _bool_env("SEED_PERSONA_RESET_NON_ADMIN", True):
+        command.append("--reset-non-admin")
+
+    print("SEED_PERSONA_DATA is enabled. Running persona seed...")
+    subprocess.run(command, check=True, cwd=BASE_DIR)
+    print("Persona seed completed.")
 
 
 def run_init_and_seed() -> None:
@@ -33,7 +57,9 @@ def run_init_and_seed() -> None:
                 print("Database ready.")
                 print(f"Subjects created: {subjects_created}")
                 print(f"Admin ready: {admin.email}")
-                return
+
+            _maybe_seed_persona_data()
+            return
         except OperationalError as error:
             if attempt == max_attempts:
                 print("Database init failed after all retry attempts.")
