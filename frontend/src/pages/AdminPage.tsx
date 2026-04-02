@@ -58,106 +58,106 @@ export function AdminPage() {
     <RequireAuth allowedRoles={['admin']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Khong gian admin</p>
-          <h2>Cap tai khoan giao vien va xem lien ket</h2>
+          <p className="eyebrow">Không gian admin</p>
+          <h2>Cấp tài khoản giáo viên và xem liên kết</h2>
           <p>
-            Admin van chi tao tai khoan giao vien, nhung gio da co them mot dashboard tong quan de kiem tra xem du lieu
-            hoc sinh dang duoc lien ket voi bao nhieu giao vien va co bao nhieu hoc sinh dang hoc da giao vien.
+            Admin vẫn chỉ tạo tài khoản giáo viên, nhưng giờ đã có thêm một dashboard tổng quan để kiểm tra xem dữ liệu
+            học sinh đang được liên kết với bao nhiêu giáo viên và có bao nhiêu học sinh đang học đa giáo viên.
           </p>
         </section>
 
         <section className="metrics-grid">
           <article className="mini-card">
-            <span>Tong giao vien</span>
+            <span>Tổng giáo viên</span>
             <strong>{relationshipsQuery.data?.summary.teacher_count ?? 0}</strong>
           </article>
           <article className="mini-card">
-            <span>Lien ket GV-HS</span>
+            <span>Liên kết GV-HS</span>
             <strong>{relationshipsQuery.data?.summary.teacher_student_link_count ?? 0}</strong>
           </article>
           <article className="mini-card">
-            <span>Nhom phu huynh</span>
+            <span>Nhóm phụ huynh</span>
             <strong>{relationshipsQuery.data?.summary.teacher_parent_group_count ?? 0}</strong>
           </article>
           <article className="mini-card">
-            <span>Hoc sinh hoc da GV</span>
+            <span>Học sinh học đa GV</span>
             <strong>{relationshipsQuery.data?.summary.shared_student_count ?? 0}</strong>
           </article>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tao tai khoan giao vien</h3>
+            <h3>Tạo tài khoản giáo viên</h3>
             <form className="form-stack" onSubmit={handleSubmit}>
               <label>
-                Ho ten giao vien
-                <input value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Nguyen Van Giao Vien" />
+                Họ tên giáo viên
+                <input value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Nguyễn Văn Giáo Viên" />
               </label>
               <label>
                 Email
                 <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="teacher@school.edu" />
               </label>
               <label>
-                So dien thoai
+                Số điện thoại
                 <input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="0901234567" />
               </label>
               <label>
-                Mat khau tam thoi
-                <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Nhap mat khau cap cho giao vien" />
+                Mật khẩu tạm thời
+                <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Nhập mật khẩu cấp cho giáo viên" />
               </label>
               <label>
-                Truong hoc
-                <input value={schoolName} onChange={(event) => setSchoolName(event.target.value)} placeholder="Truong Tieu hoc ABC" />
+                Trường học
+                <input value={schoolName} onChange={(event) => setSchoolName(event.target.value)} placeholder="Trường Tiểu học ABC" />
               </label>
               <button className="action-button" type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Dang tao...' : 'Cap tai khoan giao vien'}
+                {createMutation.isPending ? 'Đang tạo...' : 'Cấp tài khoản giáo viên'}
               </button>
               {createMutation.error ? <p className="error-text">{(createMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Danh sach giao vien da cap</h3>
+            <h3>Danh sách giáo viên đã cấp</h3>
             <div className="student-list compact-list">
               {teachersQuery.data?.map((item) => (
                 <div key={item.user.id} className="student-row">
                   <strong>{item.profile?.full_name ?? item.user.email ?? `Teacher #${item.user.id}`}</strong>
-                  <span>{item.user.email ?? item.user.phone ?? 'Khong co dinh danh'} / {item.profile?.school_name ?? 'Chua co truong hoc'}</span>
+                  <span>{item.user.email ?? item.user.phone ?? 'Không có định danh'} / {item.profile?.school_name ?? 'Chưa có trường học'}</span>
                 </div>
               ))}
-              {!teachersQuery.data?.length && !teachersQuery.isLoading ? <p>Chua co giao vien nao duoc cap tai khoan.</p> : null}
+              {!teachersQuery.data?.length && !teachersQuery.isLoading ? <p>Chưa có giáo viên nào được cấp tài khoản.</p> : null}
             </div>
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Tong quan lien ket theo giao vien</h3>
+            <h3>Tổng quan liên kết theo giáo viên</h3>
             <div className="student-list compact-list">
               {relationshipsQuery.data?.teachers.map((item) => (
                 <div key={item.teacher.user.id} className="student-row">
                   <strong>{item.teacher.profile?.full_name ?? item.teacher.user.email ?? `Teacher #${item.teacher.user.id}`}</strong>
-                  <span>{item.teacher.profile?.school_name ?? 'Chua co truong hoc'}</span>
-                  <p>Hoc sinh dang lien ket: {item.student_count}</p>
-                  <p>Nhom phu huynh: {item.parent_group_count}</p>
-                  <p>Hoc sinh dang hoc cung giao vien khac: {item.shared_student_count}</p>
+                  <span>{item.teacher.profile?.school_name ?? 'Chưa có trường học'}</span>
+                  <p>Học sinh đang liên kết: {item.student_count}</p>
+                  <p>Nhóm phụ huynh: {item.parent_group_count}</p>
+                  <p>Học sinh đang học cùng giáo viên khác: {item.shared_student_count}</p>
                 </div>
               ))}
-              {!relationshipsQuery.data?.teachers.length && !relationshipsQuery.isLoading ? <p>Chua co du lieu lien ket nao.</p> : null}
+              {!relationshipsQuery.data?.teachers.length && !relationshipsQuery.isLoading ? <p>Chưa có dữ liệu liên kết nào.</p> : null}
             </div>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Hoc sinh dang hoc voi nhieu giao vien</h3>
+            <h3>Học sinh đang học với nhiều giáo viên</h3>
             <div className="student-list compact-list">
               {relationshipsQuery.data?.shared_students.map((item) => (
                 <div key={item.student.id} className="student-row">
                   <strong>{item.student.full_name}</strong>
                   <span>{item.student.disability_level}</span>
-                  <p>Dang hoc voi: {item.teachers.map((teacher) => teacher.full_name).join(', ')}</p>
+                  <p>Đang học với: {item.teachers.map((teacher) => teacher.full_name).join(', ')}</p>
                 </div>
               ))}
-              {!relationshipsQuery.data?.shared_students.length && !relationshipsQuery.isLoading ? <p>Chua co hoc sinh nao dang hoc voi nhieu giao vien.</p> : null}
+              {!relationshipsQuery.data?.shared_students.length && !relationshipsQuery.isLoading ? <p>Chưa có học sinh nào đang học với nhiều giáo viên.</p> : null}
             </div>
           </article>
         </section>

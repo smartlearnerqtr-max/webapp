@@ -103,34 +103,34 @@ export function ClassesPage() {
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Quan ly lop hoc</h2>
+          <h2>Quản lý lớp học</h2>
           <p>
-            Khi giao vien tao lop, he thong sinh san <strong>ID lop</strong> va <strong>mat khau vao lop</strong>.
-            Hoc sinh co the tu dang nhap vao lop bang hai thong tin nay, con giao vien van co the them hoc sinh thu cong neu can.
+            Khi giáo viên tạo lớp, hệ thống sinh sẵn <strong>ID lớp</strong> và <strong>mật khẩu vào lớp</strong>.
+            Học sinh có thể tự đăng nhập vào lớp bằng hai thông tin này, còn giáo viên vẫn có thể thêm học sinh thủ công nếu cần.
           </p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tao lop moi</h3>
+            <h3>Tạo lớp mới</h3>
             <form className="form-stack" onSubmit={handleSubmit}>
               <label>
-                Ten lop
-                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Lop 6A ho tro" />
+                Tên lớp
+                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Lớp 6A hỗ trợ" />
               </label>
               <label>
-                Khoi lop
+                Khối lớp
                 <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder="6" />
               </label>
               <button className="action-button" type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Dang tao...' : 'Tao lop'}
+                {createMutation.isPending ? 'Đang tạo...' : 'Tạo lớp'}
               </button>
               {createMutation.error ? <p className="error-text">{(createMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chon lop de quan ly</h3>
+            <h3>Chọn lớp để quản lý</h3>
             <div className="tag-wrap">
               {classesQuery.data?.map((classItem) => (
                 <button
@@ -143,40 +143,40 @@ export function ClassesPage() {
                 </button>
               ))}
             </div>
-            {!classesQuery.data?.length && !classesQuery.isLoading ? <p>Chua co lop nao. Tao lop dau tien de bat dau.</p> : null}
+            {!classesQuery.data?.length && !classesQuery.isLoading ? <p>Chưa có lớp nào. Tạo lớp đầu tiên để bắt đầu.</p> : null}
           </article>
         </section>
 
         {selectedClass ? (
           <section className="dashboard-grid">
             <article className="roadmap-panel">
-              <h3>Thong tin vao lop cho hoc sinh</h3>
+              <h3>Thông tin vào lớp cho học sinh</h3>
               <div className="metrics-grid">
                 <div className="mini-card">
-                  <span>ID lop</span>
+                  <span>ID lớp</span>
                   <strong>{selectedClass.id}</strong>
                 </div>
                 <div className="mini-card">
-                  <span>Mat khau vao lop</span>
-                  <strong>{selectedClass.join_credential?.class_password ?? 'Dang cap nhat'}</strong>
+                  <span>Mật khẩu vào lớp</span>
+                  <strong>{selectedClass.join_credential?.class_password ?? 'Đang cập nhật'}</strong>
                 </div>
                 <div className="mini-card">
-                  <span>Giao vien</span>
+                  <span>Giáo viên</span>
                   <strong>{selectedClass.teacher_id}</strong>
                 </div>
               </div>
-              <p>Gui ID lop va mat khau nay cho hoc sinh de cac em tu vao lop tu trang hoc sinh.</p>
+              <p>Gửi ID lớp và mật khẩu này cho học sinh để các em tự vào lớp từ trang học sinh.</p>
             </article>
 
             <article className="roadmap-panel">
-              <h3>Tong quan lop dang chon</h3>
+              <h3>Tổng quan lớp đang chọn</h3>
               <div className="detail-stack">
                 <div className="student-row">
                   <strong>{selectedClass.name}</strong>
-                  <span>{selectedClass.grade_label ? `Khoi ${selectedClass.grade_label}` : 'Chua gan khoi'}</span>
+                  <span>{selectedClass.grade_label ? `Khối ${selectedClass.grade_label}` : 'Chưa gắn khối'}</span>
                 </div>
-                <p>Trang thai: {selectedClass.status}</p>
-                <p>{selectedClass.student_count} hoc sinh, {selectedClass.subject_count} mon hoc.</p>
+                <p>Trạng thái: {selectedClass.status}</p>
+                <p>{selectedClass.student_count} học sinh, {selectedClass.subject_count} môn học.</p>
               </div>
             </article>
           </section>
@@ -184,19 +184,19 @@ export function ClassesPage() {
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Them hoc sinh vao lop</h3>
+            <h3>Thêm học sinh vào lớp</h3>
             <div className="form-stack">
               <label>
-                Hoc sinh chua nam trong lop
+                Học sinh chưa nằm trong lớp
                 <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)} disabled={!resolvedSelectedClassId}>
-                  <option value="">Chon hoc sinh</option>
+                  <option value="">Chọn học sinh</option>
                   {availableStudents.map((student) => (
                     <option key={student.id} value={student.id}>{student.full_name} - {student.disability_level}</option>
                   ))}
                 </select>
               </label>
               <button className="action-button" type="button" disabled={!resolvedSelectedClassId || !selectedStudentId || addStudentMutation.isPending} onClick={() => addStudentMutation.mutate()}>
-                {addStudentMutation.isPending ? 'Dang them...' : 'Them vao lop'}
+                {addStudentMutation.isPending ? 'Đang thêm...' : 'Thêm vào lớp'}
               </button>
               {addStudentMutation.error ? <p className="error-text">{(addStudentMutation.error as Error).message}</p> : null}
             </div>
@@ -204,37 +204,37 @@ export function ClassesPage() {
             <div className="student-list compact-list">
               {classStudentsQuery.data?.map((item) => (
                 <div key={item.id} className="student-row">
-                  <strong>{item.student?.full_name ?? `Hoc sinh #${item.student_id}`}</strong>
-                  <span>{item.student?.preferred_input ?? 'touch'} / {item.student?.disability_level ?? 'khong ro'}</span>
+                  <strong>{item.student?.full_name ?? `Học sinh #${item.student_id}`}</strong>
+                  <span>{item.student?.preferred_input ?? 'touch'} / {item.student?.disability_level ?? 'không rõ'}</span>
                 </div>
               ))}
-              {resolvedSelectedClassId && !classStudentsQuery.data?.length && !classStudentsQuery.isLoading ? <p>Lop nay chua co hoc sinh nao.</p> : null}
+              {resolvedSelectedClassId && !classStudentsQuery.data?.length && !classStudentsQuery.isLoading ? <p>Lớp này chưa có học sinh nào.</p> : null}
             </div>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Gan mon hoc cho lop</h3>
+            <h3>Gắn môn học cho lớp</h3>
             <div className="form-stack">
               <label>
-                Mon hoc chua gan
+                Môn học chưa gắn
                 <select value={selectedSubjectId} onChange={(event) => setSelectedSubjectId(event.target.value)} disabled={!resolvedSelectedClassId}>
-                  <option value="">Chon mon hoc</option>
+                  <option value="">Chọn môn học</option>
                   {availableSubjects.map((subject) => (
                     <option key={subject.id} value={subject.id}>{subject.name}</option>
                   ))}
                 </select>
               </label>
               <button className="action-button" type="button" disabled={!resolvedSelectedClassId || !selectedSubjectId || addSubjectMutation.isPending} onClick={() => addSubjectMutation.mutate()}>
-                {addSubjectMutation.isPending ? 'Dang gan...' : 'Gan mon hoc'}
+                {addSubjectMutation.isPending ? 'Đang gắn...' : 'Gắn môn học'}
               </button>
               {addSubjectMutation.error ? <p className="error-text">{(addSubjectMutation.error as Error).message}</p> : null}
             </div>
 
             <div className="tag-wrap">
               {classSubjectsQuery.data?.map((item) => (
-                <span key={item.id} className="subject-pill">{item.subject?.name ?? `Mon #${item.subject_id}`}</span>
+                <span key={item.id} className="subject-pill">{item.subject?.name ?? `Môn #${item.subject_id}`}</span>
               ))}
-              {resolvedSelectedClassId && !classSubjectsQuery.data?.length && !classSubjectsQuery.isLoading ? <p>Lop nay chua co mon hoc nao.</p> : null}
+              {resolvedSelectedClassId && !classSubjectsQuery.data?.length && !classSubjectsQuery.isLoading ? <p>Lớp này chưa có môn học nào.</p> : null}
             </div>
           </article>
         </section>
@@ -242,10 +242,10 @@ export function ClassesPage() {
         <section className="card-grid classes-grid">
           {classesQuery.data?.map((classItem) => (
             <article key={classItem.id} className="info-card">
-              <span>{classItem.grade_label ? `Khoi ${classItem.grade_label}` : 'Lop hoc'}</span>
+              <span>{classItem.grade_label ? `Khối ${classItem.grade_label}` : 'Lớp học'}</span>
               <strong>{classItem.name}</strong>
-              <p>ID {classItem.id} | mat khau {classItem.join_credential?.class_password ?? 'dang cap nhat'}</p>
-              <p>{classItem.student_count} hoc sinh, {classItem.subject_count} mon hoc</p>
+              <p>ID {classItem.id} | mật khẩu {classItem.join_credential?.class_password ?? 'đang cập nhật'}</p>
+              <p>{classItem.student_count} học sinh, {classItem.subject_count} môn học</p>
             </article>
           ))}
         </section>

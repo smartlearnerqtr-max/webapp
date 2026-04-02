@@ -15,11 +15,11 @@ export function RequireAuth({ children, allowedRoles }: RequireAuthProps) {
   if (!user) {
     return (
       <section className="placeholder-panel">
-        <p className="eyebrow">Can dang nhap</p>
-        <h2>Hay dang nhap de tiep tuc</h2>
-        <p>He thong se dua ban vao dung khu vuc theo vai tro giao vien, hoc sinh hoac phu huynh.</p>
+        <p className="eyebrow">Cần đăng nhập</p>
+        <h2>Hãy đăng nhập để tiếp tục</h2>
+        <p>Hệ thống sẽ đưa bạn vào đúng khu vực theo vai trò giáo viên, học sinh hoặc phụ huynh.</p>
         <Link className="action-button" to="/">
-          Ve trang dang nhap
+          Về trang đăng nhập
         </Link>
       </section>
     )

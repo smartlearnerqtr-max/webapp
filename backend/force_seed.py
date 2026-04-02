@@ -25,8 +25,8 @@ def force_seed():
         
         # 2. Teachers
         teachers_data = [
-            {"email": "co_lan@example.com", "name": "Co Lan", "school": "Truong Tieu Hoc A"},
-            {"email": "co_mai@example.com", "name": "Co Mai", "school": "Truong Tieu Hoc B"}
+            {"email": "co_lan@example.com", "name": "Cô Lan", "school": "Trường Tiểu Học A"},
+            {"email": "co_mai@example.com", "name": "Cô Mai", "school": "Trường Tiểu Học B"}
         ]
         teachers = []
         for data in teachers_data:
@@ -43,13 +43,13 @@ def force_seed():
         
         # 3. Students & Parents (10 each)
         for t_idx, teacher in enumerate(teachers):
-            classroom = Classroom(teacher_id=teacher.id, name=f"Lop co {teacher.full_name}", grade_label="1")
+            classroom = Classroom(teacher_id=teacher.id, name=f"Lớp cô {teacher.full_name}", grade_label="1")
             db.session.add(classroom); db.session.flush()
             for sub in subjects:
                 db.session.add(ClassSubject(class_id=classroom.id, subject_id=sub.id, is_active=True))
             
             for i in range(1, 11):
-                s_name = f"Hoc sinh {i} ({teacher.full_name})"
+                s_name = f"Học sinh {i} ({teacher.full_name})"
                 student = StudentProfile(full_name=s_name, disability_level="nhe", created_by_teacher_id=teacher.id)
                 db.session.add(student); db.session.flush()
                 db.session.add(ClassStudent(class_id=classroom.id, student_id=student.id))
@@ -57,7 +57,7 @@ def force_seed():
                 p_email = f"phu_huynh_{t_idx}_{i}@example.com"
                 p_user = User(email=p_email, password_hash="...", role="parent")
                 db.session.add(p_user); db.session.flush()
-                p_profile = ParentProfile(user_id=p_user.id, full_name=f"Phu huynh {s_name}")
+                p_profile = ParentProfile(user_id=p_user.id, full_name=f"Phụ huynh {s_name}")
                 db.session.add(p_profile); db.session.flush()
                 db.session.add(ParentStudentLink(parent_id=p_profile.id, student_id=student.id, linked_by_teacher_id=teacher.id))
         

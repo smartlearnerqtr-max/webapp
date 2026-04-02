@@ -17,8 +17,8 @@ export function LogsPage() {
       <div className="page-stack">
         <section className="roadmap-panel">
           <p className="eyebrow">Task 39 + 40</p>
-          <h2>Log ky thuat backend</h2>
-          <p>Cac hanh dong nhu dang nhap, tao lop, tao hoc sinh va luu AI settings se bat dau xuat hien o day.</p>
+          <h2>Log kỹ thuật backend</h2>
+          <p>Các hành động như đăng nhập, tạo lớp, tạo học sinh và lưu AI settings sẽ bắt đầu xuất hiện ở đây.</p>
         </section>
 
         <section className="roadmap-panel">
@@ -30,7 +30,7 @@ export function LogsPage() {
                 <p>{log.message}</p>
               </div>
             ))}
-            {!logsQuery.data?.length && !logsQuery.isLoading ? <p>Chua co log nao duoc ghi.</p> : null}
+            {!logsQuery.data?.length && !logsQuery.isLoading ? <p>Chưa có log nào được ghi.</p> : null}
           </div>
         </section>
       </div>

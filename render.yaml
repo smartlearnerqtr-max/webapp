@@ -5,7 +5,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    preDeployCommand: python -c "from run import app, init_db; init_db(); ctx=app.app_context(); ctx.push(); from app.services.seed_service import seed_subjects, seed_admin_user; seed_subjects(); seed_admin_user(); ctx.pop()"
+    preDeployCommand: python init_and_seed.py
     startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
     healthCheckPath: /api/v1/health
     envVars:

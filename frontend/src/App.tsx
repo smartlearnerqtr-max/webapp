@@ -21,19 +21,19 @@ const navItemsByRole: Record<string, Array<{ to: string; label: string }>> = {
     { to: '/admin', label: 'Trang admin' },
   ],
   teacher: [
-    { to: '/giao-vien', label: 'Trang giao vien' },
-    { to: '/hoc-sinh', label: 'Hoc sinh' },
-    { to: '/lop-hoc', label: 'Lop hoc' },
-    { to: '/bai-hoc', label: 'Bai hoc' },
-    { to: '/giao-bai', label: 'Giao bai' },
-    { to: '/tien-do', label: 'Tien do' },
-    { to: '/cai-dat-ai', label: 'Cai dat AI' },
+    { to: '/giao-vien', label: 'Trang giáo viên' },
+    { to: '/hoc-sinh', label: 'Học sinh' },
+    { to: '/lop-hoc', label: 'Lớp học' },
+    { to: '/bai-hoc', label: 'Bài học' },
+    { to: '/giao-bai', label: 'Giao bài' },
+    { to: '/tien-do', label: 'Tiến độ' },
+    { to: '/cai-dat-ai', label: 'Cài đặt AI' },
   ],
   student: [
-    { to: '/hoc-tap', label: 'Trang hoc sinh' },
+    { to: '/hoc-tap', label: 'Trang học sinh' },
   ],
   parent: [
-    { to: '/phu-huynh', label: 'Trang phu huynh' },
+    { to: '/phu-huynh', label: 'Trang phụ huynh' },
   ],
 }
 
@@ -50,10 +50,10 @@ function App() {
 
   const navItems = useMemo(() => {
     if (!user) {
-      return [{ to: '/', label: 'Dang nhap / dang ky' }]
+      return [{ to: '/', label: 'Đăng nhập / đăng ký' }]
     }
 
-    return navItemsByRole[user.role] ?? [{ to: getDefaultRouteForRole(user.role), label: 'Trang cua toi' }]
+    return navItemsByRole[user.role] ?? [{ to: getDefaultRouteForRole(user.role), label: 'Trang của tôi' }]
   }, [user])
 
   function handleLogout() {
@@ -79,18 +79,18 @@ function App() {
 
       <aside className={`sidebar ${isMenuOpen ? 'sidebar-open' : ''}`}>
         <div>
-          <p className="eyebrow">Ban hoc thong minh</p>
-          <h2 style={{ margin: '0.5rem 0 0 0', fontSize: '1.5rem' }}>He thong ho tro hoc tap</h2>
+          <p className="eyebrow">Bạn học thông minh</p>
+          <h2 style={{ margin: '0.5rem 0 0 0', fontSize: '1.5rem' }}>Hệ thống hỗ trợ học tập</h2>
           <p className="sidebar-copy">
-            {user?.role === 'admin' && 'Khong gian admin: chi dung de cap tai khoan giao vien.'}
-            {user?.role === 'teacher' && 'Khong gian dieu phoi danh cho giao vien: quan ly hoc sinh, bai hoc va assignment.'}
-            {user?.role === 'student' && 'Khong gian hoc sinh: xem bai duoc giao va theo doi tien do hoc tap cua minh.'}
-            {user?.role === 'parent' && 'Khong gian phu huynh: theo doi tien do hoc tap va tinh hinh hoc cua con.'}
-            {!user && 'Hoc sinh va phu huynh co the tu dang ky. Giao vien duoc admin cap tai khoan rieng.'}
+            {user?.role === 'admin' && 'Không gian admin: chỉ dùng để cấp tài khoản giáo viên.'}
+            {user?.role === 'teacher' && 'Không gian điều phối dành cho giáo viên: quản lý học sinh, bài học và assignment.'}
+            {user?.role === 'student' && 'Không gian học sinh: xem bài được giao và theo dõi tiến độ học tập của mình.'}
+            {user?.role === 'parent' && 'Không gian phụ huynh: theo dõi tiến độ học tập và tình hình học của con.'}
+            {!user && 'Học sinh và phụ huynh có thể tự đăng ký. Giáo viên được admin cấp tài khoản riêng.'}
           </p>
         </div>
 
-        <nav className="nav-list" aria-label="Dieu huong chinh">
+        <nav className="nav-list" aria-label="Điều hướng chính">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -104,11 +104,11 @@ function App() {
         </nav>
 
         <div className="sidebar-card">
-          <span className="sidebar-card-label">Trang thai</span>
-          <strong>{user ? `${user.email ?? user.phone} (${user.role})` : 'Chua dang nhap'}</strong>
+          <span className="sidebar-card-label">Trạng thái</span>
+          <strong>{user ? `${user.email ?? user.phone} (${user.role})` : 'Chưa đăng nhập'}</strong>
           {user ? (
             <button className="ghost-button" type="button" onClick={handleLogout} style={{ marginTop: '0.75rem', width: '100%' }}>
-              Dang xuat
+              Đăng xuất
             </button>
           ) : null}
         </div>

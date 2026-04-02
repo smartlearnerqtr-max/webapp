@@ -7,12 +7,12 @@ import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
 const quickLinks = [
-  { to: '/hoc-sinh', title: 'Quan ly ho so hoc sinh', description: 'Xem va bo sung ho so hoc sinh phuc vu cho qua trinh day hoc.' },
-  { to: '/lop-hoc', title: 'Quan ly lop hoc', description: 'Tao lop, lay ID lop va mat khau, gan mon hoc va theo doi hoc sinh vao lop.' },
-  { to: '/bai-hoc', title: 'Xay dung bai hoc', description: 'Tao bai hoc, activity va cau hinh voice learning.' },
-  { to: '/giao-bai', title: 'Giao bai', description: 'Giao bai cho lop va theo doi assignment dang hoat dong.' },
-  { to: '/tien-do', title: 'Tien do', description: 'Xem readiness va quyet dinh co nen tang do kho hay khong.' },
-  { to: '/cai-dat-ai', title: 'Cai dat AI', description: 'Luu Gemini key va test tro ly AI cho bai hoc.' },
+  { to: '/hoc-sinh', title: 'Quản lý hồ sơ học sinh', description: 'Xem và bổ sung hồ sơ học sinh phục vụ cho quá trình dạy học.' },
+  { to: '/lop-hoc', title: 'Quản lý lớp học', description: 'Tạo lớp, lấy ID lớp và mật khẩu, gắn môn học và theo dõi học sinh vào lớp.' },
+  { to: '/bai-hoc', title: 'Xây dựng bài học', description: 'Tạo bài học, hoạt động và cấu hình voice learning.' },
+  { to: '/giao-bai', title: 'Giao bài', description: 'Giao bài cho lớp và theo dõi assignment đang hoạt động.' },
+  { to: '/tien-do', title: 'Tiến độ', description: 'Xem readiness và quyết định có nên tăng độ khó hay không.' },
+  { to: '/cai-dat-ai', title: 'Cài đặt AI', description: 'Lưu Gemini key và test trợ lý AI cho bài học.' },
 ]
 
 export function TeacherHomePage() {
@@ -108,11 +108,11 @@ export function TeacherHomePage() {
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Khong gian giao vien</p>
-          <h2>Trung tam dieu hanh lop hoc va phu huynh</h2>
+          <p className="eyebrow">Không gian giáo viên</p>
+          <h2>Trung tâm điều hành lớp học và phụ huynh</h2>
           <p>
-            Tai khoan giao vien do admin cap. Sau khi tao lop, giao vien gui <strong>ID lop</strong> va <strong>mat khau</strong> cho hoc sinh tu vao lop.
-            Phu huynh co the tim giao vien qua <strong>teacher ID</strong>, giao vien chu dong them phu huynh vao nhom cua tung hoc sinh va gui bao cao hang ngay chi trong mot nut bam.
+            Tài khoản giáo viên do admin cấp. Sau khi tạo lớp, giáo viên gửi <strong>ID lớp</strong> và <strong>mật khẩu</strong> cho học sinh tự vào lớp.
+            Phụ huynh có thể tìm giáo viên qua <strong>teacher ID</strong>, giáo viên chủ động thêm phụ huynh vào nhóm của từng học sinh và gửi báo cáo hàng ngày chỉ trong một nút bấm.
           </p>
         </section>
 
@@ -122,50 +122,50 @@ export function TeacherHomePage() {
             <strong>{teacherId ?? '---'}</strong>
           </article>
           <article className="mini-card">
-            <span>Hoc sinh dang quan ly</span>
+            <span>Học sinh đang quản lý</span>
             <strong>{studentCount}</strong>
           </article>
           <article className="mini-card">
-            <span>Lien ket phu huynh</span>
+            <span>Liên kết phụ huynh</span>
             <strong>{parentGroupCount}</strong>
           </article>
           <article className="mini-card">
-            <span>Bao cao da gui</span>
+            <span>Báo cáo đã gửi</span>
             <strong>{reportCount}</strong>
           </article>
           <article className="mini-card">
-            <span>Hoc sinh hoc da GV</span>
+            <span>Học sinh học đa GV</span>
             <strong>{sharedStudentCount}</strong>
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Huong dan phoi hop</h3>
+            <h3>Hướng dẫn phối hợp</h3>
             <div className="detail-stack">
-              <p>1. Tao lop trong muc Lop hoc de lay ID lop va mat khau cho hoc sinh.</p>
-              <p>2. Yeu cau phu huynh gui cho giao vien parent ID cua tai khoan da dang ky.</p>
-              <p>3. Chon hoc sinh va phu huynh o day de dua phu huynh vao dung nhom theo doi.</p>
-              <p>4. Gui bao cao tung hoc sinh hoac gui tat ca phu huynh vao cuoi ngay.</p>
+              <p>1. Tạo lớp trong mục Lớp học để lấy ID lớp và mật khẩu cho học sinh.</p>
+              <p>2. Yêu cầu phụ huynh gửi cho giáo viên parent ID của tài khoản đã đăng ký.</p>
+              <p>3. Chọn học sinh và phụ huynh ở đây để đưa phụ huynh vào đúng nhóm theo dõi.</p>
+              <p>4. Gửi báo cáo từng học sinh hoặc gửi tất cả phụ huynh vào cuối ngày.</p>
             </div>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Gan phu huynh vao hoc sinh</h3>
+            <h3>Gắn phụ huynh vào học sinh</h3>
             <div className="form-stack">
               <label>
-                Hoc sinh
+                Học sinh
                 <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)}>
-                  <option value="">Chon hoc sinh</option>
+                  <option value="">Chọn học sinh</option>
                   {(studentsQuery.data ?? []).map((student) => (
                     <option key={student.id} value={student.id}>{student.full_name} - ID {student.id}</option>
                   ))}
                 </select>
               </label>
               <label>
-                Phu huynh
+                Phụ huynh
                 <select value={selectedParentId} onChange={(event) => setSelectedParentId(event.target.value)} disabled={!selectedStudentId}>
-                  <option value="">Chon phu huynh</option>
+                  <option value="">Chọn phụ huynh</option>
                   {availableParents.map((parent) => (
                     <option key={parent.id} value={parent.id}>
                       {parent.full_name} - ID {parent.id} {parent.email ? `- ${parent.email}` : ''}
@@ -174,12 +174,12 @@ export function TeacherHomePage() {
                 </select>
               </label>
               <button className="action-button" type="button" disabled={!selectedStudentId || !selectedParentId || linkMutation.isPending} onClick={() => linkMutation.mutate()}>
-                {linkMutation.isPending ? 'Dang lien ket...' : 'Them vao nhom phu huynh'}
+                {linkMutation.isPending ? 'Đang liên kết...' : 'Thêm vào nhóm phụ huynh'}
               </button>
               {selectedSharedStudent ? (
                 <div className="detail-stack">
-                  <p>Hoc sinh nay dang hoc voi {selectedSharedStudent.teachers.length} giao vien.</p>
-                  <p>Giao vien khac: {selectedSharedStudent.peer_teachers.map((teacher) => teacher.full_name).join(', ') || 'Khong co'}</p>
+                  <p>Học sinh này đang học với {selectedSharedStudent.teachers.length} giáo viên.</p>
+                  <p>Giáo viên khác: {selectedSharedStudent.peer_teachers.map((teacher) => teacher.full_name).join(', ') || 'Không có'}</p>
                 </div>
               ) : null}
               {linkMutation.error ? <p className="error-text">{(linkMutation.error as Error).message}</p> : null}
@@ -189,7 +189,7 @@ export function TeacherHomePage() {
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Hoc sinh dang hoc voi nhieu giao vien</h3>
+            <h3>Học sinh đang học với nhiều giáo viên</h3>
             <div className="student-list compact-list">
               {(sharedStudentsQuery.data ?? []).map((item) => (
                 <button
@@ -199,57 +199,57 @@ export function TeacherHomePage() {
                   onClick={() => setSelectedStudentId(String(item.student.id))}
                 >
                   <strong>{item.student.full_name}</strong>
-                  <span>{item.student.disability_level} | Lop voi minh: {item.my_active_class_count}</span>
-                  <p>Phu huynh da vao nhom voi minh: {item.parent_group_count}</p>
-                  <p>Dang hoc cung: {item.peer_teachers.map((teacher) => teacher.full_name).join(', ')}</p>
+                  <span>{item.student.disability_level} | Lớp với mình: {item.my_active_class_count}</span>
+                  <p>Phụ huynh đã vào nhóm với mình: {item.parent_group_count}</p>
+                  <p>Đang học cùng: {item.peer_teachers.map((teacher) => teacher.full_name).join(', ')}</p>
                 </button>
               ))}
-              {!sharedStudentsQuery.data?.length && !sharedStudentsQuery.isLoading ? <p>Chua co hoc sinh nao hoc cung giao vien khac.</p> : null}
+              {!sharedStudentsQuery.data?.length && !sharedStudentsQuery.isLoading ? <p>Chưa có học sinh nào học cùng giáo viên khác.</p> : null}
             </div>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Phoi hop theo hoc sinh dang chon</h3>
+            <h3>Phối hợp theo học sinh đang chọn</h3>
             {selectedSharedStudent ? (
               <div className="detail-stack">
                 <div className="student-row">
                   <strong>{selectedSharedStudent.student.full_name}</strong>
-                  <span>Co {selectedSharedStudent.teachers.length} giao vien dang lien ket</span>
+                  <span>Có {selectedSharedStudent.teachers.length} giáo viên đang liên kết</span>
                 </div>
                 {selectedSharedStudent.teachers.map((teacher) => (
                   <div key={teacher.id} className="student-row">
                     <strong>{teacher.full_name}</strong>
-                    <span>{teacher.is_current_teacher ? 'Giao vien hien tai' : 'Giao vien phoi hop'}</span>
-                    <p>{teacher.school_name ?? 'Chua cap nhat truong'} | {teacher.email ?? teacher.phone ?? 'Chua co lien he'}</p>
+                    <span>{teacher.is_current_teacher ? 'Giáo viên hiện tại' : 'Giáo viên phối hợp'}</span>
+                    <p>{teacher.school_name ?? 'Chưa cập nhật trường'} | {teacher.email ?? teacher.phone ?? 'Chưa có liên hệ'}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p>Chon mot hoc sinh trong danh sach ben trai de xem giao vien phoi hop.</p>
+              <p>Chọn một học sinh trong danh sách bên trái để xem giáo viên phối hợp.</p>
             )}
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Gui bao cao hoc tap</h3>
+            <h3>Gửi báo cáo học tập</h3>
             <div className="form-stack">
               <label>
-                Gui theo hoc sinh (bo trong de gui tat ca)
+                Gửi theo học sinh (bỏ trống để gửi tất cả)
                 <select value={reportStudentId} onChange={(event) => setReportStudentId(event.target.value)}>
-                  <option value="">Tat ca phu huynh dang lien ket</option>
+                  <option value="">Tất cả phụ huynh đang liên kết</option>
                   {(studentsQuery.data ?? []).map((student) => (
                     <option key={student.id} value={student.id}>{student.full_name}</option>
                   ))}
                 </select>
               </label>
               <label>
-                Tieu de bao cao
-                <input value={reportTitle} onChange={(event) => setReportTitle(event.target.value)} placeholder="Bo trong de dung tieu de mac dinh theo ngay" />
+                Tiêu đề báo cáo
+                <input value={reportTitle} onChange={(event) => setReportTitle(event.target.value)} placeholder="Bỏ trống để dùng tiêu đề mặc định theo ngày" />
               </label>
               <label>
-                Ghi chu giao vien
-                <textarea value={reportNote} onChange={(event) => setReportNote(event.target.value)} rows={4} placeholder="Vi du: Hom nay con tap trung tot hon va can nhac them khi doc cham." />
+                Ghi chú giáo viên
+                <textarea value={reportNote} onChange={(event) => setReportNote(event.target.value)} rows={4} placeholder="Ví dụ: Hôm nay con tập trung tốt hơn và cân nhắc thêm khi đọc chậm." />
               </label>
               <div className="button-row">
                 <button
@@ -258,7 +258,7 @@ export function TeacherHomePage() {
                   disabled={reportMutation.isPending || !parentGroupCount}
                   onClick={() => reportMutation.mutate(reportStudentId ? Number(reportStudentId) : undefined)}
                 >
-                  {reportMutation.isPending ? 'Dang gui...' : reportStudentId ? 'Gui bao cao hoc sinh da chon' : 'Gui bao cao tat ca'}
+                  {reportMutation.isPending ? 'Đang gửi...' : reportStudentId ? 'Gửi báo cáo học sinh đã chọn' : 'Gửi báo cáo tất cả'}
                 </button>
                 <button
                   className="ghost-button"
@@ -269,7 +269,7 @@ export function TeacherHomePage() {
                     reportMutation.mutate(undefined)
                   }}
                 >
-                  Gui cho toan bo phu huynh
+                  Gửi cho toàn bộ phụ huynh
                 </button>
               </div>
               {reportMutation.error ? <p className="error-text">{(reportMutation.error as Error).message}</p> : null}
@@ -277,47 +277,47 @@ export function TeacherHomePage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Nhom phu huynh dang theo doi</h3>
+            <h3>Nhóm phụ huynh đang theo dõi</h3>
             <div className="student-list compact-list">
               {(parentGroupsQuery.data ?? []).map((item) => (
                 <div key={item.link_id} className="student-row">
-                  <strong>{item.student?.full_name ?? 'Hoc sinh'}</strong>
-                  <span>{item.parent?.full_name ?? 'Phu huynh'} - parent ID {item.parent?.id ?? '---'}</span>
-                  <p>Tien do gan nhat: {item.progress_summary.last_progress_percent}% | readiness: {item.progress_summary.readiness_status}</p>
-                  <p>Lop: {item.classes.map((classroom) => classroom.name).join(', ') || 'Chua vao lop nao'}</p>
-                  <p>Bao cao cuoi: {item.latest_report?.report_date ?? 'Chua gui'}</p>
+                  <strong>{item.student?.full_name ?? 'Học sinh'}</strong>
+                  <span>{item.parent?.full_name ?? 'Phụ huynh'} - parent ID {item.parent?.id ?? '---'}</span>
+                  <p>Tiến độ gần nhất: {item.progress_summary.last_progress_percent}% | readiness: {item.progress_summary.readiness_status}</p>
+                  <p>Lớp: {item.classes.map((classroom) => classroom.name).join(', ') || 'Chưa vào lớp nào'}</p>
+                  <p>Báo cáo cuối: {item.latest_report?.report_date ?? 'Chưa gửi'}</p>
                 </div>
               ))}
-              {!parentGroupsQuery.data?.length && !parentGroupsQuery.isLoading ? <p>Chua co lien ket phu huynh nao.</p> : null}
+              {!parentGroupsQuery.data?.length && !parentGroupsQuery.isLoading ? <p>Chưa có liên kết phụ huynh nào.</p> : null}
             </div>
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Lich su gui bao cao</h3>
+            <h3>Lịch sử gửi báo cáo</h3>
             <div className="student-list compact-list">
               {(reportsQuery.data ?? []).map((report) => (
                 <div key={report.id} className="student-row">
-                  <strong>{report.student?.full_name ?? `Hoc sinh #${report.student_id}`}</strong>
-                  <span>{report.report_date} - {report.parent?.full_name ?? `Phu huynh #${report.parent_id}`}</span>
+                  <strong>{report.student?.full_name ?? `Học sinh #${report.student_id}`}</strong>
+                  <span>{report.report_date} - {report.parent?.full_name ?? `Phụ huynh #${report.parent_id}`}</span>
                   <p>{report.summary_text}</p>
-                  {report.teacher_note ? <p>Ghi chu: {report.teacher_note}</p> : null}
+                  {report.teacher_note ? <p>Ghi chú: {report.teacher_note}</p> : null}
                 </div>
               ))}
-              {!reportsQuery.data?.length && !reportsQuery.isLoading ? <p>Chua co bao cao nao duoc gui.</p> : null}
+              {!reportsQuery.data?.length && !reportsQuery.isLoading ? <p>Chưa có báo cáo nào được gửi.</p> : null}
             </div>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Dieu huong nhanh</h3>
+            <h3>Điều hướng nhanh</h3>
             <div className="detail-stack">
               {quickLinks.map((item) => (
                 <div key={item.to} className="student-row">
                   <strong>{item.title}</strong>
                   <span>{item.description}</span>
                   <Link className="action-button" to={item.to}>
-                    Mo chuc nang
+                    Mở chức năng
                   </Link>
                 </div>
               ))}

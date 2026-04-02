@@ -57,7 +57,7 @@ export function HomePage() {
       })
       navigate(getDefaultRouteForRole(payload.user.role), { replace: true })
     } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : 'Dang nhap that bai')
+      setError(submissionError instanceof Error ? submissionError.message : 'Đăng nhập thất bại')
     } finally {
       setSubmitState('idle')
     }
@@ -85,7 +85,7 @@ export function HomePage() {
       })
       navigate(getDefaultRouteForRole(payload.user.role), { replace: true })
     } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : 'Dang ky that bai')
+      setError(submissionError instanceof Error ? submissionError.message : 'Đăng ký thất bại')
     } finally {
       setSubmitState('idle')
     }
@@ -95,36 +95,36 @@ export function HomePage() {
     <div className="page-stack">
       <section className="auth-layout">
         <article className="roadmap-panel">
-          <p className="eyebrow">Tai khoan</p>
-          <h3>Dang nhap va dang ky</h3>
-          <p>Hoc sinh va phu huynh co the tu tao tai khoan. Giao vien chi dang nhap bang tai khoan do admin cap. Admin dung tai khoan bootstrap de cap giao vien moi.</p>
+          <p className="eyebrow">Tài khoản</p>
+          <h3>Đăng nhập và đăng ký</h3>
+          <p>Học sinh và phụ huynh có thể tự tạo tài khoản. Giáo viên chỉ đăng nhập bằng tài khoản do admin cấp. Admin dùng tài khoản bootstrap để cấp giáo viên mới.</p>
 
           <div className="button-row">
             <button className={mode === 'login' ? 'action-button' : 'ghost-button'} type="button" onClick={() => setMode('login')}>
-              Dang nhap
+              Đăng nhập
             </button>
             <button className={mode === 'register' ? 'action-button' : 'ghost-button'} type="button" onClick={() => setMode('register')}>
-              Dang ky
+              Đăng ký
             </button>
           </div>
 
           {mode === 'login' ? (
             <form className="form-stack" onSubmit={handleLoginSubmit} style={{ marginTop: '1rem' }}>
               <label>
-                Email hoac so dien thoai
-                <input value={identity} onChange={(event) => setIdentity(event.target.value)} placeholder="Nhap email hoac so dien thoai" />
+                Email hoặc số điện thoại
+                <input value={identity} onChange={(event) => setIdentity(event.target.value)} placeholder="Nhập email hoặc số điện thoại" />
               </label>
               <label>
-                Mat khau
-                <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Nhap mat khau" />
+                Mật khẩu
+                <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Nhập mật khẩu" />
               </label>
               <div className="button-row">
                 <button className="action-button" type="submit" disabled={submitState === 'submitting'}>
-                  {submitState === 'submitting' ? 'Dang xu ly...' : 'Dang nhap'}
+                  {submitState === 'submitting' ? 'Đang xử lý...' : 'Đăng nhập'}
                 </button>
                 {user ? (
                   <button className="ghost-button" type="button" onClick={clearSession}>
-                    Dang xuat
+                    Đăng xuất
                   </button>
                 ) : null}
               </div>
@@ -132,46 +132,46 @@ export function HomePage() {
           ) : (
             <form className="form-stack" onSubmit={handleRegisterSubmit} style={{ marginTop: '1rem' }}>
               <label>
-                Vai tro tu dang ky
+                Vai trò tự đăng ký
                 <select value={registerRole} onChange={(event) => setRegisterRole(event.target.value as RegisterRole)}>
-                  <option value="student">Hoc sinh</option>
-                  <option value="parent">Phu huynh</option>
+                  <option value="student">Học sinh</option>
+                  <option value="parent">Phụ huynh</option>
                 </select>
               </label>
               <label>
-                Ho ten
-                <input value={registerName} onChange={(event) => setRegisterName(event.target.value)} placeholder="Nhap ho ten" />
+                Họ tên
+                <input value={registerName} onChange={(event) => setRegisterName(event.target.value)} placeholder="Nhập họ tên" />
               </label>
               <label>
                 Email
-                <input value={registerEmail} onChange={(event) => setRegisterEmail(event.target.value)} placeholder="co the de trong neu dung so dien thoai" />
+                <input value={registerEmail} onChange={(event) => setRegisterEmail(event.target.value)} placeholder="có thể để trống nếu dùng số điện thoại" />
               </label>
               <label>
-                So dien thoai
-                <input value={registerPhone} onChange={(event) => setRegisterPhone(event.target.value)} placeholder="co the de trong neu dung email" />
+                Số điện thoại
+                <input value={registerPhone} onChange={(event) => setRegisterPhone(event.target.value)} placeholder="có thể để trống nếu dùng email" />
               </label>
               <label>
-                Mat khau
-                <input type="password" value={registerPassword} onChange={(event) => setRegisterPassword(event.target.value)} placeholder="Tu dat mat khau" />
+                Mật khẩu
+                <input type="password" value={registerPassword} onChange={(event) => setRegisterPassword(event.target.value)} placeholder="Tự đặt mật khẩu" />
               </label>
               {registerRole === 'student' ? (
                 <label>
-                  Muc do khuyet tat
+                  Mức độ khuyết tật
                   <select value={registerDisabilityLevel} onChange={(event) => setRegisterDisabilityLevel(event.target.value)}>
-                    <option value="nhe">Nhe</option>
-                    <option value="trung_binh">Trung binh</option>
-                    <option value="nang">Nang</option>
+                    <option value="nhe">Nhẹ</option>
+                    <option value="trung_binh">Trung bình</option>
+                    <option value="nang">Nặng</option>
                   </select>
                 </label>
               ) : null}
               {registerRole === 'parent' ? (
                 <label>
-                  Moi quan he
-                  <input value={relationshipLabel} onChange={(event) => setRelationshipLabel(event.target.value)} placeholder="Me, Ba, Nguoi giam ho..." />
+                  Mối quan hệ
+                  <input value={relationshipLabel} onChange={(event) => setRelationshipLabel(event.target.value)} placeholder="Mẹ, Ba, Người giám hộ..." />
                 </label>
               ) : null}
               <button className="action-button" type="submit" disabled={submitState === 'submitting'}>
-                {submitState === 'submitting' ? 'Dang tao tai khoan...' : 'Dang ky va vao he thong'}
+                {submitState === 'submitting' ? 'Đang tạo tài khoản...' : 'Đăng ký và vào hệ thống'}
               </button>
             </form>
           )}
@@ -181,26 +181,26 @@ export function HomePage() {
         </article>
 
         <article className="roadmap-panel">
-          <p className="eyebrow">Trang thai</p>
+          <p className="eyebrow">Trạng thái</p>
           <h3>Backend</h3>
           <div>
-            {isLoading && <p>Dang kiem tra...</p>}
-            {isError && <p style={{ color: '#d32f2f' }}>Chua ket noi</p>}
-            {data?.status === 'ok' && <p style={{ color: '#388e3c' }}>Dang hoat dong</p>}
+            {isLoading && <p>Đang kiểm tra...</p>}
+            {isError && <p style={{ color: '#d32f2f' }}>Chưa kết nối</p>}
+            {data?.status === 'ok' && <p style={{ color: '#388e3c' }}>Đang hoạt động</p>}
             {data?.app_name && <p>{data.app_name}</p>}
           </div>
           <div className="detail-stack" style={{ marginTop: '1rem' }}>
             <div className="student-row">
-              <strong>Hoc sinh / phu huynh</strong>
-              <span>Tu dang ky tai khoan ngay tai man hinh nay</span>
+              <strong>Học sinh / phụ huynh</strong>
+              <span>Tự đăng ký tài khoản ngay tại màn hình này</span>
             </div>
             <div className="student-row">
-              <strong>Giao vien</strong>
-              <span>Chi dang nhap sau khi duoc admin cap tai khoan</span>
+              <strong>Giáo viên</strong>
+              <span>Chỉ đăng nhập sau khi được admin cấp tài khoản</span>
             </div>
             <div className="student-row">
               <strong>Admin</strong>
-              <span>Chi dung de tao va cap tai khoan giao vien</span>
+              <span>Chỉ dùng để tạo và cấp tài khoản giáo viên</span>
             </div>
           </div>
         </article>

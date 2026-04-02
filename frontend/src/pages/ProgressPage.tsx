@@ -6,9 +6,9 @@ import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
 const readinessLabelMap: Record<string, string> = {
-  can_ho_tro_them: 'Can ho tro them',
-  dang_phu_hop: 'Dang phu hop',
-  san_sang_nang_do_kho: 'San sang nang do kho',
+  can_ho_tro_them: 'Cần hỗ trợ thêm',
+  dang_phu_hop: 'Đang phù hợp',
+  san_sang_nang_do_kho: 'Sẵn sàng nâng độ khó',
 }
 
 export function ProgressPage() {
@@ -33,20 +33,20 @@ export function ProgressPage() {
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Tien do hoc tap va goi y nang do kho</h2>
-          <p>Readiness chi la goi y cho giao vien. He thong khong tu dong nang do kho, nhung se tong hop nhung dau hieu de ban quyet dinh.</p>
+          <h2>Tiến độ học tập và gợi ý nâng độ khó</h2>
+          <p>Readiness chỉ là gợi ý cho giáo viên. Hệ thống không tự động nâng độ khó, nhưng sẽ tổng hợp những dấu hiệu để bạn quyết định.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Chon assignment</h3>
+            <h3>Chọn assignment</h3>
             <div className="form-stack">
               <label>
-                Assignment can xem
+                Assignment cần xem
                 <select value={resolvedSelectedAssignmentId} onChange={(event) => setSelectedAssignmentId(event.target.value)}>
-                  <option value="">Chon assignment</option>
+                  <option value="">Chọn assignment</option>
                   {assignmentsQuery.data?.map((assignment) => (
-                    <option key={assignment.id} value={assignment.id}>{assignment.lesson?.title ?? `Assignment #${assignment.id}`} - {assignment.classroom?.name ?? 'Khong ro lop'}</option>
+                    <option key={assignment.id} value={assignment.id}>{assignment.lesson?.title ?? `Assignment #${assignment.id}`} - {assignment.classroom?.name ?? 'Không rõ lớp'}</option>
                   ))}
                 </select>
               </label>
@@ -54,45 +54,45 @@ export function ProgressPage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Tong quan</h3>
+            <h3>Tổng quan</h3>
             {progressQuery.data ? (
               <div className="metrics-grid">
                 <div className="info-card mini-card">
-                  <span>Hoc sinh</span>
+                  <span>Học sinh</span>
                   <strong>{progressQuery.data.summary.student_count}</strong>
                 </div>
                 <div className="info-card mini-card">
-                  <span>Da xong</span>
+                  <span>Đã xong</span>
                   <strong>{progressQuery.data.summary.completed_count}</strong>
                 </div>
                 <div className="info-card mini-card">
-                  <span>Can ho tro</span>
+                  <span>Cần hỗ trợ</span>
                   <strong>{progressQuery.data.summary.need_support_count}</strong>
                 </div>
                 <div className="info-card mini-card">
-                  <span>San sang tang muc</span>
+                  <span>Sẵn sàng tăng mức</span>
                   <strong>{progressQuery.data.summary.ready_to_increase_count}</strong>
                 </div>
               </div>
             ) : (
-              <p>Chon assignment de xem tong quan tien do.</p>
+              <p>Chọn assignment để xem tổng quan tiến độ.</p>
             )}
           </article>
         </section>
 
         <section className="roadmap-panel">
-          <h3>Chi tiet theo hoc sinh</h3>
+          <h3>Chi tiết theo học sinh</h3>
           <div className="student-list compact-list">
             {progressQuery.data?.progresses.map((progress) => (
               <div key={progress.id} className="progress-card">
                 <div className="student-row">
-                  <strong>{progress.student?.full_name ?? `Hoc sinh #${progress.student_id}`}</strong>
+                  <strong>{progress.student?.full_name ?? `Học sinh #${progress.student_id}`}</strong>
                   <span>{progress.progress_percent}% / {progress.status}</span>
                 </div>
                 <p>
                   Readiness: <strong>{readinessLabelMap[progress.readiness_status] ?? progress.readiness_status}</strong>
                 </p>
-                <p>Diem hoan thanh: {progress.completion_score} | Tro giup: {progress.help_count} | Hoc lai: {progress.retry_count}</p>
+                <p>Điểm hoàn thành: {progress.completion_score} | Trợ giúp: {progress.help_count} | Học lại: {progress.retry_count}</p>
                 <div className="tag-wrap">
                   {progress.readiness_reasons.map((reason) => (
                     <span key={reason} className="subject-pill muted-pill">{reason}</span>
@@ -100,7 +100,7 @@ export function ProgressPage() {
                 </div>
               </div>
             ))}
-            {!progressQuery.data?.progresses.length && !progressQuery.isLoading ? <p>Assignment nay chua co du lieu tien do.</p> : null}
+            {!progressQuery.data?.progresses.length && !progressQuery.isLoading ? <p>Assignment này chưa có dữ liệu tiến độ.</p> : null}
           </div>
         </section>
       </div>

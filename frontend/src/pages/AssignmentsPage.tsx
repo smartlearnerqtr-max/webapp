@@ -70,42 +70,42 @@ export function AssignmentsPage() {
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Giao bai hoc theo lop</h2>
-          <p>Chon bai hoc va lop, he thong se tao assignment cho toan bo hoc sinh dang active trong lop do.</p>
+          <h2>Giao bài học theo lớp</h2>
+          <p>Chọn bài học và lớp, hệ thống sẽ tạo assignment cho toàn bộ học sinh đang active trong lớp đó.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tao assignment</h3>
+            <h3>Tạo assignment</h3>
             <div className="form-stack">
               <label>
-                Lop hoc
+                Lớp học
                 <select value={resolvedClassId} onChange={(event) => setClassId(event.target.value)}>
-                  <option value="">Chon lop hoc</option>
+                  <option value="">Chọn lớp học</option>
                   {classesQuery.data?.map((item) => (
                     <option key={item.id} value={item.id}>{item.name}</option>
                   ))}
                 </select>
               </label>
               <label>
-                Bai hoc
+                Bài học
                 <select value={resolvedLessonId} onChange={(event) => setLessonId(event.target.value)}>
-                  <option value="">Chon bai hoc</option>
+                  <option value="">Chọn bài học</option>
                   {lessonsQuery.data?.map((lesson) => (
                     <option key={lesson.id} value={lesson.id}>{lesson.title}</option>
                   ))}
                 </select>
               </label>
               <label>
-                Han hoan thanh
+                Hạn hoàn thành
                 <input value={dueAt} onChange={(event) => setDueAt(event.target.value)} placeholder="2026-04-10T20:00:00+07:00" />
               </label>
               <label>
-                % can hoan thanh
+                % cần hoàn thành
                 <input value={requiredCompletionPercent} onChange={(event) => setRequiredCompletionPercent(event.target.value)} inputMode="numeric" />
               </label>
               <button className="action-button" type="button" disabled={!resolvedClassId || !resolvedLessonId || createMutation.isPending} onClick={() => createMutation.mutate()}>
-                {createMutation.isPending ? 'Dang giao...' : 'Giao bai cho ca lop'}
+                {createMutation.isPending ? 'Đang giao...' : 'Giao bài cho cả lớp'}
               </button>
               {createMutation.error ? <p className="error-text">{(createMutation.error as Error).message}</p> : null}
             </div>
@@ -115,28 +115,28 @@ export function AssignmentsPage() {
             <h3>Preview assignment</h3>
             <div className="detail-stack">
               <div className="student-row">
-                <strong>{selectedClass?.name ?? 'Chua chon lop'}</strong>
-                <span>{classStudentsQuery.data?.length ?? 0} hoc sinh se nhan bai</span>
+                <strong>{selectedClass?.name ?? 'Chưa chọn lớp'}</strong>
+                <span>{classStudentsQuery.data?.length ?? 0} học sinh sẽ nhận bài</span>
               </div>
               <div className="student-row">
-                <strong>{selectedLesson?.title ?? 'Chua chon bai hoc'}</strong>
-                <span>{selectedLesson?.subject?.name ?? 'Chua co mon hoc'} / {selectedLesson?.activity_count ?? 0} activity</span>
+                <strong>{selectedLesson?.title ?? 'Chưa chọn bài học'}</strong>
+                <span>{selectedLesson?.subject?.name ?? 'Chưa có môn học'} / {selectedLesson?.activity_count ?? 0} activity</span>
               </div>
-              <p>Task voice answer van nam trong tung activity, nen khi hoc sinh vao bai se dung cau hinh voice cua bai hoc da tao.</p>
+              <p>Task voice answer vẫn nằm trong từng activity, nên khi học sinh vào bài sẽ dùng cấu hình voice của bài học đã tạo.</p>
             </div>
           </article>
         </section>
 
         <section className="roadmap-panel">
-          <h3>Danh sach assignment da tao</h3>
+          <h3>Danh sách assignment đã tạo</h3>
           <div className="student-list compact-list">
             {assignmentsQuery.data?.map((assignment) => (
               <div key={assignment.id} className="student-row">
                 <strong>{assignment.lesson?.title ?? `Assignment #${assignment.id}`}</strong>
-                <span>{assignment.classroom?.name ?? 'Khong ro lop'} / {assignment.student_ids.length} hoc sinh / {assignment.status}</span>
+                <span>{assignment.classroom?.name ?? 'Không rõ lớp'} / {assignment.student_ids.length} học sinh / {assignment.status}</span>
               </div>
             ))}
-            {!assignmentsQuery.data?.length && !assignmentsQuery.isLoading ? <p>Chua co assignment nao.</p> : null}
+            {!assignmentsQuery.data?.length && !assignmentsQuery.isLoading ? <p>Chưa có assignment nào.</p> : null}
           </div>
         </section>
       </div>

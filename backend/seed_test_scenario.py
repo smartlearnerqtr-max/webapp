@@ -23,8 +23,8 @@ def seed_test_scenario():
 
     # 2. Create Teachers
     teachers_data = [
-        {"email": "co_lan@example.com", "name": "Co Lan", "school": "Truong Tieu Hoc A"},
-        {"email": "co_mai@example.com", "name": "Co Mai", "school": "Truong Tieu Hoc B"}
+        {"email": "co_lan@example.com", "name": "Cô Lan", "school": "Trường Tiểu Học A"},
+        {"email": "co_mai@example.com", "name": "Cô Mai", "school": "Trường Tiểu Học B"}
     ]
     
     teachers = []
@@ -45,7 +45,7 @@ def seed_test_scenario():
                 user_id=user.id,
                 full_name=data["name"],
                 school_name=data["school"],
-                note=f"Giao vien kinh nghiem tu {data['school']}"
+                note=f"Giáo viên kinh nghiệm từ {data['school']}"
             )
             db.session.add(profile)
             teachers.append(profile)
@@ -63,9 +63,9 @@ def seed_test_scenario():
         if not classroom:
             classroom = Classroom(
                 teacher_id=teacher.id,
-                name=f"Lop cua {teacher.full_name}",
-                grade_label="Lop 1",
-                description=f"Khong gian hoc tap cua {teacher.full_name}",
+                name=f"Lớp của {teacher.full_name}",
+                grade_label="Lớp 1",
+                description=f"Không gian học tập của {teacher.full_name}",
                 status="active"
             )
             db.session.add(classroom)
@@ -76,10 +76,10 @@ def seed_test_scenario():
                 db.session.add(ClassSubject(class_id=classroom.id, subject_id=sub.id, is_active=True))
 
         for i in range(1, 11):
-            student_name = f"Hoc sinh {i} ({teacher.full_name})"
+            student_name = f"Học sinh {i} ({teacher.full_name})"
             p_idx = f"{teacher.id}_{i}"
             parent_email = f"phu_huynh_{p_idx}@example.com"
-            parent_name = f"Phu huynh {student_name}"
+            parent_name = f"Phụ huynh {student_name}"
             
             # Create Student
             student = StudentProfile(
@@ -109,7 +109,7 @@ def seed_test_scenario():
                 p_profile = ParentProfile(
                     user_id=p_user.id,
                     full_name=parent_name,
-                    relationship_label="Phu huynh"
+                    relationship_label="Phụ huynh"
                 )
                 db.session.add(p_profile)
                 db.session.flush()
@@ -139,8 +139,8 @@ def seed_test_scenario():
             lesson = Lesson(
                 created_by_teacher_id=teacher.id,
                 subject_id=sub.id,
-                title=f"Bai hoc {sub.name} co ban",
-                description=f"Huong dan hoc {sub.name} cho tre",
+                title=f"Bài học {sub.name} cơ bản",
+                description=f"Hướng dẫn học {sub.name} cho trẻ",
                 primary_level="nhe",
                 estimated_minutes=15,
                 is_published=True
@@ -151,9 +151,9 @@ def seed_test_scenario():
             # Add Activity
             db.session.add(LessonActivity(
                 lesson_id=lesson.id,
-                title="Lam quen con so/chu cai",
+                title="Làm quen con số/chữ cái",
                 activity_type="interactive_card",
-                instruction_text="Hay cham vao hinh anh phu hop",
+                instruction_text="Hãy chạm vào hình ảnh phù hợp",
                 sort_order=1
             ))
             
@@ -211,10 +211,10 @@ def seed_test_scenario():
             parent_id=parent.id,
             student_id=student.id,
             report_date=datetime.now().strftime("%Y-%m-%d"),
-            title=f"Bao cao ngay {datetime.now().strftime('%d/%m/%Y')} - {student.full_name}",
-            summary_text=f"Hom nay {student.full_name} da hoc tap rat cham chi.",
-            teacher_note="Phu huynh can nhac nho con tap trung hon vao bai hoc toan.",
-            recommendation="Khuyen khich con su dung hinh anh de ghi nho.",
+            title=f"Báo cáo ngày {datetime.now().strftime('%d/%m/%Y')} - {student.full_name}",
+            summary_text=f"Hôm nay {student.full_name} đã học tập rất chăm chỉ.",
+            teacher_note="Phụ huynh cần nhắc nhở con tập trung hơn vào bài học toán.",
+            recommendation="Khuyến khích con sử dụng hình ảnh để ghi nhớ.",
             total_assignments=3,
             completed_count=random.randint(0, 3),
             in_progress_count=1,

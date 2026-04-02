@@ -7,18 +7,18 @@ import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
 const LEVEL_OPTIONS = [
-  { value: 'nang', label: 'Nang' },
-  { value: 'trung_binh', label: 'Trung binh' },
-  { value: 'nhe', label: 'Nhe' },
+  { value: 'nang', label: 'Nặng' },
+  { value: 'trung_binh', label: 'Trung bình' },
+  { value: 'nhe', label: 'Nhẹ' },
 ]
 
 const ACTIVITY_TYPES = [
-  { value: 'multiple_choice', label: 'Chon dap an' },
-  { value: 'matching', label: 'Noi cap' },
-  { value: 'drag_drop', label: 'Keo tha' },
-  { value: 'listen_choose', label: 'Nghe va chon' },
-  { value: 'watch_answer', label: 'Xem video va tra loi' },
-  { value: 'step_by_step', label: 'Tung buoc' },
+  { value: 'multiple_choice', label: 'Chọn đáp án' },
+  { value: 'matching', label: 'Nối cặp' },
+  { value: 'drag_drop', label: 'Kéo thả' },
+  { value: 'listen_choose', label: 'Nghe và chọn' },
+  { value: 'watch_answer', label: 'Xem video và trả lời' },
+  { value: 'step_by_step', label: 'Từng bước' },
 ]
 
 export function LessonsPage() {
@@ -119,29 +119,29 @@ export function LessonsPage() {
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Bai hoc va hoat dong ben trong bai hoc</h2>
-          <p>Moi bai hoc gan voi mon hoc, muc do khuyet tat chinh va chua nhieu activity nhu chon dap an, keo tha, video hoac voice.</p>
+          <h2>Bài học và hoạt động bên trong bài học</h2>
+          <p>Mỗi bài học gắn với môn học, mức độ khuyết tật chính và chứa nhiều hoạt động như chọn đáp án, kéo thả, video hoặc voice.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tao bai hoc</h3>
+            <h3>Tạo bài học</h3>
             <form className="form-stack" onSubmit={handleLessonSubmit}>
               <label>
-                Tieu de bai hoc
-                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhan biet hinh tron" />
+                Tiêu đề bài học
+                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhận biết hình tròn" />
               </label>
               <label>
-                Mon hoc
+                Môn học
                 <select value={resolvedSubjectId} onChange={(event) => setSubjectId(event.target.value)}>
-                  <option value="">Chon mon hoc</option>
+                  <option value="">Chọn môn học</option>
                   {subjectsQuery.data?.map((subject) => (
                     <option key={subject.id} value={subject.id}>{subject.name}</option>
                   ))}
                 </select>
               </label>
               <label>
-                Muc do chinh
+                Mức độ chính
                 <select value={primaryLevel} onChange={(event) => setPrimaryLevel(event.target.value)}>
                   {LEVEL_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -149,22 +149,22 @@ export function LessonsPage() {
                 </select>
               </label>
               <label>
-                Mo ta ngan
-                <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bai hoc co ho tro voice" />
+                Mô tả ngắn
+                <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bài học có hỗ trợ voice" />
               </label>
               <label>
-                So phut du kien
+                Số phút dự kiến
                 <input value={estimatedMinutes} onChange={(event) => setEstimatedMinutes(event.target.value)} inputMode="numeric" />
               </label>
               <button className="action-button" type="submit" disabled={createLessonMutation.isPending}>
-                {createLessonMutation.isPending ? 'Dang tao...' : 'Tao bai hoc'}
+                {createLessonMutation.isPending ? 'Đang tạo...' : 'Tạo bài học'}
               </button>
               {createLessonMutation.error ? <p className="error-text">{(createLessonMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chon bai hoc dang chinh</h3>
+            <h3>Chọn bài học đang chỉnh</h3>
             <div className="tag-wrap">
               {lessonsQuery.data?.map((lesson) => (
                 <button
@@ -177,7 +177,7 @@ export function LessonsPage() {
                 </button>
               ))}
             </div>
-            {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Chua co bai hoc nao, hay tao bai hoc dau tien.</p> : null}
+            {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Chưa có bài học nào, hãy tạo bài học đầu tiên.</p> : null}
           </article>
         </section>
 
@@ -211,17 +211,17 @@ export function LessonsPage() {
                 event.currentTarget.style.boxShadow = '0 4px 12px rgba(167, 139, 250, 0.3)'
               }}
             >
-              <span>Them hoat dong vao bai hoc</span>
+              <span>Thêm hoạt động vào bài học</span>
               <span style={{ fontSize: '1.3rem' }}>{isActivityFormOpen ? '-' : '+'}</span>
             </button>
             {isActivityFormOpen ? (
               <form className="form-stack" onSubmit={handleActivitySubmit}>
                 <label>
-                  Ten hoat dong
-                  <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder="Chon dap an bang giong noi" />
+                  Tên hoạt động
+                  <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder="Chọn đáp án bằng giọng nói" />
                 </label>
                 <label>
-                  Loai hoat dong
+                  Loại hoạt động
                   <select value={activityType} onChange={(event) => setActivityType(event.target.value)}>
                     {ACTIVITY_TYPES.map((option) => (
                       <option key={option.value} value={option.value}>{option.label}</option>
@@ -229,8 +229,8 @@ export function LessonsPage() {
                   </select>
                 </label>
                 <label>
-                  Huong dan
-                  <input value={instructionText} onChange={(event) => setInstructionText(event.target.value)} placeholder="Hay doc dap an dung" />
+                  Hướng dẫn
+                  <input value={instructionText} onChange={(event) => setInstructionText(event.target.value)} placeholder="Hãy đọc đáp án đúng" />
                 </label>
                 <label>
                   Config JSON
@@ -238,10 +238,10 @@ export function LessonsPage() {
                 </label>
                 <label className="checkbox-row">
                   <input type="checkbox" checked={voiceAnswerEnabled} onChange={(event) => setVoiceAnswerEnabled(event.target.checked)} />
-                  Bat voice answer cho hoat dong nay
+                  Bật voice answer cho hoạt động này
                 </label>
                 <button className="action-button" type="submit" disabled={!resolvedSelectedLessonId || createActivityMutation.isPending}>
-                  {createActivityMutation.isPending ? 'Dang them...' : 'Them hoat dong'}
+                  {createActivityMutation.isPending ? 'Đang thêm...' : 'Thêm hoạt động'}
                 </button>
                 {createActivityMutation.error ? <p className="error-text">{(createActivityMutation.error as Error).message}</p> : null}
               </form>
@@ -249,14 +249,14 @@ export function LessonsPage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chi tiet bai hoc</h3>
+            <h3>Chi tiết bài học</h3>
             {selectedLesson ? (
               <div className="detail-stack">
                 <div className="student-row">
                   <strong>{selectedLesson.title}</strong>
-                  <span>{selectedLesson.subject?.name ?? 'Chua co mon'} / {selectedLesson.primary_level}</span>
+                  <span>{selectedLesson.subject?.name ?? 'Chưa có môn'} / {selectedLesson.primary_level}</span>
                 </div>
-                <p>{lessonDetailQuery.data?.description ?? selectedLesson.description ?? 'Chua co mo ta.'}</p>
+                <p>{lessonDetailQuery.data?.description ?? selectedLesson.description ?? 'Chưa có mô tả.'}</p>
                 <div className="student-list compact-list">
                   {lessonDetailQuery.data?.activities?.map((activity) => (
                     <div key={activity.id} className="student-row">
@@ -264,11 +264,11 @@ export function LessonsPage() {
                       <span>{activity.activity_type} {activity.voice_answer_enabled ? '/ voice' : ''}</span>
                     </div>
                   ))}
-                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>Bai hoc nay chua co hoat dong nao.</p> : null}
+                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>Bài học này chưa có hoạt động nào.</p> : null}
                 </div>
               </div>
             ) : (
-              <p>Hay chon mot bai hoc de xem chi tiet.</p>
+              <p>Hãy chọn một bài học để xem chi tiết.</p>
             )}
           </article>
         </section>

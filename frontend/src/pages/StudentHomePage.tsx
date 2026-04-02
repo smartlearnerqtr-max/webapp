@@ -6,15 +6,15 @@ import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
 const statusLabelMap: Record<string, string> = {
-  not_started: 'Chua bat dau',
-  in_progress: 'Dang hoc',
-  completed: 'Da hoan thanh',
+  not_started: 'Chưa bắt đầu',
+  in_progress: 'Đang học',
+  completed: 'Đã hoàn thành',
 }
 
 const readinessLabelMap: Record<string, string> = {
-  can_ho_tro_them: 'Can ho tro them',
-  dang_phu_hop: 'Dang phu hop',
-  san_sang_nang_do_kho: 'San sang nang do kho',
+  can_ho_tro_them: 'Cần hỗ trợ thêm',
+  dang_phu_hop: 'Đang phù hợp',
+  san_sang_nang_do_kho: 'Sẵn sàng nâng độ khó',
 }
 
 const emptyProgressDraft = {
@@ -151,79 +151,79 @@ export function StudentHomePage() {
     <RequireAuth allowedRoles={['student']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Khong gian hoc sinh</p>
-          <h2>Hom nay em hoc gi?</h2>
+          <p className="eyebrow">Không gian học sinh</p>
+          <h2>Hôm nay em học gì?</h2>
           <p>
-            Hoc sinh co the tu vao lop bang <strong>ID lop</strong> va <strong>mat khau</strong> do giao vien gui, sau do xem bai duoc giao,
-            mo chi tiet bai hoc, bat dau hoc va cap nhat tien do ngay tai day. Neu hoc voi nhieu giao vien, he thong se hien day du trong mot dashboard duy nhat.
+            Học sinh có thể tự vào lớp bằng <strong>ID lớp</strong> và <strong>mật khẩu</strong> do giáo viên gửi, sau đó xem bài được giao,
+            mở chi tiết bài học, bắt đầu học và cập nhật tiến độ ngay tại đây. Nếu học với nhiều giáo viên, hệ thống sẽ hiện đầy đủ trong một dashboard duy nhất.
           </p>
         </section>
 
         <section className="metrics-grid">
           <article className="mini-card">
-            <span>Tong assignment</span>
+            <span>Tổng assignment</span>
             <strong>{totalAssignments}</strong>
           </article>
           <article className="mini-card">
-            <span>Dang hoc</span>
+            <span>Đang học</span>
             <strong>{inProgressCount}</strong>
           </article>
           <article className="mini-card">
-            <span>Da xong</span>
+            <span>Đã xong</span>
             <strong>{completedCount}</strong>
           </article>
           <article className="mini-card">
-            <span>So giao vien</span>
+            <span>Số giáo viên</span>
             <strong>{myTeachersQuery.data?.length ?? 0}</strong>
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Thong tin hoc sinh</h3>
+            <h3>Thông tin học sinh</h3>
             <div className="detail-stack">
               <div className="student-row">
-                <strong>{typeof profile?.['full_name'] === 'string' ? String(profile['full_name']) : user?.email ?? 'Hoc sinh'}</strong>
+                <strong>{typeof profile?.['full_name'] === 'string' ? String(profile['full_name']) : user?.email ?? 'Học sinh'}</strong>
                 <span>
                   {typeof profile?.['preferred_input'] === 'string' ? String(profile['preferred_input']) : 'touch'} / {' '}
                   {typeof profile?.['preferred_font_size'] === 'string' ? String(profile['preferred_font_size']) : 'medium'}
                 </span>
               </div>
-              <p>Muc do: {typeof profile?.['disability_level'] === 'string' ? String(profile['disability_level']) : 'chua ro'}</p>
-              <p>Ghi chu ho tro: {typeof profile?.['support_note'] === 'string' ? String(profile['support_note']) : 'Chua co ghi chu ho tro.'}</p>
+              <p>Mức độ: {typeof profile?.['disability_level'] === 'string' ? String(profile['disability_level']) : 'chưa rõ'}</p>
+              <p>Ghi chú hỗ trợ: {typeof profile?.['support_note'] === 'string' ? String(profile['support_note']) : 'Chưa có ghi chú hỗ trợ.'}</p>
             </div>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Giao vien dang day em</h3>
+            <h3>Giáo viên đang dạy em</h3>
             <div className="student-list compact-list">
               {(myTeachersQuery.data ?? []).map((item) => (
                 <div key={item.link_id} className="student-row">
                   <strong>{item.teacher.full_name}</strong>
-                  <span>Teacher ID {item.teacher.id} / {item.teacher.school_name ?? 'Chua cap nhat truong'}</span>
-                  <p>Email: {item.teacher.email ?? 'Chua cap nhat'} | So dien thoai: {item.teacher.phone ?? 'Chua cap nhat'}</p>
-                  <p>So lop dang hoc voi giao vien nay: {item.active_class_count}</p>
+                  <span>Teacher ID {item.teacher.id} / {item.teacher.school_name ?? 'Chưa cập nhật trường'}</span>
+                  <p>Email: {item.teacher.email ?? 'Chưa cập nhật'} | Số điện thoại: {item.teacher.phone ?? 'Chưa cập nhật'}</p>
+                  <p>Số lớp đang học với giáo viên này: {item.active_class_count}</p>
                 </div>
               ))}
-              {!myTeachersQuery.data?.length && !myTeachersQuery.isLoading ? <p>Em chua lien ket voi giao vien nao.</p> : null}
+              {!myTeachersQuery.data?.length && !myTeachersQuery.isLoading ? <p>Em chưa liên kết với giáo viên nào.</p> : null}
             </div>
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Tham gia lop hoc</h3>
+            <h3>Tham gia lớp học</h3>
             <div className="form-stack">
               <label>
-                ID lop
-                <input value={joinClassId} onChange={(event) => setJoinClassId(event.target.value)} inputMode="numeric" placeholder="Vi du: 12" />
+                ID lớp
+                <input value={joinClassId} onChange={(event) => setJoinClassId(event.target.value)} inputMode="numeric" placeholder="Ví dụ: 12" />
               </label>
               <label>
-                Mat khau vao lop
-                <input value={joinClassPassword} onChange={(event) => setJoinClassPassword(event.target.value.toUpperCase())} placeholder="Vi du: AB12CD34" />
+                Mật khẩu vào lớp
+                <input value={joinClassPassword} onChange={(event) => setJoinClassPassword(event.target.value.toUpperCase())} placeholder="Ví dụ: AB12CD34" />
               </label>
               <button className="action-button" type="button" disabled={!joinClassId || !joinClassPassword || joinClassMutation.isPending} onClick={() => joinClassMutation.mutate()}>
-                {joinClassMutation.isPending ? 'Dang vao lop...' : 'Vao lop'}
+                {joinClassMutation.isPending ? 'Đang vào lớp...' : 'Vào lớp'}
               </button>
               {joinClassMutation.error ? <p className="error-text">{(joinClassMutation.error as Error).message}</p> : null}
             </div>
@@ -231,31 +231,31 @@ export function StudentHomePage() {
               {(myClassesQuery.data ?? []).map((classroom) => (
                 <span key={classroom.id} className="subject-pill">{classroom.name} / GV {classroom.teacher_id}</span>
               ))}
-              {!myClassesQuery.data?.length && !myClassesQuery.isLoading ? <p>Em chua tham gia lop hoc nao.</p> : null}
+              {!myClassesQuery.data?.length && !myClassesQuery.isLoading ? <p>Em chưa tham gia lớp học nào.</p> : null}
             </div>
-            {joinedClassesLabel.length ? <p>Danh sach lop hien tai: {joinedClassesLabel.join(', ')}</p> : null}
+            {joinedClassesLabel.length ? <p>Danh sách lớp hiện tại: {joinedClassesLabel.join(', ')}</p> : null}
           </article>
 
           <article className="roadmap-panel">
-            <h3>Bai gan nhat</h3>
+            <h3>Bài gần nhất</h3>
             {latestAssignment ? (
               <div className="detail-stack">
                 <div className="student-row">
                   <strong>{latestAssignment.assignment?.lesson?.title ?? `Assignment #${latestAssignment.assignment_id}`}</strong>
                   <span>{statusLabelMap[latestAssignment.status] ?? latestAssignment.status}</span>
                 </div>
-                <p>Tien do: {latestAssignment.progress_percent}%</p>
+                <p>Tiến độ: {latestAssignment.progress_percent}%</p>
                 <p>Readiness: {readinessLabelMap[latestAssignment.readiness_status] ?? latestAssignment.readiness_status}</p>
               </div>
             ) : (
-              <p>Chua co bai hoc nao duoc giao cho tai khoan nay.</p>
+              <p>Chưa có bài học nào được giao cho tài khoản này.</p>
             )}
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Danh sach bai hoc duoc giao</h3>
+            <h3>Danh sách bài học được giao</h3>
             <div className="student-list compact-list">
               {assignmentsQuery.data?.map((item) => (
                 <button
@@ -267,7 +267,7 @@ export function StudentHomePage() {
                   {item.assignment?.lesson?.title ?? `Assignment #${item.assignment_id}`}
                 </button>
               ))}
-              {!assignmentsQuery.data?.length && !assignmentsQuery.isLoading ? <p>Chua co assignment nao.</p> : null}
+              {!assignmentsQuery.data?.length && !assignmentsQuery.isLoading ? <p>Chưa có assignment nào.</p> : null}
             </div>
 
             {selectedAssignment ? (
@@ -276,22 +276,22 @@ export function StudentHomePage() {
                   <strong>{selectedAssignment.assignment?.lesson?.title ?? `Assignment #${selectedAssignment.assignment_id}`}</strong>
                   <span>{statusLabelMap[selectedAssignment.status] ?? selectedAssignment.status}</span>
                 </div>
-                <p>Tien do: {selectedAssignment.progress_percent}% | Diem: {selectedAssignment.completion_score}</p>
+                <p>Tiến độ: {selectedAssignment.progress_percent}% | Điểm: {selectedAssignment.completion_score}</p>
                 <p>Readiness: {readinessLabelMap[selectedAssignment.readiness_status] ?? selectedAssignment.readiness_status}</p>
               </div>
             ) : null}
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chi tiet bai hoc</h3>
+            <h3>Chi tiết bài học</h3>
             {detail ? (
               <div className="detail-stack">
                 <div className="student-row">
                   <strong>{detail.lesson?.title ?? detail.assignment?.lesson?.title ?? `Assignment #${detail.assignment_id}`}</strong>
-                  <span>{detail.lesson?.subject?.name ?? 'Chua co mon hoc'} / {statusLabelMap[detail.status] ?? detail.status}</span>
+                  <span>{detail.lesson?.subject?.name ?? 'Chưa có môn học'} / {statusLabelMap[detail.status] ?? detail.status}</span>
                 </div>
-                <p>{detail.lesson?.description ?? 'Chua co mo ta bai hoc.'}</p>
-                <p>Tien do hien tai: {detail.progress_percent}% | Diem: {detail.completion_score}</p>
+                <p>{detail.lesson?.description ?? 'Chưa có mô tả bài học.'}</p>
+                <p>Tiến độ hiện tại: {detail.progress_percent}% | Điểm: {detail.completion_score}</p>
                 <div className="tag-wrap">
                   {detail.readiness_reasons.map((reason) => (
                     <span key={reason} className="subject-pill">{reason}</span>
@@ -302,24 +302,24 @@ export function StudentHomePage() {
                     <div key={activity.id} className="student-row">
                       <strong>{activity.sort_order}. {activity.title}</strong>
                       <span>{activity.activity_type} {activity.voice_answer_enabled ? '/ voice' : ''}</span>
-                      <p>{activity.instruction_text ?? 'Chua co huong dan.'}</p>
+                      <p>{activity.instruction_text ?? 'Chưa có hướng dẫn.'}</p>
                     </div>
                   ))}
-                  {!detail.lesson?.activities?.length ? <p>Bai hoc nay chua co activity nao.</p> : null}
+                  {!detail.lesson?.activities?.length ? <p>Bài học này chưa có activity nào.</p> : null}
                 </div>
               </div>
             ) : (
-              <p>Hay chon mot bai hoc de xem chi tiet.</p>
+              <p>Hãy chọn một bài học để xem chi tiết.</p>
             )}
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Thao tac hoc bai</h3>
+            <h3>Thao tác học bài</h3>
             <div className="button-row">
               <button className="action-button" type="button" disabled={!effectiveSelectedAssignmentId || startMutation.isPending} onClick={() => startMutation.mutate()}>
-                {startMutation.isPending ? 'Dang bat dau...' : 'Bat dau bai hoc'}
+                {startMutation.isPending ? 'Đang bắt đầu...' : 'Bắt đầu bài học'}
               </button>
               <button className="ghost-button" type="button" disabled={!effectiveSelectedAssignmentId} onClick={() => applyPreset({
                 progressPercent: '50',
@@ -328,7 +328,7 @@ export function StudentHomePage() {
                 retryCount: '0',
                 learningSeconds: '180',
               })}>
-                Muc trung binh
+                Mức trung bình
               </button>
               <button className="ghost-button" type="button" disabled={!effectiveSelectedAssignmentId} onClick={() => applyPreset({
                 progressPercent: '100',
@@ -337,7 +337,7 @@ export function StudentHomePage() {
                 retryCount: '0',
                 learningSeconds: '240',
               })}>
-                Muc hoan thanh tot
+                Mức hoàn thành tốt
               </button>
             </div>
             {(startMutation.error || updateMutation.error || completeMutation.error) ? (
@@ -346,34 +346,34 @@ export function StudentHomePage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Cap nhat tien do</h3>
+            <h3>Cập nhật tiến độ</h3>
             <div className="form-stack">
               <label>
-                Phan tram tien do
+                Phần trăm tiến độ
                 <input value={resolvedProgressPercent} onChange={(event) => setDraftField('progressPercent', event.target.value)} inputMode="numeric" />
               </label>
               <label>
-                Diem hoan thanh
+                Điểm hoàn thành
                 <input value={resolvedCompletionScore} onChange={(event) => setDraftField('completionScore', event.target.value)} inputMode="numeric" />
               </label>
               <label>
-                So lan can tro giup
+                Số lần cần trợ giúp
                 <input value={resolvedHelpCount} onChange={(event) => setDraftField('helpCount', event.target.value)} inputMode="numeric" />
               </label>
               <label>
-                So lan hoc lai
+                Số lần học lại
                 <input value={resolvedRetryCount} onChange={(event) => setDraftField('retryCount', event.target.value)} inputMode="numeric" />
               </label>
               <label>
-                Tong so giay hoc
+                Tổng số giây học
                 <input value={resolvedLearningSeconds} onChange={(event) => setDraftField('learningSeconds', event.target.value)} inputMode="numeric" />
               </label>
               <div className="button-row">
                 <button className="action-button" type="button" disabled={!effectiveSelectedAssignmentId || updateMutation.isPending} onClick={() => updateMutation.mutate()}>
-                  {updateMutation.isPending ? 'Dang luu...' : 'Luu tien do'}
+                  {updateMutation.isPending ? 'Đang lưu...' : 'Lưu tiến độ'}
                 </button>
                 <button className="action-button" type="button" disabled={!effectiveSelectedAssignmentId || completeMutation.isPending} onClick={() => completeMutation.mutate()}>
-                  {completeMutation.isPending ? 'Dang hoan thanh...' : 'Danh dau da hoan thanh'}
+                  {completeMutation.isPending ? 'Đang hoàn thành...' : 'Đánh dấu đã hoàn thành'}
                 </button>
               </div>
             </div>
