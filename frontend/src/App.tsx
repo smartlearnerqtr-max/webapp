@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 
+import { RealtimeBridge } from './components/RealtimeBridge'
 import { AdminPage } from './pages/AdminPage'
 import { AISettingsPage } from './pages/AISettingsPage'
 import { AssignmentsPage } from './pages/AssignmentsPage'
@@ -57,6 +58,7 @@ function App() {
   const user = useAuthStore((state) => state.user)
   const clearSession = useAuthStore((state) => state.clearSession)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
 
   useEffect(() => {
     hydrate()
@@ -82,13 +84,14 @@ function App() {
     <div className="app-shell">
       <button
         className="menu-toggle-fixed"
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        onClick={() => setIsMenuOpen((current) => !current)}
         aria-label="Mở điều hướng"
         aria-expanded={isMenuOpen}
       >
-        <span></span>
-        <span></span>
-        <span></span>
+        {user && unreadNotificationCount > 0 ? <span className="menu-toggle-badge">{unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}</span> : null}
+        <span className="menu-toggle-line"></span>
+        <span className="menu-toggle-line"></span>
+        <span className="menu-toggle-line"></span>
       </button>
 
       {isMenuOpen && <div className="backdrop" onClick={() => setIsMenuOpen(false)}></div>}
@@ -135,6 +138,11 @@ function App() {
           <strong>{user ? `${user.email ?? user.phone}` : 'Chưa đăng nhập'}</strong>
           <p>{user ? `Vai trò: ${roleLabels[user.role] ?? user.role}` : 'Đăng nhập để mở màn hình học tập riêng của bạn.'}</p>
           {user ? (
+            <p className="sidebar-notification-copy">
+              Thông báo mới: <span className="sidebar-notification-badge">{unreadNotificationCount}</span>
+            </p>
+          ) : null}
+          {user ? (
             <button className="ghost-button" type="button" onClick={handleLogout} style={{ marginTop: '0.9rem', width: '100%' }}>
               Đăng xuất
             </button>
@@ -143,6 +151,7 @@ function App() {
       </aside>
 
       <main className="content">
+        <RealtimeBridge isNotificationPanelOpen={isMenuOpen} onUnreadCountChange={setUnreadNotificationCount} />
         <Routes>
           <Route path="/" element={user ? <Navigate to={getDefaultRouteForRole(user.role)} replace /> : <HomePage />} />
           <Route path="/admin" element={<AdminPage />} />

@@ -1,10 +1,17 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
+import { BarChartCard } from '../components/BarChartCard'
 import { fetchParentChildren, fetchParentReports, fetchTeacherByIdForParent } from '../services/api'
 import type { ParentReportItem } from '../services/api'
 import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
+
+const readinessLabelMap: Record<string, string> = {
+  can_ho_tro_them: 'Cần hỗ trợ thêm',
+  dang_phu_hop: 'Đang phù hợp',
+  san_sang_nang_do_kho: 'Sẵn sàng nâng độ khó',
+}
 
 export function ParentPage() {
   const token = useAuthStore((state) => state.accessToken)
@@ -36,8 +43,29 @@ export function ParentPage() {
     return grouped
   }, [reportsQuery.data])
 
+  const familyProgressChartItems = useMemo(() => {
+    const summary = (childrenQuery.data ?? []).reduce(
+      (accumulator, item) => {
+        accumulator.totalAssignments += item.progress_summary.total_assignments
+        accumulator.completedCount += item.progress_summary.completed_count
+        accumulator.inProgressCount += item.progress_summary.in_progress_count
+        return accumulator
+      },
+      { totalAssignments: 0, completedCount: 0, inProgressCount: 0 },
+    )
+
+    const remainingCount = Math.max(summary.totalAssignments - summary.completedCount - summary.inProgressCount, 0)
+
+    return [
+      { label: 'Số con theo dõi', value: childrenQuery.data?.length ?? 0, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
+      { label: 'Tổng bài tập', value: summary.totalAssignments, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
+      { label: 'Đã hoàn thành', value: summary.completedCount, color: 'linear-gradient(180deg, #ffbe3d 0%, #f29f05 100%)' },
+      { label: 'Chưa bắt đầu', value: remainingCount, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
+    ]
+  }, [childrenQuery.data])
+
   const parentId = typeof profile?.['id'] === 'number' ? profile['id'] : null
-  const parentName = typeof profile?.['full_name'] === 'string' ? String(profile['full_name']) : 'Phu huynh'
+  const parentName = typeof profile?.['full_name'] === 'string' ? String(profile['full_name']) : 'Phụ huynh'
 
   return (
     <RequireAuth allowedRoles={['parent']}>
@@ -45,7 +73,7 @@ export function ParentPage() {
         <section className="roadmap-panel">
           <h2>Dashboard phụ huynh</h2>
           <p>
-            Phụ huynh có thể theo dõi tiến độ học tập của con, tra giáo viên bằng <strong>teacher ID</strong> và nhận báo cáo hàng ngày do giáo viên gửi.
+            Phụ huynh có thể theo dõi tiến độ học tập của con, tra giáo viên bằng <strong>teacher ID</strong> và nhận báo cáo hằng ngày do giáo viên gửi.
           </p>
         </section>
 
@@ -70,6 +98,12 @@ export function ParentPage() {
                 <strong>{reportsQuery.data?.length ?? 0}</strong>
               </div>
             </div>
+            <BarChartCard
+              title="Biểu đồ tổng quan gia đình"
+              description="Tóm tắt nhanh số con và khối lượng bài đang theo dõi trên app."
+              items={familyProgressChartItems}
+              emptyMessage="Chưa có dữ liệu học sinh để hiển thị biểu đồ."
+            />
             <p>Gửi parent ID này cho giáo viên để giáo viên thêm quý vị vào nhóm thông báo đúng của con.</p>
           </article>
 
@@ -101,6 +135,18 @@ export function ParentPage() {
         <section className="dashboard-grid">
           {childrenQuery.data?.map((item) => {
             const studentReports = reportsByStudent.get(item.student.id) ?? []
+            const remainingAssignments = Math.max(
+              item.progress_summary.total_assignments - item.progress_summary.completed_count - item.progress_summary.in_progress_count,
+              0,
+            )
+
+            const childProgressChartItems = [
+              { label: 'Tổng bài', value: item.progress_summary.total_assignments, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
+              { label: 'Đã xong', value: item.progress_summary.completed_count, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
+              { label: 'Đang học', value: item.progress_summary.in_progress_count, color: 'linear-gradient(180deg, #ffbe3d 0%, #f29f05 100%)' },
+              { label: 'Chưa bắt đầu', value: remainingAssignments, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
+            ]
+
             return (
               <article key={item.student.id} className="roadmap-panel">
                 <div className="student-row">
@@ -125,8 +171,14 @@ export function ParentPage() {
                     <strong>{item.progress_summary.last_progress_percent}%</strong>
                   </div>
                 </div>
+                <BarChartCard
+                  title="Biểu đồ tiến độ của con"
+                  description="Nhìn nhanh phần đã xong, đang học và phần còn lại."
+                  items={childProgressChartItems}
+                />
+                <p className="helper-text">Tiến độ gần nhất: {item.progress_summary.last_progress_percent}%.</p>
                 <p>Bài học gần nhất: {item.progress_summary.last_assignment_title ?? 'Chưa có assignment nào'}</p>
-                <p>Readiness: {item.progress_summary.readiness_status}</p>
+                <p>Readiness: {readinessLabelMap[item.progress_summary.readiness_status] ?? item.progress_summary.readiness_status}</p>
                 <div className="tag-wrap">
                   {item.classes.map((classroom) => (
                     <span key={classroom.id} className="subject-pill">{classroom.name}</span>

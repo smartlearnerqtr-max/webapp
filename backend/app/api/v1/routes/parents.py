@@ -8,6 +8,7 @@ from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 from ....extensions import db
 from ....models import ParentDailyReport, ParentProfile, ParentStudentLink, StudentLessonProgress, StudentProfile, TeacherParentStudentLink, TeacherProfile, User
 from ....services.logger import log_server_event
+from ....services.realtime_service import publish_realtime_event
 from ....services.relationship_service import (
     ensure_parent_student_link,
     ensure_teacher_parent_student_link,
@@ -118,6 +119,10 @@ def _recommendation_for_status(status: str) -> str:
     if status == 'san_sang_nang_do_kho':
         return 'Con dang hoc tot. Gia dinh co the dong vien de con thu them bai nang hon.'
     return 'Con dang theo kip tien do hien tai. Gia dinh tiep tuc nhac con hoc deu moi ngay.'
+
+
+def _user_ids_for_parent_links(links: list[TeacherParentStudentLink]) -> list[int]:
+    return sorted({link.parent.user_id for link in links if link.parent and link.parent.user_id})
 
 
 def _build_group_item(link: TeacherParentStudentLink) -> dict[str, object]:
@@ -255,6 +260,14 @@ def link_parent_to_student(student_id: int):
     ensure_parent_student_link(parent_profile.id, student.id)
     link, _created = ensure_teacher_parent_student_link(user.teacher_profile.id, parent_profile.id, student.id, source='teacher_linked_parent')
 
+    publish_realtime_event(
+        'parent_group_updated',
+        f'Phu huynh {parent_profile.full_name} vua duoc lien ket voi hoc sinh {student.full_name}.',
+        title='Cap nhat phu huynh',
+        recipient_user_ids=[uid for uid in [user.id, parent_profile.user_id] if uid],
+        payload={'student_id': student.id, 'student_name': student.full_name, 'parent_id': parent_profile.id, 'parent_name': parent_profile.full_name, 'link_id': link.id},
+    )
+
     db.session.commit()
     log_server_event(level='info', module='parents', message='Lien ket phu huynh voi hoc sinh', action_name='link_parent_student', user_id=user.id, metadata={'student_id': student.id, 'parent_id': parent_profile.id})
     return success_response({
@@ -353,6 +366,15 @@ def send_daily_reports():
             report.retry_count = int(summary['retry_count'])
             report.completion_score = int(summary['completion_score'])
         reports.append(report)
+
+    parent_user_ids = _user_ids_for_parent_links(links)
+    publish_realtime_event(
+        'parent_report_sent',
+        f'Da gui {len(reports)} bao cao hoc tap moi.',
+        title='Bao cao hoc tap',
+        recipient_user_ids=[user.id, *parent_user_ids],
+        payload={'report_count': len(reports), 'student_id': student_id, 'source': 'daily_report'},
+    )
 
     db.session.commit()
     log_server_event(

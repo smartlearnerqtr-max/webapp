@@ -697,3 +697,24 @@ export async function sendAIChat(token: string, payload: {
 export async function fetchLogs(token: string): Promise<LogItem[]> {
   return request<LogItem[]>('/api/v1/logs', { token })
 }
+
+export type RealtimeEventItem = {
+  id: number
+  recipient_user_id: number | null
+  recipient_role: string | null
+  event_type: string
+  title: string | null
+  message: string
+  payload_json: string | null
+  created_at: string | null
+  updated_at: string | null
+}
+
+export function getRealtimeStreamUrl(token: string, lastEventId?: number): string {
+  const url = new URL('/api/v1/realtime/stream', API_BASE_URL)
+  url.searchParams.set('access_token', token)
+  if (lastEventId) {
+    url.searchParams.set('last_event_id', String(lastEventId))
+  }
+  return url.toString()
+}

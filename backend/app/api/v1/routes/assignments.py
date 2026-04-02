@@ -6,8 +6,9 @@ from flask import request
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from ....extensions import db
-from ....models import Classroom, ClassStudent, Lesson, LessonAssignment, LessonAssignmentStudent, StudentLessonProgress, Subject, User
+from ....models import Classroom, ClassStudent, Lesson, LessonAssignment, LessonAssignmentStudent, ParentStudentLink, StudentLessonProgress, StudentProfile, Subject, TeacherProfile, User
 from ....services.logger import log_server_event
+from ....services.realtime_service import publish_realtime_event
 from ....utils.responses import error_response, success_response
 from .. import api_v1
 
@@ -45,6 +46,62 @@ def _get_teacher_assignment(assignment_id: int, teacher_id: int) -> LessonAssign
 
 def _get_active_class_student_ids(classroom: Classroom) -> list[int]:
     return [link.student_id for link in classroom.students if link.status == 'active']
+
+
+def _get_student_user_ids(student_ids: list[int]) -> list[int]:
+    if not student_ids:
+        return []
+    students = StudentProfile.query.filter(StudentProfile.id.in_(student_ids)).all()
+    return sorted({student.user_id for student in students if student.user_id})
+
+
+def _get_parent_user_ids(student_ids: list[int]) -> list[int]:
+    if not student_ids:
+        return []
+    links = ParentStudentLink.query.filter(ParentStudentLink.student_id.in_(student_ids), ParentStudentLink.status == 'active').all()
+    return sorted({link.parent.user_id for link in links if link.parent and link.parent.user_id})
+
+
+def _get_teacher_user_id(teacher_id: int | None) -> int | None:
+    if not teacher_id:
+        return None
+    teacher = TeacherProfile.query.get(teacher_id)
+    if not teacher or not teacher.user_id:
+        return None
+    return int(teacher.user_id)
+
+
+def _get_assignment_recipient_user_ids(assignment: LessonAssignment) -> list[int]:
+    student_ids = [item.student_id for item in assignment.students]
+    recipient_ids = set(_get_student_user_ids(student_ids))
+    recipient_ids.update(_get_parent_user_ids(student_ids))
+    teacher_user_id = _get_teacher_user_id(assignment.assigned_by_teacher_id)
+    if teacher_user_id:
+        recipient_ids.add(teacher_user_id)
+    return sorted(recipient_ids)
+
+
+def _publish_assignment_progress_event(progress: StudentLessonProgress, event_type: str, message: str) -> None:
+    assignment = progress.assignment
+    recipient_ids = set()
+    teacher_user_id = _get_teacher_user_id(assignment.assigned_by_teacher_id) if assignment else None
+    if teacher_user_id:
+        recipient_ids.add(teacher_user_id)
+    recipient_ids.update(_get_student_user_ids([progress.student_id]))
+    recipient_ids.update(_get_parent_user_ids([progress.student_id]))
+    publish_realtime_event(
+        event_type,
+        message,
+        title='Cap nhat tien do',
+        recipient_user_ids=sorted(recipient_ids),
+        payload={
+            'assignment_id': progress.assignment_id,
+            'student_id': progress.student_id,
+            'progress_percent': progress.progress_percent,
+            'status': progress.status,
+            'source': 'progress_update',
+        },
+    )
 
 
 def _calculate_readiness(progress: StudentLessonProgress) -> dict[str, object]:
@@ -145,6 +202,32 @@ def create_assignment():
             )
         )
 
+    student_user_ids = _get_student_user_ids(final_student_ids)
+    parent_user_ids = _get_parent_user_ids(final_student_ids)
+    publish_realtime_event(
+        'assignment_created',
+        f'Da giao bai {lesson.title} cho lop {classroom.name}.',
+        title='Bai tap moi',
+        recipient_user_ids=[user.id],
+        payload={'assignment_id': assignment.id, 'class_id': classroom.id, 'class_name': classroom.name, 'lesson_id': lesson.id, 'lesson_title': lesson.title, 'student_count': len(final_student_ids), 'source': 'manual'},
+    )
+    if student_user_ids:
+        publish_realtime_event(
+            'assignment_created',
+            f'Ban vua nhan bai moi: {lesson.title}.',
+            title='Bai tap moi',
+            recipient_user_ids=student_user_ids,
+            payload={'assignment_id': assignment.id, 'class_id': classroom.id, 'class_name': classroom.name, 'lesson_id': lesson.id, 'lesson_title': lesson.title, 'student_count': len(final_student_ids), 'source': 'manual'},
+        )
+    if parent_user_ids:
+        publish_realtime_event(
+            'assignment_created',
+            f'Co bai tap moi duoc giao cho hoc sinh trong lop {classroom.name}.',
+            title='Cap nhat hoc tap',
+            recipient_user_ids=parent_user_ids,
+            payload={'assignment_id': assignment.id, 'class_id': classroom.id, 'class_name': classroom.name, 'lesson_id': lesson.id, 'lesson_title': lesson.title, 'student_count': len(final_student_ids), 'source': 'manual'},
+        )
+
     db.session.commit()
     log_server_event(
         level='info',
@@ -182,6 +265,13 @@ def update_assignment(assignment_id: int):
     for field in ['due_at', 'required_completion_percent', 'status']:
         if field in payload:
             setattr(assignment, field, payload.get(field))
+    publish_realtime_event(
+        'assignment_updated',
+        f'Assignment {assignment.id} vua duoc cap nhat.',
+        title='Cap nhat assignment',
+        recipient_user_ids=_get_assignment_recipient_user_ids(assignment),
+        payload={'assignment_id': assignment.id, 'status': assignment.status},
+    )
     db.session.commit()
     return success_response(assignment.to_dict(), 'Cap nhat assignment thanh cong')
 
@@ -196,6 +286,13 @@ def close_assignment(assignment_id: int):
     if not assignment:
         return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
     assignment.status = 'closed'
+    publish_realtime_event(
+        'assignment_closed',
+        f'Assignment {assignment.id} da dong.',
+        title='Dong assignment',
+        recipient_user_ids=_get_assignment_recipient_user_ids(assignment),
+        payload={'assignment_id': assignment.id, 'status': assignment.status},
+    )
     db.session.commit()
     return success_response(assignment.to_dict(), 'Da dong assignment')
 
@@ -269,6 +366,7 @@ def start_my_assignment(assignment_id: int):
     if not progress:
         return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
     progress.status = 'in_progress'
+    _publish_assignment_progress_event(progress, 'assignment_progress_updated', f'Tien do bai hoc {assignment_id} vua bat dau.')
     db.session.commit()
     return success_response(progress.to_dict(), 'Bat dau bai hoc thanh cong')
 
@@ -289,6 +387,7 @@ def update_my_assignment_progress(assignment_id: int):
             setattr(progress, field, int(payload.get(field)))
     if payload.get('status') in {'not_started', 'in_progress', 'completed'}:
         progress.status = payload['status']
+    _publish_assignment_progress_event(progress, 'assignment_progress_updated', f'Tien do bai hoc {assignment_id} vua duoc cap nhat.')
     db.session.commit()
     return success_response(progress.to_dict(), 'Cap nhat tien do thanh cong')
 
@@ -305,6 +404,7 @@ def complete_my_assignment(assignment_id: int):
     progress.status = 'completed'
     progress.progress_percent = 100
     progress.completed_at = datetime.now(UTC).isoformat()
+    _publish_assignment_progress_event(progress, 'assignment_completed', f'Bai hoc {assignment_id} da hoan thanh.')
     db.session.commit()
     return success_response(progress.to_dict(), 'Da hoan thanh bai hoc')
 

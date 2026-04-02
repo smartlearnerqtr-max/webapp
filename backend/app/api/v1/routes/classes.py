@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import secrets
 
@@ -7,7 +7,9 @@ from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from ....extensions import db
 from ....models import ClassJoinCredential, ClassStudent, Classroom, StudentProfile, User
+from ....services.assignment_delivery_service import ensure_student_has_active_assignments
 from ....services.logger import log_server_event
+from ....services.realtime_service import publish_realtime_event
 from ....services.relationship_service import ensure_teacher_student_link, sync_legacy_teacher_student_links, teacher_has_student_access
 from ....utils.responses import error_response, success_response
 from .. import api_v1
@@ -53,6 +55,63 @@ def _serialize_student_classroom(classroom: Classroom) -> dict[str, object]:
     payload = classroom.to_dict()
     payload['teacher'] = classroom.teacher.to_dict() if classroom.teacher else None
     return payload
+
+
+def _get_student_user_ids(student_ids: list[int]) -> list[int]:
+    if not student_ids:
+        return []
+    students = StudentProfile.query.filter(StudentProfile.id.in_(student_ids)).all()
+    return sorted({student.user_id for student in students if student.user_id})
+
+
+def _get_parent_user_ids(student_ids: list[int]) -> list[int]:
+    if not student_ids:
+        return []
+    students = StudentProfile.query.filter(StudentProfile.id.in_(student_ids)).all()
+    parent_user_ids: set[int] = set()
+    for student in students:
+        for link in student.parent_links:
+            if link.status == 'active' and link.parent and link.parent.user_id:
+                parent_user_ids.add(int(link.parent.user_id))
+    return sorted(parent_user_ids)
+
+
+def _publish_auto_assignment_events(
+    *,
+    teacher_user_id: int,
+    classroom: Classroom,
+    student: StudentProfile,
+    assignment_count: int,
+    recipient_user_ids: list[int],
+) -> None:
+    if assignment_count <= 0:
+        return
+
+    payload = {
+        'source': 'class_sync',
+        'class_id': classroom.id,
+        'class_name': classroom.name,
+        'student_id': student.id,
+        'student_name': student.full_name,
+        'assignment_count': assignment_count,
+    }
+
+    publish_realtime_event(
+        'assignment_created',
+        f'Hoc sinh {student.full_name} da duoc nhan tu dong {assignment_count} bai dang mo cua lop {classroom.name}.',
+        title='Tu dong bo sung bai tap',
+        recipient_user_ids=[teacher_user_id],
+        payload=payload,
+    )
+
+    if recipient_user_ids:
+        publish_realtime_event(
+            'assignment_created',
+            f'Ban vua nhan {assignment_count} bai dang hoat dong cua lop {classroom.name}.',
+            title='Bai tap moi da san sang',
+            recipient_user_ids=recipient_user_ids,
+            payload=payload,
+        )
 
 
 @api_v1.get('/classes')
@@ -174,17 +233,19 @@ def add_students_to_class(class_id: int):
     student_ids = payload.get('student_ids') or []
     if payload.get('student_id'):
         student_ids.append(payload['student_id'])
-    student_ids = [int(item) for item in student_ids if item]
-    if not student_ids:
+    unique_student_ids = [int(item) for item in dict.fromkeys(student_ids) if item]
+    if not unique_student_ids:
         return error_response('Vui long chon it nhat mot hoc sinh', 'VALIDATION_ERROR', 422)
 
     links = []
     invalid_student_ids = []
-    for sid in dict.fromkeys(student_ids):
+    students_by_id: dict[int, StudentProfile] = {}
+    for sid in unique_student_ids:
         student = StudentProfile.query.get(sid)
         if not teacher_has_student_access(user.teacher_profile.id, student):
             invalid_student_ids.append(sid)
             continue
+        students_by_id[sid] = student
         class_link = ClassStudent.query.filter_by(class_id=class_id, student_id=sid).first()
         if not class_link:
             class_link = ClassStudent(class_id=class_id, student_id=sid, status='active')
@@ -202,8 +263,31 @@ def add_students_to_class(class_id: int):
             {'student_ids': invalid_student_ids},
         )
 
+    auto_assignment_count = 0
+    for sid in unique_student_ids:
+        student = students_by_id[sid]
+        created_assignments = ensure_student_has_active_assignments(classroom, sid)
+        auto_assignment_count += len(created_assignments)
+        recipient_user_ids = [uid for uid in [student.user_id, *_get_parent_user_ids([sid])] if uid]
+        _publish_auto_assignment_events(
+            teacher_user_id=user.id,
+            classroom=classroom,
+            student=student,
+            assignment_count=len(created_assignments),
+            recipient_user_ids=recipient_user_ids,
+        )
+
+    student_user_ids = _get_student_user_ids(unique_student_ids)
+    publish_realtime_event(
+        'class_membership_updated',
+        f'Lop {classroom.name} vua duoc cap nhat hoc sinh.',
+        title='Cap nhat lop hoc',
+        recipient_user_ids=[user.id, *student_user_ids],
+        payload={'class_id': class_id, 'class_name': classroom.name, 'student_ids': unique_student_ids, 'auto_assignment_count': auto_assignment_count},
+    )
+
     db.session.commit()
-    log_server_event(level='info', module='classes', message='Them hoc sinh vao lop', action_name='add_students_to_class', user_id=user.id, metadata={'class_id': class_id, 'student_ids': student_ids})
+    log_server_event(level='info', module='classes', message='Them hoc sinh vao lop', action_name='add_students_to_class', user_id=user.id, metadata={'class_id': class_id, 'student_ids': unique_student_ids})
     return success_response([link.to_dict() for link in links], 'Them hoc sinh vao lop thanh cong', 201)
 
 
@@ -274,6 +358,31 @@ def join_class_by_credentials():
         link.status = 'active'
 
     ensure_teacher_student_link(classroom.teacher_id, student.id, source='class_join')
+
+    created_assignments = ensure_student_has_active_assignments(classroom, student.id)
+    teacher_user_id = classroom.teacher.user_id if classroom.teacher and classroom.teacher.user_id else None
+    parent_user_ids = _get_parent_user_ids([student.id])
+
+    publish_realtime_event(
+        'class_membership_updated',
+        f'Hoc sinh {student.full_name} vua vao lop {classroom.name}.',
+        title='Hoc sinh vao lop',
+        recipient_user_ids=[uid for uid in [user.id, teacher_user_id] if uid],
+        payload={
+            'class_id': classroom.id,
+            'class_name': classroom.name,
+            'student_id': student.id,
+            'student_name': student.full_name,
+            'auto_assignment_count': len(created_assignments),
+        },
+    )
+    _publish_auto_assignment_events(
+        teacher_user_id=teacher_user_id or 0,
+        classroom=classroom,
+        student=student,
+        assignment_count=len(created_assignments),
+        recipient_user_ids=[uid for uid in [user.id, *parent_user_ids] if uid],
+    )
 
     db.session.commit()
     log_server_event(

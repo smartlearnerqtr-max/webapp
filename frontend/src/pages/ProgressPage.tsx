@@ -1,6 +1,7 @@
-import { useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
+import { BarChartCard } from '../components/BarChartCard'
 import { fetchAssignmentProgress, fetchAssignments } from '../services/api'
 import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
@@ -29,6 +30,18 @@ export function ProgressPage() {
     enabled: Boolean(token && resolvedSelectedAssignmentId),
   })
 
+  const summaryChartItems = useMemo(() => {
+    if (!progressQuery.data) return []
+
+    return [
+      { label: 'Học sinh', value: progressQuery.data.summary.student_count, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
+      { label: 'Đã xong', value: progressQuery.data.summary.completed_count, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
+      { label: 'Đang học', value: progressQuery.data.summary.in_progress_count, color: 'linear-gradient(180deg, #ffbe3d 0%, #f29f05 100%)' },
+      { label: 'Cần hỗ trợ', value: progressQuery.data.summary.need_support_count, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
+      { label: 'Sẵn sàng tăng mức', value: progressQuery.data.summary.ready_to_increase_count, color: 'linear-gradient(180deg, #7b8df6 0%, #5868d8 100%)' },
+    ]
+  }, [progressQuery.data])
+
   return (
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
@@ -56,24 +69,35 @@ export function ProgressPage() {
           <article className="roadmap-panel">
             <h3>Tổng quan</h3>
             {progressQuery.data ? (
-              <div className="metrics-grid">
-                <div className="info-card mini-card">
-                  <span>Học sinh</span>
-                  <strong>{progressQuery.data.summary.student_count}</strong>
+              <>
+                <div className="metrics-grid">
+                  <div className="info-card mini-card">
+                    <span>Học sinh</span>
+                    <strong>{progressQuery.data.summary.student_count}</strong>
+                  </div>
+                  <div className="info-card mini-card">
+                    <span>Đã xong</span>
+                    <strong>{progressQuery.data.summary.completed_count}</strong>
+                  </div>
+                  <div className="info-card mini-card">
+                    <span>Đang học</span>
+                    <strong>{progressQuery.data.summary.in_progress_count}</strong>
+                  </div>
+                  <div className="info-card mini-card">
+                    <span>Cần hỗ trợ</span>
+                    <strong>{progressQuery.data.summary.need_support_count}</strong>
+                  </div>
+                  <div className="info-card mini-card">
+                    <span>Sẵn sàng tăng mức</span>
+                    <strong>{progressQuery.data.summary.ready_to_increase_count}</strong>
+                  </div>
                 </div>
-                <div className="info-card mini-card">
-                  <span>Đã xong</span>
-                  <strong>{progressQuery.data.summary.completed_count}</strong>
-                </div>
-                <div className="info-card mini-card">
-                  <span>Cần hỗ trợ</span>
-                  <strong>{progressQuery.data.summary.need_support_count}</strong>
-                </div>
-                <div className="info-card mini-card">
-                  <span>Sẵn sàng tăng mức</span>
-                  <strong>{progressQuery.data.summary.ready_to_increase_count}</strong>
-                </div>
-              </div>
+                <BarChartCard
+                  title="Biểu đồ tổng quan assignment"
+                  description="So sánh nhanh số học sinh ở từng trạng thái để giáo viên dễ quyết định bước tiếp theo."
+                  items={summaryChartItems}
+                />
+              </>
             ) : (
               <p>Chọn assignment để xem tổng quan tiến độ.</p>
             )}
