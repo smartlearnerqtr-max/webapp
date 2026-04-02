@@ -35,6 +35,10 @@ def seed_admin_user(email: str | None = None, password: str | None = None) -> Us
 
     existing = User.query.filter_by(email=admin_email).first()
     if existing:
+        existing.password_hash = hash_password(admin_password)
+        existing.role = 'admin'
+        existing.status = 'active'
+        db.session.commit()
         return existing
 
     user = User(
