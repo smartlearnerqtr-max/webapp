@@ -1,4 +1,4 @@
-import './App.css'
+﻿import './App.css'
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 
@@ -18,7 +18,7 @@ import { getDefaultRouteForRole } from './utils/roleRoutes'
 
 const navItemsByRole: Record<string, Array<{ to: string; label: string }>> = {
   admin: [
-    { to: '/admin', label: 'Trang admin' },
+    { to: '/admin', label: 'Quản trị' },
   ],
   teacher: [
     { to: '/giao-vien', label: 'Trang giáo viên' },
@@ -35,6 +35,20 @@ const navItemsByRole: Record<string, Array<{ to: string; label: string }>> = {
   parent: [
     { to: '/phu-huynh', label: 'Trang phụ huynh' },
   ],
+}
+
+const roleDescriptions: Record<string, string> = {
+  admin: 'Quản lý tài khoản và hệ thống.',
+  teacher: 'Quản lý lớp học, bài học và phụ huynh.',
+  student: 'Xem bài được giao và theo dõi tiến độ học tập.',
+  parent: 'Theo dõi tình hình học tập của con.',
+}
+
+const roleLabels: Record<string, string> = {
+  admin: 'Quản trị viên',
+  teacher: 'Giáo viên',
+  student: 'Học sinh',
+  parent: 'Phụ huynh',
 }
 
 function App() {
@@ -56,6 +70,8 @@ function App() {
     return navItemsByRole[user.role] ?? [{ to: getDefaultRouteForRole(user.role), label: 'Trang của tôi' }]
   }, [user])
 
+  const activeDescription = user ? roleDescriptions[user.role] ?? 'Không gian học tập của bạn đã sẵn sàng.' : 'Đăng nhập để sử dụng hệ thống.'
+
   function handleLogout() {
     clearSession()
     setIsMenuOpen(false)
@@ -67,7 +83,7 @@ function App() {
       <button
         className="menu-toggle-fixed"
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        aria-label="Toggle navigation"
+        aria-label="Mở điều hướng"
         aria-expanded={isMenuOpen}
       >
         <span></span>
@@ -78,16 +94,27 @@ function App() {
       {isMenuOpen && <div className="backdrop" onClick={() => setIsMenuOpen(false)}></div>}
 
       <aside className={`sidebar ${isMenuOpen ? 'sidebar-open' : ''}`}>
-        <div>
-          <p className="eyebrow">Bạn học thông minh</p>
-          <h2 style={{ margin: '0.5rem 0 0 0', fontSize: '1.5rem' }}>Hệ thống hỗ trợ học tập</h2>
-          <p className="sidebar-copy">
-            {user?.role === 'admin' && 'Không gian admin: chỉ dùng để cấp tài khoản giáo viên.'}
-            {user?.role === 'teacher' && 'Không gian điều phối dành cho giáo viên: quản lý học sinh, bài học và assignment.'}
-            {user?.role === 'student' && 'Không gian học sinh: xem bài được giao và theo dõi tiến độ học tập của mình.'}
-            {user?.role === 'parent' && 'Không gian phụ huynh: theo dõi tiến độ học tập và tình hình học của con.'}
-            {!user && 'Học sinh và phụ huynh có thể tự đăng ký. Giáo viên được admin cấp tài khoản riêng.'}
-          </p>
+        <div className="sidebar-top">
+          <div className="sidebar-brand-block">
+            <p className="eyebrow">Bạn học thông minh</p>
+            <h2 className="sidebar-title">Bạn học thông minh</h2>
+            <p className="sidebar-copy">{activeDescription}</p>
+          </div>
+
+          <div className="sidebar-preview">
+            <div className="preview-tile">
+              <span className="preview-caption">Lộ trình học</span>
+              <strong className="preview-metric">Ngắn gọn</strong>
+            </div>
+            <div className="preview-tile">
+              <span className="preview-caption">Theo dõi</span>
+              <strong className="preview-metric">Rõ tiến độ</strong>
+            </div>
+            <div className="preview-tile">
+              <span className="preview-caption">Phối hợp</span>
+              <strong className="preview-metric">GV · PH</strong>
+            </div>
+          </div>
         </div>
 
         <nav className="nav-list" aria-label="Điều hướng chính">
@@ -104,10 +131,11 @@ function App() {
         </nav>
 
         <div className="sidebar-card">
-          <span className="sidebar-card-label">Trạng thái</span>
-          <strong>{user ? `${user.email ?? user.phone} (${user.role})` : 'Chưa đăng nhập'}</strong>
+          <span className="sidebar-card-label">Phiên hiện tại</span>
+          <strong>{user ? `${user.email ?? user.phone}` : 'Chưa đăng nhập'}</strong>
+          <p>{user ? `Vai trò: ${roleLabels[user.role] ?? user.role}` : 'Đăng nhập để mở màn hình học tập riêng của bạn.'}</p>
           {user ? (
-            <button className="ghost-button" type="button" onClick={handleLogout} style={{ marginTop: '0.75rem', width: '100%' }}>
+            <button className="ghost-button" type="button" onClick={handleLogout} style={{ marginTop: '0.9rem', width: '100%' }}>
               Đăng xuất
             </button>
           ) : null}

@@ -1,15 +1,37 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 
-import { fetchHealth, login, registerAccount } from '../services/api'
+import { PWAInstallButton } from '../components/PWAInstallButton'
+import { login, registerAccount } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { getDefaultRouteForRole } from '../utils/roleRoutes'
-import { PWAInstallButton } from '../components/PWAInstallButton'
 
 type AuthMode = 'login' | 'register'
 type RegisterRole = 'student' | 'parent'
+
+const homeStats = [
+  { label: 'Bài học trực quan', value: '24+' },
+  { label: 'Vai trò phối hợp', value: '4' },
+  { label: 'Theo dõi mỗi ngày', value: '100%' },
+]
+
+const learningTags = ['Toán dễ hiểu', 'Ngôn ngữ', 'Kỹ năng sống', 'Theo dõi tiến độ']
+
+const roleGuides = [
+  {
+    title: 'Học sinh / phụ huynh',
+    description: 'Tự tạo tài khoản và bắt đầu học ngay từ điện thoại hoặc máy tính bảng.',
+  },
+  {
+    title: 'Giáo viên',
+    description: 'Đăng nhập bằng tài khoản được cấp để quản lý lớp, bài học và báo cáo.',
+  },
+  {
+    title: 'Quản trị viên',
+    description: 'Thiết lập tài khoản giáo viên và giữ luồng vận hành gọn, dễ kiểm soát.',
+  },
+]
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -31,12 +53,6 @@ export function HomePage() {
   const [registerDisabilityLevel, setRegisterDisabilityLevel] = useState('trung_binh')
   const [relationshipLabel, setRelationshipLabel] = useState('')
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['health'],
-    queryFn: fetchHealth,
-    retry: 1,
-  })
-
   useEffect(() => {
     if (user) {
       navigate(getDefaultRouteForRole(user.role), { replace: true })
@@ -47,6 +63,7 @@ export function HomePage() {
     event.preventDefault()
     setSubmitState('submitting')
     setError(null)
+
     try {
       const payload = await login(identity, password)
       setSession({
@@ -67,6 +84,7 @@ export function HomePage() {
     event.preventDefault()
     setSubmitState('submitting')
     setError(null)
+
     try {
       const payload = await registerAccount({
         role: registerRole,
@@ -92,24 +110,80 @@ export function HomePage() {
   }
 
   return (
-    <div className="page-stack">
-      <section className="auth-layout">
-        <article className="roadmap-panel">
-          <p className="eyebrow">Tài khoản</p>
-          <h3>Đăng nhập và đăng ký</h3>
-          <p>Học sinh và phụ huynh có thể tự tạo tài khoản. Giáo viên chỉ đăng nhập bằng tài khoản do admin cấp. Admin dùng tài khoản bootstrap để cấp giáo viên mới.</p>
+    <div className="page-stack home-page">
+      <section className="auth-layout auth-layout-home">
+        <article className="roadmap-panel auth-hero">
+          <div className="hero-copy">
+            <p className="eyebrow hero-eyebrow">Bạn học thông minh</p>
+            <h1 className="hero-title">Ứng dụng hỗ trợ học tập cho học sinh, phụ huynh và giáo viên.</h1>
+          </div>
 
-          <div className="button-row">
-            <button className={mode === 'login' ? 'action-button' : 'ghost-button'} type="button" onClick={() => setMode('login')}>
+          <div className="home-stats">
+            {homeStats.map((item) => (
+              <div key={item.label} className="home-stat-card">
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
+              </div>
+            ))}
+          </div>
+
+          <div className="phone-stage">
+            <div className="phone-frame">
+              <div className="phone-topbar">
+                <span className="phone-dot"></span>
+                <span className="phone-dot"></span>
+                <span className="phone-dot"></span>
+              </div>
+              <div className="phone-hero-area">
+                <div className="hero-bubble hero-bubble-large"></div>
+                <div className="hero-bubble hero-bubble-small"></div>
+                <div className="hero-character hero-character-left"></div>
+                <div className="hero-character hero-character-right"></div>
+                <div className="hero-book"></div>
+              </div>
+              <div className="phone-course-list">
+                <div className="phone-course-card phone-course-card-blue">
+                  <span>Lộ trình cá nhân</span>
+                  <strong>Bài hôm nay</strong>
+                </div>
+                <div className="phone-course-card phone-course-card-yellow">
+                  <span>Tiến độ</span>
+                  <strong>Đang ổn định</strong>
+                </div>
+                <div className="phone-course-card phone-course-card-coral">
+                  <span>Gắn kết phụ huynh</span>
+                  <strong>Nhắc việc rõ ràng</strong>
+                </div>
+              </div>
+            </div>
+            <div className="floating-note note-top">Lớp học trực quan</div>
+            <div className="floating-note note-bottom">Theo dõi dễ hiểu</div>
+          </div>
+
+          <div className="hero-pill-row">
+            {learningTags.map((tag) => (
+              <span key={tag} className="hero-pill">{tag}</span>
+            ))}
+          </div>
+        </article>
+
+        <article className="roadmap-panel auth-card">
+          <div className="form-card-header">
+            <p className="eyebrow form-eyebrow">Bắt đầu</p>
+            <h3>Đăng nhập và đăng ký</h3>
+          </div>
+
+          <div className="mode-switch" role="tablist" aria-label="Chọn chế độ tài khoản">
+            <button className={mode === 'login' ? 'mode-switch-button mode-switch-button-active' : 'mode-switch-button'} type="button" onClick={() => setMode('login')}>
               Đăng nhập
             </button>
-            <button className={mode === 'register' ? 'action-button' : 'ghost-button'} type="button" onClick={() => setMode('register')}>
+            <button className={mode === 'register' ? 'mode-switch-button mode-switch-button-active' : 'mode-switch-button'} type="button" onClick={() => setMode('register')}>
               Đăng ký
             </button>
           </div>
 
           {mode === 'login' ? (
-            <form className="form-stack" onSubmit={handleLoginSubmit} style={{ marginTop: '1rem' }}>
+            <form className="form-stack" onSubmit={handleLoginSubmit}>
               <label>
                 Email hoặc số điện thoại
                 <input value={identity} onChange={(event) => setIdentity(event.target.value)} placeholder="Nhập email hoặc số điện thoại" />
@@ -120,7 +194,7 @@ export function HomePage() {
               </label>
               <div className="button-row">
                 <button className="action-button" type="submit" disabled={submitState === 'submitting'}>
-                  {submitState === 'submitting' ? 'Đang xử lý...' : 'Đăng nhập'}
+                  {submitState === 'submitting' ? 'Đang xử lý...' : 'Vào ứng dụng'}
                 </button>
                 {user ? (
                   <button className="ghost-button" type="button" onClick={clearSession}>
@@ -130,7 +204,7 @@ export function HomePage() {
               </div>
             </form>
           ) : (
-            <form className="form-stack" onSubmit={handleRegisterSubmit} style={{ marginTop: '1rem' }}>
+            <form className="form-stack" onSubmit={handleRegisterSubmit}>
               <label>
                 Vai trò tự đăng ký
                 <select value={registerRole} onChange={(event) => setRegisterRole(event.target.value as RegisterRole)}>
@@ -144,11 +218,11 @@ export function HomePage() {
               </label>
               <label>
                 Email
-                <input value={registerEmail} onChange={(event) => setRegisterEmail(event.target.value)} placeholder="có thể để trống nếu dùng số điện thoại" />
+                <input value={registerEmail} onChange={(event) => setRegisterEmail(event.target.value)} placeholder="Có thể để trống nếu dùng số điện thoại" />
               </label>
               <label>
                 Số điện thoại
-                <input value={registerPhone} onChange={(event) => setRegisterPhone(event.target.value)} placeholder="có thể để trống nếu dùng email" />
+                <input value={registerPhone} onChange={(event) => setRegisterPhone(event.target.value)} placeholder="Có thể để trống nếu dùng email" />
               </label>
               <label>
                 Mật khẩu
@@ -156,7 +230,7 @@ export function HomePage() {
               </label>
               {registerRole === 'student' ? (
                 <label>
-                  Mức độ khuyết tật
+                  Mức độ hỗ trợ
                   <select value={registerDisabilityLevel} onChange={(event) => setRegisterDisabilityLevel(event.target.value)}>
                     <option value="nhe">Nhẹ</option>
                     <option value="trung_binh">Trung bình</option>
@@ -171,7 +245,7 @@ export function HomePage() {
                 </label>
               ) : null}
               <button className="action-button" type="submit" disabled={submitState === 'submitting'}>
-                {submitState === 'submitting' ? 'Đang tạo tài khoản...' : 'Đăng ký và vào hệ thống'}
+                {submitState === 'submitting' ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
               </button>
             </form>
           )}
@@ -179,31 +253,20 @@ export function HomePage() {
           <PWAInstallButton />
           {error ? <p className="error-text">{error}</p> : null}
         </article>
+      </section>
 
-        <article className="roadmap-panel">
-          <p className="eyebrow">Trạng thái</p>
-          <h3>Backend</h3>
-          <div>
-            {isLoading && <p>Đang kiểm tra...</p>}
-            {isError && <p style={{ color: '#d32f2f' }}>Chưa kết nối</p>}
-            {data?.status === 'ok' && <p style={{ color: '#388e3c' }}>Đang hoạt động</p>}
-            {data?.app_name && <p>{data.app_name}</p>}
-          </div>
-          <div className="detail-stack" style={{ marginTop: '1rem' }}>
-            <div className="student-row">
-              <strong>Học sinh / phụ huynh</strong>
-              <span>Tự đăng ký tài khoản ngay tại màn hình này</span>
+      <section className="roadmap-panel role-guide-panel">
+        <p className="eyebrow form-eyebrow">Luồng sử dụng</p>
+        <h3>Thiết kế cho đúng người, đúng việc</h3>
+        <div className="home-role-grid">
+          {roleGuides.map((item) => (
+            <div key={item.title} className="role-card">
+              <span className="role-card-label">Vai trò</span>
+              <strong>{item.title}</strong>
+              <p>{item.description}</p>
             </div>
-            <div className="student-row">
-              <strong>Giáo viên</strong>
-              <span>Chỉ đăng nhập sau khi được admin cấp tài khoản</span>
-            </div>
-            <div className="student-row">
-              <strong>Admin</strong>
-              <span>Chỉ dùng để tạo và cấp tài khoản giáo viên</span>
-            </div>
-          </div>
-        </article>
+          ))}
+        </div>
       </section>
     </div>
   )

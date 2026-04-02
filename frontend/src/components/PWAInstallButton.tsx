@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -37,11 +37,11 @@ export function PWAInstallButton() {
 
   return (
     <button
-      className="action-button"
+      className="ghost-button"
       onClick={handleInstall}
-      style={{ width: '100%', marginTop: '0.5rem' }}
+      style={{ width: '100%' }}
     >
-      Tai ung dung
+      Tải ứng dụng
     </button>
   )
 }
