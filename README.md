@@ -79,3 +79,25 @@ Luu y:
 - Backend start command dang chay `seed-base`, nhung gio chi bootstrap admin va mon hoc co ban, khong tao demo teacher/student/parent nua.
 - `ADMIN_EMAIL` va `ADMIN_PASSWORD` duoc doc tu env var de tao admin bootstrap.
 - Health check backend dung `/api/v1/health`.
+
+## Dua du lieu local hien tai len Render
+
+Neu ban dang co du lieu that trong local SQLite tai [backend/instance/dev.db](d:/webapp/backend/instance/dev.db), Render se khong tu dong nhan du lieu do vi service tren Render dang dung Postgres rieng.
+
+Co the dong bo nguyen trang local len database Render bang lenh:
+
+```powershell
+cd backend
+.\.venv\Scripts\activate
+$env:TARGET_DATABASE_URL="postgresql://<user>:<password>@<host>/<database>"
+python sync_local_db.py
+```
+
+Script nay se:
+
+- tao bang neu database dich chua co
+- xoa du lieu hien co trong database dich
+- copy toan bo du lieu tu `backend/instance/dev.db`
+- reset lai sequence ID tren Postgres sau khi copy
+
+Lay `External Database URL` trong dashboard database Render va gan vao `TARGET_DATABASE_URL` truoc khi chay.

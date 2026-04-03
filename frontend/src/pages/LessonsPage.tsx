@@ -18,30 +18,30 @@ type ActivityType =
   | 'ai_chat'
 
 const LEVEL_OPTIONS = [
-  { value: 'nang', label: 'N?ng' },
-  { value: 'trung_binh', label: 'Trung b?nh' },
-  { value: 'nhe', label: 'Nh?' },
+  { value: 'nang', label: 'Nang' },
+  { value: 'trung_binh', label: 'Trung binh' },
+  { value: 'nhe', label: 'Nhe' },
 ]
 
 const ACTIVITY_TYPES: Array<{ value: ActivityType; label: string; description: string }> = [
-  { value: 'multiple_choice', label: 'Ch?n ??p ?n', description: 'T?o c?c l?a ch?n v? ??nh d?u ??p ?n ??ng.' },
-  { value: 'matching', label: 'N?i c?p', description: 'T?o c?c c?p th?ng tin ?? h?c sinh gh?p l?i.' },
-  { value: 'drag_drop', label: 'K?o th?', description: 'T?o c?c m?c ?? h?c sinh k?o v?o ??ng v? tr?.' },
-  { value: 'listen_choose', label: 'Nghe v? ch?n', description: 'Th?m l?i ??c ho?c ?m thanh m?u r?i cho h?c sinh ch?n ??p ?n.' },
-  { value: 'watch_answer', label: 'Xem v? tr? l?i', description: 'G?n n?i dung quan s?t r?i y?u c?u tr? l?i sau khi xem.' },
-  { value: 'step_by_step', label: 'T?ng b??c', description: 'Chia ho?t ??ng th?nh c?c b??c ng?n, d? theo d?i.' },
-  { value: 'aac', label: 'Th? giao ti?p', description: 'T?o b? th? ??n gi?n ?? h? tr? giao ti?p v? ph?n h?i.' },
-  { value: 'career_simulation', label: 'M? ph?ng ngh? nghi?p', description: 'Thi?t k? t?nh hu?ng th?c h?nh theo vai tr? ho?c c?ng vi?c.' },
-  { value: 'ai_chat', label: 'Trao ??i v?i AI', description: 'G?i ? l?i m? ??u v? m?c ti?u trao ??i v?i tr? l? AI.' },
+  { value: 'multiple_choice', label: 'Chon dap an', description: 'Tao cac lua chon va danh dau dap an dung.' },
+  { value: 'matching', label: 'Noi cap', description: 'Tao cac cap thong tin de hoc sinh ghep lai.' },
+  { value: 'drag_drop', label: 'Keo tha', description: 'Tao cac muc de hoc sinh keo vao dung vi tri.' },
+  { value: 'listen_choose', label: 'Nghe va chon', description: 'Them loi doc hoac am thanh mau roi cho hoc sinh chon dap an.' },
+  { value: 'watch_answer', label: 'Xem va tra loi', description: 'Gan noi dung quan sat roi yeu cau tra loi sau khi xem.' },
+  { value: 'step_by_step', label: 'Tung buoc', description: 'Chia hoat dong thanh cac buoc ngan, de theo doi.' },
+  { value: 'aac', label: 'The giao tiep', description: 'Tao bo the don gian de ho tro giao tiep va phan hoi.' },
+  { value: 'career_simulation', label: 'Mo phong nghe nghiep', description: 'Thiet ke tinh huong thuc hanh theo vai tro hoac cong viec.' },
+  { value: 'ai_chat', label: 'Trao doi voi AI', description: 'Goi y loi mo dau va muc tieu trao doi voi tro ly AI.' },
 ]
 
-const DEFAULT_CHOICE_OPTIONS = ['??p ?n A', '??p ?n B']
-const DEFAULT_MATCHING_PAIRS = ['H?nh tr?n | Tr?n', 'H?nh vu?ng | Vu?ng']
-const DEFAULT_DRAG_ITEMS = ['Qu? t?o', 'Con m?o', 'Xe ??p']
-const DEFAULT_DRAG_TARGETS = ['Gi? tr?i c?y', '??ng v?t', 'Ph??ng ti?n']
-const DEFAULT_STEPS = ['B??c 1: Quan s?t', 'B??c 2: Ch?n ??p ?n', 'B??c 3: Nh?n ph?n h?i']
-const DEFAULT_AAC_CARDS = ['Con mu?n u?ng n??c', 'Con c?n gi?p ??', 'Con ?? xong']
-const DEFAULT_GOALS = ['Ch?o h?i l?ch s?', 'Tr? l?i ng?n g?n', 'Nh? tr? gi?p khi c?n']
+const DEFAULT_CHOICE_OPTIONS = ['Dap an A', 'Dap an B']
+const DEFAULT_MATCHING_PAIRS = ['Hinh tron | Tron', 'Hinh vuong | Vuong']
+const DEFAULT_DRAG_ITEMS = ['Qua tao', 'Con meo', 'Xe dap']
+const DEFAULT_DRAG_TARGETS = ['Gio trai cay', 'Dong vat', 'Phuong tien']
+const DEFAULT_STEPS = ['Buoc 1: Quan sat', 'Buoc 2: Chon dap an', 'Buoc 3: Nhan phan hoi']
+const DEFAULT_AAC_CARDS = ['Con muon uong nuoc', 'Con can giup do', 'Con da xong']
+const DEFAULT_GOALS = ['Chao hoi lich su', 'Tra loi ngan gon', 'Nho tro giup khi can']
 
 function prettifyJson(value: object) {
   return JSON.stringify(value, null, 2)
@@ -65,25 +65,25 @@ function parsePairs(value: string) {
 function defaultInstructionForType(activityType: ActivityType) {
   switch (activityType) {
     case 'multiple_choice':
-      return 'H?y ??c c?u h?i v? ch?n ??p ?n ??ng.'
+      return 'Hay doc cau hoi va chon dap an dung.'
     case 'matching':
-      return 'H?y n?i c?c c?p ph? h?p v?i nhau.'
+      return 'Hay noi cac cap phu hop voi nhau.'
     case 'drag_drop':
-      return 'H?y k?o t?ng m?c v?o ??ng v? tr?.'
+      return 'Hay keo tung muc vao dung vi tri.'
     case 'listen_choose':
-      return 'H?y nghe k? r?i ch?n ??p ?n ??ng.'
+      return 'Hay nghe ky roi chon dap an dung.'
     case 'watch_answer':
-      return 'H?y xem n?i dung tr??c r?i tr? l?i c?u h?i.'
+      return 'Hay xem noi dung truoc roi tra loi cau hoi.'
     case 'step_by_step':
-      return 'H?y l?m l?n l??t t?ng b??c theo h??ng d?n.'
+      return 'Hay lam lan luot tung buoc theo huong dan.'
     case 'aac':
-      return 'H?y ch?n th? ph? h?p v?i ?i?u em mu?n n?i.'
+      return 'Hay chon the phu hop voi dieu em muon noi.'
     case 'career_simulation':
-      return 'H?y th?c hi?n ho?t ??ng theo t?nh hu?ng m? ph?ng.'
+      return 'Hay thuc hien hoat dong theo tinh huong mo phong.'
     case 'ai_chat':
-      return 'H?y trao ??i ng?n g?n v?i tr? l? ?? ho?n th?nh nhi?m v?.'
+      return 'Hay trao doi ngan gon voi tro ly de hoan thanh nhiem vu.'
     default:
-      return 'H?y l?m theo h??ng d?n c?a ho?t ??ng n?y.'
+      return 'Hay lam theo huong dan cua hoat dong nay.'
   }
 }
 
@@ -93,6 +93,10 @@ function defaultVoiceEnabledForType(activityType: ActivityType) {
 
 function activityLabel(activityType: ActivityType) {
   return ACTIVITY_TYPES.find((item) => item.value === activityType)?.label ?? activityType
+}
+
+function levelLabel(level: string) {
+  return LEVEL_OPTIONS.find((item) => item.value === level)?.label ?? level
 }
 
 function buildActivityConfig(activityType: ActivityType, fields: {
@@ -194,19 +198,19 @@ export function LessonsPage() {
   const [activityType, setActivityType] = useState<ActivityType>('multiple_choice')
   const [instructionText, setInstructionText] = useState(defaultInstructionForType('multiple_choice'))
   const [voiceAnswerEnabled, setVoiceAnswerEnabled] = useState(defaultVoiceEnabledForType('multiple_choice'))
-  const [prompt, setPrompt] = useState('C?u h?i ch?nh c?a ho?t ??ng')
+  const [prompt, setPrompt] = useState('Cau hoi chinh cua hoat dong')
   const [choiceOptionsText, setChoiceOptionsText] = useState(DEFAULT_CHOICE_OPTIONS.join('\n'))
   const [correctChoice, setCorrectChoice] = useState(DEFAULT_CHOICE_OPTIONS[0])
   const [matchingPairsText, setMatchingPairsText] = useState(DEFAULT_MATCHING_PAIRS.join('\n'))
   const [dragItemsText, setDragItemsText] = useState(DEFAULT_DRAG_ITEMS.join('\n'))
   const [dragTargetsText, setDragTargetsText] = useState(DEFAULT_DRAG_TARGETS.join('\n'))
   const [mediaUrl, setMediaUrl] = useState('https://example.com/video-bai-hoc')
-  const [questionPrompt, setQuestionPrompt] = useState('Sau khi xem xong, em th?y ?i?u g??')
+  const [questionPrompt, setQuestionPrompt] = useState('Sau khi xem xong, em thay dieu gi')
   const [stepListText, setStepListText] = useState(DEFAULT_STEPS.join('\n'))
   const [aacCardsText, setAacCardsText] = useState(DEFAULT_AAC_CARDS.join('\n'))
-  const [scenarioText, setScenarioText] = useState('Em v?o vai nh?n vi?n th? vi?n v? gi?p b?n ch?n s?ch ph? h?p.')
-  const [successCriteriaText, setSuccessCriteriaText] = useState('Ch?n ??ng vai tr?, l?m ?? b??c, tr? l?i l?ch s?.')
-  const [aiStarterPrompt, setAiStarterPrompt] = useState('H?y ??ng vai b?n h?c v? h?i em 3 c?u ng?n v? b?i h?c n?y.')
+  const [scenarioText, setScenarioText] = useState('Em vao vai nhan vien thu vien va giup ban chon sach phu hop.')
+  const [successCriteriaText, setSuccessCriteriaText] = useState('Chon dung vai tro, lam du buoc, tra loi lich su.')
+  const [aiStarterPrompt, setAiStarterPrompt] = useState('Hay dong vai ban hoc va hoi em 3 cau ngan ve bai hoc nay.')
   const [aiGoalText, setAiGoalText] = useState(DEFAULT_GOALS.join('\n'))
   const [showAdvancedConfig, setShowAdvancedConfig] = useState(false)
   const [advancedConfigJson, setAdvancedConfigJson] = useState('')
@@ -324,7 +328,7 @@ export function LessonsPage() {
       ])
     },
     onError: (error) => {
-      setActivityFormError(error instanceof Error ? error.message : 'Kh?ng th? t?o ho?t ??ng')
+      setActivityFormError(error instanceof Error ? error.message : 'Khong the tao hoat dong')
     },
   })
 
@@ -342,7 +346,7 @@ export function LessonsPage() {
       try {
         JSON.parse(advancedConfigJson.trim())
       } catch {
-        setActivityFormError('C?u h?nh n?ng cao ph?i l? JSON h?p l?.')
+        setActivityFormError('Cau hinh nang cao phai la JSON hop le.')
         return
       }
     }
@@ -370,29 +374,29 @@ export function LessonsPage() {
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>B?i h?c v? ho?t ??ng b?n trong b?i h?c</h2>
-          <p>M?i b?i h?c g?n v?i m?n h?c, m?c ?? khuy?t t?t ch?nh v? ch?a nhi?u ho?t ??ng nh? ch?n ??p ?n, k?o th?, video ho?c voice.</p>
+          <h2>Bai hoc va hoat dong ben trong bai hoc</h2>
+          <p>Moi bai hoc gan voi mon hoc, muc do khuyet tat chinh va chua nhieu hoat dong nhu chon dap an, keo tha, video hoac voice.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>T?o b?i h?c</h3>
+            <h3>Tao bai hoc</h3>
             <form className="form-stack" onSubmit={handleLessonSubmit}>
               <label>
-                Ti?u ?? b?i h?c
-                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nh?n bi?t h?nh tr?n" />
+                Tieu de bai hoc
+                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhan biet hinh tron" />
               </label>
               <label>
-                M?n h?c
+                Mon hoc
                 <select value={resolvedSubjectId} onChange={(event) => setSubjectId(event.target.value)}>
-                  <option value="">Ch?n m?n h?c</option>
+                  <option value="">Chon mon hoc</option>
                   {subjectsQuery.data?.map((subject) => (
                     <option key={subject.id} value={subject.id}>{subject.name}</option>
                   ))}
                 </select>
               </label>
               <label>
-                M?c ?? ch?nh
+                Muc do chinh
                 <select value={primaryLevel} onChange={(event) => setPrimaryLevel(event.target.value)}>
                   {LEVEL_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -400,22 +404,22 @@ export function LessonsPage() {
                 </select>
               </label>
               <label>
-                M? t? ng?n
-                <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="B?i h?c c? h? tr? voice" />
+                Mo ta ngan
+                <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bai hoc co ho tro voice" />
               </label>
               <label>
-                S? ph?t d? ki?n
+                So phut du kien
                 <input value={estimatedMinutes} onChange={(event) => setEstimatedMinutes(event.target.value)} inputMode="numeric" />
               </label>
               <button className="action-button" type="submit" disabled={createLessonMutation.isPending}>
-                {createLessonMutation.isPending ? '?ang t?o...' : 'T?o b?i h?c'}
+                {createLessonMutation.isPending ? 'Dang tao...' : 'Tao bai hoc'}
               </button>
               {createLessonMutation.error ? <p className="error-text">{(createLessonMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Ch?n b?i h?c ?ang ch?nh</h3>
+            <h3>Chon bai hoc dang chinh</h3>
             <div className="tag-wrap">
               {lessonsQuery.data?.map((lesson) => (
                 <button
@@ -428,7 +432,7 @@ export function LessonsPage() {
                 </button>
               ))}
             </div>
-            {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Ch?a c? b?i h?c n?o, h?y t?o b?i h?c ??u ti?n.</p> : null}
+            {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Chua co bai hoc nao, hay tao bai hoc dau tien.</p> : null}
           </article>
         </section>
 
@@ -454,17 +458,17 @@ export function LessonsPage() {
                 transition: 'all 200ms ease',
               }}
             >
-              <span>Th?m ho?t ??ng v?o b?i h?c</span>
+              <span>Them hoat dong vao bai hoc</span>
               <span style={{ fontSize: '1.3rem' }}>{isActivityFormOpen ? '-' : '+'}</span>
             </button>
             {isActivityFormOpen ? (
               <form className="form-stack" onSubmit={handleActivitySubmit}>
                 <label>
-                  T?n ho?t ??ng
-                  <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder="Ch?n ??p ?n b?ng gi?ng n?i" />
+                  Ten hoat dong
+                  <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder="Chon dap an bang giong noi" />
                 </label>
                 <label>
-                  Lo?i ho?t ??ng
+                  Loai hoat dong
                   <select value={activityType} onChange={handleActivityTypeChange}>
                     {ACTIVITY_TYPES.map((option) => (
                       <option key={option.value} value={option.value}>{option.label}</option>
@@ -473,22 +477,22 @@ export function LessonsPage() {
                 </label>
                 <p className="helper-text">{ACTIVITY_TYPES.find((option) => option.value === activityType)?.description}</p>
                 <label>
-                  H??ng d?n hi?n th? cho h?c sinh
-                  <input value={instructionText} onChange={(event) => setInstructionText(event.target.value)} placeholder="H?y ??c ??p ?n ??ng" />
+                  Huong dan hien thi cho hoc sinh
+                  <input value={instructionText} onChange={(event) => setInstructionText(event.target.value)} placeholder="Hay doc dap an dung" />
                 </label>
 
                 {(activityType === 'multiple_choice' || activityType === 'listen_choose') ? (
                   <div className="config-card">
                     <label>
-                      C?u h?i ho?c n?i dung c?n nghe
-                      <input value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="?m n?o l? ?m /a/?" />
+                      Cau hoi hoac noi dung can nghe
+                      <input value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="Am nao la am /a/" />
                     </label>
                     <label>
-                      Danh s?ch l?a ch?n, m?i d?ng m?t ??p ?n
+                      Danh sach lua chon, moi dong mot dap an
                       <textarea value={choiceOptionsText} onChange={(event) => setChoiceOptionsText(event.target.value)} rows={4} />
                     </label>
                     <label>
-                      ??p ?n ??ng
+                      Dap an dung
                       <select value={correctChoice} onChange={(event) => setCorrectChoice(event.target.value)}>
                         {choiceOptions.map((option) => (
                           <option key={option} value={option}>{option}</option>
@@ -501,7 +505,7 @@ export function LessonsPage() {
                 {activityType === 'matching' ? (
                   <div className="config-card">
                     <label>
-                      C?c c?p c?n n?i, m?i d?ng theo m?u Tr?i | Ph?i
+                      Cac cap can noi, moi dong theo mau Trai | Phai
                       <textarea value={matchingPairsText} onChange={(event) => setMatchingPairsText(event.target.value)} rows={5} />
                     </label>
                   </div>
@@ -510,11 +514,11 @@ export function LessonsPage() {
                 {activityType === 'drag_drop' ? (
                   <div className="config-card config-grid-2">
                     <label>
-                      C?c m?c c?n k?o, m?i d?ng m?t m?c
+                      Cac muc can keo, moi dong mot muc
                       <textarea value={dragItemsText} onChange={(event) => setDragItemsText(event.target.value)} rows={5} />
                     </label>
                     <label>
-                      C?c v? tr? ??ch, m?i d?ng m?t v? tr?
+                      Cac vi tri dich, moi dong mot vi tri
                       <textarea value={dragTargetsText} onChange={(event) => setDragTargetsText(event.target.value)} rows={5} />
                     </label>
                   </div>
@@ -523,12 +527,12 @@ export function LessonsPage() {
                 {activityType === 'watch_answer' ? (
                   <div className="config-card">
                     <label>
-                      Link video ho?c h?nh minh ho?
+                      Link video hoac hinh minh hoa
                       <input value={mediaUrl} onChange={(event) => setMediaUrl(event.target.value)} placeholder="https://..." />
                     </label>
                     <label>
-                      C?u h?i sau khi xem
-                      <input value={questionPrompt} onChange={(event) => setQuestionPrompt(event.target.value)} placeholder="Em th?y b?n nh? ?ang l?m g??" />
+                      Cau hoi sau khi xem
+                      <input value={questionPrompt} onChange={(event) => setQuestionPrompt(event.target.value)} placeholder="Em thay ban nho dang lam gi" />
                     </label>
                   </div>
                 ) : null}
@@ -536,7 +540,7 @@ export function LessonsPage() {
                 {activityType === 'step_by_step' ? (
                   <div className="config-card">
                     <label>
-                      C?c b??c h??ng d?n, m?i d?ng m?t b??c
+                      Cac buoc huong dan, moi dong mot buoc
                       <textarea value={stepListText} onChange={(event) => setStepListText(event.target.value)} rows={5} />
                     </label>
                   </div>
@@ -545,7 +549,7 @@ export function LessonsPage() {
                 {activityType === 'aac' ? (
                   <div className="config-card">
                     <label>
-                      C?c th? giao ti?p, m?i d?ng m?t th?
+                      Cac the giao tiep, moi dong mot the
                       <textarea value={aacCardsText} onChange={(event) => setAacCardsText(event.target.value)} rows={5} />
                     </label>
                   </div>
@@ -554,11 +558,11 @@ export function LessonsPage() {
                 {activityType === 'career_simulation' ? (
                   <div className="config-card">
                     <label>
-                      T?nh hu?ng m? ph?ng
+                      Tinh huong mo phong
                       <textarea value={scenarioText} onChange={(event) => setScenarioText(event.target.value)} rows={4} />
                     </label>
                     <label>
-                      Ti?u ch? ho?n th?nh
+                      Tieu chi hoan thanh
                       <textarea value={successCriteriaText} onChange={(event) => setSuccessCriteriaText(event.target.value)} rows={3} />
                     </label>
                   </div>
@@ -567,11 +571,11 @@ export function LessonsPage() {
                 {activityType === 'ai_chat' ? (
                   <div className="config-card">
                     <label>
-                      L?i m? ??u cho AI
+                      Loi mo dau cho AI
                       <textarea value={aiStarterPrompt} onChange={(event) => setAiStarterPrompt(event.target.value)} rows={4} />
                     </label>
                     <label>
-                      M?c ti?u c?n ??t, m?i d?ng m?t m?c ti?u
+                      Muc tieu can dat, moi dong mot muc tieu
                       <textarea value={aiGoalText} onChange={(event) => setAiGoalText(event.target.value)} rows={4} />
                     </label>
                   </div>
@@ -579,20 +583,20 @@ export function LessonsPage() {
 
                 <label className="checkbox-row">
                   <input type="checkbox" checked={voiceAnswerEnabled} onChange={(event) => setVoiceAnswerEnabled(event.target.checked)} />
-                  B?t voice answer cho ho?t ??ng n?y
+                  Bat voice answer cho hoat dong nay
                 </label>
 
                 <div className="config-preview">
                   <div className="student-row">
                     <strong>{activityLabel(activityType)}</strong>
-                    <span>H? th?ng s? t? t?o c?u h?nh k? thu?t ? ph?a sau.</span>
+                    <span>He thong se tu tao cau hinh ky thuat o phia sau.</span>
                   </div>
                   <button className="ghost-button" type="button" onClick={toggleAdvancedConfig}>
-                    {showAdvancedConfig ? '?n c?u h?nh n?ng cao' : 'Xem c?u h?nh h? th?ng s? l?u'}
+                    {showAdvancedConfig ? 'An cau hinh nang cao' : 'Xem cau hinh he thong se luu'}
                   </button>
                   {showAdvancedConfig ? (
                     <label>
-                      C?u h?nh n?ng cao
+                      Cau hinh nang cao
                       <textarea value={advancedConfigJson} onChange={(event) => setAdvancedConfigJson(event.target.value)} rows={10} />
                     </label>
                   ) : (
@@ -601,7 +605,7 @@ export function LessonsPage() {
                 </div>
 
                 <button className="action-button" type="submit" disabled={!resolvedSelectedLessonId || createActivityMutation.isPending}>
-                  {createActivityMutation.isPending ? '?ang th?m...' : 'Th?m ho?t ??ng'}
+                  {createActivityMutation.isPending ? 'Dang them...' : 'Them hoat dong'}
                 </button>
                 {activityFormError ? <p className="error-text">{activityFormError}</p> : null}
                 {createActivityMutation.error && !activityFormError ? <p className="error-text">{(createActivityMutation.error as Error).message}</p> : null}
@@ -610,27 +614,27 @@ export function LessonsPage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chi ti?t b?i h?c</h3>
+            <h3>Chi tiet bai hoc</h3>
             {selectedLesson ? (
               <div className="detail-stack">
                 <div className="student-row">
                   <strong>{selectedLesson.title}</strong>
-                  <span>{selectedLesson.subject?.name ?? 'Ch?a c? m?n'} / {selectedLesson.primary_level}</span>
+                  <span>{selectedLesson.subject?.name ?? 'Chua co mon'} / {levelLabel(selectedLesson.primary_level)}</span>
                 </div>
-                <p>{lessonDetailQuery.data?.description ?? selectedLesson.description ?? 'Ch?a c? m? t?.'}</p>
+                <p>{lessonDetailQuery.data?.description ?? selectedLesson.description ?? 'Chua co mo ta.'}</p>
                 <div className="student-list compact-list">
                   {lessonDetailQuery.data?.activities?.map((activity) => (
                     <div key={activity.id} className="student-row">
                       <strong>{activity.sort_order}. {activity.title}</strong>
                       <span>{activityLabel(activity.activity_type as ActivityType)} {activity.voice_answer_enabled ? '/ voice' : ''}</span>
-                      <p>{activity.instruction_text ?? 'Ch?a c? h??ng d?n.'}</p>
+                      <p>{activity.instruction_text ?? 'Chua co huong dan.'}</p>
                     </div>
                   ))}
-                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>B?i h?c n?y ch?a c? ho?t ??ng n?o.</p> : null}
+                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>Bai hoc nay chua co hoat dong nao.</p> : null}
                 </div>
               </div>
             ) : (
-              <p>H?y ch?n m?t b?i h?c ?? xem chi ti?t.</p>
+              <p>Hay chon mot bai hoc de xem chi tiet.</p>
             )}
           </article>
         </section>
