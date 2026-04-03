@@ -21,7 +21,11 @@ DEFAULT_ADMIN_PASSWORD = 'admin123456'
 def seed_subjects() -> int:
     created = 0
     for index, (code, name) in enumerate(BASE_SUBJECTS, start=1):
-        if Subject.query.filter_by(code=code).first():
+        existing = Subject.query.filter_by(code=code).first()
+        if existing:
+            existing.name = name
+            existing.sort_order = index
+            existing.is_active = True
             continue
         db.session.add(Subject(code=code, name=name, sort_order=index, is_active=True))
         created += 1

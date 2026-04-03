@@ -41,14 +41,14 @@ TEACHER_SPECS = [
         "email": "user001@gmail.com",
         "full_name": "Co Minh Anh",
         "school_name": "Truong Hoa Binh",
-        "class_name": "Lop Mat Troi",
+        "class_name": "Lớp Mặt Trời",
         "grade_label": "3",
     },
     {
         "email": "user004@gmail.com",
         "full_name": "Thay Quoc Viet",
         "school_name": "Truong Binh Minh",
-        "class_name": "Lop Cau Vong",
+        "class_name": "Lớp Cầu Vồng",
         "grade_label": "4",
     },
 ]
@@ -72,13 +72,13 @@ PARENT_SPECS = [
 LESSON_BLUEPRINTS = [
     {
         "subject_code": "TOAN",
-        "title": "Nhan biet hinh khoi quanh em",
-        "description": "Bai hoc giup hoc sinh nhan ra hinh tron, hinh vuong va phan loai vat dung quen thuoc.",
+        "title": "Nhận biết hình khối quanh em",
+        "description": "Bài học giúp học sinh nhận ra hình tròn, hình vuông và phân loại vật dụng quen thuộc.",
         "primary_level": "nhe",
         "estimated_minutes": 18,
         "activities": [
             {
-                "title": "Chon hinh tron dung",
+                "title": "Chọn hình tròn đúng",
                 "activity_type": "multiple_choice",
                 "instruction_text": "Doc cau hoi va chon dap an dung.",
                 "voice_answer_enabled": True,
@@ -90,9 +90,9 @@ LESSON_BLUEPRINTS = [
                 },
             },
             {
-                "title": "Noi ten voi hinh dang",
+                "title": "Nối tên với hình dạng",
                 "activity_type": "matching",
-                "instruction_text": "Noi moi vat voi dang hinh phu hop.",
+                "instruction_text": "Nối mỗi vật với dạng hình phù hợp.",
                 "voice_answer_enabled": False,
                 "config": {
                     "kind": "matching",
@@ -105,9 +105,9 @@ LESSON_BLUEPRINTS = [
                 },
             },
             {
-                "title": "Keo tha vao nhom dung",
+                "title": "Kéo thả vào nhóm đúng",
                 "activity_type": "drag_drop",
-                "instruction_text": "Keo tung vat vao nhom dung.",
+                "instruction_text": "Kéo từng vật vào nhóm đúng.",
                 "voice_answer_enabled": False,
                 "config": {
                     "kind": "drag_drop",
@@ -120,13 +120,13 @@ LESSON_BLUEPRINTS = [
     },
     {
         "subject_code": "VAN",
-        "title": "Nghe va noi ve do vat trong lop",
-        "description": "Bai hoc luyen nghe, quan sat va tra loi cau hoi sau khi xem noi dung minh hoa.",
+        "title": "Nghe và nói về đồ vật trong lớp",
+        "description": "Bài học luyện nghe, quan sát và trả lời câu hỏi sau khi xem nội dung minh họa.",
         "primary_level": "trung_binh",
         "estimated_minutes": 20,
         "activities": [
             {
-                "title": "Nghe va chon do vat",
+                "title": "Nghe và chọn đồ vật",
                 "activity_type": "listen_choose",
                 "instruction_text": "Nghe ky va chon dap an dung.",
                 "voice_answer_enabled": True,
@@ -138,9 +138,9 @@ LESSON_BLUEPRINTS = [
                 },
             },
             {
-                "title": "Xem video va tra loi",
+                "title": "Xem video và trả lời",
                 "activity_type": "watch_answer",
-                "instruction_text": "Xem noi dung minh hoa roi tra loi.",
+                "instruction_text": "Xem nội dung minh họa rồi trả lời.",
                 "voice_answer_enabled": False,
                 "config": {
                     "kind": "watch_answer",
@@ -149,9 +149,9 @@ LESSON_BLUEPRINTS = [
                 },
             },
             {
-                "title": "Lam theo tung buoc",
+                "title": "Làm theo từng bước",
                 "activity_type": "step_by_step",
-                "instruction_text": "Lam lan luot theo tung buoc.",
+                "instruction_text": "Làm lần lượt theo từng bước.",
                 "voice_answer_enabled": False,
                 "config": {
                     "kind": "step_by_step",
@@ -167,37 +167,37 @@ LESSON_BLUEPRINTS = [
     },
     {
         "subject_code": "KY_NANG_SONG",
-        "title": "Tu phuc vu va giao tiep lich su",
-        "description": "Bai hoc ket hop the giao tiep, tinh huong dong vai va trao doi voi AI.",
+        "title": "Tự phục vụ và giao tiếp lịch sự",
+        "description": "Bài học kết hợp thẻ giao tiếp, tình huống đóng vai và trao đổi với AI.",
         "primary_level": "trung_binh",
         "estimated_minutes": 22,
         "activities": [
             {
-                "title": "Chon the giao tiep phu hop",
+                "title": "Chọn thẻ giao tiếp phù hợp",
                 "activity_type": "aac",
                 "instruction_text": "Chon cau em muon noi trong tinh huong nay.",
                 "voice_answer_enabled": True,
                 "config": {
                     "kind": "aac",
                     "prompt": "Em muon xin them nuoc uong, em se chon the nao?",
-                    "cards": ["Con muon uong nuoc", "Con da xong", "Con can giup do"],
+                    "cards": ["Con mu?n u?ng n??c", "Con ?? xong", "Con c?n gi?p ??"],
                 },
             },
             {
-                "title": "Dong vai o thu vien",
+                "title": "Đóng vai ở thư viện",
                 "activity_type": "career_simulation",
-                "instruction_text": "Lam theo tinh huong dong vai.",
+                "instruction_text": "Làm theo tình huống đóng vai.",
                 "voice_answer_enabled": False,
                 "config": {
                     "kind": "career_simulation",
                     "scenario": "Em dong vai ban truc thu vien va huong dan mot ban moi tim sach.",
-                    "success_criteria": "Chao hoi lich su, hoi nhu cau, chi dung khu sach can tim.",
+                    "success_criteria": "Ch?o h?i l?ch s?, hoi nhu cau, chi dung khu sach can tim.",
                 },
             },
             {
-                "title": "Trao doi ngan voi AI",
+                "title": "Trao đổi ngắn với AI",
                 "activity_type": "ai_chat",
-                "instruction_text": "Trao doi ngan gon voi tro ly AI.",
+                "instruction_text": "Trao đổi ngắn gọn với trợ lý AI.",
                 "voice_answer_enabled": True,
                 "config": {
                     "kind": "ai_chat",
@@ -441,7 +441,7 @@ def create_teacher_workspace(client, teacher: dict[str, object], spec: dict[str,
 
         request_json(client, "GET", f"/api/v1/lessons/{lesson_id}/activities", 200, headers=headers)
         request_json(client, "GET", f"/api/v1/activities/{activity_ids[0]}", 200, headers=headers)
-        request_json(client, "PUT", f"/api/v1/activities/{activity_ids[0]}", 200, headers=headers, json={"instruction_text": "Lam bai cham rai va xin tro giup neu can."})
+        request_json(client, "PUT", f"/api/v1/activities/{activity_ids[0]}", 200, headers=headers, json={"instruction_text": "Làm bài chậm rãi và xin trợ giúp nếu cần."})
         request_json(
             client,
             "POST",
@@ -595,7 +595,7 @@ def exercise_ai_and_realtime(client, teacher_token: str) -> None:
         "/api/v1/ai/chat",
         200,
         headers=headers,
-        json={"message": "Goi y cach dong vien hoc sinh trong 3 cau ngan.", "context": {"subject_name": "Ky nang song", "lesson_title": "Tu phuc vu va giao tiep lich su"}},
+        json={"message": "Gợi ý cách động viên học sinh trong 3 câu ngắn.", "context": {"subject_name": "Kỹ năng sống", "lesson_title": "Tự phục vụ và giao tiếp lịch sự"}},
     )
 
     stream_response = client.get(f"/api/v1/realtime/stream?access_token={teacher_token}&last_event_id=0", buffered=False)
