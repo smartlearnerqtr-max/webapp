@@ -180,7 +180,7 @@ LESSON_BLUEPRINTS = [
                 "config": {
                     "kind": "aac",
                     "prompt": "Em muon xin them nuoc uong, em se chon the nao?",
-                    "cards": ["Con mu?n u?ng n??c", "Con ?? xong", "Con c?n gi?p ??"],
+                    "cards": ["Con muốn uống nước", "Con đã xong", "Con cần giúp đỡ"],
                 },
             },
             {
@@ -191,7 +191,7 @@ LESSON_BLUEPRINTS = [
                 "config": {
                     "kind": "career_simulation",
                     "scenario": "Em dong vai ban truc thu vien va huong dan mot ban moi tim sach.",
-                    "success_criteria": "Ch?o h?i l?ch s?, hoi nhu cau, chi dung khu sach can tim.",
+                    "success_criteria": "Chào hỏi lịch sự, hỏi nhu cầu, chỉ đúng khu sách cần tìm.",
                 },
             },
             {

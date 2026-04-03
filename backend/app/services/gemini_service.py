@@ -38,7 +38,7 @@ def build_learning_prompt(message: str, context: dict[str, Any] | None = None) -
 
     system_prompt = (
         'Ban la tro ly hoc tap cho webapp Ban hoc thong minh. '
-        'Hay tra loi ngan gon, de hieu, than thien, uu tien cau ngan va tu ng? don gian. '
+        'Hay tra loi ngan gon, de hieu, than thien, uu tien cau ngan va tu ngữ don gian. '
         'Neu nguoi dung la hoc sinh khuyet tat, hay chia nho huong dan thanh tung buoc ngan, '
         'khong dung cau qua dai va khong dua nhieu lua chon phuc tap cung luc.'
     )

@@ -39,9 +39,9 @@ const DEFAULT_CHOICE_OPTIONS = ['Đáp án A', 'Đáp án B']
 const DEFAULT_MATCHING_PAIRS = ['Hình tròn | Tròn', 'Hình vuông | Vuông']
 const DEFAULT_DRAG_ITEMS = ['Quả táo', 'Con mèo', 'Xe đạp']
 const DEFAULT_DRAG_TARGETS = ['Giỏ trái cây', 'Động vật', 'Phương tiện']
-const DEFAULT_STEPS = ['Bước 1: Quan sát', 'Buoc 2: Chọn đáp án', 'B??c 3: Nhẹn ph?n h?i']
+const DEFAULT_STEPS = ['Bước 1: Quan sát', 'Bước 2: Chọn đáp án', 'Bước 3: Nhận phản hồi']
 const DEFAULT_AAC_CARDS = ['Con muốn uống nước', 'Con cần giúp đỡ', 'Con đã xong']
-const DEFAULT_GOALS = ['Chào hỏi lịch sự', 'Trả lời ngắn gọn', 'Nhẹ tr? gi?p khi c?n']
+const DEFAULT_GOALS = ['Chào hỏi lịch sự', 'Trả lời ngắn gọn', 'Nhờ trợ giúp khi cần']
 
 function prettifyJson(value: object) {
   return JSON.stringify(value, null, 2)
@@ -359,7 +359,7 @@ export function LessonsPage() {
             <form className="form-stack" onSubmit={handleLessonSubmit}>
               <label>
                 Tiêu đề bài học
-                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhẹn bi?t h?nh tr?n" />
+                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhận biết hình tròn" />
               </label>
               <label>
                 Môn học
@@ -440,7 +440,7 @@ export function LessonsPage() {
               <form className="form-stack" onSubmit={handleActivitySubmit}>
                 <label>
                   Tên hoạt động
-                  <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder="Chọn đáp án bang giong noi" />
+                  <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder="Chọn đáp án bằng giọng nói" />
                 </label>
                 <label>
                   Loại hoạt động
