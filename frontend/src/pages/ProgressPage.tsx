@@ -1,7 +1,7 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
-import { BarChartCard } from '../components/BarChartCard'
+import { DonutChartCard } from '../components/DonutChartCard'
 import { fetchAssignmentProgress, fetchAssignments } from '../services/api'
 import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
@@ -30,15 +30,23 @@ export function ProgressPage() {
     enabled: Boolean(token && resolvedSelectedAssignmentId),
   })
 
-  const summaryChartItems = useMemo(() => {
-    if (!progressQuery.data) return []
+  const readinessChartItems = useMemo(() => {
+    if (!progressQuery.data?.progresses.length) return []
+
+    const readinessCounts = progressQuery.data.progresses.reduce(
+      (result, progress) => {
+        if (progress.readiness_status === 'can_ho_tro_them') result.needSupport += 1
+        else if (progress.readiness_status === 'san_sang_nang_do_kho') result.readyUp += 1
+        else result.onTrack += 1
+        return result
+      },
+      { needSupport: 0, onTrack: 0, readyUp: 0 },
+    )
 
     return [
-      { label: 'Học sinh', value: progressQuery.data.summary.student_count, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
-      { label: 'Đã xong', value: progressQuery.data.summary.completed_count, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
-      { label: 'Đang học', value: progressQuery.data.summary.in_progress_count, color: 'linear-gradient(180deg, #ffbe3d 0%, #f29f05 100%)' },
-      { label: 'Cần hỗ trợ', value: progressQuery.data.summary.need_support_count, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
-      { label: 'Sẵn sàng tăng mức', value: progressQuery.data.summary.ready_to_increase_count, color: 'linear-gradient(180deg, #7b8df6 0%, #5868d8 100%)' },
+      { label: 'Cần hỗ trợ', value: readinessCounts.needSupport, color: '#ec6a55', hint: 'Cần thêm trợ giúp trước khi tăng độ khó.' },
+      { label: 'Đang phù hợp', value: readinessCounts.onTrack, color: '#335dc4', hint: 'Đang học ổn định ở mức hiện tại.' },
+      { label: 'Sẵn sàng tăng mức', value: readinessCounts.readyUp, color: '#2a8f80', hint: 'Có thể cân nhắc bài khó hơn.' },
     ]
   }, [progressQuery.data])
 
@@ -92,10 +100,10 @@ export function ProgressPage() {
                     <strong>{progressQuery.data.summary.ready_to_increase_count}</strong>
                   </div>
                 </div>
-                <BarChartCard
-                  title="Biểu đồ tổng quan assignment"
-                  description="So sánh nhanh số học sinh ở từng trạng thái để giáo viên dễ quyết định bước tiếp theo."
-                  items={summaryChartItems}
+                <DonutChartCard
+                  title="Biểu đồ tròn readiness"
+                  description="Nhìn nhanh nhóm học sinh cần hỗ trợ, đang phù hợp và sẵn sàng tăng độ khó trong assignment này."
+                  items={readinessChartItems}
                 />
               </>
             ) : (
