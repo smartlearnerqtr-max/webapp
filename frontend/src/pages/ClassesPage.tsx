@@ -146,18 +146,18 @@ export function ClassesPage() {
         {selectedClass ? (
           <section className="dashboard-grid">
             <article className="roadmap-panel">
-              <h3>Thông tin vào lớp cho học sinh</h3>
+              <h3>Thông tin lớp học</h3>
               <div className="metrics-grid">
                 <div className="mini-card">
                   <span>ID lớp</span>
                   <strong>{selectedClass.id}</strong>
                 </div>
                 <div className="mini-card">
-                  <span>Mật khẩu vào lớp</span>
-                  <strong>{selectedClass.join_credential?.class_password ?? 'Đang cập nhật'}</strong>
+                  <span>Mật khẩu lớp</span>
+                  <strong>{selectedClass.join_credential?.class_password ?? 'Chưa cập nhật'}</strong>
                 </div>
                 <div className="mini-card">
-                  <span>Giáo viên</span>
+                  <span>ID Giáo viên</span>
                   <strong>{selectedClass.teacher_id}</strong>
                 </div>
               </div>
@@ -170,7 +170,7 @@ export function ClassesPage() {
                   <strong>{selectedClass.name}</strong>
                   <span>{selectedClass.grade_label ? `Khối ${selectedClass.grade_label}` : 'Chưa gắn khối'}</span>
                 </div>
-                <p>Trạng thái: {selectedClass.status}</p>
+                <p>Trạng thái: {selectedClass.status === 'active' ? 'Đang hoạt động' : selectedClass.status}</p>
                 <p>{selectedClass.student_count} học sinh, {selectedClass.subject_count} môn học.</p>
               </div>
             </article>
@@ -182,7 +182,7 @@ export function ClassesPage() {
             <h3>Thêm học sinh vào lớp</h3>
             <div className="form-stack">
               <label>
-                Học sinh chưa nằm trong lớp
+                Học sinh chưa vào lớp
                 <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)} disabled={!resolvedSelectedClassId}>
                   <option value="">Chọn học sinh</option>
                   {availableStudents.map((student) => (
@@ -200,7 +200,7 @@ export function ClassesPage() {
               {classStudentsQuery.data?.map((item) => (
                 <div key={item.id} className="student-row">
                   <strong>{item.student?.full_name ?? `Học sinh #${item.student_id}`}</strong>
-                  <span>{item.student?.preferred_input ?? 'touch'} / {item.student?.disability_level ?? 'không rõ'}</span>
+                  <span>{item.student?.preferred_input ?? 'Bàn phím'} / {item.student?.disability_level ?? 'Mức độ nhẹ'}</span>
                 </div>
               ))}
               {resolvedSelectedClassId && !classStudentsQuery.data?.length && !classStudentsQuery.isLoading ? <p>Lớp này chưa có học sinh nào.</p> : null}
@@ -211,7 +211,7 @@ export function ClassesPage() {
             <h3>Gắn môn học cho lớp</h3>
             <div className="form-stack">
               <label>
-                Môn học chưa gắn
+                Môn học có sẵn
                 <select value={selectedSubjectId} onChange={(event) => setSelectedSubjectId(event.target.value)} disabled={!resolvedSelectedClassId}>
                   <option value="">Chọn môn học</option>
                   {availableSubjects.map((subject) => (
@@ -239,7 +239,7 @@ export function ClassesPage() {
             <article key={classItem.id} className="info-card">
               <span>{classItem.grade_label ? `Khối ${classItem.grade_label}` : 'Lớp học'}</span>
               <strong>{classItem.name}</strong>
-              <p>ID {classItem.id} | mật khẩu {classItem.join_credential?.class_password ?? 'đang cập nhật'}</p>
+              <p>ID: {classItem.id} | Mật khẩu: {classItem.join_credential?.class_password ?? 'Chưa cập nhật'}</p>
               <p>{classItem.student_count} học sinh, {classItem.subject_count} môn học</p>
             </article>
           ))}

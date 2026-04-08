@@ -20,30 +20,30 @@ type ActivityType =
 type WatchAnswerSource = 'external' | 'upload'
 
 const LEVEL_OPTIONS = [
-  { value: 'nang', label: 'Nang' },
-  { value: 'trung_binh', label: 'Trung binh' },
-  { value: 'nhe', label: 'Nhe' },
+  { value: 'nang', label: 'Nặng' },
+  { value: 'trung_binh', label: 'Trung bình' },
+  { value: 'nhe', label: 'Nhẹ' },
 ]
 
 const ACTIVITY_TYPES: Array<{ value: ActivityType; label: string; description: string }> = [
-  { value: 'multiple_choice', label: 'Chon dap an', description: 'Tao cac lua chon va danh dau dap an dung.' },
-  { value: 'matching', label: 'Noi cap', description: 'Tao cac cap thong tin de hoc sinh ghep lai.' },
-  { value: 'drag_drop', label: 'Keo tha', description: 'Tao cac muc de hoc sinh keo vao dung vi tri.' },
-  { value: 'listen_choose', label: 'Nghe va chon', description: 'Them noi dung nghe roi cho hoc sinh chon dap an.' },
-  { value: 'watch_answer', label: 'Xem va tra loi', description: 'Them anh/video roi yeu cau hoc sinh quan sat va tra loi.' },
-  { value: 'step_by_step', label: 'Tung buoc', description: 'Chia hoat dong thanh cac buoc ngan, de theo doi.' },
-  { value: 'aac', label: 'The giao tiep', description: 'Tao bo the de ho tro giao tiep va phan hoi.' },
-  { value: 'career_simulation', label: 'Mo phong nghe nghiep', description: 'Thiet ke tinh huong thuc hanh theo vai tro.' },
-  { value: 'ai_chat', label: 'Trao doi voi AI', description: 'Them loi mo dau va muc tieu trao doi voi tro ly AI.' },
+  { value: 'multiple_choice', label: 'Chọn đáp án', description: 'Tạo các lựa chọn và đánh dấu đáp án đúng.' },
+  { value: 'matching', label: 'Nối cặp', description: 'Tạo các cặp thông tin để học sinh ghép lại.' },
+  { value: 'drag_drop', label: 'Kéo thả', description: 'Tạo các mục để học sinh kéo vào đúng vị trí.' },
+  { value: 'listen_choose', label: 'Nghe và chọn', description: 'Thêm nội dung nghe rồi cho học sinh chọn đáp án.' },
+  { value: 'watch_answer', label: 'Xem và trả lời', description: 'Thêm ảnh/video rồi yêu cầu học sinh quan sát và trả lời.' },
+  { value: 'step_by_step', label: 'Từng bước', description: 'Chia hoạt động thành các bước ngắn, dễ theo dõi.' },
+  { value: 'aac', label: 'Thẻ giao tiếp', description: 'Tạo bộ thẻ để hỗ trợ giao tiếp và phản hồi.' },
+  { value: 'career_simulation', label: 'Mô phỏng nghề nghiệp', description: 'Thiết kế tình huống thực hành theo vai trò.' },
+  { value: 'ai_chat', label: 'Trao đổi với AI', description: 'Thêm lời mở đầu và mục tiêu trao đổi với trợ lý AI.' },
 ]
 
-const DEFAULT_CHOICE_OPTIONS = ['Dap an A', 'Dap an B']
-const DEFAULT_MATCHING_PAIRS = ['Hinh tron | Tron', 'Hinh vuong | Vuong']
-const DEFAULT_DRAG_ITEMS = ['Qua tao', 'Con meo', 'Xe dap']
-const DEFAULT_DRAG_TARGETS = ['Gio trai cay', 'Dong vat', 'Phuong tien']
-const DEFAULT_STEPS = ['Buoc 1: Quan sat', 'Buoc 2: Chon dap an', 'Buoc 3: Nhan phan hoi']
-const DEFAULT_AAC_CARDS = ['Con muon uong nuoc', 'Con can giup do', 'Con da xong']
-const DEFAULT_GOALS = ['Chao hoi lich su', 'Tra loi ngan gon', 'Nho tro giup khi can']
+const DEFAULT_CHOICE_OPTIONS = ['Đáp án A', 'Đáp án B']
+const DEFAULT_MATCHING_PAIRS = ['Hình tròn | Tròn', 'Hình vuông | Vuông']
+const DEFAULT_DRAG_ITEMS = ['Quả táo', 'Con mèo', 'Xe đạp']
+const DEFAULT_DRAG_TARGETS = ['Giỏ trái cây', 'Động vật', 'Phương tiện']
+const DEFAULT_STEPS = ['Bước 1: Quan sát', 'Bước 2: Chọn đáp án', 'Bước 3: Nhận phản hồi']
+const DEFAULT_AAC_CARDS = ['Con muốn uống nước', 'Con cần giúp đỡ', 'Con đã xong']
+const DEFAULT_GOALS = ['Chào hỏi lịch sự', 'Trả lời ngắn gọn', 'Nhờ trợ giúp khi cần']
 
 function prettifyJson(value: object) {
   return JSON.stringify(value, null, 2)
@@ -67,25 +67,25 @@ function parsePairs(value: string) {
 function defaultInstructionForType(activityType: ActivityType) {
   switch (activityType) {
     case 'multiple_choice':
-      return 'Hay doc cau hoi va chon dap an dung.'
+      return 'Hãy đọc câu hỏi và chọn đáp án đúng.'
     case 'matching':
-      return 'Hay noi cac cap phu hop voi nhau.'
+      return 'Hãy nối các cặp phù hợp với nhau.'
     case 'drag_drop':
-      return 'Hay keo tung muc vao dung vi tri.'
+      return 'Hãy kéo từng mục vào đúng vị trí.'
     case 'listen_choose':
-      return 'Hay nghe ky roi chon dap an dung.'
+      return 'Hãy nghe kỹ rồi chọn đáp án đúng.'
     case 'watch_answer':
-      return 'Hay xem noi dung truoc roi tra loi cau hoi.'
+      return 'Hãy xem nội dung trước rồi trả lời câu hỏi.'
     case 'step_by_step':
-      return 'Hay lam lan luot tung buoc theo huong dan.'
+      return 'Hãy làm lần lượt từng bước theo hướng dẫn.'
     case 'aac':
-      return 'Hay chon the phu hop voi dieu em muon noi.'
+      return 'Hãy chọn thẻ phù hợp với điều em muốn nói.'
     case 'career_simulation':
-      return 'Hay thuc hien hoat dong theo tinh huong mo phong.'
+      return 'Hãy thực hiện hoạt động theo tình huống mô phỏng.'
     case 'ai_chat':
-      return 'Hay trao doi ngan gon voi tro ly de hoan thanh nhiem vu.'
+      return 'Hãy trao đổi ngắn gọn với trợ lý để hoàn thành nhiệm vụ.'
     default:
-      return 'Hay lam theo huong dan cua hoat dong nay.'
+      return 'Hãy làm theo hướng dẫn của hoạt động này.'
   }
 }
 
@@ -216,7 +216,7 @@ export function LessonsPage() {
   const [activityType, setActivityType] = useState<ActivityType>('multiple_choice')
   const [instructionText, setInstructionText] = useState(defaultInstructionForType('multiple_choice'))
   const [voiceAnswerEnabled, setVoiceAnswerEnabled] = useState(defaultVoiceEnabledForType('multiple_choice'))
-  const [prompt, setPrompt] = useState('Cau hoi chinh cua hoat dong')
+  const [prompt, setPrompt] = useState('Câu hỏi chính của hoạt động')
   const [choiceOptionsText, setChoiceOptionsText] = useState(DEFAULT_CHOICE_OPTIONS.join('\n'))
   const [correctChoice, setCorrectChoice] = useState(DEFAULT_CHOICE_OPTIONS[0])
   const [matchingPairsText, setMatchingPairsText] = useState(DEFAULT_MATCHING_PAIRS.join('\n'))
@@ -225,12 +225,12 @@ export function LessonsPage() {
   const [mediaUrl, setMediaUrl] = useState('')
   const [watchAnswerSource, setWatchAnswerSource] = useState<WatchAnswerSource>('external')
   const [mediaFile, setMediaFile] = useState<File | null>(null)
-  const [questionPrompt, setQuestionPrompt] = useState('Sau khi xem xong, em thay dieu gi?')
+  const [questionPrompt, setQuestionPrompt] = useState('Sau khi xem xong, em thấy điều gì?')
   const [stepListText, setStepListText] = useState(DEFAULT_STEPS.join('\n'))
   const [aacCardsText, setAacCardsText] = useState(DEFAULT_AAC_CARDS.join('\n'))
-  const [scenarioText, setScenarioText] = useState('Em vao vai nhan vien thu vien va giup ban chon sach phu hop.')
-  const [successCriteriaText, setSuccessCriteriaText] = useState('Chon dung vai tro, lam du buoc, tra loi lich su.')
-  const [aiStarterPrompt, setAiStarterPrompt] = useState('Hay dong vai ban hoc va hoi em 3 cau ngan ve bai hoc nay.')
+  const [scenarioText, setScenarioText] = useState('Em vào vai nhân viên thư viện và giúp bạn chọn sách phù hợp.')
+  const [successCriteriaText, setSuccessCriteriaText] = useState('Chọn đúng vai trò, làm đủ bước, trả lời lịch sự.')
+  const [aiStarterPrompt, setAiStarterPrompt] = useState('Hãy đóng vai bạn học và hỏi em 3 câu ngắn về bài học này.')
   const [aiGoalText, setAiGoalText] = useState(DEFAULT_GOALS.join('\n'))
   const [activityFormError, setActivityFormError] = useState<string | null>(null)
   const [isActivityFormOpen, setIsActivityFormOpen] = useState(false)
@@ -377,7 +377,7 @@ export function LessonsPage() {
       ])
     },
     onError: (error) => {
-      setActivityFormError(error instanceof Error ? error.message : 'Khong the tao hoat dong')
+      setActivityFormError(error instanceof Error ? error.message : 'Không thể tạo hoạt động')
     },
   })
 
@@ -410,28 +410,28 @@ export function LessonsPage() {
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Bai hoc va hoat dong ben trong bai hoc</h2>
+          <h2>Bài học và hoạt động bên trong bài học</h2>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tao bai hoc</h3>
+            <h3>Tạo bài học</h3>
             <form className="form-stack" onSubmit={handleLessonSubmit}>
               <label>
-                Tieu de bai hoc
-                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhan biet hinh tron" />
+                Tiêu đề bài học
+                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Nhận biết hình vuông" />
               </label>
               <label>
-                Mon hoc
+                Môn học
                 <select value={resolvedSubjectId} onChange={(event) => setSubjectId(event.target.value)}>
-                  <option value="">Chon mon hoc</option>
+                  <option value="">Chọn môn học</option>
                   {subjectsQuery.data?.map((subject) => (
                     <option key={subject.id} value={subject.id}>{subject.name}</option>
                   ))}
                 </select>
               </label>
               <label>
-                Muc do chinh
+                Mức độ chính
                 <select value={primaryLevel} onChange={(event) => setPrimaryLevel(event.target.value)}>
                   {LEVEL_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -439,22 +439,22 @@ export function LessonsPage() {
                 </select>
               </label>
               <label>
-                Mo ta ngan
-                <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bai hoc co ho tro media" />
+                Mô tả ngắn
+                <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Bài học có hỗ trợ media" />
               </label>
               <label>
-                So phut du kien
+                Số phút dự kiến
                 <input value={estimatedMinutes} onChange={(event) => setEstimatedMinutes(event.target.value)} inputMode="numeric" />
               </label>
               <button className="action-button" type="submit" disabled={createLessonMutation.isPending}>
-                {createLessonMutation.isPending ? 'Dang tao...' : 'Tao bai hoc'}
+                {createLessonMutation.isPending ? 'Đang tạo...' : 'Tạo bài học'}
               </button>
               {createLessonMutation.error ? <p className="error-text">{(createLessonMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chon bai hoc dang chinh</h3>
+            <h3>Chọn bài học đang chỉnh</h3>
             <div className="tag-wrap">
               {lessonsQuery.data?.map((lesson) => (
                 <button
@@ -467,7 +467,7 @@ export function LessonsPage() {
                 </button>
               ))}
             </div>
-            {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Chua co bai hoc nao, hay tao bai hoc dau tien.</p> : null}
+            {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Chưa có bài học nào, hãy tạo bài học đầu tiên.</p> : null}
           </article>
         </section>
 
@@ -493,19 +493,19 @@ export function LessonsPage() {
                 transition: 'all 200ms ease',
               }}
             >
-              <span>Them hoat dong vao bai hoc</span>
+              <span>Thêm hoạt động vào bài học</span>
               <span style={{ fontSize: '1.3rem' }}>{isActivityFormOpen ? '-' : '+'}</span>
             </button>
 
             {isActivityFormOpen ? (
               <form className="form-stack" onSubmit={handleActivitySubmit}>
                 <label>
-                  Ten hoat dong
-                  <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder="Xem video va tra loi" />
+                  Tên hoạt động
+                  <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder="Xem video và trả lời" />
                 </label>
 
                 <label>
-                  Loai hoat dong
+                  Loại hoạt động
                   <select value={activityType} onChange={handleActivityTypeChange}>
                     {ACTIVITY_TYPES.map((option) => (
                       <option key={option.value} value={option.value}>{option.label}</option>
@@ -516,22 +516,22 @@ export function LessonsPage() {
                 <p className="helper-text">{ACTIVITY_TYPES.find((option) => option.value === activityType)?.description}</p>
 
                 <label>
-                  Huong dan hien thi cho hoc sinh
-                  <input value={instructionText} onChange={(event) => setInstructionText(event.target.value)} placeholder="Hay doc va lam theo huong dan" />
+                  Hướng dẫn hiển thị cho học sinh
+                  <input value={instructionText} onChange={(event) => setInstructionText(event.target.value)} placeholder="Hãy đọc và làm theo hướng dẫn" />
                 </label>
 
                 {(activityType === 'multiple_choice' || activityType === 'listen_choose') ? (
                   <div className="config-card">
                     <label>
-                      Cau hoi hoac noi dung can nghe
-                      <input value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="Vat nao co dang tron?" />
+                      Câu hỏi hoặc nội dung cần nghe
+                      <input value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="Vật nào có dạng tròn?" />
                     </label>
                     <label>
-                      Danh sach lua chon, moi dong mot dap an
+                      Danh sách lựa chọn, mỗi dòng một đáp án
                       <textarea value={choiceOptionsText} onChange={(event) => setChoiceOptionsText(event.target.value)} rows={4} />
                     </label>
                     <label>
-                      Dap an dung
+                      Đáp án đúng
                       <select value={correctChoice} onChange={(event) => setCorrectChoice(event.target.value)}>
                         {choiceOptions.map((option) => (
                           <option key={option} value={option}>{option}</option>
@@ -544,7 +544,7 @@ export function LessonsPage() {
                 {activityType === 'matching' ? (
                   <div className="config-card">
                     <label>
-                      Cac cap can noi, moi dong theo mau Trai | Phai
+                      Các cặp cần nối, mỗi dòng theo mẫu Trái | Phải
                       <textarea value={matchingPairsText} onChange={(event) => setMatchingPairsText(event.target.value)} rows={5} />
                     </label>
                   </div>
@@ -553,11 +553,11 @@ export function LessonsPage() {
                 {activityType === 'drag_drop' ? (
                   <div className="config-card config-grid-2">
                     <label>
-                      Cac muc can keo, moi dong mot muc
+                      Các mục cần kéo, mỗi dòng một mục
                       <textarea value={dragItemsText} onChange={(event) => setDragItemsText(event.target.value)} rows={5} />
                     </label>
                     <label>
-                      Cac vi tri dich, moi dong mot vi tri
+                      Các vị trí đích, mỗi dòng một vị trí
                       <textarea value={dragTargetsText} onChange={(event) => setDragTargetsText(event.target.value)} rows={5} />
                     </label>
                   </div>
@@ -566,31 +566,31 @@ export function LessonsPage() {
                 {activityType === 'watch_answer' ? (
                   <div className="config-card">
                     <label>
-                      Nguon media
+                      Nguồn media
                       <select value={watchAnswerSource} onChange={(event) => setWatchAnswerSource(event.target.value as WatchAnswerSource)}>
-                        <option value="external">Nhap link ngoai</option>
-                        <option value="upload">Tai file tu may</option>
+                        <option value="external">Nhập link ngoài</option>
+                        <option value="upload">Tải file từ máy</option>
                       </select>
                     </label>
 
                     {watchAnswerSource === 'external' ? (
                       <label>
-                        Link video hoac hinh minh hoa
+                        Link video hoặc hình minh họa
                         <input value={mediaUrl} onChange={(event) => setMediaUrl(event.target.value)} placeholder="https://..." />
                       </label>
                     ) : (
                       <label>
-                        Chon file video hoac anh
+                        Chọn file video hoặc ảnh
                         <input type="file" accept="image/*,video/*" onChange={(event) => setMediaFile(event.target.files?.[0] ?? null)} />
                       </label>
                     )}
 
-                    {watchAnswerSource === 'upload' && mediaFile ? <p className="helper-text">Da chon: {mediaFile.name}</p> : null}
-                    {watchAnswerSource === 'external' ? <p className="helper-text">Ho tro tot nhat voi anh truc tiep, video MP4/WebM, YouTube va Google Drive.</p> : null}
+                    {watchAnswerSource === 'upload' && mediaFile ? <p className="helper-text">Đã chọn: {mediaFile.name}</p> : null}
+                    {watchAnswerSource === 'external' ? <p className="helper-text">Hỗ trợ tốt nhất với ảnh trực tiếp, video MP4/WebM, YouTube và Google Drive.</p> : null}
 
                     <label>
-                      Cau hoi sau khi xem
-                      <input value={questionPrompt} onChange={(event) => setQuestionPrompt(event.target.value)} placeholder="Em thay ban nho dang lam gi?" />
+                      Câu hỏi sau khi xem
+                      <input value={questionPrompt} onChange={(event) => setQuestionPrompt(event.target.value)} placeholder="Em thấy bạn nhỏ đang làm gì?" />
                     </label>
                   </div>
                 ) : null}
@@ -598,7 +598,7 @@ export function LessonsPage() {
                 {activityType === 'step_by_step' ? (
                   <div className="config-card">
                     <label>
-                      Cac buoc huong dan, moi dong mot buoc
+                      Các bước hướng dẫn, mỗi dòng một bước
                       <textarea value={stepListText} onChange={(event) => setStepListText(event.target.value)} rows={5} />
                     </label>
                   </div>
@@ -607,7 +607,7 @@ export function LessonsPage() {
                 {activityType === 'aac' ? (
                   <div className="config-card">
                     <label>
-                      Cac the giao tiep, moi dong mot the
+                      Các thẻ giao tiếp, mỗi dòng một thẻ
                       <textarea value={aacCardsText} onChange={(event) => setAacCardsText(event.target.value)} rows={5} />
                     </label>
                   </div>
@@ -616,11 +616,11 @@ export function LessonsPage() {
                 {activityType === 'career_simulation' ? (
                   <div className="config-card">
                     <label>
-                      Tinh huong mo phong
+                      Tình huống mô phỏng
                       <textarea value={scenarioText} onChange={(event) => setScenarioText(event.target.value)} rows={4} />
                     </label>
                     <label>
-                      Tieu chi hoan thanh
+                      Tiêu chí hoàn thành
                       <textarea value={successCriteriaText} onChange={(event) => setSuccessCriteriaText(event.target.value)} rows={3} />
                     </label>
                   </div>
@@ -629,11 +629,11 @@ export function LessonsPage() {
                 {activityType === 'ai_chat' ? (
                   <div className="config-card">
                     <label>
-                      Loi mo dau cho AI
+                      Lời mở đầu cho AI
                       <textarea value={aiStarterPrompt} onChange={(event) => setAiStarterPrompt(event.target.value)} rows={4} />
                     </label>
                     <label>
-                      Muc tieu can dat, moi dong mot muc tieu
+                      Mục tiêu cần đạt, mỗi dòng một mục tiêu
                       <textarea value={aiGoalText} onChange={(event) => setAiGoalText(event.target.value)} rows={4} />
                     </label>
                   </div>
@@ -641,11 +641,11 @@ export function LessonsPage() {
 
                 <label className="checkbox-row">
                   <input type="checkbox" checked={voiceAnswerEnabled} onChange={(event) => setVoiceAnswerEnabled(event.target.checked)} />
-                  Bat voice answer cho hoat dong nay
+                  Bật voice answer cho hoạt động này
                 </label>
 
                 <button className="action-button" type="submit" disabled={!resolvedSelectedLessonId || createActivityMutation.isPending}>
-                  {createActivityMutation.isPending ? 'Dang them...' : 'Them hoat dong'}
+                  {createActivityMutation.isPending ? 'Đang thêm...' : 'Thêm hoạt động'}
                 </button>
 
                 {activityFormError ? <p className="error-text">{activityFormError}</p> : null}
@@ -654,27 +654,27 @@ export function LessonsPage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chi tiet bai hoc</h3>
+            <h3>Chi tiết bài học</h3>
             {selectedLesson ? (
               <div className="detail-stack">
                 <div className="student-row">
                   <strong>{selectedLesson.title}</strong>
-                  <span>{selectedLesson.subject?.name ?? 'Chua co mon'} / {levelLabel(selectedLesson.primary_level)}</span>
+                  <span>{selectedLesson.subject?.name ?? 'Chưa có môn'} / {levelLabel(selectedLesson.primary_level)}</span>
                 </div>
-                <p>{lessonDetailQuery.data?.description ?? selectedLesson.description ?? 'Chua co mo ta.'}</p>
+                <p>{lessonDetailQuery.data?.description ?? selectedLesson.description ?? 'Chưa có mô tả.'}</p>
                 <div className="student-list compact-list">
                   {lessonDetailQuery.data?.activities?.map((activity) => (
                     <div key={activity.id} className="student-row">
                       <strong>{activity.sort_order}. {activity.title}</strong>
                       <span>{activityLabel(activity.activity_type as ActivityType)} {activity.voice_answer_enabled ? '/ voice' : ''}</span>
-                      <p>{activity.instruction_text ?? 'Chua co huong dan.'}</p>
+                      <p>{activity.instruction_text ?? 'Chưa có hướng dẫn.'}</p>
                     </div>
                   ))}
-                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>Bai hoc nay chua co hoat dong nao.</p> : null}
+                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>Bài học này chưa có hoạt động nào.</p> : null}
                 </div>
               </div>
             ) : (
-              <p>Hay chon mot bai hoc de xem chi tiet.</p>
+              <p>Hãy chọn một bài học để xem chi tiết.</p>
             )}
           </article>
         </section>

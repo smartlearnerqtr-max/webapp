@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { BarChartCard } from '../components/BarChartCard'
@@ -155,7 +155,7 @@ export function ParentPage() {
                 </div>
                 <div className="metrics-grid">
                   <div className="info-card mini-card">
-                    <span>Tổng assignment</span>
+                    <span>Tổng bài tập</span>
                     <strong>{item.progress_summary.total_assignments}</strong>
                   </div>
                   <div className="info-card mini-card">
@@ -177,8 +177,8 @@ export function ParentPage() {
                   items={childProgressChartItems}
                 />
                 <p className="helper-text">Tiến độ gần nhất: {item.progress_summary.last_progress_percent}%.</p>
-                <p>Bài học gần nhất: {item.progress_summary.last_assignment_title ?? 'Chưa có assignment nào'}</p>
-                <p>Readiness: {readinessLabelMap[item.progress_summary.readiness_status] ?? item.progress_summary.readiness_status}</p>
+                <p>Bài học gần nhất: {item.progress_summary.last_assignment_title ?? 'Chưa có bài tập nào'}</p>
+                <p>Mức độ sẵn sàng: {readinessLabelMap[item.progress_summary.readiness_status] ?? item.progress_summary.readiness_status}</p>
                 <div className="tag-wrap">
                   {item.classes.map((classroom) => (
                     <span key={classroom.id} className="subject-pill">{classroom.name}</span>

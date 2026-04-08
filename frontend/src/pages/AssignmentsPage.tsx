@@ -75,7 +75,7 @@ export function AssignmentsPage() {
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tạo assignment</h3>
+            <h3>Tạo bài tập</h3>
             <div className="form-stack">
               <label>
                 Lớp học
@@ -111,7 +111,7 @@ export function AssignmentsPage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Preview assignment</h3>
+            <h3>Xem trước bài tập</h3>
             <div className="detail-stack">
               <div className="student-row">
                 <strong>{selectedClass?.name ?? 'Chưa chọn lớp'}</strong>
@@ -119,22 +119,22 @@ export function AssignmentsPage() {
               </div>
               <div className="student-row">
                 <strong>{selectedLesson?.title ?? 'Chưa chọn bài học'}</strong>
-                <span>{selectedLesson?.subject?.name ?? 'Chưa có môn học'} / {selectedLesson?.activity_count ?? 0} activity</span>
+                <span>{selectedLesson?.subject?.name ?? 'Chưa có môn học'} / {selectedLesson?.activity_count ?? 0} hoạt động</span>
               </div>
             </div>
           </article>
         </section>
 
         <section className="roadmap-panel">
-          <h3>Danh sách assignment đã tạo</h3>
+          <h3>Danh sách bài tập đã tạo</h3>
           <div className="student-list compact-list">
             {assignmentsQuery.data?.map((assignment) => (
               <div key={assignment.id} className="student-row">
-                <strong>{assignment.lesson?.title ?? `Assignment #${assignment.id}`}</strong>
+                <strong>{assignment.lesson?.title ?? `Bài tập #${assignment.id}`}</strong>
                 <span>{assignment.classroom?.name ?? 'Không rõ lớp'} / {assignment.student_ids.length} học sinh / {assignment.status}</span>
               </div>
             ))}
-            {!assignmentsQuery.data?.length && !assignmentsQuery.isLoading ? <p>Chưa có assignment nào.</p> : null}
+            {!assignmentsQuery.data?.length && !assignmentsQuery.isLoading ? <p>Chưa có bài tập nào.</p> : null}
           </div>
         </section>
       </div>

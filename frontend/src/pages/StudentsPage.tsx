@@ -105,7 +105,7 @@ export function StudentsPage() {
               <div className="detail-stack">
                 <div className="student-row">
                   <strong>{selectedStudent.full_name}</strong>
-                  <span>{selectedStudent.disability_level} / {selectedStudent.preferred_input}</span>
+                  <span>{LEVEL_OPTIONS.find(o => o.value === selectedStudent.disability_level)?.label ?? selectedStudent.disability_level} / {selectedStudent.preferred_input === 'touch' ? 'Cảm ứng' : 'Bàn phím'}</span>
                 </div>
                 <p>Ghi chú hỗ trợ: {selectedStudent.support_note ?? 'Chưa có ghi chú.'}</p>
                 <p>Số giáo viên đang liên kết: {studentTeachersQuery.data?.length ?? 0}</p>

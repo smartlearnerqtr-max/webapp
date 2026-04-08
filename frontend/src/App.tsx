@@ -1,6 +1,7 @@
 import './App.css'
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { useIsFetching, useIsMutating } from '@tanstack/react-query'
 
 import { RealtimeBridge } from './components/RealtimeBridge'
 import { AdminPage } from './pages/AdminPage'
@@ -59,6 +60,9 @@ function App() {
   const clearSession = useAuthStore((state) => state.clearSession)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+  const isFetching = useIsFetching()
+  const isMutating = useIsMutating()
+  const isLoading = isFetching > 0 || isMutating > 0
 
   useEffect(() => {
     hydrate()
@@ -82,6 +86,7 @@ function App() {
 
   return (
     <div className="app-shell">
+      {isLoading && <div className="global-loading-bar" />}
       <button
         className="menu-toggle-fixed"
         onClick={() => setIsMenuOpen((current) => !current)}

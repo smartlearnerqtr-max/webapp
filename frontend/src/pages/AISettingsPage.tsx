@@ -105,11 +105,11 @@ export function AISettingsPage() {
           <article className="roadmap-panel">
             <h3>Trạng thái hiện tại</h3>
             <div className="settings-grid">
-              <div><span>Provider</span><strong>{settingsQuery.data?.provider ?? 'gemini'}</strong></div>
-              <div><span>Model</span><strong>{settingsQuery.data?.model_name ?? 'gemini-2.5-flash'}</strong></div>
+              <div><span>Nhà cung cấp</span><strong>{settingsQuery.data?.provider ?? 'Gemini'}</strong></div>
+              <div><span>Tên Model</span><strong>{settingsQuery.data?.model_name ?? 'gemini-2.0-flash'}</strong></div>
               <div><span>API key</span><strong>{settingsQuery.data?.api_key_masked ?? 'Chưa lưu'}</strong></div>
-              <div><span>Status</span><strong>{settingsQuery.data?.status ?? 'chưa_cấu_hình'}</strong></div>
-              <div><span>Last error</span><strong>{settingsQuery.data?.last_error_message ?? 'Không có'}</strong></div>
+              <div><span>Trạng thái</span><strong>{settingsQuery.data?.status === 'configured' ? 'Đã cấu hình' : 'Chưa cấu hình'}</strong></div>
+              <div><span>Lỗi gần nhất</span><strong>{settingsQuery.data?.last_error_message ?? 'Không có'}</strong></div>
             </div>
           </article>
         </section>
@@ -120,31 +120,31 @@ export function AISettingsPage() {
             <form className="form-stack" onSubmit={handleChatSubmit}>
               <label>
                 Môn học
-                <input value={subjectName} onChange={(event) => setSubjectName(event.target.value)} placeholder="Toán" />
+                <input value={subjectName} onChange={(event) => setSubjectName(event.target.value)} placeholder="Toán học" />
               </label>
               <label>
                 Bài học
-                <input value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)} placeholder="Nhận biết hình tròn" />
+                <input value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)} placeholder="Nhận biết hình vuông" />
               </label>
               <label>
                 Loại hoạt động
                 <input value={activityType} onChange={(event) => setActivityType(event.target.value)} placeholder="multiple_choice" />
               </label>
               <label>
-                Prompt
+                Nội dung yêu cầu (Prompt)
                 <textarea value={message} onChange={(event) => setMessage(event.target.value)} rows={6} />
               </label>
               <button className="action-button" type="submit" disabled={chatMutation.isPending || !settingsQuery.data}>
-                {chatMutation.isPending ? 'Đang gọi Gemini...' : 'Gửi prompt'}
+                {chatMutation.isPending ? 'Đang gọi Gemini...' : 'Gửi yêu cầu'}
               </button>
               {chatMutation.error ? <p className="error-text">{(chatMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Phản hồi AI</h3>
+            <h3>Phản hồi từ AI</h3>
             <div className="response-box">
-              {aiReply ? <p>{aiReply}</p> : <p>Chưa có phản hồi.</p>}
+              {aiReply ? <p>{aiReply}</p> : <p>Chưa có phản hồi từ hệ thống.</p>}
             </div>
           </article>
         </section>

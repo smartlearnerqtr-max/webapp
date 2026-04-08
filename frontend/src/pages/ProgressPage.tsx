@@ -59,14 +59,14 @@ export function ProgressPage() {
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Chọn assignment</h3>
+            <h3>Chọn bài tập</h3>
             <div className="form-stack">
               <label>
-                Assignment cần xem
+                Bài tập cần xem
                 <select value={resolvedSelectedAssignmentId} onChange={(event) => setSelectedAssignmentId(event.target.value)}>
-                  <option value="">Chọn assignment</option>
+                  <option value="">Chọn bài tập</option>
                   {assignmentsQuery.data?.map((assignment) => (
-                    <option key={assignment.id} value={assignment.id}>{assignment.lesson?.title ?? `Assignment #${assignment.id}`} - {assignment.classroom?.name ?? 'Không rõ lớp'}</option>
+                    <option key={assignment.id} value={assignment.id}>{assignment.lesson?.title ?? `Bài tập #${assignment.id}`} - {assignment.classroom?.name ?? 'Không rõ lớp'}</option>
                   ))}
                 </select>
               </label>
@@ -100,13 +100,13 @@ export function ProgressPage() {
                   </div>
                 </div>
                 <DonutChartCard
-                  title="Biểu đồ tròn readiness"
-                  description="Nhìn nhanh nhóm học sinh cần hỗ trợ, đang phù hợp và sẵn sàng tăng độ khó trong assignment này."
+                  title="Biểu đồ tròn sẵn sàng (readiness)"
+                  description="Nhìn nhanh nhóm học sinh cần hỗ trợ, đang phù hợp và sẵn sàng tăng độ khó trong bài tập này."
                   items={readinessChartItems}
                 />
               </>
             ) : (
-              <p>Chọn assignment để xem tổng quan tiến độ.</p>
+              <p>Chọn bài tập để xem tổng quan tiến độ.</p>
             )}
           </article>
         </section>
