@@ -55,10 +55,6 @@ export function StudentsPage() {
       <div className="page-stack">
         <section className="roadmap-panel">
           <h2>Quản lý hồ sơ học sinh</h2>
-          <p>
-            Giáo viên có thể tạo học sinh mới cho mình, và với mô hình mới, một học sinh có thể học với nhiều giáo viên.
-            Màn này giúp xem nhanh một học sinh hiện đang được kết nối với những giáo viên nào.
-          </p>
         </section>
 
         <section className="auth-layout">

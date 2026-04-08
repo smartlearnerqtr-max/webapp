@@ -75,7 +75,6 @@ export function AISettingsPage() {
       <div className="page-stack">
         <section className="roadmap-panel">
           <h2>Cấu hình Gemini và hỏi đáp AI cơ bản</h2>
-          <p>Key được gửi về backend Flask, mã hóa trước khi lưu. Mỗi request Gemini đi qua server để tránh lộ key ra frontend và có log để debug.</p>
         </section>
 
         <section className="auth-layout">
@@ -145,7 +144,7 @@ export function AISettingsPage() {
           <article className="roadmap-panel">
             <h3>Phản hồi AI</h3>
             <div className="response-box">
-              {aiReply ? <p>{aiReply}</p> : <p>Chưa có phản hồi nào. Hãy test key hoặc gửi prompt để kiểm tra luồng Gemini.</p>}
+              {aiReply ? <p>{aiReply}</p> : <p>Chưa có phản hồi.</p>}
             </div>
           </article>
         </section>

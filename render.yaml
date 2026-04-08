@@ -6,7 +6,7 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     preDeployCommand: python init_and_seed.py
-    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 30 --keep-alive 5
     healthCheckPath: /api/v1/health
     envVars:
       - key: FLASK_ENV
@@ -20,7 +20,7 @@ services:
       - key: ADMIN_EMAIL
         value: datminhtuan07@gmail.com
       - key: ADMIN_PASSWORD
-        value: tuanminh28
+        sync: false
       - key: DATABASE_URL
         fromDatabase:
           name: ban-hoc-db

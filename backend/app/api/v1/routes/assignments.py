@@ -4,6 +4,7 @@ from datetime import datetime, UTC
 
 from flask import request
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
+from sqlalchemy.orm import joinedload, selectinload
 
 from ....extensions import db
 from ....models import Classroom, ClassStudent, Lesson, LessonAssignment, LessonAssignmentStudent, ParentStudentLink, StudentLessonProgress, StudentProfile, Subject, TeacherProfile, User
@@ -13,6 +14,16 @@ from ....utils.responses import error_response, success_response
 from .. import api_v1
 
 VALID_TARGET_TYPES = {'class', 'group', 'student'}
+
+
+def _parse_date(date_str: str | None) -> datetime | None:
+    if not date_str:
+        return None
+    try:
+        # Handling ISO format from frontend (e.g., 2024-04-08T10:00:00Z)
+        return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+    except (ValueError, TypeError):
+        return None
 
 
 def _current_user():
@@ -133,7 +144,11 @@ def list_assignments():
     user, error = _require_teacher_user()
     if error:
         return error
-    query = LessonAssignment.query.filter_by(assigned_by_teacher_id=user.teacher_profile.id)
+    query = LessonAssignment.query.options(
+        joinedload(LessonAssignment.lesson),
+        joinedload(LessonAssignment.classroom),
+        joinedload(LessonAssignment.subject)
+    ).filter_by(assigned_by_teacher_id=user.teacher_profile.id)
     if request.args.get('class_id'):
         query = query.filter_by(class_id=int(request.args['class_id']))
     assignments = query.order_by(LessonAssignment.created_at.desc()).all()
@@ -184,7 +199,7 @@ def create_assignment():
         subject_id=subject.id,
         assigned_by_teacher_id=user.teacher_profile.id,
         target_type=target_type,
-        due_at=payload.get('due_at'),
+        due_at=_parse_date(payload.get('due_at')),
         required_completion_percent=payload.get('required_completion_percent') or 100,
         status=payload.get('status') or 'active',
     )
@@ -264,7 +279,10 @@ def update_assignment(assignment_id: int):
     payload = request.get_json(silent=True) or {}
     for field in ['due_at', 'required_completion_percent', 'status']:
         if field in payload:
-            setattr(assignment, field, payload.get(field))
+            val = payload.get(field)
+            if field == 'due_at':
+                val = _parse_date(val)
+            setattr(assignment, field, val)
     publish_realtime_event(
         'assignment_updated',
         f'Assignment {assignment.id} vua duoc cap nhat.',
@@ -303,8 +321,12 @@ def get_assignment_progress(assignment_id: int):
     user, error = _require_teacher_user()
     if error:
         return error
-    assignment = _get_teacher_assignment(assignment_id, user.teacher_profile.id)
-    if not assignment:
+    # Load progresses và student_profile cùng lúc bằng selectinload/joinedload
+    assignment = LessonAssignment.query.options(
+        selectinload(LessonAssignment.progresses).joinedload(StudentLessonProgress.student)
+    ).get(assignment_id)
+
+    if not assignment or assignment.assigned_by_teacher_id != user.teacher_profile.id:
         return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
 
     progresses = []
@@ -334,7 +356,11 @@ def list_my_assignments():
     user, error = _require_student_user()
     if error:
         return error
-    progresses = StudentLessonProgress.query.filter_by(student_id=user.student_profile.id).order_by(StudentLessonProgress.created_at.desc()).all()
+    # Load assignment, lesson và classroom ngay từ đầu
+    progresses = StudentLessonProgress.query.options(
+        joinedload(StudentLessonProgress.assignment).joinedload(LessonAssignment.lesson),
+        joinedload(StudentLessonProgress.assignment).joinedload(LessonAssignment.classroom)
+    ).filter_by(student_id=user.student_profile.id).order_by(StudentLessonProgress.created_at.desc()).all()
     data = [{**progress.to_dict(), 'assignment': progress.assignment.to_dict() if progress.assignment else None} for progress in progresses]
     return success_response(data)
 
@@ -403,7 +429,7 @@ def complete_my_assignment(assignment_id: int):
         return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
     progress.status = 'completed'
     progress.progress_percent = 100
-    progress.completed_at = datetime.now(UTC).isoformat()
+    progress.completed_at = datetime.now(UTC)
     _publish_assignment_progress_event(progress, 'assignment_completed', f'Bai hoc {assignment_id} da hoan thanh.')
     db.session.commit()
     return success_response(progress.to_dict(), 'Da hoan thanh bai hoc')

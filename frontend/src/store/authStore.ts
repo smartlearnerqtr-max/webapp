@@ -31,7 +31,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   profile: null,
   hydrate: () => {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY)
+    const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return
     const parsed = JSON.parse(raw) as Omit<AuthState, 'hydrate' | 'setSession' | 'clearSession'>
     set({
@@ -43,11 +43,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   setSession: ({ accessToken, refreshToken, user, profile }) => {
     const payload = { accessToken, refreshToken, user, profile }
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
     set(payload)
   },
   clearSession: () => {
-    window.sessionStorage.removeItem(STORAGE_KEY)
+    window.localStorage.removeItem(STORAGE_KEY)
     set({ accessToken: null, refreshToken: null, user: null, profile: null })
   },
 }))

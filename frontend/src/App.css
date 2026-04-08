@@ -1,26 +1,25 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --primary: #3d6fd6;
-  --primary-strong: #2446a8;
-  --primary-soft: #e8f0ff;
-  --accent: #ffbe3d;
-  --accent-soft: #fff4d7;
-  --coral: #ff8d7a;
-  --coral-soft: #fff0eb;
-  --mint: #6fd7c1;
-  --bg: #edf3fb;
-  --bg-layer: #f7fbff;
-  --card: rgba(255, 255, 255, 0.92);
+  --primary: hsl(230, 75%, 65%);
+  --primary-strong: hsl(230, 70%, 50%);
+  --primary-soft: hsl(230, 85%, 95%);
+  --accent: hsl(35, 100%, 65%);
+  --accent-soft: hsl(35, 100%, 95%);
+  --coral: hsl(10, 100%, 74%);
+  --coral-soft: hsl(10, 100%, 96%);
+  --mint: hsl(166, 58%, 64%);
+  --bg: hsl(230, 40%, 98%);
+  --bg-layer: hsl(230, 40%, 99%);
+  --card: rgba(255, 255, 255, 0.95);
   --card-solid: #ffffff;
-  --text: #25324a;
-  --text-muted: #64748b;
-  --border: rgba(105, 146, 220, 0.18);
-  --shadow: 0 18px 45px rgba(43, 86, 160, 0.12);
-  --shadow-lg: 0 28px 70px rgba(33, 66, 131, 0.18);
-  --radius-xl: 30px;
-  --radius-lg: 22px;
-  --radius-md: 16px;
+  --text: hsl(230, 50%, 20%);
+  --text-muted: hsl(230, 20%, 45%);
+  --border: hsla(230, 30%, 80%, 0.15);
+  --shadow: 0 12px 36px hsla(230, 50%, 30%, 0.08);
+  --shadow-lg: 0 24px 60px hsla(230, 50%, 30%, 0.12);
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
 }
 
 * {
@@ -37,7 +36,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Nunito', 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   background:
     radial-gradient(circle at top left, rgba(255, 190, 61, 0.18), transparent 28%),
     radial-gradient(circle at top right, rgba(61, 111, 214, 0.18), transparent 30%),
@@ -160,7 +159,7 @@ button {
 
 .sidebar-title {
   margin: 0;
-  font-family: 'Baloo 2', 'Nunito', sans-serif;
+  font-family: var(--font-title);
   font-size: 1.85rem;
   line-height: 1.1;
 }
@@ -322,7 +321,7 @@ button {
 .placeholder-panel h3 {
   margin: 0;
   color: var(--text);
-  font-family: 'Baloo 2', 'Nunito', sans-serif;
+  font-family: var(--font-title);
   line-height: 1.15;
 }
 
@@ -720,7 +719,7 @@ button {
   display: block;
   color: var(--primary-strong);
   font-size: 1.6rem;
-  font-family: 'Baloo 2', 'Nunito', sans-serif;
+  font-family: var(--font-title);
 }
 
 .settings-grid > div,
@@ -803,7 +802,7 @@ button {
 .home-stat-card strong {
   font-size: 1.7rem;
   color: var(--primary-strong);
-  font-family: 'Baloo 2', 'Nunito', sans-serif;
+  font-family: var(--font-title);
 }
 
 .phone-stage {
@@ -1134,7 +1133,7 @@ button {
   text-align: center;
   color: var(--primary-strong);
   font-size: 1.35rem;
-  font-family: 'Baloo 2', 'Nunito', sans-serif;
+  font-family: var(--font-title);
 }
 
 .bar-chart-track {
@@ -1257,7 +1256,7 @@ button {
   color: var(--primary-strong);
   font-size: 2.6rem;
   line-height: 1;
-  font-family: 'Baloo 2', 'Nunito', sans-serif;
+  font-family: var(--font-title);
 }
 
 .donut-chart-center span {

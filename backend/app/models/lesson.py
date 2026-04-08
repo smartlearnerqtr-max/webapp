@@ -1,6 +1,6 @@
-from __future__ import annotations
+from datetime import datetime
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, UniqueConstraint, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import db
@@ -87,7 +87,7 @@ class LessonAssignment(TimestampMixin, db.Model):
     subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"), nullable=False, index=True)
     assigned_by_teacher_id: Mapped[int] = mapped_column(ForeignKey("teacher_profiles.id"), nullable=False, index=True)
     target_type: Mapped[str] = mapped_column(String(30), nullable=False, default="class")
-    due_at: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    due_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     required_completion_percent: Mapped[int] = mapped_column(Integer, nullable=False, default=100)
     status: Mapped[str] = mapped_column(String(30), nullable=False, default="active")
 
@@ -105,7 +105,7 @@ class LessonAssignment(TimestampMixin, db.Model):
             "subject_id": self.subject_id,
             "assigned_by_teacher_id": self.assigned_by_teacher_id,
             "target_type": self.target_type,
-            "due_at": self.due_at,
+            "due_at": self.due_at.isoformat() if self.due_at else None,
             "required_completion_percent": self.required_completion_percent,
             "status": self.status,
             "lesson": self.lesson.to_dict() if self.lesson else None,
@@ -142,7 +142,7 @@ class StudentLessonProgress(TimestampMixin, db.Model):
     help_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     reward_star_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     completion_score: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    completed_at: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     assignment = relationship("LessonAssignment", back_populates="progresses")
     student = relationship("StudentProfile")
@@ -159,6 +159,6 @@ class StudentLessonProgress(TimestampMixin, db.Model):
             "help_count": self.help_count,
             "reward_star_count": self.reward_star_count,
             "completion_score": self.completion_score,
-            "completed_at": self.completed_at,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
             "student": self.student.to_dict() if self.student else None,
         }

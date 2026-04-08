@@ -332,6 +332,13 @@ export type AIChatResponse = {
   prompt_feedback: Record<string, unknown> | null
 }
 
+export type UploadedMediaItem = {
+  url: string
+  filename: string
+  original_name: string
+  media_kind: 'image' | 'video'
+}
+
 export type LogItem = {
   id: number
   level: string
@@ -582,6 +589,26 @@ export async function createLessonActivity(token: string, lessonId: number, payl
     token,
     body: payload,
   })
+}
+
+export async function uploadLessonMedia(token: string, file: File): Promise<UploadedMediaItem> {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/media/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  })
+
+  const json = await response.json()
+  if (!response.ok || !json.success) {
+    throw new Error(json.message ?? 'Upload failed')
+  }
+
+  return json.data as UploadedMediaItem
 }
 
 export async function fetchAssignments(token: string): Promise<AssignmentItem[]> {

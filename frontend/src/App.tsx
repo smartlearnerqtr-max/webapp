@@ -1,4 +1,4 @@
-﻿import './App.css'
+import './App.css'
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 
@@ -99,25 +99,10 @@ function App() {
       <aside className={`sidebar ${isMenuOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-top">
           <div className="sidebar-brand-block">
-            <p className="eyebrow">Bạn học thông minh</p>
             <h2 className="sidebar-title">Bạn học thông minh</h2>
             <p className="sidebar-copy">{activeDescription}</p>
           </div>
 
-          <div className="sidebar-preview">
-            <div className="preview-tile">
-              <span className="preview-caption">Lộ trình học</span>
-              <strong className="preview-metric">Ngắn gọn</strong>
-            </div>
-            <div className="preview-tile">
-              <span className="preview-caption">Theo dõi</span>
-              <strong className="preview-metric">Rõ tiến độ</strong>
-            </div>
-            <div className="preview-tile">
-              <span className="preview-caption">Phối hợp</span>
-              <strong className="preview-metric">GV · PH</strong>
-            </div>
-          </div>
         </div>
 
         <nav className="nav-list" aria-label="Điều hướng chính">

@@ -1,9 +1,10 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import secrets
 
 from flask import request
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
+from sqlalchemy.orm import joinedload
 
 from ....extensions import db
 from ....models import ClassJoinCredential, ClassStudent, Classroom, StudentProfile, User
@@ -121,7 +122,7 @@ def list_classes():
     if error:
         return error
     status = request.args.get('status')
-    query = Classroom.query.filter_by(teacher_id=user.teacher_profile.id)
+    query = Classroom.query.options(joinedload(Classroom.join_credential)).filter_by(teacher_id=user.teacher_profile.id)
     if status:
         query = query.filter_by(status=status)
     classrooms = query.order_by(Classroom.created_at.desc()).all()
@@ -314,10 +315,15 @@ def list_my_classes():
     user, error = _require_student_user()
     if error:
         return error
+    # Sử dụng joinedload để lấy lớp và giáo viên trong 1 lần query duy nhất
+    class_links = ClassStudent.query.options(
+        joinedload(ClassStudent.classroom).joinedload(Classroom.teacher)
+    ).filter_by(student_id=user.student_profile.id, status='active').all()
+
     classes = [
         _serialize_student_classroom(link.classroom)
-        for link in user.student_profile.classrooms
-        if link.status == 'active' and link.classroom and link.classroom.status == 'active'
+        for link in class_links
+        if link.classroom and link.classroom.status == 'active'
     ]
     return success_response(classes)
 

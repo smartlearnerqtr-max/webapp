@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 
@@ -173,10 +173,6 @@ export function TeacherHomePage() {
         <section className="roadmap-panel">
           <p className="eyebrow">Không gian giáo viên</p>
           <h2>Trung tâm điều hành lớp học và phụ huynh</h2>
-          <p>
-            Tài khoản giáo viên do admin cấp. Sau khi tạo lớp, giáo viên gửi <strong>ID lớp</strong> và <strong>mật khẩu</strong> cho học sinh tự vào lớp.
-            Phụ huynh có thể tìm giáo viên qua <strong>teacher ID</strong>, giáo viên chủ động thêm phụ huynh vào nhóm của từng học sinh và gửi báo cáo hằng ngày chỉ trong một nút bấm.
-          </p>
         </section>
 
         <section className="metrics-grid">

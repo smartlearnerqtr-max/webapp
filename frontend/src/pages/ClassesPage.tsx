@@ -104,10 +104,6 @@ export function ClassesPage() {
       <div className="page-stack">
         <section className="roadmap-panel">
           <h2>Quản lý lớp học</h2>
-          <p>
-            Khi giáo viên tạo lớp, hệ thống sinh sẵn <strong>ID lớp</strong> và <strong>mật khẩu vào lớp</strong>.
-            Học sinh có thể tự đăng nhập vào lớp bằng hai thông tin này, còn giáo viên vẫn có thể thêm học sinh thủ công nếu cần.
-          </p>
         </section>
 
         <section className="auth-layout">
@@ -165,7 +161,6 @@ export function ClassesPage() {
                   <strong>{selectedClass.teacher_id}</strong>
                 </div>
               </div>
-              <p>Gửi ID lớp và mật khẩu này cho học sinh để các em tự vào lớp từ trang học sinh.</p>
             </article>
 
             <article className="roadmap-panel">

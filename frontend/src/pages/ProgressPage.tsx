@@ -55,7 +55,6 @@ export function ProgressPage() {
       <div className="page-stack">
         <section className="roadmap-panel">
           <h2>Tiến độ học tập và gợi ý nâng độ khó</h2>
-          <p>Readiness chỉ là gợi ý cho giáo viên. Hệ thống không tự động nâng độ khó, nhưng sẽ tổng hợp những dấu hiệu để bạn quyết định.</p>
         </section>
 
         <section className="auth-layout">

@@ -71,7 +71,6 @@ export function AssignmentsPage() {
       <div className="page-stack">
         <section className="roadmap-panel">
           <h2>Giao bài học theo lớp</h2>
-          <p>Chọn bài học và lớp, hệ thống sẽ tạo assignment cho toàn bộ học sinh đang active trong lớp đó.</p>
         </section>
 
         <section className="auth-layout">
@@ -122,7 +121,6 @@ export function AssignmentsPage() {
                 <strong>{selectedLesson?.title ?? 'Chưa chọn bài học'}</strong>
                 <span>{selectedLesson?.subject?.name ?? 'Chưa có môn học'} / {selectedLesson?.activity_count ?? 0} activity</span>
               </div>
-              <p>Task voice answer vẫn nằm trong từng activity, nên khi học sinh vào bài sẽ dùng cấu hình voice của bài học đã tạo.</p>
             </div>
           </article>
         </section>
