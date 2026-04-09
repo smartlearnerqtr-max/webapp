@@ -1,27 +1,32 @@
-import { useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 
 import { BarChartCard } from '../components/BarChartCard'
+import { ChatDock } from '../components/ChatDock'
 import { RequireAuth } from '../components/RequireAuth'
 import {
   fetchParents,
   fetchStudents,
+  fetchTeacherMessages,
   fetchTeacherParentGroups,
   fetchTeacherReports,
   fetchTeacherSharedStudents,
   linkParentToStudent,
+  markTeacherMessagesRead,
   sendDailyReports,
+  sendTeacherMessage,
 } from '../services/api'
+import type { ParentTeacherConversationItem } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
 const quickLinks = [
-  { to: '/hoc-sinh', title: 'Hồ sơ học sinh', description: 'Thêm và cập nhật thông tin học sinh.' },
-  { to: '/lop-hoc', title: 'Lớp học', description: 'Tạo lớp, lấy mật khẩu và quản lý sĩ số.' },
-  { to: '/bai-hoc', title: 'Bài học', description: 'Tạo bài học và hoạt động nhanh gọn.' },
-  { to: '/giao-bai', title: 'Giao bài', description: 'Chọn lớp, bài học và giao trong vài bước.' },
-  { to: '/tien-do', title: 'Tiến độ', description: 'Xem mức độ sẵn sàng và kết quả học tập.' },
-  { to: '/cai-dat-ai', title: 'Cài đặt AI', description: 'Kiểm tra key và trợ lý AI.' },
+  { to: '/hoc-sinh', title: 'Hồ sơ học sinh', description: 'Thêm và cập nhật thông tin nền của học sinh.' },
+  { to: '/lop-hoc', title: 'Lớp học', description: 'Tạo lớp, lấy mã vào lớp và quản lý sĩ số.' },
+  { to: '/bai-hoc', title: 'Bài học', description: 'Tạo bài học và hoạt động theo từng bước dễ nhập.' },
+  { to: '/giao-bai', title: 'Giao bài', description: 'Chọn lớp, chọn bài học rồi giao trong vài thao tác.' },
+  { to: '/tien-do', title: 'Tiến độ', description: 'Theo dõi dữ liệu học tập mà hệ thống tự cập nhật từ học sinh.' },
+  { to: '/cai-dat-ai', title: 'Cài đặt AI', description: 'Kiểm tra trợ lý AI và trạng thái kết nối.' },
 ]
 
 const readinessLabelMap: Record<string, string> = {
@@ -39,6 +44,12 @@ export function TeacherHomePage() {
   const [reportStudentId, setReportStudentId] = useState('')
   const [reportTitle, setReportTitle] = useState('')
   const [reportNote, setReportNote] = useState('')
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const [selectedConversationKey, setSelectedConversationKey] = useState('')
+  const [messageDraft, setMessageDraft] = useState('')
+  const [selectedChatStudentId, setSelectedChatStudentId] = useState('')
+  const [conversationSearchTerm, setConversationSearchTerm] = useState('')
+  const deferredSearchTerm = useDeferredValue(conversationSearchTerm)
 
   const studentsQuery = useQuery({
     queryKey: ['students', token],
@@ -70,6 +81,12 @@ export function TeacherHomePage() {
     enabled: Boolean(token),
   })
 
+  const conversationsQuery = useQuery({
+    queryKey: ['teacher-messages', token],
+    queryFn: () => fetchTeacherMessages(token!),
+    enabled: Boolean(token),
+  })
+
   const linkedPairKeys = useMemo(
     () => new Set((parentGroupsQuery.data ?? []).map((item) => `${item.student?.id ?? 'x'}-${item.parent?.id ?? 'y'}`)),
     [parentGroupsQuery.data],
@@ -93,6 +110,7 @@ export function TeacherHomePage() {
         queryClient.invalidateQueries({ queryKey: ['teacher-parent-groups', token] }),
         queryClient.invalidateQueries({ queryKey: ['parents', token] }),
         queryClient.invalidateQueries({ queryKey: ['teacher-shared-students', token] }),
+        queryClient.invalidateQueries({ queryKey: ['teacher-messages', token] }),
       ])
     },
   })
@@ -113,6 +131,79 @@ export function TeacherHomePage() {
     },
   })
 
+  const conversations = conversationsQuery.data ?? []
+  const unreadConversationCount = conversations.reduce((count, item) => count + item.unread_count, 0)
+
+  const conversationStudentOptions = useMemo(() => {
+    const options = new Map<string, string>()
+    for (const conversation of conversations) {
+      if (conversation.student) {
+        options.set(String(conversation.student.id), conversation.student.full_name)
+      }
+    }
+    return Array.from(options.entries()).map(([id, fullName]) => ({ id, fullName }))
+  }, [conversations])
+
+  const filteredConversations = useMemo(() => {
+    const keyword = deferredSearchTerm.trim().toLowerCase()
+    return conversations.filter((conversation) => {
+      if (selectedChatStudentId && String(conversation.student?.id ?? '') !== selectedChatStudentId) return false
+      if (!keyword) return true
+
+      const haystack = [
+        conversation.parent?.full_name,
+        conversation.parent?.relationship_label,
+        conversation.student?.full_name,
+        conversation.latest_message?.message,
+      ].join(' ').toLowerCase()
+
+      return haystack.includes(keyword)
+    })
+  }, [conversations, deferredSearchTerm, selectedChatStudentId])
+
+  const selectedConversation = useMemo(
+    () => filteredConversations.find((item) => item.conversation_key === selectedConversationKey) ?? filteredConversations[0] ?? null,
+    [filteredConversations, selectedConversationKey],
+  )
+
+  useEffect(() => {
+    if (!filteredConversations.length) {
+      setSelectedConversationKey('')
+      return
+    }
+
+    if (!selectedConversationKey || !filteredConversations.some((item) => item.conversation_key === selectedConversationKey)) {
+      setSelectedConversationKey(filteredConversations[0].conversation_key)
+    }
+  }, [filteredConversations, selectedConversationKey])
+
+  const sendMessageMutation = useMutation({
+    mutationFn: (conversation: ParentTeacherConversationItem) => sendTeacherMessage(token!, {
+      parent_id: conversation.parent?.id ?? 0,
+      student_id: conversation.student?.id ?? 0,
+      message: messageDraft.trim(),
+    }),
+    onSuccess: async () => {
+      setMessageDraft('')
+      await queryClient.invalidateQueries({ queryKey: ['teacher-messages', token] })
+    },
+  })
+
+  const markReadMutation = useMutation({
+    mutationFn: (conversation: ParentTeacherConversationItem) => markTeacherMessagesRead(token!, {
+      parent_id: conversation.parent?.id ?? 0,
+      student_id: conversation.student?.id ?? 0,
+    }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['teacher-messages', token] })
+    },
+  })
+
+  useEffect(() => {
+    if (!isChatOpen || !selectedConversation || selectedConversation.unread_count <= 0 || markReadMutation.isPending) return
+    markReadMutation.mutate(selectedConversation)
+  }, [isChatOpen, markReadMutation, selectedConversation])
+
   const teacherId = typeof profile?.id === 'number' ? profile.id : null
   const studentCount = studentsQuery.data?.length ?? 0
   const parentGroupCount = parentGroupsQuery.data?.length ?? 0
@@ -123,7 +214,7 @@ export function TeacherHomePage() {
     { label: 'Học sinh', value: studentCount, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
     { label: 'Liên kết phụ huynh', value: parentGroupCount, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
     { label: 'Báo cáo đã gửi', value: reportCount, color: 'linear-gradient(180deg, #ffbe3d 0%, #f29f05 100%)' },
-    { label: 'Học cùng GV khác', value: sharedStudentCount, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
+    { label: 'Tin nhắn chưa đọc', value: unreadConversationCount, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
   ]
 
   const parentGroupProgressChartItems = useMemo(() => {
@@ -170,7 +261,6 @@ export function TeacherHomePage() {
   const averageLatestProgress = useMemo(() => {
     const groups = parentGroupsQuery.data ?? []
     if (!groups.length) return 0
-
     const total = groups.reduce((sum, item) => sum + item.progress_summary.last_progress_percent, 0)
     return Math.round(total / groups.length)
   }, [parentGroupsQuery.data])
@@ -180,8 +270,42 @@ export function TeacherHomePage() {
       <div className="page-stack">
         <section className="roadmap-panel">
           <p className="eyebrow">Giáo viên</p>
-          <h2>Trung tâm điều hành gọn gàng</h2>
-          <p>Theo dõi lớp học, gắn phụ huynh và gửi báo cáo nhanh mà không cần đi qua quá nhiều form.</p>
+          <h2>Trung tâm điều hành gọn gàng và sạch hơn</h2>
+          <p>Mình đã tách chat thành cửa sổ nổi riêng. Trang giáo viên giờ tập trung vào vận hành, còn trao đổi với phụ huynh sẽ mở bằng một nút chat ở góc màn hình.</p>
+        </section>
+
+        <section className="dashboard-grid">
+          <article className="roadmap-panel">
+            <h3>Tiến độ được cập nhật tự động</h3>
+            <div className="detail-stack">
+              <div className="student-row">
+                <strong>Không cần nhập tay tiến độ</strong>
+                <span>Hệ thống tự ghi nhận từ hoạt động học sinh đã làm trong từng bài học.</span>
+              </div>
+              <div className="student-row">
+                <strong>Giáo viên tập trung vào điều phối</strong>
+                <span>Tạo bài, giao bài, xem dữ liệu và hỗ trợ đúng học sinh đang cần thêm trợ giúp.</span>
+              </div>
+            </div>
+          </article>
+
+          <article className="roadmap-panel">
+            <h3>Luồng làm việc đề xuất</h3>
+            <div className="detail-stack">
+              <div className="student-row">
+                <strong>1. Tạo bài và hoạt động</strong>
+                <span>Thiết kế bài học ngắn, rõ và vừa sức với học sinh.</span>
+              </div>
+              <div className="student-row">
+                <strong>2. Giao bài cho lớp</strong>
+                <span>Sau khi giao, hệ thống tự theo dõi trạng thái học tập và phần trăm hoàn thành.</span>
+              </div>
+              <div className="student-row">
+                <strong>3. Chat và gửi báo cáo</strong>
+                <span>Dùng dữ liệu học thật để phản hồi cho phụ huynh nhanh, rõ và đúng ngữ cảnh.</span>
+              </div>
+            </div>
+          </article>
         </section>
 
         <section className="metrics-grid">
@@ -202,6 +326,10 @@ export function TeacherHomePage() {
             <strong>{reportCount}</strong>
           </article>
           <article className="mini-card">
+            <span>Tin nhắn chưa đọc</span>
+            <strong>{unreadConversationCount}</strong>
+          </article>
+          <article className="mini-card">
             <span>Học sinh học cùng GV khác</span>
             <strong>{sharedStudentCount}</strong>
           </article>
@@ -212,7 +340,7 @@ export function TeacherHomePage() {
             <h3>Tổng quan nhanh</h3>
             <BarChartCard
               title="Thống kê hiện tại"
-              description="Nhìn nhanh khối lượng quản lý trong ngày."
+              description="Nhìn nhanh khối lượng theo dõi và phối hợp trong ngày."
               items={teacherOverviewChartItems}
             />
           </article>
@@ -221,7 +349,7 @@ export function TeacherHomePage() {
             <h3>Readiness</h3>
             <BarChartCard
               title="Mức độ sẵn sàng"
-              description="Dùng để ưu tiên nhóm cần hỗ trợ trước."
+              description="Dữ liệu này đến từ quá trình học của học sinh, giúp ưu tiên nhóm cần hỗ trợ trước."
               items={readinessChartItems}
               emptyMessage="Chưa có liên kết phụ huynh nên chưa có dữ liệu readiness."
             />
@@ -234,15 +362,15 @@ export function TeacherHomePage() {
             <div className="detail-stack">
               <div className="student-row">
                 <strong>1. Tạo hoặc chọn lớp</strong>
-                <span>Lấy ID lớp và mật khẩu cho học sinh vào lớp.</span>
+                <span>Lấy ID lớp và mật khẩu để học sinh vào lớp nhanh.</span>
               </div>
               <div className="student-row">
                 <strong>2. Gắn phụ huynh</strong>
-                <span>Chọn học sinh và parent ID đúng để theo dõi tiến độ.</span>
+                <span>Phụ huynh sẽ thấy tiến độ tự động khi đã được liên kết đúng với học sinh.</span>
               </div>
               <div className="student-row">
-                <strong>3. Gửi báo cáo</strong>
-                <span>Gửi nhanh cho một học sinh hoặc toàn bộ phụ huynh.</span>
+                <strong>3. Trả lời nhanh bằng icon chat</strong>
+                <span>Không còn khung chat chen vào giữa dashboard, chỉ bấm icon là mở hộp chat riêng.</span>
               </div>
             </div>
           </article>
@@ -255,7 +383,9 @@ export function TeacherHomePage() {
                 <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)}>
                   <option value="">Chọn học sinh</option>
                   {(studentsQuery.data ?? []).map((student) => (
-                    <option key={student.id} value={student.id}>{student.full_name} - ID {student.id}</option>
+                    <option key={student.id} value={student.id}>
+                      {student.full_name} - ID {student.id}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -298,12 +428,19 @@ export function TeacherHomePage() {
           <article className="roadmap-panel">
             <h3>Gửi báo cáo học tập</h3>
             <div className="form-stack">
+              <div className="config-card">
+                <strong>Dữ liệu báo cáo được lấy tự động</strong>
+                <p className="helper-text">Báo cáo dùng tiến độ, độ sẵn sàng và mức hoàn thành gần nhất từ quá trình học của học sinh.</p>
+              </div>
+
               <label>
                 Gửi theo học sinh
                 <select value={reportStudentId} onChange={(event) => setReportStudentId(event.target.value)}>
                   <option value="">Tất cả phụ huynh đang liên kết</option>
                   {(studentsQuery.data ?? []).map((student) => (
-                    <option key={student.id} value={student.id}>{student.full_name}</option>
+                    <option key={student.id} value={student.id}>
+                      {student.full_name}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -316,12 +453,7 @@ export function TeacherHomePage() {
                 </label>
                 <label>
                   Ghi chú giáo viên
-                  <textarea
-                    value={reportNote}
-                    onChange={(event) => setReportNote(event.target.value)}
-                    rows={4}
-                    placeholder="Viết ngắn gọn điều cần phụ huynh lưu ý."
-                  />
+                  <textarea value={reportNote} onChange={(event) => setReportNote(event.target.value)} rows={4} placeholder="Viết ngắn gọn điều phụ huynh cần lưu ý thêm." />
                 </label>
               </details>
 
@@ -355,7 +487,7 @@ export function TeacherHomePage() {
             <h3>Nhóm phụ huynh đang theo dõi</h3>
             <BarChartCard
               title="Tiến độ của nhóm phụ huynh"
-              description="Tổng hợp assignment đang hiển thị bên phụ huynh."
+              description="Tổng hợp dữ liệu học tập được hệ thống tự đồng bộ sang phía phụ huynh."
               items={parentGroupProgressChartItems}
               emptyMessage="Chưa có liên kết phụ huynh nên chưa có tiến độ để hiển thị."
             />
@@ -447,6 +579,42 @@ export function TeacherHomePage() {
           </article>
         </section>
       </div>
+
+      <ChatDock
+        viewerRole="teacher"
+        isOpen={isChatOpen}
+        onToggle={() => setIsChatOpen((current) => !current)}
+        title="Chat với phụ huynh"
+        subtitle="Bấm để mở hộp chat nổi"
+        unreadCount={unreadConversationCount}
+        conversations={filteredConversations}
+        selectedConversationKey={selectedConversationKey}
+        onSelectConversation={setSelectedConversationKey}
+        studentOptions={conversationStudentOptions}
+        selectedStudentId={selectedChatStudentId}
+        onStudentFilterChange={setSelectedChatStudentId}
+        searchTerm={conversationSearchTerm}
+        onSearchTermChange={setConversationSearchTerm}
+        searchPlaceholder="Nhập tên phụ huynh, học sinh hoặc nội dung gần nhất"
+        selectedConversation={selectedConversation}
+        renderConversationLabel={(conversation) => `${conversation.student?.full_name ?? 'Học sinh'} • ${conversation.parent?.full_name ?? 'Phụ huynh'}`}
+        renderConversationMeta={(conversation) => conversation.parent?.relationship_label ?? 'Phụ huynh đang theo dõi'}
+        emptyListTitle="Chưa có đoạn chat nào"
+        emptyListDescription="Sau khi gắn phụ huynh vào học sinh, khung chat sẽ xuất hiện để giáo viên trao đổi trực tiếp."
+        emptySearchTitle="Không tìm thấy đoạn chat phù hợp"
+        emptySearchDescription="Thử đổi học sinh hoặc xóa từ khóa tìm kiếm để hiện lại danh sách đầy đủ."
+        emptyChatTitle="Chưa có tin nhắn nào"
+        emptyChatDescription="Bạn có thể mở đầu bằng một lời nhắn ngắn để phụ huynh biết cách phối hợp với bài học hiện tại."
+        counterpartName={(conversation) => conversation.parent?.full_name ?? 'Phụ huynh'}
+        chatContextLabel={(conversation) => `Trao đổi về ${conversation.student?.full_name ?? 'học sinh'}`}
+        messageDraft={messageDraft}
+        onMessageDraftChange={setMessageDraft}
+        onSend={() => { if (selectedConversation) sendMessageMutation.mutate(selectedConversation) }}
+        sendPending={sendMessageMutation.isPending}
+        sendError={sendMessageMutation.error ? (sendMessageMutation.error as Error).message : null}
+        messagePlaceholder="Ví dụ: Hôm nay bé đã hoàn thành phần số học khá tốt, phụ huynh nhắc bé ôn lại hình học thêm 10 phút nhé."
+        messageHelperText="Nội dung ngắn, rõ việc cần phối hợp sẽ giúp phụ huynh thực hiện dễ hơn."
+      />
     </RequireAuth>
   )
 }

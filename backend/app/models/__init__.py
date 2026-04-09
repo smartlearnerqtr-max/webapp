@@ -4,6 +4,7 @@ from .classroom import ClassJoinCredential, ClassStudent, Classroom
 from .lesson import Lesson, LessonActivity, LessonAssignment, LessonAssignmentStudent, StudentLessonProgress
 from .log import ServerLog
 from .parent_student import ParentDailyReport, ParentStudentLink
+from .parent_teacher_message import ParentTeacherMessage
 from .profiles import ParentProfile, StudentProfile, TeacherProfile
 from .realtime import RealtimeEvent
 from .subject import ClassSubject, Subject
@@ -32,5 +33,6 @@ __all__ = [
     "ServerLog",
     "ParentStudentLink",
     "ParentDailyReport",
+    "ParentTeacherMessage",
     "RealtimeEvent",
 ]

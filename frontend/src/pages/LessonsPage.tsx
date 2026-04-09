@@ -1,13 +1,21 @@
 import { useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
+import type { Dispatch, FormEvent, SetStateAction } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { createLesson, createLessonActivity, fetchLesson, fetchLessons, fetchSubjects, uploadLessonMedia } from '../services/api'
 import { RequireAuth } from '../components/RequireAuth'
+import {
+  createLesson,
+  createLessonActivity,
+  fetchLesson,
+  fetchLessons,
+  fetchSubjects,
+  uploadLessonMedia,
+} from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
 type ActivityType =
   | 'multiple_choice'
+  | 'image_choice'
   | 'matching'
   | 'drag_drop'
   | 'listen_choose'
@@ -17,7 +25,12 @@ type ActivityType =
   | 'career_simulation'
   | 'ai_chat'
 
-type WatchAnswerSource = 'external' | 'upload'
+type MediaSource = 'external' | 'upload'
+
+type PairItem = {
+  left: string
+  right: string
+}
 
 const LEVEL_OPTIONS = [
   { value: 'nang', label: 'Nặng' },
@@ -26,48 +39,49 @@ const LEVEL_OPTIONS = [
 ]
 
 const ACTIVITY_TYPES: Array<{ value: ActivityType; label: string; description: string }> = [
-  { value: 'multiple_choice', label: 'Chọn đáp án', description: 'Nhanh nhất để tạo, hợp với bài nhận biết cơ bản.' },
-  { value: 'matching', label: 'Nối cặp', description: 'Tốt cho bài ghép từ, ghép hình và khái niệm.' },
-  { value: 'drag_drop', label: 'Kéo thả', description: 'Hợp với phần loại đồ vật, con vật và tình huống.' },
-  { value: 'listen_choose', label: 'Nghe và chọn', description: 'Cho bài nghe ngắn và chọn đáp án.' },
-  { value: 'watch_answer', label: 'Xem và trả lời', description: 'Thêm ảnh hoặc video rồi cho học sinh trả lời ngắn.' },
-  { value: 'step_by_step', label: 'Từng bước', description: 'Chia nhiệm vụ thành các bước để theo dõi.' },
-  { value: 'aac', label: 'Thẻ giao tiếp', description: 'Tạo bộ thẻ phản hồi cho học sinh.' },
-  { value: 'career_simulation', label: 'Mô phỏng nghề', description: 'Dùng cho tình huống thực hành theo vai trò.' },
-  { value: 'ai_chat', label: 'Hỏi đáp với AI', description: 'Cho học sinh đối đáp ngắn gọn với trợ lý.' },
+  { value: 'multiple_choice', label: 'Chọn đáp án', description: 'Tạo câu hỏi trắc nghiệm nhanh với 4 đáp án để giáo viên chọn đáp án đúng.' },
+  { value: 'image_choice', label: 'Nhìn ảnh chọn đáp án', description: 'Tải ảnh lên rồi đặt câu hỏi để học sinh nhìn ảnh và chọn 1 trong 4 đáp án.' },
+  { value: 'matching', label: 'Nối cặp', description: 'Dùng cho bài ghép khái niệm, ghép chữ với hình hoặc ghép đồ vật tương ứng.' },
+  { value: 'drag_drop', label: 'Kéo thả', description: 'Phù hợp với bài phân loại, sắp xếp đồ vật hoặc ghép mục vào đúng nhóm.' },
+  { value: 'listen_choose', label: 'Nghe và chọn', description: 'Giáo viên nhập câu đọc hoặc lời thoại ngắn, học sinh nghe và chọn đáp án.' },
+  { value: 'watch_answer', label: 'Xem rồi trả lời', description: 'Thêm ảnh hoặc video rồi cho học sinh trả lời ngắn sau khi quan sát.' },
+  { value: 'step_by_step', label: 'Làm theo từng bước', description: 'Chia nhiệm vụ thành các bước nhỏ để học sinh hoàn thành tuần tự.' },
+  { value: 'aac', label: 'Thẻ giao tiếp', description: 'Tạo các thẻ để học sinh chọn ý muốn nói hoặc nhu cầu cần hỗ trợ.' },
+  { value: 'career_simulation', label: 'Mô phỏng tình huống', description: 'Dùng cho các hoạt động vào vai hoặc thực hành tình huống thực tế.' },
+  { value: 'ai_chat', label: 'Hỏi đáp với AI', description: 'Tạo cuộc hội thoại ngắn để học sinh luyện phản hồi hoặc giao tiếp.' },
 ]
 
-const DEFAULT_CHOICE_OPTIONS = ['Đáp án A', 'Đáp án B']
-const DEFAULT_MATCHING_PAIRS = ['Hình tròn | Tròn', 'Hình vuông | Vuông']
-const DEFAULT_DRAG_ITEMS = ['Quả táo', 'Con mèo', 'Xe đạp']
-const DEFAULT_DRAG_TARGETS = ['Giỏ trái cây', 'Động vật', 'Phương tiện']
-const DEFAULT_STEPS = ['Bước 1: Quan sát', 'Bước 2: Chọn đáp án', 'Bước 3: Nhận phản hồi']
-const DEFAULT_AAC_CARDS = ['Con muốn uống nước', 'Con cần giúp đỡ', 'Con đã xong']
-const DEFAULT_GOALS = ['Chào hỏi lịch sự', 'Trả lời ngắn gọn', 'Nhờ trợ giúp khi cần']
+const CHOICE_SLOT_LABELS = ['A', 'B', 'C', 'D']
 
-function prettifyJson(value: object) {
-  return JSON.stringify(value, null, 2)
+function createDefaultChoiceOptions() {
+  return ['', '', '', '']
 }
 
-function parseLines(value: string) {
-  return value
-    .split(/\r?\n/)
-    .map((item) => item.trim())
-    .filter(Boolean)
+function createDefaultPairs(): PairItem[] {
+  return [
+    { left: '', right: '' },
+    { left: '', right: '' },
+  ]
 }
 
-function parsePairs(value: string) {
-  return value
-    .split(/\r?\n/)
-    .map((row) => row.split('|').map((item) => item.trim()))
-    .filter((row) => row[0] && row[1])
-    .map(([left, right]) => ({ left, right }))
+function createDefaultList(count = 3) {
+  return Array.from({ length: count }, () => '')
+}
+
+function activityLabel(activityType: ActivityType) {
+  return ACTIVITY_TYPES.find((item) => item.value === activityType)?.label ?? activityType
+}
+
+function levelLabel(level: string) {
+  return LEVEL_OPTIONS.find((item) => item.value === level)?.label ?? level
 }
 
 function defaultInstructionForType(activityType: ActivityType) {
   switch (activityType) {
     case 'multiple_choice':
       return 'Hãy đọc câu hỏi và chọn đáp án đúng.'
+    case 'image_choice':
+      return 'Hãy nhìn kỹ hình ảnh rồi chọn đáp án đúng nhất.'
     case 'matching':
       return 'Hãy nối các cặp phù hợp với nhau.'
     case 'drag_drop':
@@ -81,27 +95,19 @@ function defaultInstructionForType(activityType: ActivityType) {
     case 'aac':
       return 'Hãy chọn thẻ phù hợp với điều em muốn nói.'
     case 'career_simulation':
-      return 'Hãy thực hiện hoạt động theo tình huống mô phỏng.'
+      return 'Hãy làm theo tình huống mô phỏng.'
     case 'ai_chat':
-      return 'Hãy trao đổi ngắn gọn với trợ lý để hoàn thành nhiệm vụ.'
+      return 'Hãy trò chuyện ngắn gọn với trợ lý để hoàn thành nhiệm vụ.'
     default:
-      return 'Hãy làm theo hướng dẫn của hoạt động này.'
+      return 'Hãy làm theo hướng dẫn của hoạt động.'
   }
 }
 
 function defaultVoiceEnabledForType(activityType: ActivityType) {
-  return activityType === 'listen_choose' || activityType === 'multiple_choice' || activityType === 'aac' || activityType === 'ai_chat'
+  return activityType === 'multiple_choice' || activityType === 'image_choice' || activityType === 'listen_choose' || activityType === 'aac' || activityType === 'ai_chat'
 }
 
-function activityLabel(activityType: ActivityType) {
-  return ACTIVITY_TYPES.find((item) => item.value === activityType)?.label ?? activityType
-}
-
-function levelLabel(level: string) {
-  return LEVEL_OPTIONS.find((item) => item.value === level)?.label ?? level
-}
-
-function inferWatchAnswerMediaKind(mediaUrl: string, mediaFile: File | null, source: WatchAnswerSource) {
+function inferMediaKind(mediaUrl: string, mediaFile: File | null, source: MediaSource) {
   if (source === 'upload' && mediaFile) {
     if (mediaFile.type.startsWith('image/')) return 'image'
     if (mediaFile.type.startsWith('video/')) return 'video'
@@ -115,92 +121,125 @@ function inferWatchAnswerMediaKind(mediaUrl: string, mediaFile: File | null, sou
   return 'external'
 }
 
-function buildActivityConfig(activityType: ActivityType, fields: {
-  prompt: string
-  choiceOptionsText: string
-  correctChoice: string
-  matchingPairsText: string
-  dragItemsText: string
-  dragTargetsText: string
-  mediaUrl: string
-  mediaKind: string
-  questionPrompt: string
-  stepListText: string
-  aacCardsText: string
-  scenarioText: string
-  successCriteriaText: string
-  aiStarterPrompt: string
-  aiGoalText: string
-}) {
-  const choiceOptions = parseLines(fields.choiceOptionsText)
-  const dragItems = parseLines(fields.dragItemsText)
-  const dragTargets = parseLines(fields.dragTargetsText)
-  const stepList = parseLines(fields.stepListText)
-  const aacCards = parseLines(fields.aacCardsText)
-  const aiGoals = parseLines(fields.aiGoalText)
+function compactLines(items: string[]) {
+  return items.map((item) => item.trim()).filter(Boolean)
+}
 
-  switch (activityType) {
-    case 'multiple_choice':
-      return {
-        kind: 'multiple_choice',
-        prompt: fields.prompt.trim(),
-        choices: choiceOptions,
-        correct: fields.correctChoice.trim() || choiceOptions[0] || '',
-      }
-    case 'matching':
-      return {
-        kind: 'matching',
-        prompt: fields.prompt.trim(),
-        pairs: parsePairs(fields.matchingPairsText),
-      }
-    case 'drag_drop':
-      return {
-        kind: 'drag_drop',
-        prompt: fields.prompt.trim(),
-        items: dragItems,
-        targets: dragTargets,
-      }
-    case 'listen_choose':
-      return {
-        kind: 'listen_choose',
-        audio_text: fields.prompt.trim(),
-        choices: choiceOptions,
-        correct: fields.correctChoice.trim() || choiceOptions[0] || '',
-      }
-    case 'watch_answer':
-      return {
-        kind: 'watch_answer',
-        media_url: fields.mediaUrl.trim(),
-        media_kind: fields.mediaKind.trim() || undefined,
-        prompt: fields.questionPrompt.trim(),
-      }
-    case 'step_by_step':
-      return {
-        kind: 'step_by_step',
-        prompt: fields.prompt.trim(),
-        steps: stepList,
-      }
-    case 'aac':
-      return {
-        kind: 'aac',
-        prompt: fields.prompt.trim(),
-        cards: aacCards,
-      }
-    case 'career_simulation':
-      return {
-        kind: 'career_simulation',
-        scenario: fields.scenarioText.trim(),
-        success_criteria: fields.successCriteriaText.trim(),
-      }
-    case 'ai_chat':
-      return {
-        kind: 'ai_chat',
-        starter_prompt: fields.aiStarterPrompt.trim(),
-        goals: aiGoals,
-      }
-    default:
-      return {}
-  }
+function compactPairs(items: PairItem[]) {
+  return items
+    .map((item) => ({ left: item.left.trim(), right: item.right.trim() }))
+    .filter((item) => item.left && item.right)
+}
+
+function ChoiceBuilder(props: {
+  promptLabel: string
+  promptValue: string
+  promptPlaceholder: string
+  onPromptChange: (value: string) => void
+  showPrompt?: boolean
+  options: string[]
+  correctIndex: number
+  onOptionChange: (index: number, value: string) => void
+  onCorrectChange: (index: number) => void
+}) {
+  const { promptLabel, promptValue, promptPlaceholder, onPromptChange, showPrompt = true, options, correctIndex, onOptionChange, onCorrectChange } = props
+
+  return (
+    <div className="config-card detail-stack">
+      {showPrompt ? (
+        <label>
+          {promptLabel}
+          <input value={promptValue} onChange={(event) => onPromptChange(event.target.value)} placeholder={promptPlaceholder} />
+        </label>
+      ) : null}
+
+      <div className="detail-stack">
+        <strong>4 đáp án gợi ý</strong>
+        <div className="builder-grid">
+          {options.map((option, index) => (
+            <label key={index} className="builder-choice-card">
+              <div className="builder-choice-head">
+                <span className="subject-pill muted-pill">Đáp án {CHOICE_SLOT_LABELS[index]}</span>
+                <label className="builder-radio">
+                  <input type="radio" checked={correctIndex === index} onChange={() => onCorrectChange(index)} />
+                  <span>Đáp án đúng</span>
+                </label>
+              </div>
+              <input value={option} onChange={(event) => onOptionChange(index, event.target.value)} placeholder={`Nhập đáp án ${CHOICE_SLOT_LABELS[index]}`} />
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PairBuilder(props: {
+  title: string
+  helper: string
+  items: PairItem[]
+  onChange: (index: number, field: 'left' | 'right', value: string) => void
+  onAdd: () => void
+  onRemove: (index: number) => void
+}) {
+  return (
+    <div className="config-card detail-stack">
+      <div className="detail-stack">
+        <strong>{props.title}</strong>
+        <p className="helper-text">{props.helper}</p>
+      </div>
+
+      <div className="builder-stack">
+        {props.items.map((item, index) => (
+          <div key={index} className="builder-pair-row">
+            <input value={item.left} onChange={(event) => props.onChange(index, 'left', event.target.value)} placeholder="Cột bên trái" />
+            <input value={item.right} onChange={(event) => props.onChange(index, 'right', event.target.value)} placeholder="Cột bên phải" />
+            <button className="ghost-button" type="button" onClick={() => props.onRemove(index)} disabled={props.items.length <= 2}>
+              Xóa
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <button className="ghost-button" type="button" onClick={props.onAdd}>
+        Thêm một cặp
+      </button>
+    </div>
+  )
+}
+
+function ListBuilder(props: {
+  title: string
+  helper: string
+  items: string[]
+  itemPlaceholder: string
+  onChange: (index: number, value: string) => void
+  onAdd: () => void
+  onRemove: (index: number) => void
+}) {
+  return (
+    <div className="config-card detail-stack">
+      <div className="detail-stack">
+        <strong>{props.title}</strong>
+        <p className="helper-text">{props.helper}</p>
+      </div>
+
+      <div className="builder-stack">
+        {props.items.map((item, index) => (
+          <div key={index} className="builder-list-row">
+            <input value={item} onChange={(event) => props.onChange(index, event.target.value)} placeholder={`${props.itemPlaceholder} ${index + 1}`} />
+            <button className="ghost-button" type="button" onClick={() => props.onRemove(index)} disabled={props.items.length <= 2}>
+              Xóa
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <button className="ghost-button" type="button" onClick={props.onAdd}>
+        Thêm dòng
+      </button>
+    </div>
+  )
 }
 
 export function LessonsPage() {
@@ -212,28 +251,44 @@ export function LessonsPage() {
   const [primaryLevel, setPrimaryLevel] = useState('trung_binh')
   const [estimatedMinutes, setEstimatedMinutes] = useState('15')
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null)
+
   const [activityTitle, setActivityTitle] = useState('')
   const [activityType, setActivityType] = useState<ActivityType>('multiple_choice')
   const [instructionText, setInstructionText] = useState(defaultInstructionForType('multiple_choice'))
   const [voiceAnswerEnabled, setVoiceAnswerEnabled] = useState(defaultVoiceEnabledForType('multiple_choice'))
-  const [prompt, setPrompt] = useState('Câu hỏi chính của hoạt động')
-  const [choiceOptionsText, setChoiceOptionsText] = useState(DEFAULT_CHOICE_OPTIONS.join('\n'))
-  const [correctChoice, setCorrectChoice] = useState(DEFAULT_CHOICE_OPTIONS[0])
-  const [matchingPairsText, setMatchingPairsText] = useState(DEFAULT_MATCHING_PAIRS.join('\n'))
-  const [dragItemsText, setDragItemsText] = useState(DEFAULT_DRAG_ITEMS.join('\n'))
-  const [dragTargetsText, setDragTargetsText] = useState(DEFAULT_DRAG_TARGETS.join('\n'))
-  const [mediaUrl, setMediaUrl] = useState('')
-  const [watchAnswerSource, setWatchAnswerSource] = useState<WatchAnswerSource>('external')
-  const [mediaFile, setMediaFile] = useState<File | null>(null)
-  const [questionPrompt, setQuestionPrompt] = useState('Sau khi xem xong, em thấy điều gì?')
-  const [stepListText, setStepListText] = useState(DEFAULT_STEPS.join('\n'))
-  const [aacCardsText, setAacCardsText] = useState(DEFAULT_AAC_CARDS.join('\n'))
-  const [scenarioText, setScenarioText] = useState('Em vào vai nhân viên thư viện và giúp bạn chọn sách phù hợp.')
-  const [successCriteriaText, setSuccessCriteriaText] = useState('Chọn đúng vai trò, làm đủ bước, trả lời lịch sự.')
-  const [aiStarterPrompt, setAiStarterPrompt] = useState('Hãy đóng vai bạn học và hỏi em 3 câu ngắn về bài học này.')
-  const [aiGoalText, setAiGoalText] = useState(DEFAULT_GOALS.join('\n'))
   const [activityFormError, setActivityFormError] = useState<string | null>(null)
   const [isActivityFormOpen, setIsActivityFormOpen] = useState(false)
+
+  const [questionPrompt, setQuestionPrompt] = useState('Vật nào có dạng hình tròn?')
+  const [choiceOptions, setChoiceOptions] = useState<string[]>(createDefaultChoiceOptions())
+  const [correctChoiceIndex, setCorrectChoiceIndex] = useState(0)
+
+  const [imageChoicePrompt, setImageChoicePrompt] = useState('Bạn nhìn thấy gì trong tấm ảnh này?')
+  const [imageChoiceSource, setImageChoiceSource] = useState<MediaSource>('upload')
+  const [imageChoiceUrl, setImageChoiceUrl] = useState('')
+  const [imageChoiceFile, setImageChoiceFile] = useState<File | null>(null)
+  const [imageChoiceOptions, setImageChoiceOptions] = useState<string[]>(createDefaultChoiceOptions())
+  const [imageChoiceCorrectIndex, setImageChoiceCorrectIndex] = useState(0)
+
+  const [matchingPairs, setMatchingPairs] = useState<PairItem[]>(createDefaultPairs())
+  const [dragItems, setDragItems] = useState<string[]>(createDefaultList())
+  const [dragTargets, setDragTargets] = useState<string[]>(createDefaultList())
+
+  const [listenPrompt, setListenPrompt] = useState('Con hãy nghe cô đọc và chọn đáp án đúng.')
+  const [listenOptions, setListenOptions] = useState<string[]>(createDefaultChoiceOptions())
+  const [listenCorrectIndex, setListenCorrectIndex] = useState(0)
+
+  const [watchAnswerSource, setWatchAnswerSource] = useState<MediaSource>('external')
+  const [watchAnswerUrl, setWatchAnswerUrl] = useState('')
+  const [watchAnswerFile, setWatchAnswerFile] = useState<File | null>(null)
+  const [watchAnswerPrompt, setWatchAnswerPrompt] = useState('Sau khi xem xong, em thấy điều gì?')
+
+  const [stepList, setStepList] = useState<string[]>(createDefaultList())
+  const [aacCards, setAacCards] = useState<string[]>(createDefaultList())
+  const [scenarioText, setScenarioText] = useState('Em vào vai nhân viên thư viện và giúp bạn nhỏ chọn đúng cuốn sách cần tìm.')
+  const [successCriteriaText, setSuccessCriteriaText] = useState('Chọn đúng vai trò, trả lời lịch sự và làm đủ các bước.')
+  const [aiStarterPrompt, setAiStarterPrompt] = useState('Hãy hỏi em 3 câu ngắn về bài học này.')
+  const [aiGoals, setAiGoals] = useState<string[]>(createDefaultList())
 
   const subjectsQuery = useQuery({
     queryKey: ['subjects'],
@@ -260,59 +315,19 @@ export function LessonsPage() {
     [lessonsQuery.data, resolvedSelectedLessonId],
   )
 
-  const generatedConfigObject = useMemo(
-    () => buildActivityConfig(activityType, {
-      prompt,
-      choiceOptionsText,
-      correctChoice,
-      matchingPairsText,
-      dragItemsText,
-      dragTargetsText,
-      mediaUrl,
-      mediaKind: inferWatchAnswerMediaKind(mediaUrl, mediaFile, watchAnswerSource),
-      questionPrompt,
-      stepListText,
-      aacCardsText,
-      scenarioText,
-      successCriteriaText,
-      aiStarterPrompt,
-      aiGoalText,
-    }),
-    [
-      activityType,
-      prompt,
-      choiceOptionsText,
-      correctChoice,
-      matchingPairsText,
-      dragItemsText,
-      dragTargetsText,
-      mediaUrl,
-      mediaFile,
-      watchAnswerSource,
-      questionPrompt,
-      stepListText,
-      aacCardsText,
-      scenarioText,
-      successCriteriaText,
-      aiStarterPrompt,
-      aiGoalText,
-    ],
-  )
-
-  const generatedConfigJson = useMemo(() => prettifyJson(generatedConfigObject), [generatedConfigObject])
-  const choiceOptions = useMemo(() => parseLines(choiceOptionsText), [choiceOptionsText])
   const currentActivityDescription = ACTIVITY_TYPES.find((option) => option.value === activityType)?.description ?? ''
 
   const createLessonMutation = useMutation({
-    mutationFn: () => createLesson(token!, {
-      title,
-      description,
-      subject_id: Number(resolvedSubjectId),
-      primary_level: primaryLevel,
-      estimated_minutes: Number(estimatedMinutes),
-      difficulty_stage: 1,
-      is_published: true,
-    }),
+    mutationFn: () =>
+      createLesson(token!, {
+        title,
+        description,
+        subject_id: Number(resolvedSubjectId),
+        primary_level: primaryLevel,
+        estimated_minutes: Number(estimatedMinutes),
+        difficulty_stage: 1,
+        is_published: true,
+      }),
     onSuccess: async (createdLesson) => {
       setTitle('')
       setDescription('')
@@ -322,56 +337,225 @@ export function LessonsPage() {
     },
   })
 
-  const createActivityMutation = useMutation({
-    mutationFn: async () => {
-      let configJson = generatedConfigJson
+  function updateChoiceOption(
+    setter: Dispatch<SetStateAction<string[]>>,
+    index: number,
+    value: string,
+  ) {
+    setter((current) => current.map((item, itemIndex) => (itemIndex === index ? value : item)))
+  }
 
-      if (activityType === 'watch_answer') {
-        if (watchAnswerSource === 'upload') {
-          if (!mediaFile) {
-            throw new Error('Hãy chọn file ảnh hoặc video trước khi thêm hoạt động.')
-          }
+  function updatePair(index: number, field: 'left' | 'right', value: string) {
+    setMatchingPairs((current) =>
+      current.map((item, itemIndex) => (itemIndex === index ? { ...item, [field]: value } : item)),
+    )
+  }
 
-          const uploadedMedia = await uploadLessonMedia(token!, mediaFile)
-          configJson = prettifyJson(buildActivityConfig(activityType, {
-            prompt,
-            choiceOptionsText,
-            correctChoice,
-            matchingPairsText,
-            dragItemsText,
-            dragTargetsText,
-            mediaUrl: uploadedMedia.url,
-            mediaKind: uploadedMedia.media_kind,
-            questionPrompt,
-            stepListText,
-            aacCardsText,
-            scenarioText,
-            successCriteriaText,
-            aiStarterPrompt,
-            aiGoalText,
-          }))
-        } else if (!mediaUrl.trim()) {
-          throw new Error('Hãy nhập link video hoặc ảnh trước khi thêm hoạt động.')
-        }
+  function updateList(
+    setter: Dispatch<SetStateAction<string[]>>,
+    index: number,
+    value: string,
+  ) {
+    setter((current) => current.map((item, itemIndex) => (itemIndex === index ? value : item)))
+  }
+
+  function validateActivityForm() {
+    if (!resolvedSelectedLessonId) return 'Hãy chọn bài học trước khi thêm hoạt động.'
+
+    if ((activityTitle || activityLabel(activityType)).trim().length === 0) {
+      return 'Hãy nhập tên hoạt động.'
+    }
+
+    if (activityType === 'multiple_choice') {
+      if (!questionPrompt.trim()) return 'Hãy nhập câu hỏi cho hoạt động chọn đáp án.'
+      if (choiceOptions.some((option) => !option.trim())) return 'Hãy điền đủ 4 đáp án A, B, C, D.'
+    }
+
+    if (activityType === 'listen_choose') {
+      if (!listenPrompt.trim()) return 'Hãy nhập nội dung nghe hoặc câu đọc cho học sinh.'
+      if (listenOptions.some((option) => !option.trim())) return 'Hãy điền đủ 4 đáp án nghe và chọn.'
+    }
+
+    if (activityType === 'image_choice') {
+      if (!imageChoicePrompt.trim()) return 'Hãy nhập câu hỏi cho hoạt động nhìn ảnh.'
+      if (imageChoiceOptions.some((option) => !option.trim())) return 'Hãy điền đủ 4 đáp án gợi ý cho hoạt động nhìn ảnh.'
+      if (imageChoiceSource === 'upload' && !imageChoiceFile) return 'Hãy tải lên một hình ảnh cho hoạt động nhìn ảnh.'
+      if (imageChoiceSource === 'external' && !imageChoiceUrl.trim()) return 'Hãy nhập link hình ảnh cho hoạt động nhìn ảnh.'
+    }
+
+    if (activityType === 'matching' && compactPairs(matchingPairs).length < 2) {
+      return 'Hãy nhập ít nhất 2 cặp nối.'
+    }
+
+    if (activityType === 'drag_drop') {
+      if (compactLines(dragItems).length < 2) return 'Hãy nhập ít nhất 2 mục cần kéo.'
+      if (compactLines(dragTargets).length < 2) return 'Hãy nhập ít nhất 2 vị trí đích.'
+    }
+
+    if (activityType === 'watch_answer') {
+      if (!watchAnswerPrompt.trim()) return 'Hãy nhập câu hỏi sau khi xem.'
+      if (watchAnswerSource === 'upload' && !watchAnswerFile) return 'Hãy chọn file ảnh hoặc video trước khi thêm hoạt động.'
+      if (watchAnswerSource === 'external' && !watchAnswerUrl.trim()) return 'Hãy nhập link ảnh hoặc video trước khi thêm hoạt động.'
+    }
+
+    if (activityType === 'step_by_step' && compactLines(stepList).length < 2) {
+      return 'Hãy nhập ít nhất 2 bước cho hoạt động.'
+    }
+
+    if (activityType === 'aac' && compactLines(aacCards).length < 2) {
+      return 'Hãy nhập ít nhất 2 thẻ giao tiếp.'
+    }
+
+    if (activityType === 'career_simulation' && !scenarioText.trim()) {
+      return 'Hãy nhập tình huống mô phỏng.'
+    }
+
+    if (activityType === 'ai_chat' && !aiStarterPrompt.trim()) {
+      return 'Hãy nhập lời mở đầu cho AI.'
+    }
+
+    return null
+  }
+
+  async function buildActivityPayloadConfig() {
+    if (activityType === 'multiple_choice') {
+      const choices = choiceOptions.map((option) => option.trim())
+      return {
+        kind: 'multiple_choice',
+        prompt: questionPrompt.trim(),
+        choices,
+        correct: choices[correctChoiceIndex] ?? choices[0] ?? '',
+      }
+    }
+
+    if (activityType === 'listen_choose') {
+      const choices = listenOptions.map((option) => option.trim())
+      return {
+        kind: 'listen_choose',
+        audio_text: listenPrompt.trim(),
+        prompt: listenPrompt.trim(),
+        choices,
+        correct: choices[listenCorrectIndex] ?? choices[0] ?? '',
+      }
+    }
+
+    if (activityType === 'image_choice') {
+      let mediaUrl = imageChoiceUrl.trim()
+      let mediaKind = inferMediaKind(imageChoiceUrl, imageChoiceFile, imageChoiceSource)
+
+      if (imageChoiceSource === 'upload' && imageChoiceFile) {
+        const uploadedMedia = await uploadLessonMedia(token!, imageChoiceFile)
+        mediaUrl = uploadedMedia.url
+        mediaKind = uploadedMedia.media_kind
       }
 
+      const choices = imageChoiceOptions.map((option) => option.trim())
+      return {
+        kind: 'image_choice',
+        media_url: mediaUrl,
+        media_kind: mediaKind || 'image',
+        prompt: imageChoicePrompt.trim(),
+        choices,
+        correct: choices[imageChoiceCorrectIndex] ?? choices[0] ?? '',
+      }
+    }
+
+    if (activityType === 'matching') {
+      return {
+        kind: 'matching',
+        prompt: instructionText.trim(),
+        pairs: compactPairs(matchingPairs),
+      }
+    }
+
+    if (activityType === 'drag_drop') {
+      return {
+        kind: 'drag_drop',
+        prompt: instructionText.trim(),
+        items: compactLines(dragItems),
+        targets: compactLines(dragTargets),
+      }
+    }
+
+    if (activityType === 'watch_answer') {
+      let mediaUrl = watchAnswerUrl.trim()
+      let mediaKind = inferMediaKind(watchAnswerUrl, watchAnswerFile, watchAnswerSource)
+
+      if (watchAnswerSource === 'upload' && watchAnswerFile) {
+        const uploadedMedia = await uploadLessonMedia(token!, watchAnswerFile)
+        mediaUrl = uploadedMedia.url
+        mediaKind = uploadedMedia.media_kind
+      }
+
+      return {
+        kind: 'watch_answer',
+        media_url: mediaUrl,
+        media_kind: mediaKind,
+        prompt: watchAnswerPrompt.trim(),
+      }
+    }
+
+    if (activityType === 'step_by_step') {
+      return {
+        kind: 'step_by_step',
+        prompt: instructionText.trim(),
+        steps: compactLines(stepList),
+      }
+    }
+
+    if (activityType === 'aac') {
+      return {
+        kind: 'aac',
+        prompt: instructionText.trim(),
+        cards: compactLines(aacCards),
+      }
+    }
+
+    if (activityType === 'career_simulation') {
+      return {
+        kind: 'career_simulation',
+        scenario: scenarioText.trim(),
+        success_criteria: successCriteriaText.trim(),
+      }
+    }
+
+    return {
+      kind: 'ai_chat',
+      starter_prompt: aiStarterPrompt.trim(),
+      goals: compactLines(aiGoals),
+    }
+  }
+
+  const createActivityMutation = useMutation({
+    mutationFn: async () => {
+      const validationError = validateActivityForm()
+      if (validationError) {
+        throw new Error(validationError)
+      }
+
+      const config = await buildActivityPayloadConfig()
       return createLessonActivity(token!, resolvedSelectedLessonId!, {
         title: activityTitle.trim() || activityLabel(activityType),
         activity_type: activityType,
-        instruction_text: instructionText,
+        instruction_text: instructionText.trim(),
         voice_answer_enabled: voiceAnswerEnabled,
         is_required: true,
         sort_order: (lessonDetailQuery.data?.activities?.length ?? 0) + 1,
         difficulty_stage: 1,
-        config_json: configJson,
+        config_json: JSON.stringify(config),
       })
     },
     onSuccess: async () => {
       setActivityTitle('')
       setActivityFormError(null)
-      setWatchAnswerSource('external')
-      setMediaFile(null)
-      setMediaUrl('')
+      if (activityType === 'image_choice') {
+        setImageChoiceFile(null)
+        setImageChoiceUrl('')
+      }
+      if (activityType === 'watch_answer') {
+        setWatchAnswerFile(null)
+        setWatchAnswerUrl('')
+      }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['lessons', token] }),
         queryClient.invalidateQueries({ queryKey: ['lesson-detail', token, resolvedSelectedLessonId] }),
@@ -391,7 +575,6 @@ export function LessonsPage() {
   function handleActivitySubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setActivityFormError(null)
-    if (!resolvedSelectedLessonId) return
     createActivityMutation.mutate()
   }
 
@@ -400,13 +583,7 @@ export function LessonsPage() {
     setInstructionText(defaultInstructionForType(nextType))
     setVoiceAnswerEnabled(defaultVoiceEnabledForType(nextType))
     setActivityFormError(null)
-    if (!activityTitle.trim()) {
-      setActivityTitle(activityLabel(nextType))
-    }
-    if (nextType !== 'watch_answer') {
-      setWatchAnswerSource('external')
-      setMediaFile(null)
-    }
+    setActivityTitle('')
   }
 
   return (
@@ -414,7 +591,10 @@ export function LessonsPage() {
       <div className="page-stack">
         <section className="roadmap-panel">
           <h2>Tạo bài học và thêm hoạt động</h2>
-          <p>Mình đã rút gọn form: tạo bài học trước, chọn loại hoạt động, nhập nội dung chính là xong.</p>
+          <p>
+            Form này được làm lại theo cách giáo viên dễ dùng hơn: mỗi loại hoạt động có ô nhập riêng, rõ từng bước và
+            không cần suy nghĩ theo kiểu cấu hình kỹ thuật.
+          </p>
         </section>
 
         <section className="auth-layout">
@@ -423,7 +603,7 @@ export function LessonsPage() {
             <form className="form-stack" onSubmit={handleLessonSubmit}>
               <label>
                 Tên bài học
-                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví dụ: Nhận biết hình vuông" />
+                <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví dụ: Nhận biết động vật sống dưới nước" />
               </label>
 
               <label>
@@ -431,7 +611,9 @@ export function LessonsPage() {
                 <select value={resolvedSubjectId} onChange={(event) => setSubjectId(event.target.value)}>
                   <option value="">Chọn môn học</option>
                   {subjectsQuery.data?.map((subject) => (
-                    <option key={subject.id} value={subject.id}>{subject.name}</option>
+                    <option key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -442,14 +624,18 @@ export function LessonsPage() {
                   Mức độ chính
                   <select value={primaryLevel} onChange={(event) => setPrimaryLevel(event.target.value)}>
                     {LEVEL_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
                     ))}
                   </select>
                 </label>
+
                 <label>
                   Mô tả ngắn
-                  <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Mô tả ngắn để nhớ bài học dùng để làm gì" />
+                  <input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Mô tả nhanh bài học này dùng để rèn kỹ năng gì" />
                 </label>
+
                 <label>
                   Số phút dự kiến
                   <input value={estimatedMinutes} onChange={(event) => setEstimatedMinutes(event.target.value)} inputMode="numeric" />
@@ -483,11 +669,7 @@ export function LessonsPage() {
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <button
-              type="button"
-              onClick={() => setIsActivityFormOpen((current) => !current)}
-              className="simple-toggle-button"
-            >
+            <button type="button" onClick={() => setIsActivityFormOpen((current) => !current)} className="simple-toggle-button">
               <span>Thêm hoạt động vào bài học</span>
               <span>{isActivityFormOpen ? 'Ẩn bớt' : 'Mở nhanh'}</span>
             </button>
@@ -495,161 +677,236 @@ export function LessonsPage() {
             {isActivityFormOpen ? (
               <form className="form-stack" onSubmit={handleActivitySubmit}>
                 <div className="detail-stack">
-                  <strong>Chọn loại hoạt động</strong>
-                  <div className="tag-wrap">
+                  <strong>1. Chọn loại hoạt động</strong>
+                  <div className="builder-type-grid">
                     {ACTIVITY_TYPES.map((option) => (
                       <button
                         key={option.value}
                         type="button"
-                        className={activityType === option.value ? 'subject-pill pill-button pill-button-active' : 'subject-pill pill-button'}
+                        className={activityType === option.value ? 'builder-type-card builder-type-card-active' : 'builder-type-card'}
                         onClick={() => applyActivityType(option.value)}
                       >
-                        {option.label}
+                        <strong>{option.label}</strong>
+                        <span>{option.description}</span>
                       </button>
                     ))}
                   </div>
                   <p className="helper-text">{currentActivityDescription}</p>
                 </div>
 
-                <label>
-                  Tên hoạt động
-                  <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder={activityLabel(activityType)} />
-                </label>
+                <div className="config-card detail-stack">
+                  <strong>2. Đặt tên và hướng dẫn</strong>
+                  <label>
+                    Tên hoạt động
+                    <input value={activityTitle} onChange={(event) => setActivityTitle(event.target.value)} placeholder={activityLabel(activityType)} />
+                  </label>
+                  <label>
+                    Hướng dẫn hiển thị cho học sinh
+                    <input value={instructionText} onChange={(event) => setInstructionText(event.target.value)} placeholder="Ví dụ: Hãy nhìn kỹ rồi chọn câu trả lời đúng." />
+                  </label>
+                </div>
 
-                {(activityType === 'multiple_choice' || activityType === 'listen_choose') ? (
-                  <div className="config-card">
+                {activityType === 'multiple_choice' ? (
+                  <ChoiceBuilder
+                    promptLabel="3. Nhập câu hỏi"
+                    promptValue={questionPrompt}
+                    promptPlaceholder="Ví dụ: Con vật nào biết bơi?"
+                    onPromptChange={setQuestionPrompt}
+                    options={choiceOptions}
+                    correctIndex={correctChoiceIndex}
+                    onOptionChange={(index, value) => updateChoiceOption(setChoiceOptions, index, value)}
+                    onCorrectChange={setCorrectChoiceIndex}
+                  />
+                ) : null}
+
+                {activityType === 'image_choice' ? (
+                  <div className="config-card detail-stack">
+                    <strong>3. Hình ảnh và đáp án</strong>
+
                     <label>
-                      Câu hỏi chính
-                      <input value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="Ví dụ: Vật nào có dạng tròn?" />
+                      Câu hỏi cho học sinh
+                      <input value={imageChoicePrompt} onChange={(event) => setImageChoicePrompt(event.target.value)} placeholder="Ví dụ: Bạn nhìn thấy gì trong tấm ảnh này?" />
                     </label>
+
                     <label>
-                      Danh sách đáp án, mỗi dòng một đáp án
-                      <textarea value={choiceOptionsText} onChange={(event) => setChoiceOptionsText(event.target.value)} rows={4} />
-                    </label>
-                    <label>
-                      Đáp án đúng
-                      <select value={correctChoice} onChange={(event) => setCorrectChoice(event.target.value)}>
-                        {choiceOptions.map((option) => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
+                      Nguồn hình ảnh
+                      <select value={imageChoiceSource} onChange={(event) => setImageChoiceSource(event.target.value as MediaSource)}>
+                        <option value="upload">Tải ảnh từ máy</option>
+                        <option value="external">Dùng link ảnh</option>
                       </select>
                     </label>
+
+                    {imageChoiceSource === 'upload' ? (
+                      <label>
+                        Chọn ảnh
+                        <input type="file" accept="image/*" onChange={(event) => setImageChoiceFile(event.target.files?.[0] ?? null)} />
+                      </label>
+                    ) : (
+                      <label>
+                        Link ảnh
+                        <input value={imageChoiceUrl} onChange={(event) => setImageChoiceUrl(event.target.value)} placeholder="https://..." />
+                      </label>
+                    )}
+
+                    {imageChoiceSource === 'upload' && imageChoiceFile ? <p className="helper-text">Đã chọn ảnh: {imageChoiceFile.name}</p> : null}
+
+                    <ChoiceBuilder
+                      promptLabel="4. 4 đáp án gợi ý"
+                      promptValue={imageChoicePrompt}
+                      promptPlaceholder="Ví dụ: Bạn nhìn thấy gì trong tấm ảnh này?"
+                      onPromptChange={setImageChoicePrompt}
+                      showPrompt={false}
+                      options={imageChoiceOptions}
+                      correctIndex={imageChoiceCorrectIndex}
+                      onOptionChange={(index, value) => updateChoiceOption(setImageChoiceOptions, index, value)}
+                      onCorrectChange={setImageChoiceCorrectIndex}
+                    />
                   </div>
+                ) : null}
+
+                {activityType === 'listen_choose' ? (
+                  <ChoiceBuilder
+                    promptLabel="3. Nội dung nghe"
+                    promptValue={listenPrompt}
+                    promptPlaceholder="Ví dụ: Cô đọc: Đây là con mèo."
+                    onPromptChange={setListenPrompt}
+                    options={listenOptions}
+                    correctIndex={listenCorrectIndex}
+                    onOptionChange={(index, value) => updateChoiceOption(setListenOptions, index, value)}
+                    onCorrectChange={setListenCorrectIndex}
+                  />
                 ) : null}
 
                 {activityType === 'matching' ? (
-                  <div className="config-card">
-                    <label>
-                      Mỗi dòng theo mẫu Trái | Phải
-                      <textarea value={matchingPairsText} onChange={(event) => setMatchingPairsText(event.target.value)} rows={5} />
-                    </label>
-                  </div>
+                  <PairBuilder
+                    title="3. Nhập từng cặp cần nối"
+                    helper="Mỗi hàng là một cặp tương ứng, ví dụ trái là hình hoặc từ khóa, phải là đáp án đúng đi cùng."
+                    items={matchingPairs}
+                    onChange={updatePair}
+                    onAdd={() => setMatchingPairs((current) => [...current, { left: '', right: '' }])}
+                    onRemove={(index) => setMatchingPairs((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                  />
                 ) : null}
 
                 {activityType === 'drag_drop' ? (
-                  <div className="config-card config-grid-2">
-                    <label>
-                      Danh sách vật cần kéo
-                      <textarea value={dragItemsText} onChange={(event) => setDragItemsText(event.target.value)} rows={5} />
-                    </label>
-                    <label>
-                      Danh sách vị trí đích
-                      <textarea value={dragTargetsText} onChange={(event) => setDragTargetsText(event.target.value)} rows={5} />
-                    </label>
+                  <div className="builder-two-columns">
+                    <ListBuilder
+                      title="3. Các mục học sinh sẽ kéo"
+                      helper="Mỗi dòng là một mục riêng, ví dụ con mèo, quả táo, xe đạp."
+                      items={dragItems}
+                      itemPlaceholder="Mục cần kéo"
+                      onChange={(index, value) => updateList(setDragItems, index, value)}
+                      onAdd={() => setDragItems((current) => [...current, ''])}
+                      onRemove={(index) => setDragItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                    />
+                    <ListBuilder
+                      title="4. Các ô đích hoặc nhóm"
+                      helper="Mỗi dòng là một nhóm hoặc vị trí đích, ví dụ động vật, trái cây, phương tiện."
+                      items={dragTargets}
+                      itemPlaceholder="Vị trí đích"
+                      onChange={(index, value) => updateList(setDragTargets, index, value)}
+                      onAdd={() => setDragTargets((current) => [...current, ''])}
+                      onRemove={(index) => setDragTargets((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                    />
                   </div>
                 ) : null}
 
                 {activityType === 'watch_answer' ? (
-                  <div className="config-card">
+                  <div className="config-card detail-stack">
+                    <strong>3. Nội dung để học sinh xem</strong>
                     <label>
                       Nguồn media
-                      <select value={watchAnswerSource} onChange={(event) => setWatchAnswerSource(event.target.value as WatchAnswerSource)}>
+                      <select value={watchAnswerSource} onChange={(event) => setWatchAnswerSource(event.target.value as MediaSource)}>
                         <option value="external">Nhập link ngoài</option>
                         <option value="upload">Tải file từ máy</option>
                       </select>
                     </label>
 
-                    {watchAnswerSource === 'external' ? (
+                    {watchAnswerSource === 'upload' ? (
                       <label>
-                        Link ảnh hoặc video
-                        <input value={mediaUrl} onChange={(event) => setMediaUrl(event.target.value)} placeholder="https://..." />
+                        Chọn ảnh hoặc video
+                        <input type="file" accept="image/*,video/*" onChange={(event) => setWatchAnswerFile(event.target.files?.[0] ?? null)} />
                       </label>
                     ) : (
                       <label>
-                        Chọn file ảnh hoặc video
-                        <input type="file" accept="image/*,video/*" onChange={(event) => setMediaFile(event.target.files?.[0] ?? null)} />
+                        Link ảnh hoặc video
+                        <input value={watchAnswerUrl} onChange={(event) => setWatchAnswerUrl(event.target.value)} placeholder="https://..." />
                       </label>
                     )}
 
-                    {watchAnswerSource === 'upload' && mediaFile ? <p className="helper-text">Đã chọn: {mediaFile.name}</p> : null}
+                    {watchAnswerSource === 'upload' && watchAnswerFile ? <p className="helper-text">Đã chọn file: {watchAnswerFile.name}</p> : null}
 
                     <label>
                       Câu hỏi sau khi xem
-                      <input value={questionPrompt} onChange={(event) => setQuestionPrompt(event.target.value)} placeholder="Em thấy bạn nhỏ đang làm gì?" />
+                      <input value={watchAnswerPrompt} onChange={(event) => setWatchAnswerPrompt(event.target.value)} placeholder="Ví dụ: Em thấy bạn nhỏ đang làm gì?" />
                     </label>
                   </div>
                 ) : null}
 
                 {activityType === 'step_by_step' ? (
-                  <div className="config-card">
-                    <label>
-                      Mỗi dòng một bước
-                      <textarea value={stepListText} onChange={(event) => setStepListText(event.target.value)} rows={5} />
-                    </label>
-                  </div>
+                  <ListBuilder
+                    title="3. Các bước học sinh cần làm"
+                    helper="Mỗi dòng là một bước rõ ràng, ngắn gọn, dễ thực hiện."
+                    items={stepList}
+                    itemPlaceholder="Bước"
+                    onChange={(index, value) => updateList(setStepList, index, value)}
+                    onAdd={() => setStepList((current) => [...current, ''])}
+                    onRemove={(index) => setStepList((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                  />
                 ) : null}
 
                 {activityType === 'aac' ? (
-                  <div className="config-card">
-                    <label>
-                      Mỗi dòng một thẻ giao tiếp
-                      <textarea value={aacCardsText} onChange={(event) => setAacCardsText(event.target.value)} rows={5} />
-                    </label>
-                  </div>
+                  <ListBuilder
+                    title="3. Các thẻ giao tiếp"
+                    helper="Mỗi dòng là một câu hoặc ý ngắn để học sinh chọn."
+                    items={aacCards}
+                    itemPlaceholder="Thẻ giao tiếp"
+                    onChange={(index, value) => updateList(setAacCards, index, value)}
+                    onAdd={() => setAacCards((current) => [...current, ''])}
+                    onRemove={(index) => setAacCards((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                  />
                 ) : null}
 
                 {activityType === 'career_simulation' ? (
-                  <div className="config-card">
+                  <div className="config-card detail-stack">
+                    <strong>3. Tình huống mô phỏng</strong>
                     <label>
-                      Tình huống mô phỏng
-                      <textarea value={scenarioText} onChange={(event) => setScenarioText(event.target.value)} rows={4} />
+                      Bối cảnh hoạt động
+                      <textarea value={scenarioText} onChange={(event) => setScenarioText(event.target.value)} rows={4} placeholder="Mô tả ngắn gọn tình huống học sinh sẽ tham gia." />
+                    </label>
+                    <label>
+                      Tiêu chí hoàn thành
+                      <textarea value={successCriteriaText} onChange={(event) => setSuccessCriteriaText(event.target.value)} rows={3} placeholder="Ví dụ: Trả lời lịch sự, đúng vai, làm đủ bước." />
                     </label>
                   </div>
                 ) : null}
 
                 {activityType === 'ai_chat' ? (
-                  <div className="config-card">
-                    <label>
-                      Lời mở đầu cho AI
-                      <textarea value={aiStarterPrompt} onChange={(event) => setAiStarterPrompt(event.target.value)} rows={4} />
-                    </label>
+                  <div className="builder-two-columns">
+                    <div className="config-card detail-stack">
+                      <strong>3. Lời mở đầu cho AI</strong>
+                      <label>
+                        Nội dung AI sẽ nói đầu tiên
+                        <textarea value={aiStarterPrompt} onChange={(event) => setAiStarterPrompt(event.target.value)} rows={4} placeholder="Ví dụ: Hãy hỏi em 3 câu ngắn về chủ đề động vật." />
+                      </label>
+                    </div>
+                    <ListBuilder
+                      title="4. Mục tiêu học sinh cần đạt"
+                      helper="Mỗi dòng là một mục tiêu, ví dụ trả lời ngắn gọn, biết chào hỏi, biết nhờ hỗ trợ."
+                      items={aiGoals}
+                      itemPlaceholder="Mục tiêu"
+                      onChange={(index, value) => updateList(setAiGoals, index, value)}
+                      onAdd={() => setAiGoals((current) => [...current, ''])}
+                      onRemove={(index) => setAiGoals((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                    />
                   </div>
                 ) : null}
 
                 <details className="config-card">
                   <summary className="simple-summary">Tùy chọn thêm</summary>
-                  <label>
-                    Hướng dẫn hiển thị cho học sinh
-                    <input value={instructionText} onChange={(event) => setInstructionText(event.target.value)} placeholder="Hướng dẫn ngắn gọn cho học sinh" />
-                  </label>
-
-                  {activityType === 'career_simulation' ? (
-                    <label>
-                      Tiêu chí hoàn thành
-                      <textarea value={successCriteriaText} onChange={(event) => setSuccessCriteriaText(event.target.value)} rows={3} />
-                    </label>
-                  ) : null}
-
-                  {activityType === 'ai_chat' ? (
-                    <label>
-                      Mục tiêu cần đạt, mỗi dòng một mục
-                      <textarea value={aiGoalText} onChange={(event) => setAiGoalText(event.target.value)} rows={4} />
-                    </label>
-                  ) : null}
-
                   <label className="checkbox-row">
                     <input type="checkbox" checked={voiceAnswerEnabled} onChange={(event) => setVoiceAnswerEnabled(event.target.checked)} />
-                    Bật voice answer
+                    Bật trả lời bằng giọng nói
                   </label>
                 </details>
 
@@ -668,14 +925,19 @@ export function LessonsPage() {
               <div className="detail-stack">
                 <div className="student-row">
                   <strong>{selectedLesson.title}</strong>
-                  <span>{selectedLesson.subject?.name ?? 'Chưa có môn'} / {levelLabel(selectedLesson.primary_level)}</span>
+                  <span>
+                    {selectedLesson.subject?.name ?? 'Chưa có môn'} / {levelLabel(selectedLesson.primary_level)}
+                  </span>
                 </div>
                 <p>{lessonDetailQuery.data?.description ?? selectedLesson.description ?? 'Chưa có mô tả.'}</p>
+
                 <div className="student-list compact-list">
                   {lessonDetailQuery.data?.activities?.map((activity) => (
                     <div key={activity.id} className="student-row">
-                      <strong>{activity.sort_order}. {activity.title}</strong>
-                      <span>{activityLabel(activity.activity_type as ActivityType)} {activity.voice_answer_enabled ? '/ voice' : ''}</span>
+                      <strong>
+                        {activity.sort_order}. {activity.title}
+                      </strong>
+                      <span>{activityLabel(activity.activity_type as ActivityType)}</span>
                       <p>{activity.instruction_text ?? 'Chưa có hướng dẫn.'}</p>
                     </div>
                   ))}

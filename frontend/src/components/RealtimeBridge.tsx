@@ -25,6 +25,10 @@ type EventPayload = {
   student_count?: number
   student_name?: string
   parent_name?: string
+  teacher_name?: string
+  sender_role?: string
+  sender_name?: string
+  message_preview?: string
   report_count?: number
   auto_assignment_count?: number
 }
@@ -39,6 +43,7 @@ function invalidateTeacherQueries(queryClient: ReturnType<typeof useQueryClient>
   void queryClient.invalidateQueries({ queryKey: ['teacher-reports', token] })
   void queryClient.invalidateQueries({ queryKey: ['teacher-shared-students', token] })
   void queryClient.invalidateQueries({ queryKey: ['parents', token] })
+  void queryClient.invalidateQueries({ queryKey: ['teacher-messages', token] })
 }
 
 function invalidateStudentQueries(queryClient: ReturnType<typeof useQueryClient>, token: string) {
@@ -51,6 +56,7 @@ function invalidateStudentQueries(queryClient: ReturnType<typeof useQueryClient>
 function invalidateParentQueries(queryClient: ReturnType<typeof useQueryClient>, token: string) {
   void queryClient.invalidateQueries({ queryKey: ['parent-children', token] })
   void queryClient.invalidateQueries({ queryKey: ['parent-reports', token] })
+  void queryClient.invalidateQueries({ queryKey: ['parent-messages', token] })
 }
 
 function parsePayload(payloadJson: string | null): EventPayload {
@@ -66,6 +72,61 @@ function getUnreadStorageKey(userId: number | undefined) {
   return userId ? `webapp-realtime-unread-${userId}` : null
 }
 
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  const segments = token.split('.')
+  if (segments.length < 2) return null
+
+  try {
+    const normalized = segments[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
+    const decoded = window.atob(padded)
+    return JSON.parse(decoded) as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
+
+function isJwtExpired(token: string, skewSeconds = 15): boolean {
+  const payload = decodeJwtPayload(token)
+  const exp = Number(payload?.exp)
+  if (!Number.isFinite(exp)) return false
+  const now = Math.floor(Date.now() / 1000)
+  return exp <= now + skewSeconds
+}
+
+function playIncomingMessageTone(audioContextRef: { current: AudioContext | null }) {
+  try {
+    const AudioContextClass = window.AudioContext
+    if (!AudioContextClass) return
+
+    const context = audioContextRef.current ?? new AudioContextClass()
+    audioContextRef.current = context
+
+    if (context.state === 'suspended') {
+      void context.resume()
+    }
+
+    const oscillator = context.createOscillator()
+    const gainNode = context.createGain()
+    const now = context.currentTime
+
+    oscillator.type = 'sine'
+    oscillator.frequency.setValueAtTime(720, now)
+    oscillator.frequency.linearRampToValueAtTime(520, now + 0.12)
+
+    gainNode.gain.setValueAtTime(0.0001, now)
+    gainNode.gain.exponentialRampToValueAtTime(0.045, now + 0.02)
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.18)
+
+    oscillator.connect(gainNode)
+    gainNode.connect(context.destination)
+    oscillator.start(now)
+    oscillator.stop(now + 0.18)
+  } catch {
+    // Ignore audio failures so realtime updates never break the UI.
+  }
+}
+
 function formatNotification(event: RealtimeEventItem, role: string): NotificationCopy {
   const payload = parsePayload(event.payload_json)
   const className = payload.class_name ?? 'lớp học'
@@ -74,6 +135,9 @@ function formatNotification(event: RealtimeEventItem, role: string): Notificatio
   const studentCount = payload.student_count ?? 0
   const studentName = payload.student_name ?? 'học sinh'
   const parentName = payload.parent_name ?? 'phụ huynh'
+  const teacherName = payload.teacher_name ?? 'giáo viên'
+  const senderName = payload.sender_name ?? 'Người dùng'
+  const messagePreview = payload.message_preview ?? 'Bạn có một tin nhắn mới.'
   const reportCount = payload.report_count ?? 0
   const autoAssignmentCount = payload.auto_assignment_count ?? 0
 
@@ -126,6 +190,13 @@ function formatNotification(event: RealtimeEventItem, role: string): Notificatio
       return {
         title: 'Báo cáo đã gửi',
         message: `Đã gửi thành công ${reportCount || 'một'} báo cáo học tập tới phụ huynh.`,
+        tone: 'teacher',
+      }
+    }
+    if (event.event_type === 'parent_teacher_message_created') {
+      return {
+        title: 'Phụ huynh vừa nhắn',
+        message: `${parentName} vừa nhắn về ${studentName}: ${messagePreview}`,
         tone: 'teacher',
       }
     }
@@ -214,6 +285,21 @@ function formatNotification(event: RealtimeEventItem, role: string): Notificatio
         tone: 'parent',
       }
     }
+    if (event.event_type === 'parent_teacher_message_created') {
+      if (payload.sender_role === 'teacher') {
+        return {
+          title: 'Giáo viên vừa nhắn',
+          message: `${teacherName} vừa nhắn về ${studentName}: ${messagePreview}`,
+          tone: 'parent',
+        }
+      }
+
+      return {
+        title: 'Tin nhắn mới',
+        message: `${senderName} vừa gửi một tin nhắn mới: ${messagePreview}`,
+        tone: 'parent',
+      }
+    }
   }
 
   return {
@@ -227,9 +313,11 @@ export function RealtimeBridge({ isNotificationPanelOpen, onUnreadCountChange }:
   const queryClient = useQueryClient()
   const accessToken = useAuthStore((state) => state.accessToken)
   const user = useAuthStore((state) => state.user)
+  const clearSession = useAuthStore((state) => state.clearSession)
   const [latestEvent, setLatestEvent] = useState<RealtimeEventItem | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
   const lastEventIdRef = useRef(0)
+  const audioContextRef = useRef<AudioContext | null>(null)
   const storageKey = useMemo(() => getUnreadStorageKey(user?.id), [user?.id])
 
   useEffect(() => {
@@ -260,6 +348,14 @@ export function RealtimeBridge({ isNotificationPanelOpen, onUnreadCountChange }:
       return undefined
     }
 
+    if (isJwtExpired(accessToken)) {
+      clearSession()
+      setLatestEvent(null)
+      setUnreadCount(0)
+      lastEventIdRef.current = 0
+      return undefined
+    }
+
     let isClosed = false
     let reconnectTimer: number | null = null
     let eventSource: EventSource | null = null
@@ -274,6 +370,10 @@ export function RealtimeBridge({ isNotificationPanelOpen, onUnreadCountChange }:
         lastEventIdRef.current = payload.id
         setLatestEvent(payload)
         setUnreadCount((current) => current + 1)
+
+        if (payload.event_type === 'parent_teacher_message_created') {
+          playIncomingMessageTone(audioContextRef)
+        }
 
         if (user.role === 'teacher') {
           invalidateTeacherQueries(queryClient, accessToken)
@@ -306,7 +406,7 @@ export function RealtimeBridge({ isNotificationPanelOpen, onUnreadCountChange }:
       }
       eventSource?.close()
     }
-  }, [accessToken, queryClient, user])
+  }, [accessToken, clearSession, queryClient, user])
 
   useEffect(() => {
     if (!latestEvent) return undefined

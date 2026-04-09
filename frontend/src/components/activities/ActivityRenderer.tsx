@@ -3,6 +3,7 @@ import type { LessonActivityItem } from '../../services/api'
 
 type ActivityType =
   | 'multiple_choice'
+  | 'image_choice'
   | 'matching'
   | 'drag_drop'
   | 'listen_choose'
@@ -19,6 +20,7 @@ type ActivityPair = {
 
 const activityTypeLabelMap: Record<string, string> = {
   multiple_choice: 'Chọn đáp án',
+  image_choice: 'Nhìn ảnh chọn đáp án',
   matching: 'Nối cặp',
   drag_drop: 'Kéo thả',
   listen_choose: 'Nghe và chọn',
@@ -155,11 +157,14 @@ export const MultipleChoiceActivity = React.memo(({ activity, answers, setAnswer
   const prompt = toText(config.prompt) || toText(config.audio_text) || activity.instruction_text || 'Hãy chọn đáp án đúng.'
   const choices = toStringArray(config.choices)
   const correct = toText(config.correct)
+  const mediaUrl = toText(config.media_url)
+  const mediaKind = toText(config.media_kind)
   const selectedChoice = answers[activity.id] ?? ''
   const isCorrect = Boolean(selectedChoice) && selectedChoice === correct
 
   return (
     <div className="activity-playground">
+      {mediaUrl ? renderEmbeddedMedia(mediaUrl, mediaKind) : null}
       <p className="activity-prompt">{prompt}</p>
       <div className="activity-option-grid">
         {choices.map((choice) => (
@@ -395,7 +400,7 @@ export const ActivityCard = React.memo(({ activity, answers, setAnswers }: { act
         <span>{activityLabel(activity.activity_type)} {activity.voice_answer_enabled ? '/ voice' : ''}</span>
       </div>
       <p>{activity.instruction_text ?? 'Chưa có hướng dẫn.'}</p>
-      {activityType === 'multiple_choice' || activityType === 'listen_choose' ? (
+      {activityType === 'multiple_choice' || activityType === 'image_choice' || activityType === 'listen_choose' ? (
         <MultipleChoiceActivity activity={activity} answers={answers.choiceAnswers} setAnswers={setAnswers.setChoiceAnswers} />
       ) : activityType === 'matching' ? (
         <MatchingActivity activity={activity} answers={answers.matchingAnswers} setAnswers={setAnswers.setMatchingAnswers} />

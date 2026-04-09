@@ -57,14 +57,15 @@ export function AssignmentsPage() {
   )
 
   const createMutation = useMutation({
-    mutationFn: () => createAssignment(token!, {
-      lesson_id: Number(resolvedLessonId),
-      class_id: Number(resolvedClassId),
-      subject_id: selectedLesson?.subject_id,
-      target_type: 'class',
-      due_at: dueAt || undefined,
-      required_completion_percent: Number(requiredCompletionPercent),
-    }),
+    mutationFn: () =>
+      createAssignment(token!, {
+        lesson_id: Number(resolvedLessonId),
+        class_id: Number(resolvedClassId),
+        subject_id: selectedLesson?.subject_id,
+        target_type: 'class',
+        due_at: dueAt || undefined,
+        required_completion_percent: Number(requiredCompletionPercent),
+      }),
     onSuccess: async () => {
       setDueAt('')
       setRequiredCompletionPercent('80')
@@ -81,19 +82,26 @@ export function AssignmentsPage() {
       <div className="page-stack">
         <section className="roadmap-panel">
           <h2>Giao bài học cho lớp</h2>
-          <p>Chỉ cần chọn lớp, chọn bài học, xem nhanh số học sinh nhận bài rồi bấm giao.</p>
+          <p>Chỉ cần chọn lớp, chọn bài học và bấm giao. Sau đó hệ thống sẽ tự theo dõi tiến độ học sinh khi các em làm bài.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
             <h3>Giao bài nhanh</h3>
             <div className="form-stack">
+              <div className="config-card">
+                <strong>Theo dõi tiến độ là tự động</strong>
+                <p className="helper-text">Giáo viên chỉ thiết lập bài và mức cần đạt. Khi học sinh bắt đầu làm, hệ thống sẽ tự cập nhật tiến độ.</p>
+              </div>
+
               <label>
                 Lớp học
                 <select value={resolvedClassId} onChange={(event) => setClassId(event.target.value)}>
                   <option value="">Chọn lớp học</option>
                   {classesQuery.data?.map((item) => (
-                    <option key={item.id} value={item.id}>{item.name}</option>
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -103,7 +111,9 @@ export function AssignmentsPage() {
                 <select value={resolvedLessonId} onChange={(event) => setLessonId(event.target.value)}>
                   <option value="">Chọn bài học</option>
                   {lessonsQuery.data?.map((lesson) => (
-                    <option key={lesson.id} value={lesson.id}>{lesson.title}</option>
+                    <option key={lesson.id} value={lesson.id}>
+                      {lesson.title}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -152,6 +162,7 @@ export function AssignmentsPage() {
               </div>
               <p>Mức cần đạt: {requiredCompletionPercent}%.</p>
               <p>{dueAt ? `Hạn nộp: ${dueAt}` : 'Không đặt hạn nộp, học sinh có thể học ngay khi nhận bài.'}</p>
+              <p className="helper-text">Sau khi giao xong, trang Tiến độ sẽ tự hiển thị dữ liệu theo từng học sinh.</p>
               {!classesQuery.data?.length && !classesQuery.isLoading ? <p>Bạn cần tạo lớp trước khi giao bài.</p> : null}
               {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Bạn cần tạo bài học trước khi giao bài.</p> : null}
             </div>

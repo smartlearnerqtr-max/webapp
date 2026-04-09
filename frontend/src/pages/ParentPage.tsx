@@ -1,10 +1,18 @@
-import { useMemo, useState } from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { BarChartCard } from '../components/BarChartCard'
+import { ChatDock } from '../components/ChatDock'
 import { RequireAuth } from '../components/RequireAuth'
-import { fetchParentChildren, fetchParentReports, fetchTeacherByIdForParent } from '../services/api'
-import type { ParentReportItem } from '../services/api'
+import {
+  fetchParentChildren,
+  fetchParentMessages,
+  fetchParentReports,
+  fetchTeacherByIdForParent,
+  markParentMessagesRead,
+  sendParentMessage,
+} from '../services/api'
+import type { ParentReportItem, ParentTeacherConversationItem } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
 const readinessLabelMap: Record<string, string> = {
@@ -16,7 +24,14 @@ const readinessLabelMap: Record<string, string> = {
 export function ParentPage() {
   const token = useAuthStore((state) => state.accessToken)
   const profile = useAuthStore((state) => state.profile)
+  const queryClient = useQueryClient()
   const [teacherIdInput, setTeacherIdInput] = useState('')
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const [selectedConversationKey, setSelectedConversationKey] = useState('')
+  const [messageDraft, setMessageDraft] = useState('')
+  const [selectedChatStudentId, setSelectedChatStudentId] = useState('')
+  const [conversationSearchTerm, setConversationSearchTerm] = useState('')
+  const deferredSearchTerm = useDeferredValue(conversationSearchTerm)
 
   const childrenQuery = useQuery({
     queryKey: ['parent-children', token],
@@ -30,8 +45,36 @@ export function ParentPage() {
     enabled: Boolean(token),
   })
 
+  const conversationsQuery = useQuery({
+    queryKey: ['parent-messages', token],
+    queryFn: () => fetchParentMessages(token!),
+    enabled: Boolean(token),
+  })
+
   const teacherLookupMutation = useMutation({
     mutationFn: () => fetchTeacherByIdForParent(token!, Number(teacherIdInput)),
+  })
+
+  const sendMessageMutation = useMutation({
+    mutationFn: (conversation: ParentTeacherConversationItem) => sendParentMessage(token!, {
+      teacher_id: conversation.teacher?.id ?? 0,
+      student_id: conversation.student?.id ?? 0,
+      message: messageDraft.trim(),
+    }),
+    onSuccess: async () => {
+      setMessageDraft('')
+      await queryClient.invalidateQueries({ queryKey: ['parent-messages', token] })
+    },
+  })
+
+  const markReadMutation = useMutation({
+    mutationFn: (conversation: ParentTeacherConversationItem) => markParentMessagesRead(token!, {
+      teacher_id: conversation.teacher?.id ?? 0,
+      student_id: conversation.student?.id ?? 0,
+    }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['parent-messages', token] })
+    },
   })
 
   const reportsByStudent = useMemo(() => {
@@ -64,6 +107,57 @@ export function ParentPage() {
     ]
   }, [childrenQuery.data])
 
+  const conversations = conversationsQuery.data ?? []
+  const unreadConversationCount = conversations.reduce((count, item) => count + item.unread_count, 0)
+
+  const conversationStudentOptions = useMemo(() => {
+    const options = new Map<string, string>()
+    for (const conversation of conversations) {
+      if (conversation.student) {
+        options.set(String(conversation.student.id), conversation.student.full_name)
+      }
+    }
+    return Array.from(options.entries()).map(([id, fullName]) => ({ id, fullName }))
+  }, [conversations])
+
+  const filteredConversations = useMemo(() => {
+    const keyword = deferredSearchTerm.trim().toLowerCase()
+    return conversations.filter((conversation) => {
+      if (selectedChatStudentId && String(conversation.student?.id ?? '') !== selectedChatStudentId) return false
+      if (!keyword) return true
+
+      const haystack = [
+        conversation.teacher?.full_name,
+        conversation.teacher?.school_name,
+        conversation.student?.full_name,
+        conversation.latest_message?.message,
+      ].join(' ').toLowerCase()
+
+      return haystack.includes(keyword)
+    })
+  }, [conversations, deferredSearchTerm, selectedChatStudentId])
+
+  const selectedConversation = useMemo(
+    () => filteredConversations.find((item) => item.conversation_key === selectedConversationKey) ?? filteredConversations[0] ?? null,
+    [filteredConversations, selectedConversationKey],
+  )
+
+  useEffect(() => {
+    if (!filteredConversations.length) {
+      setSelectedConversationKey('')
+      return
+    }
+
+    if (!selectedConversationKey || !filteredConversations.some((item) => item.conversation_key === selectedConversationKey)) {
+      setSelectedConversationKey(filteredConversations[0].conversation_key)
+    }
+  }, [filteredConversations, selectedConversationKey])
+
+  useEffect(() => {
+    if (!isChatOpen || !selectedConversation || selectedConversation.unread_count <= 0 || markReadMutation.isPending) return
+    markReadMutation.mutate(selectedConversation)
+  }, [isChatOpen, markReadMutation, selectedConversation])
+
   const parentId = typeof profile?.id === 'number' ? profile.id : null
   const parentName = typeof profile?.full_name === 'string' ? String(profile.full_name) : 'Phụ huynh'
 
@@ -72,8 +166,8 @@ export function ParentPage() {
       <div className="page-stack">
         <section className="roadmap-panel">
           <p className="eyebrow">Phụ huynh</p>
-          <h2>Theo dõi việc học của con</h2>
-          <p>Phụ huynh có thể xem tiến độ của con, tra giáo viên bằng teacher ID và đọc báo cáo hằng ngày.</p>
+          <h2>Theo dõi việc học của con thật gọn và dễ hiểu</h2>
+          <p>Xem tiến độ, nhận báo cáo và nhắn giáo viên bằng một nút chat nổi thay vì nhét khung chat vào giữa trang.</p>
         </section>
 
         <section className="dashboard-grid">
@@ -93,21 +187,21 @@ export function ParentPage() {
                 <strong>{childrenQuery.data?.length ?? 0}</strong>
               </div>
               <div className="mini-card">
-                <span>Báo cáo đã nhận</span>
-                <strong>{reportsQuery.data?.length ?? 0}</strong>
+                <span>Tin nhắn chưa đọc</span>
+                <strong>{unreadConversationCount}</strong>
               </div>
             </div>
             <BarChartCard
               title="Biểu đồ tổng quan gia đình"
-              description="Tóm tắt nhanh số con và khối lượng bài đang theo dõi trên ứng dụng."
+              description="Nhìn nhanh khối lượng bài học của cả gia đình trên ứng dụng."
               items={familyProgressChartItems}
-              emptyMessage="Chưa có dữ liệu học sinh để hiển thị biểu đồ."
+              emptyMessage="Chưa có dữ liệu học sinh để hiển thị."
             />
-            <p>Gửi parent ID này cho giáo viên để giáo viên thêm quý vị vào đúng nhóm thông báo của con.</p>
+            <p>Gửi parent ID này cho giáo viên nếu cần liên kết đúng phụ huynh vào hồ sơ học sinh.</p>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Tra giáo viên bằng teacher ID</h3>
+            <h3>Tra cứu giáo viên bằng teacher ID</h3>
             <div className="form-stack">
               <label>
                 Teacher ID
@@ -132,7 +226,7 @@ export function ParentPage() {
         </section>
 
         <section className="dashboard-grid">
-          {childrenQuery.data?.map((item) => {
+          {(childrenQuery.data ?? []).map((item) => {
             const studentReports = reportsByStudent.get(item.student.id) ?? []
             const remainingAssignments = Math.max(
               item.progress_summary.total_assignments - item.progress_summary.completed_count - item.progress_summary.in_progress_count,
@@ -175,8 +269,7 @@ export function ParentPage() {
                   description="Nhìn nhanh phần đã xong, đang học và phần còn lại."
                   items={childProgressChartItems}
                 />
-                <p className="helper-text">Tiến độ gần nhất: {item.progress_summary.last_progress_percent}%.</p>
-                <p>Bài học gần nhất: {item.progress_summary.last_assignment_title ?? 'Chưa có bài tập nào'}</p>
+                <p className="helper-text">Bài học gần nhất: {item.progress_summary.last_assignment_title ?? 'Chưa có bài tập nào'}.</p>
                 <p>Mức độ sẵn sàng: {readinessLabelMap[item.progress_summary.readiness_status] ?? item.progress_summary.readiness_status}</p>
                 <div className="tag-wrap">
                   {item.classes.map((classroom) => (
@@ -208,7 +301,7 @@ export function ParentPage() {
           {!childrenQuery.data?.length && !childrenQuery.isLoading ? (
             <article className="roadmap-panel">
               <h3>Chưa có liên kết nào</h3>
-              <p>Giáo viên cần liên kết phụ huynh với học sinh trước khi dashboard có dữ liệu.</p>
+              <p>Giáo viên cần liên kết phụ huynh với học sinh trước khi dashboard có dữ liệu theo dõi.</p>
             </article>
           ) : null}
         </section>
@@ -229,6 +322,42 @@ export function ParentPage() {
           </div>
         </section>
       </div>
+
+      <ChatDock
+        viewerRole="parent"
+        isOpen={isChatOpen}
+        onToggle={() => setIsChatOpen((current) => !current)}
+        title="Chat với giáo viên"
+        subtitle="Bấm để mở khung trao đổi nhanh"
+        unreadCount={unreadConversationCount}
+        conversations={filteredConversations}
+        selectedConversationKey={selectedConversationKey}
+        onSelectConversation={setSelectedConversationKey}
+        studentOptions={conversationStudentOptions}
+        selectedStudentId={selectedChatStudentId}
+        onStudentFilterChange={setSelectedChatStudentId}
+        searchTerm={conversationSearchTerm}
+        onSearchTermChange={setConversationSearchTerm}
+        searchPlaceholder="Nhập tên giáo viên, học sinh hoặc nội dung gần nhất"
+        selectedConversation={selectedConversation}
+        renderConversationLabel={(conversation) => `${conversation.teacher?.full_name ?? 'Giáo viên'} • ${conversation.student?.full_name ?? 'Học sinh'}`}
+        renderConversationMeta={(conversation) => conversation.teacher?.school_name ?? 'Giáo viên đang theo dõi con'}
+        emptyListTitle="Chưa có cuộc trò chuyện nào"
+        emptyListDescription="Giáo viên cần liên kết phụ huynh với học sinh trước, sau đó khung chat sẽ xuất hiện tại đây."
+        emptySearchTitle="Không tìm thấy cuộc trò chuyện phù hợp"
+        emptySearchDescription="Thử đổi học sinh hoặc xóa từ khóa tìm kiếm để hiện lại toàn bộ đoạn chat."
+        emptyChatTitle="Chưa có tin nhắn nào"
+        emptyChatDescription="Bạn có thể nhắn trước để trao đổi nhanh với giáo viên về tiến độ học của con."
+        counterpartName={(conversation) => conversation.teacher?.full_name ?? 'Giáo viên'}
+        chatContextLabel={(conversation) => `Trao đổi về ${conversation.student?.full_name ?? 'học sinh'}`}
+        messageDraft={messageDraft}
+        onMessageDraftChange={setMessageDraft}
+        onSend={() => { if (selectedConversation) sendMessageMutation.mutate(selectedConversation) }}
+        sendPending={sendMessageMutation.isPending}
+        sendError={sendMessageMutation.error ? (sendMessageMutation.error as Error).message : null}
+        messagePlaceholder="Ví dụ: Hôm nay bé làm bài ở nhà khá ổn, cô xem giúp em phần hình học nhé."
+        messageHelperText="Nội dung ngắn gọn, đi thẳng vào điều cần trao đổi sẽ dễ theo dõi hơn."
+      />
     </RequireAuth>
   )
 }

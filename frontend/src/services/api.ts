@@ -258,6 +258,17 @@ export type ParentAccountItem = {
   students: StudentItem[]
 }
 
+export type ParentChatContactItem = {
+  id: number
+  user_id: number
+  full_name: string
+  relationship_label: string | null
+  avatar_url: string | null
+  note: string | null
+  email: string | null
+  phone: string | null
+}
+
 export type ParentReportItem = {
   id: number
   teacher_id: number
@@ -299,6 +310,32 @@ export type ParentChildDashboardItem = {
   classes: ClassItem[]
   teachers: TeacherContactItem[]
   progress_summary: ParentProgressSummary
+}
+
+export type ParentTeacherMessageItem = {
+  id: number
+  teacher_id: number
+  parent_id: number
+  student_id: number
+  sender_user_id: number
+  sender_role: 'teacher' | 'parent'
+  message: string
+  read_by_teacher_at: string | null
+  read_by_parent_at: string | null
+  created_at: string | null
+  updated_at: string | null
+}
+
+export type ParentTeacherConversationItem = {
+  conversation_key: string
+  status: string
+  teacher: TeacherContactItem | null
+  parent: ParentChatContactItem | null
+  student: StudentItem | null
+  message_count: number
+  unread_count: number
+  latest_message: ParentTeacherMessageItem | null
+  messages: ParentTeacherMessageItem[]
 }
 
 export type JoinClassResponse = {
@@ -687,6 +724,46 @@ export async function fetchTeacherByIdForParent(token: string, teacherId: number
 
 export async function fetchParentReports(token: string): Promise<ParentReportItem[]> {
   return request<ParentReportItem[]>('/api/v1/parent/reports', { token })
+}
+
+export async function fetchTeacherMessages(token: string): Promise<ParentTeacherConversationItem[]> {
+  return request<ParentTeacherConversationItem[]>('/api/v1/teacher/messages', { token })
+}
+
+export async function sendTeacherMessage(token: string, payload: { parent_id: number; student_id: number; message: string }) {
+  return request<ParentTeacherMessageItem>('/api/v1/teacher/messages', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function markTeacherMessagesRead(token: string, payload: { parent_id: number; student_id: number }) {
+  return request<{ updated_count: number }>('/api/v1/teacher/messages/read', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function fetchParentMessages(token: string): Promise<ParentTeacherConversationItem[]> {
+  return request<ParentTeacherConversationItem[]>('/api/v1/parent/messages', { token })
+}
+
+export async function sendParentMessage(token: string, payload: { teacher_id: number; student_id: number; message: string }) {
+  return request<ParentTeacherMessageItem>('/api/v1/parent/messages', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function markParentMessagesRead(token: string, payload: { teacher_id: number; student_id: number }) {
+  return request<{ updated_count: number }>('/api/v1/parent/messages/read', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
 }
 
 export async function fetchAISettings(token: string): Promise<AISettings> {

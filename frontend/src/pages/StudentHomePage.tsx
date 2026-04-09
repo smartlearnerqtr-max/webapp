@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { ActivityCard } from '../components/activities/ActivityRenderer'
@@ -12,6 +12,9 @@ import {
   joinClassByCredential,
   startMyAssignment,
   updateMyAssignmentProgress,
+  type LessonActivityItem,
+  type MyAssignmentDetail,
+  type MyAssignmentItem,
 } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
@@ -27,12 +30,57 @@ const readinessLabelMap: Record<string, string> = {
   san_sang_nang_do_kho: 'Sẵn sàng nâng độ khó',
 }
 
-const emptyProgressDraft = {
-  progressPercent: '',
-  completionScore: '',
-  helpCount: '',
-  retryCount: '',
-  learningSeconds: '',
+type StudentAnswerState = {
+  choiceAnswers: Record<number, string>
+  matchingAnswers: Record<number, string[]>
+  dragAnswers: Record<number, string[]>
+  stepAnswers: Record<number, boolean[]>
+  textAnswers: Record<number, string>
+  aacSelections: Record<number, string>
+}
+
+function hasFilledString(value: unknown) {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function hasFilledStringArray(value: unknown) {
+  return Array.isArray(value) && value.length > 0 && value.every((item) => hasFilledString(item))
+}
+
+function hasCompletedBooleanArray(value: unknown) {
+  return Array.isArray(value) && value.length > 0 && value.every((item) => item === true)
+}
+
+function isActivityCompleted(activity: LessonActivityItem, answers: StudentAnswerState) {
+  switch (activity.activity_type) {
+    case 'multiple_choice':
+    case 'image_choice':
+    case 'listen_choose':
+      return hasFilledString(answers.choiceAnswers[activity.id])
+    case 'matching':
+      return hasFilledStringArray(answers.matchingAnswers[activity.id])
+    case 'drag_drop':
+      return hasFilledStringArray(answers.dragAnswers[activity.id])
+    case 'step_by_step':
+      return hasCompletedBooleanArray(answers.stepAnswers[activity.id])
+    case 'watch_answer':
+    case 'career_simulation':
+    case 'ai_chat':
+      return hasFilledString(answers.textAnswers[activity.id])
+    case 'aac':
+      return hasFilledString(answers.aacSelections[activity.id])
+    default:
+      return false
+  }
+}
+
+function updateAssignmentListCache(
+  current: MyAssignmentItem[] | undefined,
+  assignmentId: number,
+  patch: Partial<MyAssignmentItem>,
+) {
+  if (!current) return current
+  return current.map((item) => (item.assignment_id === assignmentId ? { ...item, ...patch } : item))
 }
 
 export function StudentHomePage() {
@@ -41,15 +89,18 @@ export function StudentHomePage() {
   const profile = useAuthStore((state) => state.profile)
   const queryClient = useQueryClient()
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null)
-  const [progressDraft, setProgressDraft] = useState(emptyProgressDraft)
   const [joinClassId, setJoinClassId] = useState('')
   const [joinClassPassword, setJoinClassPassword] = useState('')
+  const [completedLessonTitle, setCompletedLessonTitle] = useState('')
   const [choiceAnswers, setChoiceAnswers] = useState<Record<number, string>>({})
   const [matchingAnswers, setMatchingAnswers] = useState<Record<number, string[]>>({})
   const [dragAnswers, setDragAnswers] = useState<Record<number, string[]>>({})
   const [stepAnswers, setStepAnswers] = useState<Record<number, boolean[]>>({})
   const [textAnswers, setTextAnswers] = useState<Record<number, string>>({})
   const [aacSelections, setAacSelections] = useState<Record<number, string>>({})
+  const learningBaseSecondsRef = useRef(0)
+  const learningSessionStartedAtRef = useRef<number | null>(null)
+  const lastAutoSyncKeyRef = useRef('')
 
   const assignmentsQuery = useQuery({
     queryKey: ['my-assignments', token],
@@ -69,15 +120,13 @@ export function StudentHomePage() {
     enabled: Boolean(token && user?.role === 'student'),
   })
 
-  const effectiveSelectedAssignmentId = selectedAssignmentId ?? assignmentsQuery.data?.[0]?.assignment_id ?? null
+  const effectiveSelectedAssignmentId = selectedAssignmentId
 
   const assignmentDetailQuery = useQuery({
     queryKey: ['my-assignment-detail', token, effectiveSelectedAssignmentId],
     queryFn: () => fetchMyAssignment(token!, effectiveSelectedAssignmentId!),
     enabled: Boolean(token && effectiveSelectedAssignmentId),
   })
-
-  const resetProgressDraft = () => setProgressDraft(emptyProgressDraft)
 
   const refreshStudentQueries = async () => {
     await Promise.all([
@@ -88,33 +137,27 @@ export function StudentHomePage() {
     ])
   }
 
+  const resetActivityAnswers = () => {
+    setChoiceAnswers({})
+    setMatchingAnswers({})
+    setDragAnswers({})
+    setStepAnswers({})
+    setTextAnswers({})
+    setAacSelections({})
+  }
+
+  const closeLessonView = () => {
+    setSelectedAssignmentId(null)
+    resetActivityAnswers()
+    learningSessionStartedAtRef.current = null
+    lastAutoSyncKeyRef.current = ''
+  }
+
   const startMutation = useMutation({
     mutationFn: () => startMyAssignment(token!, effectiveSelectedAssignmentId!),
     onSuccess: async () => {
-      resetProgressDraft()
-      await refreshStudentQueries()
-    },
-  })
-
-  const detail = assignmentDetailQuery.data
-  const resolvedProgressPercent = progressDraft.progressPercent || String(detail?.progress_percent ?? 0)
-  const resolvedCompletionScore = progressDraft.completionScore || String(detail?.completion_score ?? 0)
-  const resolvedHelpCount = progressDraft.helpCount || String(detail?.help_count ?? 0)
-  const resolvedRetryCount = progressDraft.retryCount || String(detail?.retry_count ?? 0)
-  const resolvedLearningSeconds = progressDraft.learningSeconds || String(detail?.total_learning_seconds ?? 0)
-
-  const updateMutation = useMutation({
-    mutationFn: () => updateMyAssignmentProgress(token!, effectiveSelectedAssignmentId!, {
-      progress_percent: Number(resolvedProgressPercent),
-      total_learning_seconds: Number(resolvedLearningSeconds),
-      retry_count: Number(resolvedRetryCount),
-      help_count: Number(resolvedHelpCount),
-      reward_star_count: Number(Number(resolvedProgressPercent) >= 100 ? 3 : 2),
-      completion_score: Number(resolvedCompletionScore),
-      status: Number(resolvedProgressPercent) >= 100 ? 'completed' : 'in_progress',
-    }),
-    onSuccess: async () => {
-      resetProgressDraft()
+      learningSessionStartedAtRef.current = Date.now()
+      lastAutoSyncKeyRef.current = ''
       await refreshStudentQueries()
     },
   })
@@ -122,16 +165,20 @@ export function StudentHomePage() {
   const completeMutation = useMutation({
     mutationFn: () => completeMyAssignment(token!, effectiveSelectedAssignmentId!),
     onSuccess: async () => {
-      resetProgressDraft()
+      setCompletedLessonTitle(detail?.lesson?.title ?? detail?.assignment?.lesson?.title ?? 'Bài học')
+      closeLessonView()
+      lastAutoSyncKeyRef.current = ''
       await refreshStudentQueries()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     },
   })
 
   const joinClassMutation = useMutation({
-    mutationFn: () => joinClassByCredential(token!, {
-      class_id: Number(joinClassId),
-      class_password: joinClassPassword.trim(),
-    }),
+    mutationFn: () =>
+      joinClassByCredential(token!, {
+        class_id: Number(joinClassId),
+        class_password: joinClassPassword.trim(),
+      }),
     onSuccess: async () => {
       setJoinClassId('')
       setJoinClassPassword('')
@@ -143,28 +190,147 @@ export function StudentHomePage() {
     },
   })
 
+  const detail = assignmentDetailQuery.data
+
+  useEffect(() => {
+    learningBaseSecondsRef.current = detail?.total_learning_seconds ?? 0
+    learningSessionStartedAtRef.current = detail?.status === 'in_progress' ? Date.now() : null
+    lastAutoSyncKeyRef.current = ''
+  }, [detail?.id, detail?.total_learning_seconds, detail?.status])
+
   const totalAssignments = assignmentsQuery.data?.length ?? 0
   const completedCount = assignmentsQuery.data?.filter((item) => item.status === 'completed').length ?? 0
   const inProgressCount = assignmentsQuery.data?.filter((item) => item.status === 'in_progress').length ?? 0
   const latestAssignment = assignmentsQuery.data?.[0] ?? null
-  const selectedAssignment = assignmentsQuery.data?.find((item) => item.assignment_id === effectiveSelectedAssignmentId) ?? null
-  const joinedClassesLabel = useMemo(() => (myClassesQuery.data ?? []).map((classroom) => classroom.name), [myClassesQuery.data])
-
-  const setDraftField = (field: keyof typeof emptyProgressDraft, value: string) => {
-    setProgressDraft((current) => ({ ...current, [field]: value }))
-  }
-
-  const applyPreset = (preset: typeof emptyProgressDraft) => {
-    setProgressDraft(preset)
-  }
+  const selectedAssignment =
+    assignmentsQuery.data?.find((item) => item.assignment_id === effectiveSelectedAssignmentId) ?? null
+  const joinedClassesLabel = useMemo(
+    () => (myClassesQuery.data ?? []).map((classroom) => classroom.name),
+    [myClassesQuery.data],
+  )
 
   const chooseAssignment = (assignmentId: number) => {
     setSelectedAssignmentId(assignmentId)
-    resetProgressDraft()
+    setCompletedLessonTitle('')
+    resetActivityAnswers()
+    learningSessionStartedAtRef.current = null
+    lastAutoSyncKeyRef.current = ''
   }
 
-  const answers = { choiceAnswers, matchingAnswers, dragAnswers, stepAnswers, textAnswers, aacSelections }
-  const setAnswersMap = { setChoiceAnswers, setMatchingAnswers, setDragAnswers, setStepAnswers, setTextAnswers, setAacSelections }
+  const answers: StudentAnswerState = {
+    choiceAnswers,
+    matchingAnswers,
+    dragAnswers,
+    stepAnswers,
+    textAnswers,
+    aacSelections,
+  }
+
+  const setAnswersMap = {
+    setChoiceAnswers,
+    setMatchingAnswers,
+    setDragAnswers,
+    setStepAnswers,
+    setTextAnswers,
+    setAacSelections,
+  }
+
+  const activityProgress = useMemo(() => {
+    const activities = detail?.lesson?.activities ?? []
+    const totalActivities = activities.length
+    const completedActivities = activities.filter((activity) => isActivityCompleted(activity, answers)).length
+    const progressPercent =
+      totalActivities > 0 ? Math.round((completedActivities / totalActivities) * 100) : detail?.progress_percent ?? 0
+    const completionScore = progressPercent
+    const readyToComplete = totalActivities === 0 || completedActivities >= totalActivities
+    return {
+      totalActivities,
+      completedActivities,
+      progressPercent,
+      completionScore,
+      readyToComplete,
+      hasActivityInteraction: completedActivities > 0,
+    }
+  }, [detail?.lesson?.activities, detail?.progress_percent, answers])
+
+  const liveProgressPercent = activityProgress.hasActivityInteraction
+    ? Math.max(detail?.progress_percent ?? 0, activityProgress.progressPercent)
+    : detail?.progress_percent ?? 0
+
+  const liveCompletionScore = activityProgress.hasActivityInteraction
+    ? Math.max(detail?.completion_score ?? 0, activityProgress.completionScore)
+    : detail?.completion_score ?? 0
+
+  useEffect(() => {
+    if (!token || !detail || !effectiveSelectedAssignmentId || detail.status === 'completed') return
+    if (!activityProgress.hasActivityInteraction) return
+
+    if (!learningSessionStartedAtRef.current) {
+      learningSessionStartedAtRef.current = Date.now()
+    }
+
+    const totalLearningSeconds = Math.max(
+      detail.total_learning_seconds ?? 0,
+      learningBaseSecondsRef.current +
+        Math.max(1, Math.floor((Date.now() - learningSessionStartedAtRef.current) / 1000)),
+    )
+
+    const nextPayload = {
+      progress_percent: activityProgress.progressPercent,
+      completion_score: activityProgress.completionScore,
+      total_learning_seconds: totalLearningSeconds,
+      reward_star_count: activityProgress.progressPercent >= 100 ? 3 : activityProgress.progressPercent >= 60 ? 2 : 1,
+      status: 'in_progress' as const,
+    }
+
+    const nextKey = [
+      effectiveSelectedAssignmentId,
+      nextPayload.progress_percent,
+      nextPayload.completion_score,
+      nextPayload.total_learning_seconds,
+      nextPayload.reward_star_count,
+      nextPayload.status,
+    ].join(':')
+
+    if (lastAutoSyncKeyRef.current === nextKey) return
+
+    const sameAsServer =
+      detail.progress_percent === nextPayload.progress_percent &&
+      detail.completion_score === nextPayload.completion_score &&
+      detail.total_learning_seconds === nextPayload.total_learning_seconds &&
+      detail.status === nextPayload.status
+
+    if (sameAsServer) {
+      lastAutoSyncKeyRef.current = nextKey
+      return
+    }
+
+    const timeout = window.setTimeout(async () => {
+      lastAutoSyncKeyRef.current = nextKey
+      try {
+        const updatedProgress = await updateMyAssignmentProgress(token, effectiveSelectedAssignmentId, nextPayload)
+        queryClient.setQueryData<MyAssignmentItem[] | undefined>(['my-assignments', token], (current) =>
+          updateAssignmentListCache(current, effectiveSelectedAssignmentId, updatedProgress),
+        )
+        queryClient.setQueryData<MyAssignmentDetail | undefined>(
+          ['my-assignment-detail', token, effectiveSelectedAssignmentId],
+          (current) => (current ? { ...current, ...updatedProgress } : current),
+        )
+      } catch {
+        lastAutoSyncKeyRef.current = ''
+      }
+    }, 700)
+
+    return () => window.clearTimeout(timeout)
+  }, [
+    activityProgress.completionScore,
+    activityProgress.hasActivityInteraction,
+    activityProgress.progressPercent,
+    detail,
+    effectiveSelectedAssignmentId,
+    queryClient,
+    token,
+  ])
 
   return (
     <RequireAuth allowedRoles={['student']}>
@@ -172,13 +338,37 @@ export function StudentHomePage() {
         <section className="roadmap-panel">
           <p className="eyebrow">Không gian học sinh</p>
           <h2>Hôm nay em học gì?</h2>
+          <p>
+            Mọi bài được giao, hoạt động học tập và tiến độ đều nằm trong cùng một khu vực để em thao tác nhanh hơn và
+            dễ theo dõi hơn.
+          </p>
         </section>
 
+        {completedLessonTitle ? (
+          <section className="roadmap-panel">
+            <p className="eyebrow">Hoàn thành bài học</p>
+            <h3>{completedLessonTitle}</h3>
+            <p>Em đã hoàn thành bài học này và đã quay về trang chủ để chọn bài tiếp theo.</p>
+          </section>
+        ) : null}
+
         <section className="metrics-grid">
-          <article className="mini-card"><span>Tổng assignment</span><strong>{totalAssignments}</strong></article>
-          <article className="mini-card"><span>Đang học</span><strong>{inProgressCount}</strong></article>
-          <article className="mini-card"><span>Đã xong</span><strong>{completedCount}</strong></article>
-          <article className="mini-card"><span>Số giáo viên</span><strong>{myTeachersQuery.data?.length ?? 0}</strong></article>
+          <article className="mini-card">
+            <span>Tổng bài tập</span>
+            <strong>{totalAssignments}</strong>
+          </article>
+          <article className="mini-card">
+            <span>Đang học</span>
+            <strong>{inProgressCount}</strong>
+          </article>
+          <article className="mini-card">
+            <span>Đã xong</span>
+            <strong>{completedCount}</strong>
+          </article>
+          <article className="mini-card">
+            <span>Số giáo viên</span>
+            <strong>{myTeachersQuery.data?.length ?? 0}</strong>
+          </article>
         </section>
 
         <section className="dashboard-grid">
@@ -187,10 +377,16 @@ export function StudentHomePage() {
             <div className="detail-stack">
               <div className="student-row">
                 <strong>{typeof profile?.full_name === 'string' ? String(profile.full_name) : user?.email ?? 'Học sinh'}</strong>
-                <span>{typeof profile?.preferred_input === 'string' ? String(profile.preferred_input) : 'touch'} / {typeof profile?.preferred_font_size === 'string' ? String(profile.preferred_font_size) : 'medium'}</span>
+                <span>
+                  {typeof profile?.preferred_input === 'string' ? String(profile.preferred_input) : 'touch'} /{' '}
+                  {typeof profile?.preferred_font_size === 'string' ? String(profile.preferred_font_size) : 'medium'}
+                </span>
               </div>
               <p>Mức độ: {typeof profile?.disability_level === 'string' ? String(profile.disability_level) : 'chưa rõ'}</p>
-              <p>Ghi chú hỗ trợ: {typeof profile?.support_note === 'string' ? String(profile.support_note) : 'Chưa có ghi chú hỗ trợ.'}</p>
+              <p>
+                Ghi chú hỗ trợ:{' '}
+                {typeof profile?.support_note === 'string' ? String(profile.support_note) : 'Chưa có ghi chú hỗ trợ.'}
+              </p>
             </div>
           </article>
 
@@ -200,7 +396,9 @@ export function StudentHomePage() {
               {(myTeachersQuery.data ?? []).map((item) => (
                 <div key={item.link_id} className="student-row">
                   <strong>{item.teacher.full_name}</strong>
-                  <span>Teacher ID {item.teacher.id} / {item.teacher.school_name ?? 'Chưa cập nhật trường'}</span>
+                  <span>
+                    Giáo viên #{item.teacher.id} / {item.teacher.school_name ?? 'Chưa cập nhật trường'}
+                  </span>
                   <p>Email: {item.teacher.email ?? 'Chưa cập nhật'} | Số điện thoại: {item.teacher.phone ?? 'Chưa cập nhật'}</p>
                   <p>Số lớp đang học với giáo viên này: {item.active_class_count}</p>
                 </div>
@@ -220,16 +418,27 @@ export function StudentHomePage() {
               </label>
               <label>
                 Mật khẩu vào lớp
-                <input value={joinClassPassword} onChange={(event) => setJoinClassPassword(event.target.value.toUpperCase())} placeholder="Ví dụ: AB12CD34" />
+                <input
+                  value={joinClassPassword}
+                  onChange={(event) => setJoinClassPassword(event.target.value.toUpperCase())}
+                  placeholder="Ví dụ: AB12CD34"
+                />
               </label>
-              <button className="action-button" type="button" disabled={!joinClassId || !joinClassPassword || joinClassMutation.isPending} onClick={() => joinClassMutation.mutate()}>
+              <button
+                className="action-button"
+                type="button"
+                disabled={!joinClassId || !joinClassPassword || joinClassMutation.isPending}
+                onClick={() => joinClassMutation.mutate()}
+              >
                 {joinClassMutation.isPending ? 'Đang vào lớp...' : 'Vào lớp'}
               </button>
               {joinClassMutation.error ? <p className="error-text">{(joinClassMutation.error as Error).message}</p> : null}
             </div>
             <div className="tag-wrap">
               {(myClassesQuery.data ?? []).map((classroom) => (
-                <span key={classroom.id} className="subject-pill">{classroom.name} / GV {classroom.teacher_id}</span>
+                <span key={classroom.id} className="subject-pill">
+                  {classroom.name} / GV {classroom.teacher_id}
+                </span>
               ))}
               {!myClassesQuery.data?.length && !myClassesQuery.isLoading ? <p>Em chưa tham gia lớp học nào.</p> : null}
             </div>
@@ -241,105 +450,230 @@ export function StudentHomePage() {
             {latestAssignment ? (
               <div className="detail-stack">
                 <div className="student-row">
-                  <strong>{latestAssignment.assignment?.lesson?.title ?? `Assignment #${latestAssignment.assignment_id}`}</strong>
+                  <strong>{latestAssignment.assignment?.lesson?.title ?? `Bài tập #${latestAssignment.assignment_id}`}</strong>
                   <span>{statusLabelMap[latestAssignment.status] ?? latestAssignment.status}</span>
                 </div>
                 <p>Tiến độ: {latestAssignment.progress_percent}%</p>
-                <p>Readiness: {readinessLabelMap[latestAssignment.readiness_status] ?? latestAssignment.readiness_status}</p>
+                <p>Trạng thái sẵn sàng: {readinessLabelMap[latestAssignment.readiness_status] ?? latestAssignment.readiness_status}</p>
               </div>
-            ) : <p>Chưa có bài học nào được giao cho tài khoản này.</p>}
+            ) : (
+              <p>Chưa có bài học nào được giao cho tài khoản này.</p>
+            )}
           </article>
         </section>
 
-        <section className="dashboard-grid">
-          <article className="roadmap-panel">
-            <h3>Danh sách bài học được giao</h3>
-            <div className="student-list compact-list">
-              {assignmentsQuery.data?.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={effectiveSelectedAssignmentId === item.assignment_id ? 'subject-pill pill-button pill-button-active' : 'subject-pill pill-button'}
-                  onClick={() => chooseAssignment(item.assignment_id)}
-                >
-                  {item.assignment?.lesson?.title ?? `Assignment #${item.assignment_id}`}
-                </button>
-              ))}
-              {!assignmentsQuery.data?.length && !assignmentsQuery.isLoading ? <p>Chưa có assignment nào.</p> : null}
+        <section className="student-learning-layout">
+          <article className="roadmap-panel student-assignment-panel">
+            <div className="student-panel-head">
+              <div>
+                <p className="eyebrow">Điều hướng học tập</p>
+                <h3>Danh sách bài được giao</h3>
+                <p>Chọn bài ở cột này, khu vực bên phải sẽ hiển thị đầy đủ nội dung và hoạt động học tập.</p>
+              </div>
+              <span className="subject-pill muted-pill">{totalAssignments} bài</span>
+            </div>
+
+            <div className="student-assignment-summary">
+              <article className="info-card">
+                <span>Bài đang học</span>
+                <strong>{inProgressCount}</strong>
+              </article>
+              <article className="info-card">
+                <span>Bài đã xong</span>
+                <strong>{completedCount}</strong>
+              </article>
+            </div>
+
+            <div className="student-list compact-list student-assignment-list">
+              {assignmentsQuery.data?.map((item) => {
+                const isActive = effectiveSelectedAssignmentId === item.assignment_id
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={isActive ? 'student-assignment-item student-assignment-item-active' : 'student-assignment-item'}
+                    onClick={() => chooseAssignment(item.assignment_id)}
+                  >
+                    <div className="student-assignment-item-top">
+                      <strong>{item.assignment?.lesson?.title ?? `Bài tập #${item.assignment_id}`}</strong>
+                      <span className={isActive ? 'subject-pill pill-button-active' : 'subject-pill'}>
+                        {statusLabelMap[item.status] ?? item.status}
+                      </span>
+                    </div>
+                    <p className="student-assignment-caption">
+                      {item.assignment?.lesson?.subject?.name ?? 'Chưa có môn học'} • Điểm {item.completion_score}
+                    </p>
+                    <div className="student-assignment-progress" style={{ ['--progress' as string]: `${item.progress_percent}%` }}>
+                      <span />
+                    </div>
+                    <div className="student-assignment-meta">
+                      <span>Tiến độ {item.progress_percent}%</span>
+                      <span>{readinessLabelMap[item.readiness_status] ?? item.readiness_status}</span>
+                    </div>
+                  </button>
+                )
+              })}
+              {!assignmentsQuery.data?.length && !assignmentsQuery.isLoading ? <p>Chưa có bài tập nào.</p> : null}
             </div>
 
             {selectedAssignment ? (
-              <div className="detail-stack" style={{ marginTop: '1rem' }}>
+              <div className="detail-stack">
                 <div className="student-row">
-                  <strong>{selectedAssignment.assignment?.lesson?.title ?? `Assignment #${selectedAssignment.assignment_id}`}</strong>
+                  <strong>{selectedAssignment.assignment?.lesson?.title ?? `Bài tập #${selectedAssignment.assignment_id}`}</strong>
                   <span>{statusLabelMap[selectedAssignment.status] ?? selectedAssignment.status}</span>
                 </div>
                 <p>Tiến độ: {selectedAssignment.progress_percent}% | Điểm: {selectedAssignment.completion_score}</p>
-                <p>Readiness: {readinessLabelMap[selectedAssignment.readiness_status] ?? selectedAssignment.readiness_status}</p>
+                <p>
+                  Trạng thái sẵn sàng:{' '}
+                  {readinessLabelMap[selectedAssignment.readiness_status] ?? selectedAssignment.readiness_status}
+                </p>
               </div>
             ) : null}
           </article>
 
-          <article className="roadmap-panel">
-            <h3>Chi tiết bài học</h3>
+          <article className="roadmap-panel student-lesson-panel">
+            <div className="student-panel-head">
+              <div>
+                <p className="eyebrow">Khu vực làm bài</p>
+                <h3>Chi tiết bài học</h3>
+                <p>Phần này được ưu tiên diện tích lớn hơn để em thao tác thoải mái khi làm các hoạt động.</p>
+              </div>
+              {detail ? (
+                <span className="subject-pill">{detail.lesson?.subject?.name ?? 'Bài học'}</span>
+              ) : (
+                <span className="subject-pill muted-pill">Chưa chọn bài</span>
+              )}
+            </div>
+
             {detail ? (
-              <div className="detail-stack">
-                <div className="student-row">
-                  <strong>{detail.lesson?.title ?? detail.assignment?.lesson?.title ?? `Assignment #${detail.assignment_id}`}</strong>
-                  <span>{detail.lesson?.subject?.name ?? 'Chưa có môn học'} / {statusLabelMap[detail.status] ?? detail.status}</span>
-                </div>
-                <p>{detail.lesson?.description ?? 'Chưa có mô tả bài học.'}</p>
-                <p>Tiến độ hiện tại: {detail.progress_percent}% | Điểm: {detail.completion_score}</p>
-                <div className="tag-wrap">
-                  {detail.readiness_reasons.map((reason) => (<span key={reason} className="subject-pill">{reason}</span>))}
-                </div>
-                <div className="student-list compact-list">
-                  {detail.lesson?.activities?.map((activity) => (
-                    <ActivityCard key={activity.id} activity={activity} answers={answers} setAnswers={setAnswersMap} />
-                  ))}
-                  {!detail.lesson?.activities?.length ? <p>Bài học này chưa có activity nào.</p> : null}
-                </div>
-              </div>
-            ) : <p>Hãy chọn một bài học để xem chi tiết.</p>}
-          </article>
-        </section>
+              <div className="student-lesson-stack">
+                <div className="student-lesson-hero">
+                  <div className="detail-stack">
+                    <p className="eyebrow">Bài đang mở</p>
+                    <h3>{detail.lesson?.title ?? detail.assignment?.lesson?.title ?? `Bài tập #${detail.assignment_id}`}</h3>
+                    <p>{detail.lesson?.description ?? 'Chưa có mô tả bài học.'}</p>
+                  </div>
 
-        <section className="dashboard-grid">
-          <article className="roadmap-panel">
-            <h3>Thao tác học bài</h3>
-            <div className="button-row">
-              <button className="action-button" type="button" disabled={!effectiveSelectedAssignmentId || startMutation.isPending} onClick={() => startMutation.mutate()}>
-                {startMutation.isPending ? 'Đang bắt đầu...' : 'Bắt đầu bài học'}
-              </button>
-              <button className="ghost-button" type="button" disabled={!effectiveSelectedAssignmentId} onClick={() => applyPreset({ progressPercent: '50', completionScore: '65', helpCount: '1', retryCount: '0', learningSeconds: '180' })}>
-                Mức trung bình
-              </button>
-              <button className="ghost-button" type="button" disabled={!effectiveSelectedAssignmentId} onClick={() => applyPreset({ progressPercent: '100', completionScore: '95', helpCount: '0', retryCount: '0', learningSeconds: '240' })}>
-                Mức hoàn thành tốt
-              </button>
-            </div>
-            {(startMutation.error || updateMutation.error || completeMutation.error) ? (
-              <p className="error-text">{(startMutation.error as Error)?.message ?? (updateMutation.error as Error)?.message ?? (completeMutation.error as Error)?.message}</p>
-            ) : null}
-          </article>
+                  <div className="student-lesson-stats">
+                    <article className="info-card">
+                      <span>Tiến độ</span>
+                      <strong>{liveProgressPercent}%</strong>
+                    </article>
+                    <article className="info-card">
+                      <span>Điểm số</span>
+                      <strong>{liveCompletionScore}</strong>
+                    </article>
+                    <article className="info-card">
+                      <span>Trạng thái</span>
+                      <strong>{statusLabelMap[detail.status] ?? detail.status}</strong>
+                    </article>
+                  </div>
+                </div>
 
-          <article className="roadmap-panel">
-            <h3>Cập nhật tiến độ</h3>
-            <div className="form-stack">
-              <label>Phần trăm tiến độ<input value={resolvedProgressPercent} onChange={(event) => setDraftField('progressPercent', event.target.value)} inputMode="numeric" /></label>
-              <label>Điểm hoàn thành<input value={resolvedCompletionScore} onChange={(event) => setDraftField('completionScore', event.target.value)} inputMode="numeric" /></label>
-              <label>Số lần cần trợ giúp<input value={resolvedHelpCount} onChange={(event) => setDraftField('helpCount', event.target.value)} inputMode="numeric" /></label>
-              <label>Số lần học lại<input value={resolvedRetryCount} onChange={(event) => setDraftField('retryCount', event.target.value)} inputMode="numeric" /></label>
-              <label>Tổng số giây học<input value={resolvedLearningSeconds} onChange={(event) => setDraftField('learningSeconds', event.target.value)} inputMode="numeric" /></label>
-              <div className="button-row">
-                <button className="action-button" type="button" disabled={!effectiveSelectedAssignmentId || updateMutation.isPending} onClick={() => updateMutation.mutate()}>
-                  {updateMutation.isPending ? 'Đang lưu...' : 'Lưu tiến độ'}
-                </button>
-                <button className="action-button" type="button" disabled={!effectiveSelectedAssignmentId || completeMutation.isPending} onClick={() => completeMutation.mutate()}>
-                  {completeMutation.isPending ? 'Đang hoàn thành...' : 'Đánh dấu đã hoàn thành'}
-                </button>
+                {detail.readiness_reasons.length ? (
+                  <div className="tag-wrap">
+                    {detail.readiness_reasons.map((reason) => (
+                      <span key={reason} className="subject-pill">
+                        {reason}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+
+                <section className="student-activity-stage">
+                  <div className="student-activity-head">
+                    <div>
+                      <strong>Hoạt động trong bài</strong>
+                      <p>{detail.lesson?.activities?.length ?? 0} hoạt động đang sẵn sàng cho em luyện tập.</p>
+                    </div>
+                    <span className="subject-pill muted-pill">{detail.lesson?.activities?.length ?? 0} hoạt động</span>
+                  </div>
+
+                  <div className="student-activity-list">
+                    {detail.lesson?.activities?.map((activity) => (
+                      <ActivityCard key={activity.id} activity={activity} answers={answers} setAnswers={setAnswersMap} />
+                    ))}
+                    {!detail.lesson?.activities?.length ? <p>Bài học này chưa có hoạt động nào.</p> : null}
+                  </div>
+                </section>
+
+                <section className="student-learning-controls">
+                  <article className="config-card">
+                    <div className="detail-stack">
+                      <h4>Thao tác học bài</h4>
+                      <p className="helper-text">Em chỉ cần bắt đầu bài, làm các hoạt động và bấm hoàn thành khi đã xong hết.</p>
+                    </div>
+
+                    <div className="button-row">
+                      <button
+                        className="action-button"
+                        type="button"
+                        disabled={!effectiveSelectedAssignmentId || startMutation.isPending || detail.status === 'completed'}
+                        onClick={() => startMutation.mutate()}
+                      >
+                        {startMutation.isPending ? 'Đang bắt đầu...' : detail.status === 'completed' ? 'Bài đã hoàn thành' : 'Bắt đầu bài học'}
+                      </button>
+                      <button
+                        className="action-button"
+                        type="button"
+                        disabled={!effectiveSelectedAssignmentId || completeMutation.isPending || detail.status === 'completed' || !activityProgress.readyToComplete}
+                        onClick={() => completeMutation.mutate()}
+                      >
+                        {completeMutation.isPending ? 'Đang hoàn thành...' : 'Đánh dấu đã hoàn thành'}
+                      </button>
+                      <button className="ghost-button" type="button" onClick={closeLessonView}>
+                        Quay về trang chủ
+                      </button>
+                    </div>
+
+                    {(startMutation.error || completeMutation.error) ? (
+                      <p className="error-text">
+                        {(startMutation.error as Error)?.message ?? (completeMutation.error as Error)?.message}
+                      </p>
+                    ) : null}
+                  </article>
+
+                  <article className="config-card student-auto-progress-card">
+                    <div className="detail-stack">
+                      <h4>Tiến độ tự động</h4>
+                      <p className="helper-text">Hệ thống tự cập nhật theo số hoạt động em đã làm, em không cần nhập tay nữa.</p>
+                    </div>
+
+                    <div className="student-auto-progress-summary">
+                      <article className="info-card">
+                        <span>Đã làm</span>
+                        <strong>
+                          {activityProgress.completedActivities}/{activityProgress.totalActivities || 0}
+                        </strong>
+                      </article>
+                      <article className="info-card">
+                        <span>Tiến độ hiện tại</span>
+                        <strong>{liveProgressPercent}%</strong>
+                      </article>
+                    </div>
+
+                    <div className="student-auto-progress-track" style={{ ['--progress' as string]: `${liveProgressPercent}%` }}>
+                      <span />
+                    </div>
+
+                    <div className="student-auto-progress-note">
+                      {activityProgress.readyToComplete ? (
+                        <p>Tất cả hoạt động đã xong, em có thể bấm hoàn thành bài học.</p>
+                      ) : (
+                        <p>
+                          Em còn {Math.max(activityProgress.totalActivities - activityProgress.completedActivities, 0)} hoạt động chưa hoàn tất.
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                </section>
               </div>
-            </div>
+            ) : (
+              <div className="student-empty-stage">
+                <strong>Chọn một bài học để bắt đầu.</strong>
+                <p>Danh sách bài tập nằm ở cột bên trái. Khi em chọn bài, toàn bộ hoạt động và trạng thái học sẽ hiện tại đây.</p>
+              </div>
+            )}
           </article>
         </section>
       </div>
