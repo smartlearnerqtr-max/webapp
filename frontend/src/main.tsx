@@ -16,9 +16,11 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // Dữ liệu được coi là mới trong 30 giây — tránh refetch thừa khi navigate qua lại giữa các trang.
-      staleTime: 30_000,
+      staleTime: 2 * 60_000,
       // Giữ cache 5 phút sau khi component unmount — tẫt cả các query trước đó vẫn dùng được ngay mà không cần re-fetch.
       gcTime: 5 * 60_000,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
       // Không retry khi lỗi xác thực (401/403) — tránh chḝ không cần thiết.
       retry: (failureCount, error) => {
         const message = error instanceof Error ? error.message : ''

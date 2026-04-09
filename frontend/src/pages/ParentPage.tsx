@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { BarChartCard } from '../components/BarChartCard'
+import { RequireAuth } from '../components/RequireAuth'
 import { fetchParentChildren, fetchParentReports, fetchTeacherByIdForParent } from '../services/api'
 import type { ParentReportItem } from '../services/api'
-import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
 const readinessLabelMap: Record<string, string> = {
@@ -64,17 +64,16 @@ export function ParentPage() {
     ]
   }, [childrenQuery.data])
 
-  const parentId = typeof profile?.['id'] === 'number' ? profile['id'] : null
-  const parentName = typeof profile?.['full_name'] === 'string' ? String(profile['full_name']) : 'Phụ huynh'
+  const parentId = typeof profile?.id === 'number' ? profile.id : null
+  const parentName = typeof profile?.full_name === 'string' ? String(profile.full_name) : 'Phụ huynh'
 
   return (
     <RequireAuth allowedRoles={['parent']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Dashboard phụ huynh</h2>
-          <p>
-            Phụ huynh có thể theo dõi tiến độ học tập của con, tra giáo viên bằng <strong>teacher ID</strong> và nhận báo cáo hằng ngày do giáo viên gửi.
-          </p>
+          <p className="eyebrow">Phụ huynh</p>
+          <h2>Theo dõi việc học của con</h2>
+          <p>Phụ huynh có thể xem tiến độ của con, tra giáo viên bằng teacher ID và đọc báo cáo hằng ngày.</p>
         </section>
 
         <section className="dashboard-grid">
@@ -100,11 +99,11 @@ export function ParentPage() {
             </div>
             <BarChartCard
               title="Biểu đồ tổng quan gia đình"
-              description="Tóm tắt nhanh số con và khối lượng bài đang theo dõi trên app."
+              description="Tóm tắt nhanh số con và khối lượng bài đang theo dõi trên ứng dụng."
               items={familyProgressChartItems}
               emptyMessage="Chưa có dữ liệu học sinh để hiển thị biểu đồ."
             />
-            <p>Gửi parent ID này cho giáo viên để giáo viên thêm quý vị vào nhóm thông báo đúng của con.</p>
+            <p>Gửi parent ID này cho giáo viên để giáo viên thêm quý vị vào đúng nhóm thông báo của con.</p>
           </article>
 
           <article className="roadmap-panel">
@@ -154,19 +153,19 @@ export function ParentPage() {
                   <span>{item.student.disability_level} / {item.student.preferred_input}</span>
                 </div>
                 <div className="metrics-grid">
-                  <div className="info-card mini-card">
+                  <div className="mini-card">
                     <span>Tổng bài tập</span>
                     <strong>{item.progress_summary.total_assignments}</strong>
                   </div>
-                  <div className="info-card mini-card">
+                  <div className="mini-card">
                     <span>Đã xong</span>
                     <strong>{item.progress_summary.completed_count}</strong>
                   </div>
-                  <div className="info-card mini-card">
+                  <div className="mini-card">
                     <span>Đang học</span>
                     <strong>{item.progress_summary.in_progress_count}</strong>
                   </div>
-                  <div className="info-card mini-card">
+                  <div className="mini-card">
                     <span>Tiến độ gần nhất</span>
                     <strong>{item.progress_summary.last_progress_percent}%</strong>
                   </div>
@@ -205,6 +204,7 @@ export function ParentPage() {
               </article>
             )
           })}
+
           {!childrenQuery.data?.length && !childrenQuery.isLoading ? (
             <article className="roadmap-panel">
               <h3>Chưa có liên kết nào</h3>

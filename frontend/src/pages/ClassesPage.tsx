@@ -2,9 +2,18 @@ import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { addStudentsToClass, addSubjectToClass, createClass, fetchClasses, fetchClassStudents, fetchClassSubjects, fetchStudents, fetchSubjects } from '../services/api'
-import { useAuthStore } from '../store/authStore'
+import {
+  addStudentsToClass,
+  addSubjectToClass,
+  createClass,
+  fetchClasses,
+  fetchClassStudents,
+  fetchClassSubjects,
+  fetchStudents,
+  fetchSubjects,
+} from '../services/api'
 import { RequireAuth } from '../components/RequireAuth'
+import { useAuthStore } from '../store/authStore'
 
 export function ClassesPage() {
   const queryClient = useQueryClient()
@@ -103,7 +112,9 @@ export function ClassesPage() {
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
+          <p className="eyebrow">Lớp học</p>
           <h2>Quản lý lớp học</h2>
+          <p>Tạo lớp nhanh, chọn lớp đang dạy và thêm học sinh hoặc môn học trong vài bước ngắn.</p>
         </section>
 
         <section className="auth-layout">
@@ -112,12 +123,17 @@ export function ClassesPage() {
             <form className="form-stack" onSubmit={handleSubmit}>
               <label>
                 Tên lớp
-                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Lớp 6A hỗ trợ" />
+                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Ví dụ: Lớp 6A buổi chiều" />
               </label>
-              <label>
-                Khối lớp
-                <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder="6" />
-              </label>
+
+              <details className="config-card">
+                <summary className="simple-summary">Tùy chọn thêm</summary>
+                <label>
+                  Khối lớp
+                  <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder="Ví dụ: 6" />
+                </label>
+              </details>
+
               <button className="action-button" type="submit" disabled={createMutation.isPending}>
                 {createMutation.isPending ? 'Đang tạo...' : 'Tạo lớp'}
               </button>
@@ -127,6 +143,7 @@ export function ClassesPage() {
 
           <article className="roadmap-panel">
             <h3>Chọn lớp để quản lý</h3>
+            <p className="helper-text">Bấm vào một lớp để xem thông tin và thao tác nhanh.</p>
             <div className="tag-wrap">
               {classesQuery.data?.map((classItem) => (
                 <button
@@ -146,7 +163,11 @@ export function ClassesPage() {
         {selectedClass ? (
           <section className="dashboard-grid">
             <article className="roadmap-panel">
-              <h3>Thông tin lớp học</h3>
+              <h3>Thông tin nhanh</h3>
+              <div className="student-row">
+                <strong>{selectedClass.name}</strong>
+                <span>{selectedClass.grade_label ? `Khối ${selectedClass.grade_label}` : 'Chưa gắn khối lớp'}</span>
+              </div>
               <div className="metrics-grid">
                 <div className="mini-card">
                   <span>ID lớp</span>
@@ -157,25 +178,46 @@ export function ClassesPage() {
                   <strong>{selectedClass.join_credential?.class_password ?? 'Chưa cập nhật'}</strong>
                 </div>
                 <div className="mini-card">
-                  <span>ID Giáo viên</span>
-                  <strong>{selectedClass.teacher_id}</strong>
+                  <span>Học sinh</span>
+                  <strong>{selectedClass.student_count}</strong>
+                </div>
+                <div className="mini-card">
+                  <span>Môn học</span>
+                  <strong>{selectedClass.subject_count}</strong>
                 </div>
               </div>
             </article>
 
             <article className="roadmap-panel">
-              <h3>Tổng quan lớp đang chọn</h3>
+              <h3>Trạng thái lớp</h3>
               <div className="detail-stack">
-                <div className="student-row">
-                  <strong>{selectedClass.name}</strong>
-                  <span>{selectedClass.grade_label ? `Khối ${selectedClass.grade_label}` : 'Chưa gắn khối'}</span>
+                <div className="tag-wrap">
+                  <span className="subject-pill">{selectedClass.status === 'active' ? 'Đang hoạt động' : selectedClass.status}</span>
+                  {selectedClass.grade_label ? <span className="subject-pill muted-pill">{`Khối ${selectedClass.grade_label}`}</span> : null}
                 </div>
-                <p>Trạng thái: {selectedClass.status === 'active' ? 'Đang hoạt động' : selectedClass.status}</p>
-                <p>{selectedClass.student_count} học sinh, {selectedClass.subject_count} môn học.</p>
+                <p>Đây là lớp đang được chọn để thêm học sinh, gắn môn học và theo dõi danh sách hiện tại.</p>
+                <details className="config-card">
+                  <summary className="simple-summary">Thông tin thêm</summary>
+                  <div className="metrics-grid">
+                    <div className="mini-card">
+                      <span>ID giáo viên</span>
+                      <strong>{selectedClass.teacher_id}</strong>
+                    </div>
+                    <div className="mini-card">
+                      <span>Tên lớp</span>
+                      <strong>{selectedClass.name}</strong>
+                    </div>
+                  </div>
+                </details>
               </div>
             </article>
           </section>
-        ) : null}
+        ) : (
+          <section className="roadmap-panel">
+            <h3>Chưa chọn lớp</h3>
+            <p>Hãy tạo mới hoặc chọn một lớp ở trên để bắt đầu quản lý học sinh và môn học.</p>
+          </section>
+        )}
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
@@ -190,7 +232,12 @@ export function ClassesPage() {
                   ))}
                 </select>
               </label>
-              <button className="action-button" type="button" disabled={!resolvedSelectedClassId || !selectedStudentId || addStudentMutation.isPending} onClick={() => addStudentMutation.mutate()}>
+              <button
+                className="action-button"
+                type="button"
+                disabled={!resolvedSelectedClassId || !selectedStudentId || addStudentMutation.isPending}
+                onClick={() => addStudentMutation.mutate()}
+              >
                 {addStudentMutation.isPending ? 'Đang thêm...' : 'Thêm vào lớp'}
               </button>
               {addStudentMutation.error ? <p className="error-text">{(addStudentMutation.error as Error).message}</p> : null}
@@ -219,7 +266,12 @@ export function ClassesPage() {
                   ))}
                 </select>
               </label>
-              <button className="action-button" type="button" disabled={!resolvedSelectedClassId || !selectedSubjectId || addSubjectMutation.isPending} onClick={() => addSubjectMutation.mutate()}>
+              <button
+                className="action-button"
+                type="button"
+                disabled={!resolvedSelectedClassId || !selectedSubjectId || addSubjectMutation.isPending}
+                onClick={() => addSubjectMutation.mutate()}
+              >
                 {addSubjectMutation.isPending ? 'Đang gắn...' : 'Gắn môn học'}
               </button>
               {addSubjectMutation.error ? <p className="error-text">{(addSubjectMutation.error as Error).message}</p> : null}
@@ -234,15 +286,25 @@ export function ClassesPage() {
           </article>
         </section>
 
-        <section className="card-grid classes-grid">
-          {classesQuery.data?.map((classItem) => (
-            <article key={classItem.id} className="info-card">
-              <span>{classItem.grade_label ? `Khối ${classItem.grade_label}` : 'Lớp học'}</span>
-              <strong>{classItem.name}</strong>
-              <p>ID: {classItem.id} | Mật khẩu: {classItem.join_credential?.class_password ?? 'Chưa cập nhật'}</p>
-              <p>{classItem.student_count} học sinh, {classItem.subject_count} môn học</p>
-            </article>
-          ))}
+        <section className="roadmap-panel">
+          <h3>Danh sách lớp</h3>
+          <div className="card-grid classes-grid">
+            {classesQuery.data?.map((classItem) => (
+              <article key={classItem.id} className="info-card">
+                <span>{classItem.grade_label ? `Khối ${classItem.grade_label}` : 'Lớp học'}</span>
+                <strong>{classItem.name}</strong>
+                <p>{classItem.student_count} học sinh, {classItem.subject_count} môn học</p>
+                <p>Mật khẩu: {classItem.join_credential?.class_password ?? 'Chưa cập nhật'}</p>
+                <button
+                  type="button"
+                  className={resolvedSelectedClassId === classItem.id ? 'pill-button pill-button-active' : 'pill-button'}
+                  onClick={() => setSelectedClassId(classItem.id)}
+                >
+                  {resolvedSelectedClassId === classItem.id ? 'Đang chọn' : 'Quản lý lớp này'}
+                </button>
+              </article>
+            ))}
+          </div>
         </section>
       </div>
     </RequireAuth>

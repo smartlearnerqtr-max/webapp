@@ -1,7 +1,7 @@
 import './App.css'
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
-import { useIsFetching, useIsMutating } from '@tanstack/react-query'
+import { useIsFetching, useIsMutating, useQueryClient } from '@tanstack/react-query'
 
 import { RealtimeBridge } from './components/RealtimeBridge'
 import { AdminPage } from './pages/AdminPage'
@@ -16,6 +16,7 @@ import { StudentHomePage } from './pages/StudentHomePage'
 import { StudentsPage } from './pages/StudentsPage'
 import { TeacherHomePage } from './pages/TeacherHomePage'
 import { useAuthStore } from './store/authStore'
+import { prefetchRouteData } from './utils/routePrefetch'
 import { getDefaultRouteForRole } from './utils/roleRoutes'
 
 const navItemsByRole: Record<string, Array<{ to: string; label: string }>> = {
@@ -55,7 +56,9 @@ const roleLabels: Record<string, string> = {
 
 function App() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const hydrate = useAuthStore((state) => state.hydrate)
+  const accessToken = useAuthStore((state) => state.accessToken)
   const user = useAuthStore((state) => state.user)
   const clearSession = useAuthStore((state) => state.clearSession)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -67,6 +70,11 @@ function App() {
   useEffect(() => {
     hydrate()
   }, [hydrate])
+
+  useEffect(() => {
+    if (!user || !accessToken) return
+    void prefetchRouteData(queryClient, getDefaultRouteForRole(user.role), accessToken)
+  }, [accessToken, queryClient, user])
 
   const navItems = useMemo(() => {
     if (!user) {
@@ -82,6 +90,11 @@ function App() {
     clearSession()
     setIsMenuOpen(false)
     navigate('/', { replace: true })
+  }
+
+  function handleNavPrefetch(targetRoute: string) {
+    if (!user || !accessToken) return
+    void prefetchRouteData(queryClient, targetRoute, accessToken)
   }
 
   return (
@@ -117,6 +130,8 @@ function App() {
               to={item.to}
               className={({ isActive }) => (isActive ? 'nav-item nav-item-active' : 'nav-item')}
               onClick={() => setIsMenuOpen(false)}
+              onMouseEnter={() => handleNavPrefetch(item.to)}
+              onFocus={() => handleNavPrefetch(item.to)}
             >
               {item.label}
             </NavLink>

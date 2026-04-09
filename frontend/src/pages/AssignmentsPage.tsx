@@ -5,12 +5,18 @@ import { createAssignment, fetchAssignments, fetchClasses, fetchClassStudents, f
 import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
+const COMPLETION_PRESETS = [
+  { value: '70', label: 'Dễ xong 70%' },
+  { value: '80', label: 'Mức phổ biến' },
+  { value: '100', label: 'Cần hoàn thành hết' },
+]
+
 export function AssignmentsPage() {
   const token = useAuthStore((state) => state.accessToken)
   const queryClient = useQueryClient()
   const [classId, setClassId] = useState('')
   const [lessonId, setLessonId] = useState('')
-  const [requiredCompletionPercent, setRequiredCompletionPercent] = useState('100')
+  const [requiredCompletionPercent, setRequiredCompletionPercent] = useState('80')
   const [dueAt, setDueAt] = useState('')
 
   const classesQuery = useQuery({
@@ -61,21 +67,26 @@ export function AssignmentsPage() {
     }),
     onSuccess: async () => {
       setDueAt('')
-      setRequiredCompletionPercent('100')
+      setRequiredCompletionPercent('80')
       await queryClient.invalidateQueries({ queryKey: ['assignments', token] })
     },
   })
+
+  const studentCount = classStudentsQuery.data?.length ?? 0
+  const activityCount = selectedLesson?.activity_count ?? 0
+  const canCreateAssignment = Boolean(resolvedClassId && resolvedLessonId)
 
   return (
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Giao bài học theo lớp</h2>
+          <h2>Giao bài học cho lớp</h2>
+          <p>Chỉ cần chọn lớp, chọn bài học, xem nhanh số học sinh nhận bài rồi bấm giao.</p>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tạo bài tập</h3>
+            <h3>Giao bài nhanh</h3>
             <div className="form-stack">
               <label>
                 Lớp học
@@ -86,6 +97,7 @@ export function AssignmentsPage() {
                   ))}
                 </select>
               </label>
+
               <label>
                 Bài học
                 <select value={resolvedLessonId} onChange={(event) => setLessonId(event.target.value)}>
@@ -95,46 +107,68 @@ export function AssignmentsPage() {
                   ))}
                 </select>
               </label>
-              <label>
-                Hạn hoàn thành
-                <input value={dueAt} onChange={(event) => setDueAt(event.target.value)} placeholder="2026-04-10T20:00:00+07:00" />
-              </label>
-              <label>
-                % cần hoàn thành
-                <input value={requiredCompletionPercent} onChange={(event) => setRequiredCompletionPercent(event.target.value)} inputMode="numeric" />
-              </label>
-              <button className="action-button" type="button" disabled={!resolvedClassId || !resolvedLessonId || createMutation.isPending} onClick={() => createMutation.mutate()}>
-                {createMutation.isPending ? 'Đang giao...' : 'Giao bài cho cả lớp'}
+
+              <div className="detail-stack">
+                <strong>Mức hoàn thành cần đạt</strong>
+                <div className="tag-wrap">
+                  {COMPLETION_PRESETS.map((preset) => (
+                    <button
+                      key={preset.value}
+                      type="button"
+                      className={requiredCompletionPercent === preset.value ? 'subject-pill pill-button pill-button-active' : 'subject-pill pill-button'}
+                      onClick={() => setRequiredCompletionPercent(preset.value)}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <details className="config-card">
+                <summary className="simple-summary">Tùy chọn thêm</summary>
+                <label>
+                  Hạn hoàn thành
+                  <input value={dueAt} onChange={(event) => setDueAt(event.target.value)} placeholder="Ví dụ: 2026-04-10T20:00:00+07:00" />
+                </label>
+              </details>
+
+              <button className="action-button" type="button" disabled={!canCreateAssignment || createMutation.isPending} onClick={() => createMutation.mutate()}>
+                {createMutation.isPending ? 'Đang giao bài...' : 'Giao bài cho lớp này'}
               </button>
               {createMutation.error ? <p className="error-text">{(createMutation.error as Error).message}</p> : null}
             </div>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Xem trước bài tập</h3>
+            <h3>Xem trước trước khi giao</h3>
             <div className="detail-stack">
               <div className="student-row">
                 <strong>{selectedClass?.name ?? 'Chưa chọn lớp'}</strong>
-                <span>{classStudentsQuery.data?.length ?? 0} học sinh sẽ nhận bài</span>
+                <span>{studentCount} học sinh sẽ nhận bài</span>
               </div>
               <div className="student-row">
                 <strong>{selectedLesson?.title ?? 'Chưa chọn bài học'}</strong>
-                <span>{selectedLesson?.subject?.name ?? 'Chưa có môn học'} / {selectedLesson?.activity_count ?? 0} hoạt động</span>
+                <span>{selectedLesson?.subject?.name ?? 'Chưa có môn học'} / {activityCount} hoạt động</span>
               </div>
+              <p>Mức cần đạt: {requiredCompletionPercent}%.</p>
+              <p>{dueAt ? `Hạn nộp: ${dueAt}` : 'Không đặt hạn nộp, học sinh có thể học ngay khi nhận bài.'}</p>
+              {!classesQuery.data?.length && !classesQuery.isLoading ? <p>Bạn cần tạo lớp trước khi giao bài.</p> : null}
+              {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Bạn cần tạo bài học trước khi giao bài.</p> : null}
             </div>
           </article>
         </section>
 
         <section className="roadmap-panel">
-          <h3>Danh sách bài tập đã tạo</h3>
+          <h3>Bài tập đã giao</h3>
           <div className="student-list compact-list">
             {assignmentsQuery.data?.map((assignment) => (
               <div key={assignment.id} className="student-row">
                 <strong>{assignment.lesson?.title ?? `Bài tập #${assignment.id}`}</strong>
-                <span>{assignment.classroom?.name ?? 'Không rõ lớp'} / {assignment.student_ids.length} học sinh / {assignment.status}</span>
+                <span>{assignment.classroom?.name ?? 'Không rõ lớp'} / {assignment.student_ids.length} học sinh</span>
+                <p>Mức cần đạt: {assignment.required_completion_percent}% {assignment.due_at ? `| Hạn nộp: ${assignment.due_at}` : ''}</p>
               </div>
             ))}
-            {!assignmentsQuery.data?.length && !assignmentsQuery.isLoading ? <p>Chưa có bài tập nào.</p> : null}
+            {!assignmentsQuery.data?.length && !assignmentsQuery.isLoading ? <p>Chưa có bài tập nào được giao.</p> : null}
           </div>
         </section>
       </div>

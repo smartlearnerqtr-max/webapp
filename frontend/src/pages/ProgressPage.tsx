@@ -54,7 +54,9 @@ export function ProgressPage() {
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <h2>Tiến độ học tập và gợi ý nâng độ khó</h2>
+          <p className="eyebrow">Tiến độ</p>
+          <h2>Theo dõi học tập và gợi ý nâng độ khó</h2>
+          <p>Chọn một bài tập để xem nhanh lớp đang ở mức nào và học sinh nào cần hỗ trợ thêm.</p>
         </section>
 
         <section className="auth-layout">
@@ -66,7 +68,9 @@ export function ProgressPage() {
                 <select value={resolvedSelectedAssignmentId} onChange={(event) => setSelectedAssignmentId(event.target.value)}>
                   <option value="">Chọn bài tập</option>
                   {assignmentsQuery.data?.map((assignment) => (
-                    <option key={assignment.id} value={assignment.id}>{assignment.lesson?.title ?? `Bài tập #${assignment.id}`} - {assignment.classroom?.name ?? 'Không rõ lớp'}</option>
+                    <option key={assignment.id} value={assignment.id}>
+                      {assignment.lesson?.title ?? `Bài tập #${assignment.id}`} - {assignment.classroom?.name ?? 'Không rõ lớp'}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -78,30 +82,30 @@ export function ProgressPage() {
             {progressQuery.data ? (
               <>
                 <div className="metrics-grid">
-                  <div className="info-card mini-card">
+                  <div className="mini-card">
                     <span>Học sinh</span>
                     <strong>{progressQuery.data.summary.student_count}</strong>
                   </div>
-                  <div className="info-card mini-card">
+                  <div className="mini-card">
                     <span>Đã xong</span>
                     <strong>{progressQuery.data.summary.completed_count}</strong>
                   </div>
-                  <div className="info-card mini-card">
+                  <div className="mini-card">
                     <span>Đang học</span>
                     <strong>{progressQuery.data.summary.in_progress_count}</strong>
                   </div>
-                  <div className="info-card mini-card">
+                  <div className="mini-card">
                     <span>Cần hỗ trợ</span>
                     <strong>{progressQuery.data.summary.need_support_count}</strong>
                   </div>
-                  <div className="info-card mini-card">
+                  <div className="mini-card">
                     <span>Sẵn sàng tăng mức</span>
                     <strong>{progressQuery.data.summary.ready_to_increase_count}</strong>
                   </div>
                 </div>
                 <DonutChartCard
-                  title="Biểu đồ tròn sẵn sàng (readiness)"
-                  description="Nhìn nhanh nhóm học sinh cần hỗ trợ, đang phù hợp và sẵn sàng tăng độ khó trong bài tập này."
+                  title="Biểu đồ readiness"
+                  description="Nhìn nhanh nhóm học sinh cần hỗ trợ, đang phù hợp và sẵn sàng tăng độ khó."
                   items={readinessChartItems}
                 />
               </>
@@ -131,7 +135,7 @@ export function ProgressPage() {
                 </div>
               </div>
             ))}
-            {!progressQuery.data?.progresses.length && !progressQuery.isLoading ? <p>Assignment này chưa có dữ liệu tiến độ.</p> : null}
+            {!progressQuery.data?.progresses.length && !progressQuery.isLoading ? <p>Bài tập này chưa có dữ liệu tiến độ.</p> : null}
           </div>
         </section>
       </div>

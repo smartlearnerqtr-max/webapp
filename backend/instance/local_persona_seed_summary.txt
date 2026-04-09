@@ -1,28 +1,12 @@
 LOCAL PERSONA SEED SUMMARY
-Generated at: 2026-04-02T18:37:04
+Generated at: 2026-04-09T10:28:14
 Admin used: admin@example.com
 Shared password for all new accounts: 123456
 
-Teacher: Co Minh Anh | user001@gmail.com | class=Lop Mat Troi | join_password=PJYZJUJD
+Teacher: Cô Minh Anh | user001@gmail.com | class=Lớp Mặt Trời | join_password=EBYJRYS7
 Students and parents:
-- Student: Nguyen Hoang An | student.t1.hoang-an@example.com | Parent: Le Thi Hoa (Me) | parent.t1.hoa@example.com
-- Student: Tran Gia Han | student.t1.gia-han@example.com | Parent: Tran Van Phong (Bo) | parent.t1.phong@example.com
-- Student: Pham Minh Khang | student.t1.minh-khang@example.com | Parent: Nguyen Thi Mai (Me) | parent.t1.mai@example.com
-- Student: Le Khanh Linh | student.t1.khanh-linh@example.com | Parent: Pham Van Long (Bo) | parent.t1.long@example.com
-- Student: Vo Tuan Kiet | student.t1.tuan-kiet@example.com | Parent: Do Thi Lan (Me) | parent.t1.lan@example.com
+- Student: Nguyễn Hoàng An | student.t1.hoang-an@example.com | Parent: Lê Thị Hoà (Mẹ) | parent.t1.hoa@example.com
 Assignments:
-- Nhan biet hinh khoi quanh em (assignment_id=1)
-- Nghe va noi ve do vat trong lop (assignment_id=2)
-- Tu phuc vu va giao tiep lich su (assignment_id=3)
-
-Teacher: Thay Quoc Viet | user004@gmail.com | class=Lop Cau Vong | join_password=4J5XLLPB
-Students and parents:
-- Student: Nguyen Hoang An | student.t2.hoang-an@example.com | Parent: Le Thi Hoa (Me) | parent.t2.hoa@example.com
-- Student: Tran Gia Han | student.t2.gia-han@example.com | Parent: Tran Van Phong (Bo) | parent.t2.phong@example.com
-- Student: Pham Minh Khang | student.t2.minh-khang@example.com | Parent: Nguyen Thi Mai (Me) | parent.t2.mai@example.com
-- Student: Le Khanh Linh | student.t2.khanh-linh@example.com | Parent: Pham Van Long (Bo) | parent.t2.long@example.com
-- Student: Vo Tuan Kiet | student.t2.tuan-kiet@example.com | Parent: Do Thi Lan (Me) | parent.t2.lan@example.com
-Assignments:
-- Nhan biet hinh khoi quanh em (assignment_id=4)
-- Nghe va noi ve do vat trong lop (assignment_id=5)
-- Tu phuc vu va giao tiep lich su (assignment_id=6)
+- Số học: Đếm và cộng trong phạm vi 10 (assignment_id=1)
+- Động vật: Nhận biết con vật quen thuộc (assignment_id=2)
+- Hình học: Nhận biết hình tròn, hình vuông, hình tam giác (assignment_id=3)

@@ -533,6 +533,35 @@ button {
   line-height: 1.6;
 }
 
+.simple-toggle-button {
+  width: 100%;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+  border: 0;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #3d6fd6 0%, #2446a8 100%);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 16px 30px rgba(36, 70, 168, 0.28);
+}
+
+.simple-summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: var(--primary-strong);
+  list-style: none;
+}
+
+.simple-summary::-webkit-details-marker {
+  display: none;
+}
+
 .activity-card {
   display: grid;
   gap: 0.9rem;

@@ -1,9 +1,19 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { completeMyAssignment, fetchMyAssignment, fetchMyAssignments, fetchMyClasses, fetchMyTeachers, joinClassByCredential, startMyAssignment, updateMyAssignmentProgress } from '../services/api'
-import { RequireAuth } from '../components/RequireAuth'
-import { useAuthStore } from '../store/authStore'
+
 import { ActivityCard } from '../components/activities/ActivityRenderer'
+import { RequireAuth } from '../components/RequireAuth'
+import {
+  completeMyAssignment,
+  fetchMyAssignment,
+  fetchMyAssignments,
+  fetchMyClasses,
+  fetchMyTeachers,
+  joinClassByCredential,
+  startMyAssignment,
+  updateMyAssignmentProgress,
+} from '../services/api'
+import { useAuthStore } from '../store/authStore'
 
 const statusLabelMap: Record<string, string> = {
   not_started: 'Chưa bắt đầu',
@@ -77,6 +87,7 @@ export function StudentHomePage() {
       queryClient.invalidateQueries({ queryKey: ['my-teachers', token] }),
     ])
   }
+
   const startMutation = useMutation({
     mutationFn: () => startMyAssignment(token!, effectiveSelectedAssignmentId!),
     onSuccess: async () => {
@@ -151,8 +162,10 @@ export function StudentHomePage() {
     setSelectedAssignmentId(assignmentId)
     resetProgressDraft()
   }
+
   const answers = { choiceAnswers, matchingAnswers, dragAnswers, stepAnswers, textAnswers, aacSelections }
   const setAnswersMap = { setChoiceAnswers, setMatchingAnswers, setDragAnswers, setStepAnswers, setTextAnswers, setAacSelections }
+
   return (
     <RequireAuth allowedRoles={['student']}>
       <div className="page-stack">
@@ -173,11 +186,11 @@ export function StudentHomePage() {
             <h3>Thông tin học sinh</h3>
             <div className="detail-stack">
               <div className="student-row">
-                <strong>{typeof profile?.['full_name'] === 'string' ? String(profile['full_name']) : user?.email ?? 'Học sinh'}</strong>
-                <span>{typeof profile?.['preferred_input'] === 'string' ? String(profile['preferred_input']) : 'touch'} / {typeof profile?.['preferred_font_size'] === 'string' ? String(profile['preferred_font_size']) : 'medium'}</span>
+                <strong>{typeof profile?.full_name === 'string' ? String(profile.full_name) : user?.email ?? 'Học sinh'}</strong>
+                <span>{typeof profile?.preferred_input === 'string' ? String(profile.preferred_input) : 'touch'} / {typeof profile?.preferred_font_size === 'string' ? String(profile.preferred_font_size) : 'medium'}</span>
               </div>
-              <p>Mức độ: {typeof profile?.['disability_level'] === 'string' ? String(profile['disability_level']) : 'chưa rõ'}</p>
-              <p>Ghi chú hỗ trợ: {typeof profile?.['support_note'] === 'string' ? String(profile['support_note']) : 'Chưa có ghi chú hỗ trợ.'}</p>
+              <p>Mức độ: {typeof profile?.disability_level === 'string' ? String(profile.disability_level) : 'chưa rõ'}</p>
+              <p>Ghi chú hỗ trợ: {typeof profile?.support_note === 'string' ? String(profile.support_note) : 'Chưa có ghi chú hỗ trợ.'}</p>
             </div>
           </article>
 
@@ -243,7 +256,12 @@ export function StudentHomePage() {
             <h3>Danh sách bài học được giao</h3>
             <div className="student-list compact-list">
               {assignmentsQuery.data?.map((item) => (
-                <button key={item.id} type="button" className={effectiveSelectedAssignmentId === item.assignment_id ? 'subject-pill pill-button pill-button-active' : 'subject-pill pill-button'} onClick={() => chooseAssignment(item.assignment_id)}>
+                <button
+                  key={item.id}
+                  type="button"
+                  className={effectiveSelectedAssignmentId === item.assignment_id ? 'subject-pill pill-button pill-button-active' : 'subject-pill pill-button'}
+                  onClick={() => chooseAssignment(item.assignment_id)}
+                >
                   {item.assignment?.lesson?.title ?? `Assignment #${item.assignment_id}`}
                 </button>
               ))}
@@ -285,6 +303,7 @@ export function StudentHomePage() {
             ) : <p>Hãy chọn một bài học để xem chi tiết.</p>}
           </article>
         </section>
+
         <section className="dashboard-grid">
           <article className="roadmap-panel">
             <h3>Thao tác học bài</h3>

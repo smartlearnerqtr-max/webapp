@@ -18,8 +18,16 @@ services:
       - key: ENCRYPTION_SECRET
         generateValue: true
       - key: ADMIN_EMAIL
-        value: datminhtuan07@gmail.com
+        value: admin@example.com
       - key: ADMIN_PASSWORD
+        sync: false
+      - key: SEED_PERSONA_DATA
+        value: "true"
+      - key: SEED_PERSONA_RESET_NON_ADMIN
+        value: "true"
+      - key: GEMINI_MODEL_NAME
+        value: gemini-2.5-flash
+      - key: GEMINI_API_KEYS
         sync: false
       - key: DATABASE_URL
         fromDatabase:

@@ -2,8 +2,8 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { createTeacherByAdmin, fetchAdminRelationshipOverview, fetchAdminTeachers } from '../services/api'
 import { RequireAuth } from '../components/RequireAuth'
+import { createTeacherByAdmin, fetchAdminRelationshipOverview, fetchAdminTeachers } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
 export function AdminPage() {
@@ -60,10 +60,7 @@ export function AdminPage() {
         <section className="roadmap-panel">
           <p className="eyebrow">Không gian admin</p>
           <h2>Cấp tài khoản giáo viên và xem liên kết</h2>
-          <p>
-            Admin vẫn chỉ tạo tài khoản giáo viên, nhưng giờ đã có thêm một dashboard tổng quan để kiểm tra xem dữ liệu
-            học sinh đang được liên kết với bao nhiêu giáo viên và có bao nhiêu học sinh đang học đa giáo viên.
-          </p>
+          <p>Admin tạo tài khoản giáo viên và theo dõi nhanh số liên kết giáo viên, học sinh và phụ huynh trong hệ thống.</p>
         </section>
 
         <section className="metrics-grid">
@@ -105,10 +102,15 @@ export function AdminPage() {
                 Mật khẩu tạm thời
                 <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Nhập mật khẩu cấp cho giáo viên" />
               </label>
-              <label>
-                Trường học
-                <input value={schoolName} onChange={(event) => setSchoolName(event.target.value)} placeholder="Trường Tiểu học ABC" />
-              </label>
+
+              <details className="config-card">
+                <summary className="simple-summary">Tùy chọn thêm</summary>
+                <label>
+                  Trường học
+                  <input value={schoolName} onChange={(event) => setSchoolName(event.target.value)} placeholder="Trường Tiểu học ABC" />
+                </label>
+              </details>
+
               <button className="action-button" type="submit" disabled={createMutation.isPending}>
                 {createMutation.isPending ? 'Đang tạo...' : 'Cấp tài khoản giáo viên'}
               </button>

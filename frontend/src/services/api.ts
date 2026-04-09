@@ -308,13 +308,15 @@ export type JoinClassResponse = {
 }
 
 export type AISettings = {
-  id: number
   provider: string
   model_name: string
   api_key_masked: string
   status: string
   last_validated_at: string | null
   last_error_message: string | null
+  configured_source: string
+  key_count: number
+  rotation_enabled: boolean
 }
 
 export type AITestResult = {
@@ -323,6 +325,8 @@ export type AITestResult = {
   model_name: string
   last_validated_at: string | null
   sample_response: string
+  key_count: number
+  rotation_enabled: boolean
 }
 
 export type AIChatResponse = {
@@ -685,16 +689,8 @@ export async function fetchParentReports(token: string): Promise<ParentReportIte
   return request<ParentReportItem[]>('/api/v1/parent/reports', { token })
 }
 
-export async function fetchAISettings(token: string): Promise<AISettings | null> {
-  return request<AISettings | null>('/api/v1/ai/settings', { token })
-}
-
-export async function saveAISettings(token: string, payload: { api_key: string; model_name: string }) {
-  return request<AISettings>('/api/v1/ai/settings', {
-    method: 'PUT',
-    token,
-    body: payload,
-  })
+export async function fetchAISettings(token: string): Promise<AISettings> {
+  return request<AISettings>('/api/v1/ai/settings', { token })
 }
 
 export async function testAISettings(token: string): Promise<AITestResult> {

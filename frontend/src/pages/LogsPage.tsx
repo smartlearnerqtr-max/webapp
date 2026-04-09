@@ -16,7 +16,7 @@ export function LogsPage() {
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Task 39 + 40</p>
+          <p className="eyebrow">Nhật ký hệ thống</p>
           <h2>Log kỹ thuật backend</h2>
           <p>Các hành động như đăng nhập, tạo lớp, tạo học sinh và lưu AI settings sẽ bắt đầu xuất hiện ở đây.</p>
         </section>
@@ -37,4 +37,3 @@ export function LogsPage() {
     </RequireAuth>
   )
 }
-

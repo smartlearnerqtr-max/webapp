@@ -3,10 +3,9 @@ from __future__ import annotations
 import app.api.v1.routes.ai_settings as ai_routes
 from app import create_app
 from app.extensions import db
-from app.models import Subject, UserAISetting
+from app.models import Subject
 from app.services.gemini_service import GeminiResult
 from app.services.seed_service import seed_admin_user, seed_subjects
-from app.utils.security import encrypt_secret
 
 PASSWORD = '123456'
 STUDENT_LEVELS = ['nhe', 'trung_binh', 'nang', 'nhe', 'trung_binh', 'nang', 'nhe', 'trung_binh', 'nang', 'nhe']
@@ -91,23 +90,6 @@ def register_parent(client, index: int, prefix: str = 'parent') -> dict[str, obj
         'profile_id': data['profile']['id'],
         'access_token': data['access_token'],
     }
-
-
-def ensure_ai_setting(teacher_user_id: int) -> None:
-    setting = UserAISetting.query.filter_by(user_id=teacher_user_id, provider='gemini').first()
-    if setting:
-        return
-    db.session.add(
-        UserAISetting(
-            user_id=teacher_user_id,
-            provider='gemini',
-            model_name='gemini-2.5-flash',
-            api_key_encrypted=encrypt_secret('fake-key'),
-            api_key_masked='fake****key',
-            status='active',
-        )
-    )
-    db.session.commit()
 
 
 def create_teacher_bundle(client, teacher: dict[str, object], student_accounts: list[dict[str, object]], subject_id: int) -> dict[str, object]:
@@ -337,6 +319,8 @@ def verify_shared_student_multi_teacher(client, bundles: list[dict[str, object]]
 
 def main() -> None:
     app = create_app('testing')
+    app.config['GEMINI_API_KEYS'] = ['fake-key-1', 'fake-key-2']
+    app.config['GEMINI_MODEL_NAME'] = 'gemini-2.5-flash'
 
     with app.app_context():
         db.create_all()
@@ -371,8 +355,6 @@ def main() -> None:
                 parent_group.append(register_parent(client, cursor))
             student_groups.append(student_group)
             parent_groups.append(parent_group)
-
-        ensure_ai_setting(int(teachers[0]['user_id']))
 
         subject = Subject.query.order_by(Subject.id.asc()).first()
         expect(subject is not None, 'No subject found after seeding')

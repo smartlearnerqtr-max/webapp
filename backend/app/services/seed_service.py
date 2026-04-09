@@ -13,7 +13,7 @@ from ..models import (
 )
 from ..utils.security import hash_password
 
-BASE_SUBJECTS = [('TOAN', 'Toán'), ('VAN', 'Văn'), ('KHTN', 'Khoa học tự nhiên'), ('KY_NANG_SONG', 'Kỹ năng sống')]
+BASE_SUBJECTS = [('TOAN', 'To\u00e1n'), ('VAN', 'V\u0103n'), ('KHTN', 'Khoa h\u1ecdc t\u1ef1 nhi\u00ean'), ('KY_NANG_SONG', 'K\u1ef9 n\u0103ng s\u1ed1ng')]
 DEFAULT_ADMIN_EMAIL = 'admin@example.com'
 DEFAULT_ADMIN_PASSWORD = 'admin123456'
 

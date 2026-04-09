@@ -3,10 +3,8 @@ from __future__ import annotations
 import app.api.v1.routes.ai_settings as ai_routes
 from app import create_app
 from app.extensions import db
-from app.models import UserAISetting
 from app.services.gemini_service import GeminiResult
 from app.services.seed_service import seed_admin_user, seed_subjects
-from app.utils.security import encrypt_secret
 
 
 PASSWORD = '123456'
@@ -19,6 +17,8 @@ def expect(condition: bool, message: str) -> None:
 
 def main() -> None:
     app = create_app('testing')
+    app.config['GEMINI_API_KEYS'] = ['fake-key-1', 'fake-key-2']
+    app.config['GEMINI_MODEL_NAME'] = 'gemini-2.5-flash'
 
     with app.app_context():
         db.create_all()
@@ -89,19 +89,6 @@ def main() -> None:
         teacher2_token = teacher2_login.get_json()['data']['access_token']
         teacher1_headers = {'Authorization': f'Bearer {teacher1_token}'}
         teacher2_headers = {'Authorization': f'Bearer {teacher2_token}'}
-
-        setting = UserAISetting.query.filter_by(user_id=teacher1_payload['user']['id'], provider='gemini').first()
-        if not setting:
-            setting = UserAISetting(
-                user_id=teacher1_payload['user']['id'],
-                provider='gemini',
-                model_name='gemini-2.5-flash',
-                api_key_encrypted=encrypt_secret('fake-key'),
-                api_key_masked='fake****key',
-                status='active',
-            )
-            db.session.add(setting)
-            db.session.commit()
 
         subjects_resp = client.get('/api/v1/subjects')
         expect(subjects_resp.status_code == 200, 'Fetch subjects failed')

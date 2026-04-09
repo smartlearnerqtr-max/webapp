@@ -35,6 +35,36 @@ def _parse_cors_origins(raw_value: str | None) -> list[str]:
     return [item.strip() for item in raw_value.split(',') if item.strip()]
 
 
+def _parse_env_list(raw_value: str | None) -> list[str]:
+    if not raw_value:
+        return []
+
+    values: list[str] = []
+    for line in raw_value.splitlines():
+        parts = [item.strip() for item in line.split(',')]
+        values.extend(item for item in parts if item)
+    return values
+
+
+def _parse_gemini_api_keys() -> list[str]:
+    configured_keys = _parse_env_list(os.getenv('GEMINI_API_KEYS'))
+    indexed_keys = [
+        os.getenv(f'GEMINI_API_KEY_{index}', '').strip()
+        for index in range(1, 21)
+    ]
+
+    merged_keys: list[str] = []
+    seen: set[str] = set()
+    for key in [*configured_keys, *indexed_keys]:
+        normalized_key = key.strip()
+        if not normalized_key or normalized_key in seen:
+            continue
+        seen.add(normalized_key)
+        merged_keys.append(normalized_key)
+
+    return merged_keys
+
+
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'change-me-to-a-very-long-secret-string')
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'change-me-to-a-very-long-jwt-secret')
@@ -44,6 +74,8 @@ class Config:
     JSON_SORT_KEYS = False
     CORS_ORIGINS = _parse_cors_origins(os.getenv('CORS_ORIGINS', 'http://localhost:5173'))
     API_TITLE = 'Ban hoc thong minh API'
+    GEMINI_MODEL_NAME = (os.getenv('GEMINI_MODEL_NAME') or 'gemini-2.5-flash').strip() or 'gemini-2.5-flash'
+    GEMINI_API_KEYS = _parse_gemini_api_keys()
 
 
 class DevelopmentConfig(Config):
