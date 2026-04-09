@@ -5,8 +5,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    preDeployCommand: python init_and_seed.py
-    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 30 --keep-alive 5
+    startCommand: python init_and_seed.py && gunicorn run:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 30 --keep-alive 5
     healthCheckPath: /api/v1/health
     envVars:
       - key: FLASK_ENV
