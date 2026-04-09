@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -35,6 +36,7 @@ from app.services.seed_service import seed_subjects
 from flask_jwt_extended import create_access_token
 
 PASSWORD = "123456"
+ADMIN_EMAIL = (os.getenv("ADMIN_EMAIL") or "admin@example.com").strip().lower()
 
 TEACHER_SPECS = [
     {
@@ -280,7 +282,7 @@ def purge_non_admin_data() -> None:
     ]:
         model.query.delete()
     User.query.filter(User.role != "admin").delete()
-    User.query.filter(User.role == "admin", User.email != "admin@example.com").delete()
+    User.query.filter(User.role == "admin", User.email != ADMIN_EMAIL).delete()
     db.session.commit()
 
 
