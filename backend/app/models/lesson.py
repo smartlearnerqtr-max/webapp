@@ -7,6 +7,19 @@ from ..extensions import db
 from .base import TimestampMixin
 
 
+def _serialize_datetime(value: object) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, str):
+        return value
+    isoformat = getattr(value, "isoformat", None)
+    if callable(isoformat):
+        return isoformat()
+    return str(value)
+
+
 class Lesson(TimestampMixin, db.Model):
     __tablename__ = "lessons"
 
@@ -39,8 +52,8 @@ class Lesson(TimestampMixin, db.Model):
             "is_archived": self.is_archived,
             "activity_count": len(self.activities),
             "subject": self.subject.to_dict() if self.subject else None,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": _serialize_datetime(self.created_at),
+            "updated_at": _serialize_datetime(self.updated_at),
         }
         if include_activities:
             payload["activities"] = [activity.to_dict() for activity in sorted(self.activities, key=lambda item: item.sort_order)]
@@ -105,14 +118,14 @@ class LessonAssignment(TimestampMixin, db.Model):
             "subject_id": self.subject_id,
             "assigned_by_teacher_id": self.assigned_by_teacher_id,
             "target_type": self.target_type,
-            "due_at": self.due_at.isoformat() if self.due_at else None,
+            "due_at": _serialize_datetime(self.due_at),
             "required_completion_percent": self.required_completion_percent,
             "status": self.status,
             "lesson": self.lesson.to_dict() if self.lesson else None,
             "classroom": self.classroom.to_dict() if self.classroom else None,
             "subject": self.subject.to_dict() if self.subject else None,
             "student_ids": [item.student_id for item in self.students],
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "created_at": _serialize_datetime(self.created_at),
         }
 
 
@@ -159,6 +172,6 @@ class StudentLessonProgress(TimestampMixin, db.Model):
             "help_count": self.help_count,
             "reward_star_count": self.reward_star_count,
             "completion_score": self.completion_score,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": _serialize_datetime(self.completed_at),
             "student": self.student.to_dict() if self.student else None,
         }
