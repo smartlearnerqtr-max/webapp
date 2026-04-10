@@ -76,7 +76,7 @@ Project da co san file [render.yaml](d:/webapp/render.yaml).
 
 Luu y:
 
-- Backend start command dang chay `python init_and_seed.py && gunicorn ...`.
+- Backend start command dang chay `python start_render.py`.
 - `ADMIN_EMAIL` va `ADMIN_PASSWORD` duoc doc tu env var de tao admin bootstrap.
 - `DATABASE_URL` tren Render duoc noi thang toi Render Postgres, nen du lieu se duoc giu lai sau moi lan deploy.
 - `SEED_PERSONA_DATA` da duoc tat trong `render.yaml` de tranh viec reset lai du lieu khong phai admin moi lan service khoi dong.
