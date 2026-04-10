@@ -1,21 +1,27 @@
 from __future__ import annotations
 
+import json
 import os
 import random
 from datetime import datetime, timedelta
 
 from ..extensions import db
 from ..models import (
-    User, TeacherProfile, StudentProfile, ParentProfile, 
-    Classroom, ClassStudent, Subject, ClassSubject,
+    User, TeacherProfile, StudentProfile, ParentProfile,
+    Classroom, ClassJoinCredential, ClassStudent, Subject, ClassSubject,
     Lesson, LessonActivity, LessonAssignment, LessonAssignmentStudent,
-    StudentLessonProgress, ParentDailyReport, ParentStudentLink
+    StudentLessonProgress, ParentDailyReport, ParentStudentLink, TeacherStudentLink,
 )
 from ..utils.security import hash_password
 
 BASE_SUBJECTS = [('TOAN', 'To\u00e1n'), ('VAN', 'V\u0103n'), ('KHTN', 'Khoa h\u1ecdc t\u1ef1 nhi\u00ean'), ('KY_NANG_SONG', 'K\u1ef9 n\u0103ng s\u1ed1ng')]
 DEFAULT_ADMIN_EMAIL = 'admin@example.com'
 DEFAULT_ADMIN_PASSWORD = 'admin123456'
+DEFAULT_VISUAL_DEMO_TEACHER_EMAIL = 'visual.teacher.demo@example.com'
+DEFAULT_VISUAL_DEMO_TEACHER_PASSWORD = 'Teacher123!'
+DEFAULT_VISUAL_DEMO_STUDENT_EMAIL = 'visual.student.demo@example.com'
+DEFAULT_VISUAL_DEMO_STUDENT_PASSWORD = 'Student123!'
+DEFAULT_VISUAL_DEMO_CLASS_PASSWORD = 'VISUAL08'
 
 
 def seed_subjects() -> int:
@@ -55,6 +61,458 @@ def seed_admin_user(email: str | None = None, password: str | None = None) -> Us
     db.session.add(user)
     db.session.commit()
     return user
+
+
+def seed_visual_support_demo_bundle() -> dict[str, object]:
+    teacher_email = (os.getenv('VISUAL_DEMO_TEACHER_EMAIL') or DEFAULT_VISUAL_DEMO_TEACHER_EMAIL).strip().lower()
+    teacher_password = (os.getenv('VISUAL_DEMO_TEACHER_PASSWORD') or DEFAULT_VISUAL_DEMO_TEACHER_PASSWORD).strip()
+    student_email = (os.getenv('VISUAL_DEMO_STUDENT_EMAIL') or DEFAULT_VISUAL_DEMO_STUDENT_EMAIL).strip().lower()
+    student_password = (os.getenv('VISUAL_DEMO_STUDENT_PASSWORD') or DEFAULT_VISUAL_DEMO_STUDENT_PASSWORD).strip()
+    class_password = (os.getenv('VISUAL_DEMO_CLASS_PASSWORD') or DEFAULT_VISUAL_DEMO_CLASS_PASSWORD).strip().upper()
+    background_image_url = (
+        os.getenv('VISUAL_DEMO_BACKGROUND_IMAGE_URL')
+        or 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80'
+    ).strip()
+
+    subject = Subject.query.filter_by(code='KHTN').first()
+    if not subject:
+        seed_subjects()
+        subject = Subject.query.filter_by(code='KHTN').first()
+    if not subject:
+        raise RuntimeError('Missing subject KHTN after seeding base subjects.')
+
+    teacher_user = User.query.filter_by(email=teacher_email).first()
+    if not teacher_user:
+        teacher_user = User(
+            email=teacher_email,
+            phone=None,
+            password_hash=hash_password(teacher_password),
+            role='teacher',
+            status='active',
+        )
+        db.session.add(teacher_user)
+        db.session.flush()
+    else:
+        teacher_user.password_hash = hash_password(teacher_password)
+        teacher_user.role = 'teacher'
+        teacher_user.status = 'active'
+
+    teacher_profile = teacher_user.teacher_profile
+    if not teacher_profile:
+        teacher_profile = TeacherProfile(
+            user_id=teacher_user.id,
+            full_name='Cô Minh Họa',
+            school_name='Lớp học trực quan',
+            note='Tài khoản giáo viên demo cho lớp visual support.',
+        )
+        db.session.add(teacher_profile)
+        db.session.flush()
+    else:
+        teacher_profile.full_name = 'Cô Minh Họa'
+        teacher_profile.school_name = 'Lớp học trực quan'
+        teacher_profile.note = 'Tài khoản giáo viên demo cho lớp visual support.'
+
+    student_user = User.query.filter_by(email=student_email).first()
+    if not student_user:
+        student_user = User(
+            email=student_email,
+            phone=None,
+            password_hash=hash_password(student_password),
+            role='student',
+            status='active',
+        )
+        db.session.add(student_user)
+        db.session.flush()
+    else:
+        student_user.password_hash = hash_password(student_password)
+        student_user.role = 'student'
+        student_user.status = 'active'
+
+    student_profile = student_user.student_profile
+    if not student_profile:
+        student_profile = StudentProfile(
+            user_id=student_user.id,
+            full_name='Bé Trực Quan',
+            disability_level='nhe',
+            support_note='Tài khoản học sinh demo để thử giao diện trực quan.',
+            preferred_input='touch',
+            preferred_read_speed='slow',
+            preferred_font_size='large',
+            preferred_bg_color='warm',
+            created_by_teacher_id=teacher_profile.id,
+        )
+        db.session.add(student_profile)
+        db.session.flush()
+    else:
+        student_profile.user_id = student_user.id
+        student_profile.full_name = 'Bé Trực Quan'
+        student_profile.disability_level = 'nhe'
+        student_profile.support_note = 'Tài khoản học sinh demo để thử giao diện trực quan.'
+        student_profile.preferred_input = 'touch'
+        student_profile.preferred_read_speed = 'slow'
+        student_profile.preferred_font_size = 'large'
+        student_profile.preferred_bg_color = 'warm'
+        student_profile.created_by_teacher_id = teacher_profile.id
+
+    teacher_student_link = TeacherStudentLink.query.filter_by(
+        teacher_id=teacher_profile.id,
+        student_id=student_profile.id,
+    ).first()
+    if not teacher_student_link:
+        teacher_student_link = TeacherStudentLink(
+            teacher_id=teacher_profile.id,
+            student_id=student_profile.id,
+            status='active',
+            source='visual_demo_seed',
+        )
+        db.session.add(teacher_student_link)
+    else:
+        teacher_student_link.status = 'active'
+        teacher_student_link.source = 'visual_demo_seed'
+
+    classroom = Classroom.query.filter_by(
+        teacher_id=teacher_profile.id,
+        name='Lớp Trực Quan Demo',
+    ).first()
+    if not classroom:
+        classroom = Classroom(
+            teacher_id=teacher_profile.id,
+            name='Lớp Trực Quan Demo',
+            grade_label='Lớp minh họa',
+            description='Lớp demo giao diện trực quan cuộn dọc cho học sinh cần hỗ trợ hình ảnh.',
+            default_disability_level='nhe',
+            ui_variant=Classroom.UI_VARIANT_VISUAL_SUPPORT,
+            visual_theme=Classroom.VISUAL_THEME_GARDEN,
+            background_image_url=background_image_url,
+            status='active',
+        )
+        db.session.add(classroom)
+        db.session.flush()
+    else:
+        classroom.grade_label = 'Lớp minh họa'
+        classroom.description = 'Lớp demo giao diện trực quan cuộn dọc cho học sinh cần hỗ trợ hình ảnh.'
+        classroom.default_disability_level = 'nhe'
+        classroom.ui_variant = Classroom.UI_VARIANT_VISUAL_SUPPORT
+        classroom.visual_theme = Classroom.VISUAL_THEME_GARDEN
+        classroom.background_image_url = background_image_url
+        classroom.status = 'active'
+
+    join_credential = classroom.join_credential
+    if not join_credential:
+        join_credential = ClassJoinCredential(class_id=classroom.id, join_password=class_password)
+        db.session.add(join_credential)
+    else:
+        join_credential.join_password = class_password
+
+    class_subject = ClassSubject.query.filter_by(class_id=classroom.id, subject_id=subject.id).first()
+    if not class_subject:
+        class_subject = ClassSubject(class_id=classroom.id, subject_id=subject.id, sort_order=1, is_active=True)
+        db.session.add(class_subject)
+    else:
+        class_subject.sort_order = 1
+        class_subject.is_active = True
+
+    class_student = ClassStudent.query.filter_by(class_id=classroom.id, student_id=student_profile.id).first()
+    if not class_student:
+        class_student = ClassStudent(class_id=classroom.id, student_id=student_profile.id, status='active')
+        db.session.add(class_student)
+    else:
+        class_student.status = 'active'
+
+    lesson = Lesson.query.filter_by(
+        created_by_teacher_id=teacher_profile.id,
+        subject_id=subject.id,
+        title='Nhận biết con vật qua hình ảnh và video',
+    ).first()
+    if not lesson:
+        lesson = Lesson(
+            created_by_teacher_id=teacher_profile.id,
+            subject_id=subject.id,
+            title='Nhận biết con vật qua hình ảnh và video',
+            description='Bài học demo gồm clip ngắn, chọn ảnh, ghép hình và trả lời bằng giọng nói.',
+            primary_level='nhe',
+            estimated_minutes=15,
+            difficulty_stage=1,
+            is_published=True,
+            is_archived=False,
+        )
+        db.session.add(lesson)
+        db.session.flush()
+    else:
+        lesson.description = 'Bài học demo gồm clip ngắn, chọn ảnh, ghép hình và trả lời bằng giọng nói.'
+        lesson.primary_level = 'nhe'
+        lesson.estimated_minutes = 15
+        lesson.difficulty_stage = 1
+        lesson.is_published = True
+        lesson.is_archived = False
+
+    activities = [
+        {
+            'sort_order': 1,
+            'title': 'Clip 1: Chọn kết quả đúng',
+            'activity_type': 'multiple_choice',
+            'instruction_text': 'Xem clip ngắn rồi chọn đáp án đúng.',
+            'voice_answer_enabled': False,
+            'config': {
+                'prompt': '2 cộng 3 bằng mấy?',
+                'choices': ['5', '4'],
+                'correct': '5',
+                'media_url': '/demo-media/clip-1-count-five.html',
+            },
+        },
+        {
+            'sort_order': 2,
+            'title': 'Clip 2: Màu của quả chuối',
+            'activity_type': 'multiple_choice',
+            'instruction_text': 'Nhìn clip ngắn và chọn màu đúng.',
+            'voice_answer_enabled': False,
+            'config': {
+                'prompt': 'Quả chuối thường có màu gì?',
+                'choices': ['Vàng', 'Tím'],
+                'correct': 'Vàng',
+                'media_url': '/demo-media/clip-2-banana.html',
+            },
+        },
+        {
+            'sort_order': 3,
+            'title': 'Clip 3: Ban ngày',
+            'activity_type': 'multiple_choice',
+            'instruction_text': 'Vuốt tiếp và chọn đúng.',
+            'voice_answer_enabled': False,
+            'config': {
+                'prompt': 'Ban ngày em thường thấy gì?',
+                'choices': ['Mặt trời', 'Mặt trăng'],
+                'correct': 'Mặt trời',
+                'media_url': '/demo-media/clip-3-sun.html',
+            },
+        },
+        {
+            'sort_order': 4,
+            'title': 'Clip 4: Con cá',
+            'activity_type': 'multiple_choice',
+            'instruction_text': 'Xem clip và chọn đáp án đúng.',
+            'voice_answer_enabled': False,
+            'config': {
+                'prompt': 'Con cá bơi ở đâu?',
+                'choices': ['Dưới nước', 'Trên trời'],
+                'correct': 'Dưới nước',
+                'media_url': '/demo-media/clip-4-fish.html',
+            },
+        },
+        {
+            'sort_order': 5,
+            'title': 'Clip 5: Màu của quả táo',
+            'activity_type': 'multiple_choice',
+            'instruction_text': 'Clip ngắn có 2 đáp án.',
+            'voice_answer_enabled': False,
+            'config': {
+                'prompt': 'Quả táo trong clip có màu gì?',
+                'choices': ['Đỏ', 'Tím'],
+                'correct': 'Đỏ',
+                'media_url': '/demo-media/clip-5-red-apple.html',
+            },
+        },
+        {
+            'sort_order': 6,
+            'title': 'Ảnh mèo',
+            'activity_type': 'image_choice',
+            'instruction_text': 'Nhìn ảnh con vật và chọn đúng.',
+            'voice_answer_enabled': False,
+            'config': {
+                'prompt': 'Đây là con gì?',
+                'choices': ['Con mèo', 'Con gà'],
+                'correct': 'Con mèo',
+                'media_url': '/demo-media/cat-card.svg',
+                'media_kind': 'image',
+            },
+        },
+        {
+            'sort_order': 7,
+            'title': 'Video TikTok: Con vật gì?',
+            'activity_type': 'watch_answer',
+            'instruction_text': 'Xem video, bấm mic và nói tên con vật em thấy.',
+            'voice_answer_enabled': True,
+            'config': {
+                'kind': 'watch_answer',
+                'media_url': 'https://www.tiktok.com/@gimph_124/video/7489356649216511238?is_from_webapp=1&sender_device=pc&web_id=7520835859257869832',
+                'media_kind': 'embed',
+                'prompt': 'Trong video xuất hiện con vật gì?',
+                'answer_mode': 'voice_ai_grade',
+                'expected_answer': 'con mèo',
+                'accepted_answers': ['con mèo', 'mèo', 'con meo', 'meo'],
+            },
+        },
+        {
+            'sort_order': 8,
+            'title': 'Vuốt tìm ảnh: Con mèo',
+            'activity_type': 'image_choice',
+            'instruction_text': 'Vuốt trái phải để tìm đúng ảnh rồi bấm chọn.',
+            'voice_answer_enabled': False,
+            'config': {
+                'kind': 'image_choice',
+                'prompt': 'Đâu là con mèo?',
+                'image_selection_mode': 'carousel_find',
+                'image_cards': [
+                    {'id': 'cat', 'label': 'Con mèo', 'media_url': '/demo-media/conmeo.jpg', 'media_kind': 'image'},
+                    {'id': 'dog', 'label': 'Con chó', 'media_url': '/demo-media/concho.jpg', 'media_kind': 'image'},
+                    {'id': 'fish', 'label': 'Con cá', 'media_url': '/demo-media/conca.jpg', 'media_kind': 'image'},
+                    {'id': 'crab', 'label': 'Con cua', 'media_url': '/demo-media/concua.jpg', 'media_kind': 'image'},
+                    {'id': 'tiger', 'label': 'Con hổ', 'media_url': '/demo-media/conho.webp', 'media_kind': 'image'},
+                    {'id': 'bear', 'label': 'Con gấu', 'media_url': '/demo-media/gau.webp', 'media_kind': 'image'},
+                ],
+                'correct': 'cat',
+            },
+        },
+        {
+            'sort_order': 9,
+            'title': 'Vuốt tìm ảnh: Con gấu',
+            'activity_type': 'image_choice',
+            'instruction_text': 'Vuốt trái phải để tìm đúng ảnh rồi bấm chọn.',
+            'voice_answer_enabled': False,
+            'config': {
+                'kind': 'image_choice',
+                'prompt': 'Đâu là con gấu?',
+                'image_selection_mode': 'carousel_find',
+                'image_cards': [
+                    {'id': 'cat', 'label': 'Con mèo', 'media_url': '/demo-media/conmeo.jpg', 'media_kind': 'image'},
+                    {'id': 'dog', 'label': 'Con chó', 'media_url': '/demo-media/concho.jpg', 'media_kind': 'image'},
+                    {'id': 'fish', 'label': 'Con cá', 'media_url': '/demo-media/conca.jpg', 'media_kind': 'image'},
+                    {'id': 'crab', 'label': 'Con cua', 'media_url': '/demo-media/concua.jpg', 'media_kind': 'image'},
+                    {'id': 'tiger', 'label': 'Con hổ', 'media_url': '/demo-media/conho.webp', 'media_kind': 'image'},
+                    {'id': 'bear', 'label': 'Con gấu', 'media_url': '/demo-media/gau.webp', 'media_kind': 'image'},
+                ],
+                'correct': 'bear',
+            },
+        },
+        {
+            'sort_order': 10,
+            'title': 'Ghép mảnh ảnh: Con mèo',
+            'activity_type': 'image_puzzle',
+            'instruction_text': 'Kéo thả các mảnh để ghép lại thành hình con mèo.',
+            'voice_answer_enabled': False,
+            'config': {
+                'kind': 'image_puzzle',
+                'prompt': 'Ghép lại thành hình con mèo.',
+                'image_url': '/demo-media/conmeo.jpg',
+                'image_kind': 'image',
+                'rows': 2,
+                'cols': 3,
+                'piece_count': 6,
+            },
+        },
+        {
+            'sort_order': 11,
+            'title': 'Mở ô đoán hình: Con gấu',
+            'activity_type': 'hidden_image_guess',
+            'instruction_text': 'Chạm mở từng ô đen, đoán hình và nói tên con vật.',
+            'voice_answer_enabled': True,
+            'config': {
+                'kind': 'hidden_image_guess',
+                'prompt': 'Trong bức ảnh này là con vật gì?',
+                'image_url': '/demo-media/gau.webp',
+                'image_kind': 'image',
+                'overlay_rows': 3,
+                'overlay_cols': 4,
+                'expected_answer': 'con gấu',
+                'accepted_answers': ['gấu', 'con gấu', 'gau', 'con gau'],
+            },
+        },
+    ]
+
+    existing_activities = {
+        activity.sort_order: activity
+        for activity in LessonActivity.query.filter_by(lesson_id=lesson.id).all()
+    }
+    incoming_sort_orders = {item['sort_order'] for item in activities}
+
+    for activity in list(existing_activities.values()):
+        if activity.sort_order not in incoming_sort_orders:
+            db.session.delete(activity)
+
+    for activity_payload in activities:
+        activity = existing_activities.get(activity_payload['sort_order'])
+        if not activity:
+            activity = LessonActivity(lesson_id=lesson.id, sort_order=activity_payload['sort_order'])
+            db.session.add(activity)
+
+        activity.title = activity_payload['title']
+        activity.activity_type = activity_payload['activity_type']
+        activity.instruction_text = activity_payload['instruction_text']
+        activity.voice_answer_enabled = activity_payload['voice_answer_enabled']
+        activity.is_required = True
+        activity.difficulty_stage = 1
+        activity.config_json = json.dumps(activity_payload['config'], ensure_ascii=False)
+
+    assignment = LessonAssignment.query.filter_by(
+        lesson_id=lesson.id,
+        class_id=classroom.id,
+        assigned_by_teacher_id=teacher_profile.id,
+    ).first()
+    if not assignment:
+        assignment = LessonAssignment(
+            lesson_id=lesson.id,
+            class_id=classroom.id,
+            subject_id=subject.id,
+            assigned_by_teacher_id=teacher_profile.id,
+            target_type='class',
+            required_completion_percent=100,
+            status='active',
+        )
+        db.session.add(assignment)
+        db.session.flush()
+    else:
+        assignment.subject_id = subject.id
+        assignment.target_type = 'class'
+        assignment.required_completion_percent = 100
+        assignment.status = 'active'
+
+    assignment_student = LessonAssignmentStudent.query.filter_by(
+        assignment_id=assignment.id,
+        student_id=student_profile.id,
+    ).first()
+    if not assignment_student:
+        assignment_student = LessonAssignmentStudent(assignment_id=assignment.id, student_id=student_profile.id)
+        db.session.add(assignment_student)
+
+    progress = StudentLessonProgress.query.filter_by(
+        assignment_id=assignment.id,
+        student_id=student_profile.id,
+    ).first()
+    if not progress:
+        progress = StudentLessonProgress(
+            assignment_id=assignment.id,
+            student_id=student_profile.id,
+            status='not_started',
+            progress_percent=0,
+            total_learning_seconds=0,
+            retry_count=0,
+            help_count=0,
+            reward_star_count=0,
+            completion_score=0,
+            completed_at=None,
+        )
+        db.session.add(progress)
+    else:
+        progress.status = 'not_started'
+        progress.progress_percent = 0
+        progress.total_learning_seconds = 0
+        progress.retry_count = 0
+        progress.help_count = 0
+        progress.reward_star_count = 0
+        progress.completion_score = 0
+        progress.completed_at = None
+
+    db.session.commit()
+    return {
+        'teacher_email': teacher_email,
+        'teacher_password': teacher_password,
+        'student_email': student_email,
+        'student_password': student_password,
+        'class_name': classroom.name,
+        'class_password': class_password,
+        'lesson_title': lesson.title,
+        'activity_count': len(activities),
+    }
 
 
 def seed_test_scenario():

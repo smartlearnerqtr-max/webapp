@@ -119,14 +119,8 @@ def _should_rotate_to_next_key(exc: GeminiServiceError) -> bool:
     return False
 
 
-def _generate_text_once(*, api_key: str, model_name: str, message: str, context: dict[str, Any] | None = None, timeout: int = DEFAULT_TIMEOUT_SECONDS) -> GeminiResult:
-    if not api_key.strip():
-        raise GeminiServiceError('Gemini API key khong hop le', 'GEMINI_KEY_INVALID', 422)
-    if not message.strip():
-        raise GeminiServiceError('Noi dung gui Gemini khong duoc de trong', 'VALIDATION_ERROR', 422)
-
-    system_prompt, user_prompt = build_learning_prompt(message, context)
-    payload = {
+def _build_payload(*, system_prompt: str, user_prompt: str, temperature: float = 0.4, max_output_tokens: int = 512) -> dict[str, Any]:
+    return {
         'system_instruction': {
             'parts': [{'text': system_prompt}],
         },
@@ -137,10 +131,15 @@ def _generate_text_once(*, api_key: str, model_name: str, message: str, context:
             }
         ],
         'generationConfig': {
-            'temperature': 0.4,
-            'maxOutputTokens': 512,
+            'temperature': temperature,
+            'maxOutputTokens': max_output_tokens,
         },
     }
+
+
+def _generate_payload_once(*, api_key: str, model_name: str, payload: dict[str, Any], timeout: int = DEFAULT_TIMEOUT_SECONDS) -> GeminiResult:
+    if not api_key.strip():
+        raise GeminiServiceError('Gemini API key khong hop le', 'GEMINI_KEY_INVALID', 422)
 
     req = request.Request(
         url=f'{GEMINI_API_BASE_URL}/models/{model_name}:generateContent',
@@ -189,13 +188,12 @@ def _generate_text_once(*, api_key: str, model_name: str, message: str, context:
     )
 
 
-def generate_text(
+def _generate_payload(
     *,
     api_key: str | None = None,
     api_keys: list[str] | tuple[str, ...] | None = None,
     model_name: str,
-    message: str,
-    context: dict[str, Any] | None = None,
+    payload: dict[str, Any],
     timeout: int = DEFAULT_TIMEOUT_SECONDS,
 ) -> GeminiResult:
     resolved_api_keys = _normalize_api_keys(api_key, api_keys)
@@ -207,11 +205,10 @@ def generate_text(
 
     for key_index, resolved_api_key in rotated_key_entries:
         try:
-            result = _generate_text_once(
+            result = _generate_payload_once(
                 api_key=resolved_api_key,
                 model_name=model_name,
-                message=message,
-                context=context,
+                payload=payload,
                 timeout=timeout,
             )
             _mark_next_round_robin_start(key_index, len(resolved_api_keys))
@@ -226,3 +223,55 @@ def generate_text(
         raise last_error
 
     raise GeminiServiceError('Khong the tao phan hoi tu Gemini', 'GEMINI_API_ERROR', 502)
+
+
+def generate_text(
+    *,
+    api_key: str | None = None,
+    api_keys: list[str] | tuple[str, ...] | None = None,
+    model_name: str,
+    message: str,
+    context: dict[str, Any] | None = None,
+    timeout: int = DEFAULT_TIMEOUT_SECONDS,
+) -> GeminiResult:
+    if not message.strip():
+        raise GeminiServiceError('Noi dung gui Gemini khong duoc de trong', 'VALIDATION_ERROR', 422)
+
+    system_prompt, user_prompt = build_learning_prompt(message, context)
+    payload = _build_payload(system_prompt=system_prompt, user_prompt=user_prompt)
+    return _generate_payload(
+        api_key=api_key,
+        api_keys=api_keys,
+        model_name=model_name,
+        payload=payload,
+        timeout=timeout,
+    )
+
+
+def generate_text_with_prompts(
+    *,
+    api_key: str | None = None,
+    api_keys: list[str] | tuple[str, ...] | None = None,
+    model_name: str,
+    system_prompt: str,
+    user_prompt: str,
+    timeout: int = DEFAULT_TIMEOUT_SECONDS,
+    temperature: float = 0.2,
+    max_output_tokens: int = 512,
+) -> GeminiResult:
+    if not system_prompt.strip() or not user_prompt.strip():
+        raise GeminiServiceError('Prompt gui Gemini khong hop le', 'VALIDATION_ERROR', 422)
+
+    payload = _build_payload(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        temperature=temperature,
+        max_output_tokens=max_output_tokens,
+    )
+    return _generate_payload(
+        api_key=api_key,
+        api_keys=api_keys,
+        model_name=model_name,
+        payload=payload,
+        timeout=timeout,
+    )

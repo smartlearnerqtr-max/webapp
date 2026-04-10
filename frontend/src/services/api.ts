@@ -85,6 +85,9 @@ export type ClassItem = {
   grade_label: string | null
   description: string | null
   default_disability_level?: string | null
+  ui_variant: 'standard' | 'visual_support'
+  visual_theme: 'garden' | 'ocean' | 'cosmos'
+  background_image_url: string | null
   status: string
   student_count: number
   subject_count: number
@@ -373,6 +376,17 @@ export type AIChatResponse = {
   prompt_feedback: Record<string, unknown> | null
 }
 
+export type AIGradeAnswerResponse = {
+  transcript: string
+  normalized_transcript: string
+  is_correct: boolean
+  grade: 'correct' | 'close' | 'incorrect'
+  feedback: string
+  matched_answer: string
+  source: 'gemini' | 'fallback'
+  model_name: string | null
+}
+
 export type UploadedMediaItem = {
   url: string
   filename: string
@@ -491,7 +505,14 @@ export async function fetchClasses(token: string): Promise<ClassItem[]> {
   return request<ClassItem[]>('/api/v1/classes', { token })
 }
 
-export async function createClass(token: string, payload: { name: string; grade_label?: string; description?: string }) {
+export async function createClass(token: string, payload: {
+  name: string
+  grade_label?: string
+  description?: string
+  ui_variant?: 'standard' | 'visual_support'
+  visual_theme?: 'garden' | 'ocean' | 'cosmos'
+  background_image_url?: string
+}) {
   return request<ClassItem>('/api/v1/classes', {
     method: 'POST',
     token,
@@ -788,6 +809,22 @@ export async function sendAIChat(token: string, payload: {
   }
 }): Promise<AIChatResponse> {
   return request<AIChatResponse>('/api/v1/ai/chat', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function gradeAIAnswer(token: string, payload: {
+  transcript: string
+  expected_answer: string
+  accepted_answers?: string[]
+  question?: string
+  lesson_title?: string
+  activity_type?: string
+  media_url?: string
+}): Promise<AIGradeAnswerResponse> {
+  return request<AIGradeAnswerResponse>('/api/v1/ai/grade-answer', {
     method: 'POST',
     token,
     body: payload,

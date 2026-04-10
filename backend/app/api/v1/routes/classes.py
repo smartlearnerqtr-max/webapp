@@ -17,6 +17,15 @@ from .. import api_v1
 
 
 CLASS_PASSWORD_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+ALLOWED_CLASS_UI_VARIANTS = {
+    Classroom.UI_VARIANT_STANDARD,
+    Classroom.UI_VARIANT_VISUAL_SUPPORT,
+}
+ALLOWED_VISUAL_THEMES = {
+    Classroom.VISUAL_THEME_GARDEN,
+    Classroom.VISUAL_THEME_OCEAN,
+    Classroom.VISUAL_THEME_COSMOS,
+}
 
 
 def _require_teacher_user():
@@ -56,6 +65,31 @@ def _serialize_student_classroom(classroom: Classroom) -> dict[str, object]:
     payload = classroom.to_dict()
     payload['teacher'] = classroom.teacher.to_dict() if classroom.teacher else None
     return payload
+
+
+def _resolve_class_ui_variant(raw_value: object) -> str:
+    if not isinstance(raw_value, str):
+        return Classroom.UI_VARIANT_STANDARD
+    normalized_value = raw_value.strip().lower()
+    if normalized_value in ALLOWED_CLASS_UI_VARIANTS:
+        return normalized_value
+    return Classroom.UI_VARIANT_STANDARD
+
+
+def _resolve_visual_theme(raw_value: object) -> str:
+    if not isinstance(raw_value, str):
+        return Classroom.VISUAL_THEME_GARDEN
+    normalized_value = raw_value.strip().lower()
+    if normalized_value in ALLOWED_VISUAL_THEMES:
+        return normalized_value
+    return Classroom.VISUAL_THEME_GARDEN
+
+
+def _resolve_background_image_url(raw_value: object) -> str | None:
+    if not isinstance(raw_value, str):
+        return None
+    normalized_value = raw_value.strip()
+    return normalized_value or None
 
 
 def _get_student_user_ids(student_ids: list[int]) -> list[int]:
@@ -148,6 +182,9 @@ def create_class():
         grade_label=payload.get('grade_label'),
         description=payload.get('description'),
         default_disability_level=payload.get('default_disability_level'),
+        ui_variant=_resolve_class_ui_variant(payload.get('ui_variant')),
+        visual_theme=_resolve_visual_theme(payload.get('visual_theme')),
+        background_image_url=_resolve_background_image_url(payload.get('background_image_url')),
         status=payload.get('status') or 'active',
     )
     db.session.add(classroom)
@@ -185,6 +222,12 @@ def update_class(class_id: int):
     for field in ['name', 'grade_label', 'description', 'default_disability_level', 'status']:
         if field in payload:
             setattr(classroom, field, payload.get(field))
+    if 'ui_variant' in payload:
+        classroom.ui_variant = _resolve_class_ui_variant(payload.get('ui_variant'))
+    if 'visual_theme' in payload:
+        classroom.visual_theme = _resolve_visual_theme(payload.get('visual_theme'))
+    if 'background_image_url' in payload:
+        classroom.background_image_url = _resolve_background_image_url(payload.get('background_image_url'))
     _ensure_join_credential(classroom)
     db.session.commit()
     return success_response(_serialize_teacher_classroom(classroom), 'Cap nhat lop thanh cong')

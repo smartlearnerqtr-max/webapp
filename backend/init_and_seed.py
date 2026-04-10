@@ -10,7 +10,7 @@ from sqlalchemy.exc import OperationalError
 
 from app import create_app
 from app.extensions import db
-from app.services.seed_service import seed_admin_user, seed_subjects
+from app.services.seed_service import seed_admin_user, seed_subjects, seed_visual_support_demo_bundle
 
 app = create_app()
 BASE_DIR = Path(__file__).resolve().parent
@@ -43,6 +43,19 @@ def _maybe_seed_persona_data() -> None:
     print("Persona seed completed.")
 
 
+def _maybe_seed_visual_support_demo() -> None:
+    if not _bool_env("SEED_VISUAL_SUPPORT_DEMO", False):
+        return
+
+    print("SEED_VISUAL_SUPPORT_DEMO is enabled. Seeding visual support demo bundle...")
+    with app.app_context():
+        payload = seed_visual_support_demo_bundle()
+    print("Visual support demo completed.")
+    print(f"Teacher demo: {payload['teacher_email']} / {payload['teacher_password']}")
+    print(f"Student demo: {payload['student_email']} / {payload['student_password']}")
+    print(f"Class: {payload['class_name']} / join password: {payload['class_password']}")
+
+
 def run_init_and_seed() -> None:
     max_attempts = _int_env("DB_INIT_MAX_ATTEMPTS", 10)
     retry_delay = _int_env("DB_INIT_RETRY_DELAY_SECONDS", 3)
@@ -59,6 +72,7 @@ def run_init_and_seed() -> None:
                 print(f"Admin ready: {admin.email}")
 
             _maybe_seed_persona_data()
+            _maybe_seed_visual_support_demo()
             return
         except OperationalError as error:
             if attempt == max_attempts:

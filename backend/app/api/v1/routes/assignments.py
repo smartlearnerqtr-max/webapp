@@ -391,8 +391,18 @@ def start_my_assignment(assignment_id: int):
     progress = StudentLessonProgress.query.filter_by(assignment_id=assignment_id, student_id=user.student_profile.id).first()
     if not progress:
         return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
+    if progress.status == 'completed':
+        progress.retry_count += 1
+        progress.progress_percent = 0
+        progress.completion_score = 0
+        progress.reward_star_count = 0
+        progress.completed_at = None
     progress.status = 'in_progress'
-    _publish_assignment_progress_event(progress, 'assignment_progress_updated', f'Tien do bai hoc {assignment_id} vua bat dau.')
+    _publish_assignment_progress_event(
+        progress,
+        'assignment_progress_updated',
+        f'Tien do bai hoc {assignment_id} vua {"duoc lam lai tu dau" if progress.retry_count > 0 else "bat dau"}.',
+    )
     db.session.commit()
     return success_response(progress.to_dict(), 'Bat dau bai hoc thanh cong')
 
@@ -429,6 +439,8 @@ def complete_my_assignment(assignment_id: int):
         return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
     progress.status = 'completed'
     progress.progress_percent = 100
+    progress.completion_score = max(progress.completion_score, 100)
+    progress.reward_star_count = max(progress.reward_star_count, 3)
     progress.completed_at = datetime.now(UTC)
     _publish_assignment_progress_event(progress, 'assignment_completed', f'Bai hoc {assignment_id} da hoan thanh.')
     db.session.commit()

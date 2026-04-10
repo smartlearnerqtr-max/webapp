@@ -4,13 +4,14 @@ import uuid
 from pathlib import Path
 
 from flask import Flask, g, request
+from sqlalchemy import inspect, text
 from sqlalchemy.exc import OperationalError
 
 from .api.v1 import api_v1
 from .config import get_config
 from .extensions import cors, db, jwt, migrate
 from .services.logger import log_exception
-from .services.seed_service import seed_admin_user, seed_subjects, seed_test_scenario
+from .services.seed_service import seed_admin_user, seed_subjects, seed_test_scenario, seed_visual_support_demo_bundle
 from .utils.responses import error_response
 
 
@@ -20,6 +21,7 @@ def create_app(config_name: str | None = None) -> Flask:
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
     _init_extensions(app)
+    _apply_schema_patches(app)
     _register_request_hooks(app)
     _register_blueprints(app)
     _register_error_handlers(app)
@@ -34,6 +36,26 @@ def _init_extensions(app: Flask) -> None:
     migrate.init_app(app, db)
     jwt.init_app(app)
     cors.init_app(app, resources={r'/api/*': {'origins': app.config['CORS_ORIGINS']}})
+
+
+def _apply_schema_patches(app: Flask) -> None:
+    with app.app_context():
+        inspector = inspect(db.engine)
+        table_names = set(inspector.get_table_names())
+
+        if 'classes' in table_names:
+            class_columns = {column['name'] for column in inspector.get_columns('classes')}
+            if 'ui_variant' not in class_columns:
+                with db.engine.begin() as connection:
+                    connection.execute(text("ALTER TABLE classes ADD COLUMN ui_variant VARCHAR(30) DEFAULT 'standard'"))
+                    connection.execute(text("UPDATE classes SET ui_variant = 'standard' WHERE ui_variant IS NULL"))
+            if 'visual_theme' not in class_columns:
+                with db.engine.begin() as connection:
+                    connection.execute(text("ALTER TABLE classes ADD COLUMN visual_theme VARCHAR(30) DEFAULT 'garden'"))
+                    connection.execute(text("UPDATE classes SET visual_theme = 'garden' WHERE visual_theme IS NULL"))
+            if 'background_image_url' not in class_columns:
+                with db.engine.begin() as connection:
+                    connection.execute(text("ALTER TABLE classes ADD COLUMN background_image_url VARCHAR(1000)"))
 
 
 def _register_request_hooks(app: Flask) -> None:
@@ -92,3 +114,13 @@ def _register_cli_commands(app: Flask) -> None:
     def seed_test_scenario_command() -> None:
         seed_test_scenario()
         print('Full test scenario seeding completed')
+
+    @app.cli.command('seed-visual-demo')
+    def seed_visual_demo_command() -> None:
+        db.create_all()
+        seed_subjects()
+        payload = seed_visual_support_demo_bundle()
+        print('Visual support demo seeded')
+        print(f"Teacher demo: {payload['teacher_email']} / {payload['teacher_password']}")
+        print(f"Student demo: {payload['student_email']} / {payload['student_password']}")
+        print(f"Class: {payload['class_name']} / join password: {payload['class_password']}")

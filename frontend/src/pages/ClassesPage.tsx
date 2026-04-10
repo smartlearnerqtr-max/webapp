@@ -15,11 +15,59 @@ import {
 import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
+const classUiVariants = [
+  {
+    value: 'standard',
+    title: 'Lớp tiêu chuẩn',
+    description: 'Giữ giao diện hiện tại cho nhóm học sinh bình thường, thao tác và bố cục quen thuộc.',
+  },
+  {
+    value: 'visual_support',
+    title: 'Lớp hỗ trợ trực quan',
+    description: 'Dành cho nhóm cần giao diện cuộn dọc, card lớn, màu sinh động và ít phụ thuộc vào chữ.',
+  },
+] as const
+
+const classUiVariantLabelMap: Record<(typeof classUiVariants)[number]['value'], string> = {
+  standard: 'Giao diện tiêu chuẩn',
+  visual_support: 'Giao diện trực quan',
+}
+
+const visualThemeOptions = [
+  {
+    value: 'garden',
+    title: 'Vườn dịu mắt',
+    description: 'Xanh lá, vàng kem, hợp cho học lâu và ít gây mỏi mắt.',
+    imageUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
+  },
+  {
+    value: 'ocean',
+    title: 'Mặt hồ êm',
+    description: 'Xanh ngọc sáng, cảm giác nhẹ và sạch, hợp thao tác chạm.',
+    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80',
+  },
+  {
+    value: 'cosmos',
+    title: 'Phiêu lưu vũ trụ',
+    description: 'Tím xanh nổi bật hơn, hợp với nhóm thích cảm giác khám phá.',
+    imageUrl: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1600&q=80',
+  },
+] as const
+
+const visualThemeLabelMap: Record<(typeof visualThemeOptions)[number]['value'], string> = {
+  garden: 'Vườn dịu mắt',
+  ocean: 'Mặt hồ êm',
+  cosmos: 'Phiêu lưu vũ trụ',
+}
+
 export function ClassesPage() {
   const queryClient = useQueryClient()
   const token = useAuthStore((state) => state.accessToken)
   const [name, setName] = useState('')
   const [grade, setGrade] = useState('')
+  const [uiVariant, setUiVariant] = useState<(typeof classUiVariants)[number]['value']>('standard')
+  const [visualTheme, setVisualTheme] = useState<(typeof visualThemeOptions)[number]['value']>('garden')
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string>(visualThemeOptions[0].imageUrl)
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null)
   const [selectedStudentId, setSelectedStudentId] = useState('')
   const [selectedSubjectId, setSelectedSubjectId] = useState('')
@@ -71,10 +119,20 @@ export function ClassesPage() {
   }, [classSubjectsQuery.data, subjectsQuery.data])
 
   const createMutation = useMutation({
-    mutationFn: () => createClass(token!, { name, grade_label: grade }),
+    mutationFn: () =>
+      createClass(token!, {
+        name,
+        grade_label: grade,
+        ui_variant: uiVariant,
+        visual_theme: visualTheme,
+        background_image_url: backgroundImageUrl.trim() || undefined,
+      }),
     onSuccess: async (createdClass) => {
       setName('')
       setGrade('')
+      setUiVariant('standard')
+      setVisualTheme('garden')
+      setBackgroundImageUrl(visualThemeOptions[0].imageUrl)
       await queryClient.invalidateQueries({ queryKey: ['classes', token] })
       setSelectedClassId(createdClass.id)
     },
@@ -126,6 +184,56 @@ export function ClassesPage() {
                 <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Ví dụ: Lớp 6A buổi chiều" />
               </label>
 
+              <div className="detail-stack">
+                <strong>Kiểu giao diện của lớp</strong>
+                <div className="builder-type-grid">
+                  {classUiVariants.map((variant) => (
+                    <button
+                      key={variant.value}
+                      type="button"
+                      className={uiVariant === variant.value ? 'builder-type-card builder-type-card-active' : 'builder-type-card'}
+                      onClick={() => setUiVariant(variant.value)}
+                    >
+                      <strong>{variant.title}</strong>
+                      <span>{variant.description}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {uiVariant === 'visual_support' ? (
+                <div className="detail-stack">
+                  <strong>Theme cho lớp hỗ trợ</strong>
+                  <div className="builder-type-grid">
+                    {visualThemeOptions.map((theme) => (
+                      <button
+                        key={theme.value}
+                        type="button"
+                        className={visualTheme === theme.value ? 'builder-type-card builder-type-card-active' : 'builder-type-card'}
+                        onClick={() => {
+                          setVisualTheme(theme.value)
+                          if (!backgroundImageUrl.trim() || backgroundImageUrl === visualThemeOptions.find((item) => item.value === visualTheme)?.imageUrl) {
+                            setBackgroundImageUrl(theme.imageUrl)
+                          }
+                        }}
+                      >
+                        <strong>{theme.title}</strong>
+                        <span>{theme.description}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <label>
+                    Ảnh nền từ bên ngoài
+                    <input
+                      value={backgroundImageUrl}
+                      onChange={(event) => setBackgroundImageUrl(event.target.value)}
+                      placeholder="Dán URL ảnh nền cho lớp hỗ trợ"
+                    />
+                  </label>
+                  <p className="helper-text">Bạn có thể dùng ảnh ngoài. Hệ thống sẽ lấy ảnh này làm nền chính cho giao diện học sinh của lớp hỗ trợ.</p>
+                </div>
+              ) : null}
+
               <details className="config-card">
                 <summary className="simple-summary">Tùy chọn thêm</summary>
                 <label>
@@ -168,6 +276,12 @@ export function ClassesPage() {
                 <strong>{selectedClass.name}</strong>
                 <span>{selectedClass.grade_label ? `Khối ${selectedClass.grade_label}` : 'Chưa gắn khối lớp'}</span>
               </div>
+              <div className="tag-wrap">
+                <span className="subject-pill">{classUiVariantLabelMap[selectedClass.ui_variant] ?? selectedClass.ui_variant}</span>
+                {selectedClass.ui_variant === 'visual_support' ? (
+                  <span className="subject-pill muted-pill">{visualThemeLabelMap[selectedClass.visual_theme] ?? selectedClass.visual_theme}</span>
+                ) : null}
+              </div>
               <div className="metrics-grid">
                 <div className="mini-card">
                   <span>ID lớp</span>
@@ -194,8 +308,19 @@ export function ClassesPage() {
                 <div className="tag-wrap">
                   <span className="subject-pill">{selectedClass.status === 'active' ? 'Đang hoạt động' : selectedClass.status}</span>
                   {selectedClass.grade_label ? <span className="subject-pill muted-pill">{`Khối ${selectedClass.grade_label}`}</span> : null}
+                  <span className="subject-pill muted-pill">{classUiVariantLabelMap[selectedClass.ui_variant] ?? selectedClass.ui_variant}</span>
+                  {selectedClass.ui_variant === 'visual_support' ? (
+                    <span className="subject-pill muted-pill">{visualThemeLabelMap[selectedClass.visual_theme] ?? selectedClass.visual_theme}</span>
+                  ) : null}
                 </div>
-                <p>Đây là lớp đang được chọn để thêm học sinh, gắn môn học và theo dõi danh sách hiện tại.</p>
+                <p>
+                  {selectedClass.ui_variant === 'visual_support'
+                    ? 'Lớp này sẽ tự mở giao diện học sinh cuộn dọc, card lớn và nền sinh động cho các bài được giao từ lớp này.'
+                    : 'Đây là lớp đang dùng giao diện tiêu chuẩn để thêm học sinh, gắn môn học và theo dõi danh sách hiện tại.'}
+                </p>
+                {selectedClass.ui_variant === 'visual_support' && selectedClass.background_image_url ? (
+                  <p>Ảnh nền đang dùng: {selectedClass.background_image_url}</p>
+                ) : null}
                 <details className="config-card">
                   <summary className="simple-summary">Thông tin thêm</summary>
                   <div className="metrics-grid">
@@ -294,6 +419,8 @@ export function ClassesPage() {
                 <span>{classItem.grade_label ? `Khối ${classItem.grade_label}` : 'Lớp học'}</span>
                 <strong>{classItem.name}</strong>
                 <p>{classItem.student_count} học sinh, {classItem.subject_count} môn học</p>
+                <p>{classUiVariantLabelMap[classItem.ui_variant] ?? classItem.ui_variant}</p>
+                {classItem.ui_variant === 'visual_support' ? <p>{visualThemeLabelMap[classItem.visual_theme] ?? classItem.visual_theme}</p> : null}
                 <p>Mật khẩu: {classItem.join_credential?.class_password ?? 'Chưa cập nhật'}</p>
                 <button
                   type="button"

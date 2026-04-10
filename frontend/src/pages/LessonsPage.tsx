@@ -16,16 +16,19 @@ import { useAuthStore } from '../store/authStore'
 type ActivityType =
   | 'multiple_choice'
   | 'image_choice'
+  | 'image_puzzle'
   | 'matching'
   | 'drag_drop'
   | 'listen_choose'
   | 'watch_answer'
+  | 'hidden_image_guess'
   | 'step_by_step'
   | 'aac'
   | 'career_simulation'
   | 'ai_chat'
 
 type MediaSource = 'external' | 'upload'
+type WatchAnswerMode = 'text' | 'voice_ai_grade'
 
 type PairItem = {
   left: string
@@ -41,10 +44,12 @@ const LEVEL_OPTIONS = [
 const ACTIVITY_TYPES: Array<{ value: ActivityType; label: string; description: string }> = [
   { value: 'multiple_choice', label: 'Chọn đáp án', description: 'Tạo câu hỏi trắc nghiệm nhanh với 4 đáp án để giáo viên chọn đáp án đúng.' },
   { value: 'image_choice', label: 'Nhìn ảnh chọn đáp án', description: 'Tải ảnh lên rồi đặt câu hỏi để học sinh nhìn ảnh và chọn 1 trong 4 đáp án.' },
+  { value: 'image_puzzle', label: 'Ghép mảnh ảnh', description: 'Giáo viên đưa 1 ảnh, hệ thống chia thành nhiều mảnh để học sinh kéo thả ghép lại.' },
   { value: 'matching', label: 'Nối cặp', description: 'Dùng cho bài ghép khái niệm, ghép chữ với hình hoặc ghép đồ vật tương ứng.' },
   { value: 'drag_drop', label: 'Kéo thả', description: 'Phù hợp với bài phân loại, sắp xếp đồ vật hoặc ghép mục vào đúng nhóm.' },
   { value: 'listen_choose', label: 'Nghe và chọn', description: 'Giáo viên nhập câu đọc hoặc lời thoại ngắn, học sinh nghe và chọn đáp án.' },
   { value: 'watch_answer', label: 'Xem rồi trả lời', description: 'Thêm ảnh hoặc video rồi cho học sinh trả lời ngắn sau khi quan sát.' },
+  { value: 'hidden_image_guess', label: 'Mở ô đoán hình', description: 'Ảnh được che bởi nhiều ô đen, học sinh mở dần rồi bấm mic để nói đáp án.' },
   { value: 'step_by_step', label: 'Làm theo từng bước', description: 'Chia nhiệm vụ thành các bước nhỏ để học sinh hoàn thành tuần tự.' },
   { value: 'aac', label: 'Thẻ giao tiếp', description: 'Tạo các thẻ để học sinh chọn ý muốn nói hoặc nhu cầu cần hỗ trợ.' },
   { value: 'career_simulation', label: 'Mô phỏng tình huống', description: 'Dùng cho các hoạt động vào vai hoặc thực hành tình huống thực tế.' },
@@ -82,6 +87,8 @@ function defaultInstructionForType(activityType: ActivityType) {
       return 'Hãy đọc câu hỏi và chọn đáp án đúng.'
     case 'image_choice':
       return 'Hãy nhìn kỹ hình ảnh rồi chọn đáp án đúng nhất.'
+    case 'image_puzzle':
+      return 'Hãy kéo từng mảnh ảnh vào đúng vị trí để ghép lại hình hoàn chỉnh.'
     case 'matching':
       return 'Hãy nối các cặp phù hợp với nhau.'
     case 'drag_drop':
@@ -90,6 +97,8 @@ function defaultInstructionForType(activityType: ActivityType) {
       return 'Hãy nghe kỹ rồi chọn đáp án đúng.'
     case 'watch_answer':
       return 'Hãy xem nội dung trước rồi trả lời câu hỏi.'
+    case 'hidden_image_guess':
+      return 'Hãy mở từng ô, đoán hình phía dưới rồi bấm mic để trả lời.'
     case 'step_by_step':
       return 'Hãy làm lần lượt từng bước theo hướng dẫn.'
     case 'aac':
@@ -104,7 +113,7 @@ function defaultInstructionForType(activityType: ActivityType) {
 }
 
 function defaultVoiceEnabledForType(activityType: ActivityType) {
-  return activityType === 'multiple_choice' || activityType === 'image_choice' || activityType === 'listen_choose' || activityType === 'aac' || activityType === 'ai_chat'
+  return activityType === 'multiple_choice' || activityType === 'image_choice' || activityType === 'listen_choose' || activityType === 'aac' || activityType === 'ai_chat' || activityType === 'hidden_image_guess'
 }
 
 function inferMediaKind(mediaUrl: string, mediaFile: File | null, source: MediaSource) {
@@ -115,9 +124,9 @@ function inferMediaKind(mediaUrl: string, mediaFile: File | null, source: MediaS
 
   const normalizedUrl = mediaUrl.trim().toLowerCase()
   if (!normalizedUrl) return ''
-  if (/\.(png|jpe?g|gif|webp)(\?.*)?$/.test(normalizedUrl)) return 'image'
+  if (/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/.test(normalizedUrl)) return 'image'
   if (/\.(mp4|webm|ogg|mov)(\?.*)?$/.test(normalizedUrl)) return 'video'
-  if (normalizedUrl.includes('youtube.com') || normalizedUrl.includes('youtu.be') || normalizedUrl.includes('drive.google.com')) return 'embed'
+  if (normalizedUrl.includes('youtube.com') || normalizedUrl.includes('youtu.be') || normalizedUrl.includes('drive.google.com') || normalizedUrl.includes('tiktok.com')) return 'embed'
   return 'external'
 }
 
@@ -129,6 +138,13 @@ function compactPairs(items: PairItem[]) {
   return items
     .map((item) => ({ left: item.left.trim(), right: item.right.trim() }))
     .filter((item) => item.left && item.right)
+}
+
+function compactFlexibleLines(rawValue: string) {
+  return rawValue
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean)
 }
 
 function ChoiceBuilder(props: {
@@ -269,6 +285,12 @@ export function LessonsPage() {
   const [imageChoiceFile, setImageChoiceFile] = useState<File | null>(null)
   const [imageChoiceOptions, setImageChoiceOptions] = useState<string[]>(createDefaultChoiceOptions())
   const [imageChoiceCorrectIndex, setImageChoiceCorrectIndex] = useState(0)
+  const [imagePuzzleSource, setImagePuzzleSource] = useState<MediaSource>('upload')
+  const [imagePuzzleUrl, setImagePuzzleUrl] = useState('')
+  const [imagePuzzleFile, setImagePuzzleFile] = useState<File | null>(null)
+  const [imagePuzzlePrompt, setImagePuzzlePrompt] = useState('Hãy ghép lại để thành hình con vật hoàn chỉnh.')
+  const [imagePuzzleRows, setImagePuzzleRows] = useState('2')
+  const [imagePuzzleCols, setImagePuzzleCols] = useState('3')
 
   const [matchingPairs, setMatchingPairs] = useState<PairItem[]>(createDefaultPairs())
   const [dragItems, setDragItems] = useState<string[]>(createDefaultList())
@@ -282,6 +304,17 @@ export function LessonsPage() {
   const [watchAnswerUrl, setWatchAnswerUrl] = useState('')
   const [watchAnswerFile, setWatchAnswerFile] = useState<File | null>(null)
   const [watchAnswerPrompt, setWatchAnswerPrompt] = useState('Sau khi xem xong, em thấy điều gì?')
+  const [watchAnswerMode, setWatchAnswerMode] = useState<WatchAnswerMode>('text')
+  const [watchAnswerExpectedAnswer, setWatchAnswerExpectedAnswer] = useState('')
+  const [watchAnswerAcceptedAnswers, setWatchAnswerAcceptedAnswers] = useState('')
+  const [hiddenGuessSource, setHiddenGuessSource] = useState<MediaSource>('upload')
+  const [hiddenGuessUrl, setHiddenGuessUrl] = useState('')
+  const [hiddenGuessFile, setHiddenGuessFile] = useState<File | null>(null)
+  const [hiddenGuessPrompt, setHiddenGuessPrompt] = useState('Trong bức ảnh này là con gì?')
+  const [hiddenGuessExpectedAnswer, setHiddenGuessExpectedAnswer] = useState('')
+  const [hiddenGuessAcceptedAnswers, setHiddenGuessAcceptedAnswers] = useState('')
+  const [hiddenGuessRows, setHiddenGuessRows] = useState('3')
+  const [hiddenGuessCols, setHiddenGuessCols] = useState('4')
 
   const [stepList, setStepList] = useState<string[]>(createDefaultList())
   const [aacCards, setAacCards] = useState<string[]>(createDefaultList())
@@ -383,6 +416,12 @@ export function LessonsPage() {
       if (imageChoiceSource === 'external' && !imageChoiceUrl.trim()) return 'Hãy nhập link hình ảnh cho hoạt động nhìn ảnh.'
     }
 
+    if (activityType === 'image_puzzle') {
+      if (!imagePuzzlePrompt.trim()) return 'Hãy nhập hướng dẫn cho hoạt động ghép mảnh ảnh.'
+      if (imagePuzzleSource === 'upload' && !imagePuzzleFile) return 'Hãy tải lên một hình ảnh để cắt thành mảnh ghép.'
+      if (imagePuzzleSource === 'external' && !imagePuzzleUrl.trim()) return 'Hãy nhập link hình ảnh cho hoạt động ghép mảnh ảnh.'
+    }
+
     if (activityType === 'matching' && compactPairs(matchingPairs).length < 2) {
       return 'Hãy nhập ít nhất 2 cặp nối.'
     }
@@ -396,6 +435,14 @@ export function LessonsPage() {
       if (!watchAnswerPrompt.trim()) return 'Hãy nhập câu hỏi sau khi xem.'
       if (watchAnswerSource === 'upload' && !watchAnswerFile) return 'Hãy chọn file ảnh hoặc video trước khi thêm hoạt động.'
       if (watchAnswerSource === 'external' && !watchAnswerUrl.trim()) return 'Hãy nhập link ảnh hoặc video trước khi thêm hoạt động.'
+      if (watchAnswerMode === 'voice_ai_grade' && !watchAnswerExpectedAnswer.trim()) return 'Hãy nhập đáp án mẫu để AI chấm câu trả lời bằng giọng nói.'
+    }
+
+    if (activityType === 'hidden_image_guess') {
+      if (!hiddenGuessPrompt.trim()) return 'Hãy nhập câu hỏi cho hoạt động mở ô đoán hình.'
+      if (hiddenGuessSource === 'upload' && !hiddenGuessFile) return 'Hãy tải lên một hình ảnh cho hoạt động mở ô đoán hình.'
+      if (hiddenGuessSource === 'external' && !hiddenGuessUrl.trim()) return 'Hãy nhập link hình ảnh cho hoạt động mở ô đoán hình.'
+      if (!hiddenGuessExpectedAnswer.trim()) return 'Hãy nhập đáp án mẫu để AI chấm phần nói của học sinh.'
     }
 
     if (activityType === 'step_by_step' && compactLines(stepList).length < 2) {
@@ -460,6 +507,30 @@ export function LessonsPage() {
       }
     }
 
+    if (activityType === 'image_puzzle') {
+      let mediaUrl = imagePuzzleUrl.trim()
+      let mediaKind = inferMediaKind(imagePuzzleUrl, imagePuzzleFile, imagePuzzleSource)
+
+      if (imagePuzzleSource === 'upload' && imagePuzzleFile) {
+        const uploadedMedia = await uploadLessonMedia(token!, imagePuzzleFile)
+        mediaUrl = uploadedMedia.url
+        mediaKind = uploadedMedia.media_kind
+      }
+
+      const rows = Math.max(1, Number(imagePuzzleRows) || 2)
+      const cols = Math.max(2, Number(imagePuzzleCols) || 3)
+
+      return {
+        kind: 'image_puzzle',
+        prompt: imagePuzzlePrompt.trim(),
+        image_url: mediaUrl,
+        image_kind: mediaKind || 'image',
+        rows,
+        cols,
+        piece_count: rows * cols,
+      }
+    }
+
     if (activityType === 'matching') {
       return {
         kind: 'matching',
@@ -492,6 +563,31 @@ export function LessonsPage() {
         media_url: mediaUrl,
         media_kind: mediaKind,
         prompt: watchAnswerPrompt.trim(),
+        answer_mode: watchAnswerMode,
+        expected_answer: watchAnswerMode === 'voice_ai_grade' ? watchAnswerExpectedAnswer.trim() : '',
+        accepted_answers: watchAnswerMode === 'voice_ai_grade' ? compactFlexibleLines(watchAnswerAcceptedAnswers) : [],
+      }
+    }
+
+    if (activityType === 'hidden_image_guess') {
+      let mediaUrl = hiddenGuessUrl.trim()
+      let mediaKind = inferMediaKind(hiddenGuessUrl, hiddenGuessFile, hiddenGuessSource)
+
+      if (hiddenGuessSource === 'upload' && hiddenGuessFile) {
+        const uploadedMedia = await uploadLessonMedia(token!, hiddenGuessFile)
+        mediaUrl = uploadedMedia.url
+        mediaKind = uploadedMedia.media_kind
+      }
+
+      return {
+        kind: 'hidden_image_guess',
+        prompt: hiddenGuessPrompt.trim(),
+        image_url: mediaUrl,
+        image_kind: mediaKind || 'image',
+        overlay_rows: Math.max(2, Number(hiddenGuessRows) || 3),
+        overlay_cols: Math.max(2, Number(hiddenGuessCols) || 4),
+        expected_answer: hiddenGuessExpectedAnswer.trim(),
+        accepted_answers: compactFlexibleLines(hiddenGuessAcceptedAnswers),
       }
     }
 
@@ -552,9 +648,22 @@ export function LessonsPage() {
         setImageChoiceFile(null)
         setImageChoiceUrl('')
       }
+      if (activityType === 'image_puzzle') {
+        setImagePuzzleFile(null)
+        setImagePuzzleUrl('')
+      }
       if (activityType === 'watch_answer') {
         setWatchAnswerFile(null)
         setWatchAnswerUrl('')
+        setWatchAnswerMode('text')
+        setWatchAnswerExpectedAnswer('')
+        setWatchAnswerAcceptedAnswers('')
+      }
+      if (activityType === 'hidden_image_guess') {
+        setHiddenGuessFile(null)
+        setHiddenGuessUrl('')
+        setHiddenGuessExpectedAnswer('')
+        setHiddenGuessAcceptedAnswers('')
       }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['lessons', token] }),
@@ -764,6 +873,52 @@ export function LessonsPage() {
                   </div>
                 ) : null}
 
+                {activityType === 'image_puzzle' ? (
+                  <div className="config-card detail-stack">
+                    <strong>3. Ảnh gốc để cắt thành mảnh ghép</strong>
+
+                    <label>
+                      Hướng dẫn hiện cho học sinh
+                      <input value={imagePuzzlePrompt} onChange={(event) => setImagePuzzlePrompt(event.target.value)} placeholder="Ví dụ: Hãy ghép lại thành hình con mèo." />
+                    </label>
+
+                    <label>
+                      Nguồn hình ảnh
+                      <select value={imagePuzzleSource} onChange={(event) => setImagePuzzleSource(event.target.value as MediaSource)}>
+                        <option value="upload">Tải ảnh từ máy</option>
+                        <option value="external">Dùng link ảnh</option>
+                      </select>
+                    </label>
+
+                    {imagePuzzleSource === 'upload' ? (
+                      <label>
+                        Chọn ảnh
+                        <input type="file" accept="image/*" onChange={(event) => setImagePuzzleFile(event.target.files?.[0] ?? null)} />
+                      </label>
+                    ) : (
+                      <label>
+                        Link ảnh
+                        <input value={imagePuzzleUrl} onChange={(event) => setImagePuzzleUrl(event.target.value)} placeholder="https://..." />
+                      </label>
+                    )}
+
+                    {imagePuzzleSource === 'upload' && imagePuzzleFile ? <p className="helper-text">Đã chọn ảnh: {imagePuzzleFile.name}</p> : null}
+
+                    <div className="builder-two-columns">
+                      <label>
+                        Số hàng mảnh ghép
+                        <input value={imagePuzzleRows} onChange={(event) => setImagePuzzleRows(event.target.value)} inputMode="numeric" />
+                      </label>
+                      <label>
+                        Số cột mảnh ghép
+                        <input value={imagePuzzleCols} onChange={(event) => setImagePuzzleCols(event.target.value)} inputMode="numeric" />
+                      </label>
+                    </div>
+
+                    <p className="helper-text">Gợi ý: để khoảng 5 đến 7 mảnh thì dùng 2 hàng x 3 cột hoặc 2 hàng x 4 cột.</p>
+                  </div>
+                ) : null}
+
                 {activityType === 'listen_choose' ? (
                   <ChoiceBuilder
                     promptLabel="3. Nội dung nghe"
@@ -840,6 +995,111 @@ export function LessonsPage() {
                       Câu hỏi sau khi xem
                       <input value={watchAnswerPrompt} onChange={(event) => setWatchAnswerPrompt(event.target.value)} placeholder="Ví dụ: Em thấy bạn nhỏ đang làm gì?" />
                     </label>
+
+                    <label>
+                      Cách học sinh trả lời
+                      <select
+                        value={watchAnswerMode}
+                        onChange={(event) => {
+                          const nextMode = event.target.value as WatchAnswerMode
+                          setWatchAnswerMode(nextMode)
+                          if (nextMode === 'voice_ai_grade') {
+                            setVoiceAnswerEnabled(true)
+                          }
+                        }}
+                      >
+                        <option value="text">Gõ câu trả lời ngắn</option>
+                        <option value="voice_ai_grade">Bấm mic, nhan giong noi, AI cham</option>
+                      </select>
+                    </label>
+
+                    {watchAnswerMode === 'voice_ai_grade' ? (
+                      <>
+                        <label>
+                          Đáp án mẫu
+                          <input
+                            value={watchAnswerExpectedAnswer}
+                            onChange={(event) => setWatchAnswerExpectedAnswer(event.target.value)}
+                            placeholder="Ví dụ: con mèo"
+                          />
+                        </label>
+
+                        <label>
+                          Đáp án chấp nhận thêm
+                          <textarea
+                            value={watchAnswerAcceptedAnswers}
+                            onChange={(event) => setWatchAnswerAcceptedAnswers(event.target.value)}
+                            rows={3}
+                            placeholder="Ví dụ: mèo, con meo, meo"
+                          />
+                        </label>
+
+                        <p className="helper-text">
+                          Khi học sinh bấm mic, transcript sẽ được gửi lên server để chấm với Gemini theo đáp án ở trên.
+                        </p>
+                      </>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {activityType === 'hidden_image_guess' ? (
+                  <div className="config-card detail-stack">
+                    <strong>3. Ảnh che ô và đáp án mẫu</strong>
+
+                    <label>
+                      Câu hỏi cho học sinh
+                      <input value={hiddenGuessPrompt} onChange={(event) => setHiddenGuessPrompt(event.target.value)} placeholder="Ví dụ: Trong bức ảnh này là con gì?" />
+                    </label>
+
+                    <label>
+                      Nguồn hình ảnh
+                      <select value={hiddenGuessSource} onChange={(event) => setHiddenGuessSource(event.target.value as MediaSource)}>
+                        <option value="upload">Tải ảnh từ máy</option>
+                        <option value="external">Dùng link ảnh</option>
+                      </select>
+                    </label>
+
+                    {hiddenGuessSource === 'upload' ? (
+                      <label>
+                        Chọn ảnh
+                        <input type="file" accept="image/*" onChange={(event) => setHiddenGuessFile(event.target.files?.[0] ?? null)} />
+                      </label>
+                    ) : (
+                      <label>
+                        Link ảnh
+                        <input value={hiddenGuessUrl} onChange={(event) => setHiddenGuessUrl(event.target.value)} placeholder="https://..." />
+                      </label>
+                    )}
+
+                    {hiddenGuessSource === 'upload' && hiddenGuessFile ? <p className="helper-text">Đã chọn ảnh: {hiddenGuessFile.name}</p> : null}
+
+                    <div className="builder-two-columns">
+                      <label>
+                        Số hàng ô che
+                        <input value={hiddenGuessRows} onChange={(event) => setHiddenGuessRows(event.target.value)} inputMode="numeric" />
+                      </label>
+                      <label>
+                        Số cột ô che
+                        <input value={hiddenGuessCols} onChange={(event) => setHiddenGuessCols(event.target.value)} inputMode="numeric" />
+                      </label>
+                    </div>
+
+                    <label>
+                      Đáp án mẫu
+                      <input value={hiddenGuessExpectedAnswer} onChange={(event) => setHiddenGuessExpectedAnswer(event.target.value)} placeholder="Ví dụ: con gấu" />
+                    </label>
+
+                    <label>
+                      Đáp án chấp nhận thêm
+                      <textarea
+                        value={hiddenGuessAcceptedAnswers}
+                        onChange={(event) => setHiddenGuessAcceptedAnswers(event.target.value)}
+                        rows={3}
+                        placeholder="Ví dụ: gấu, con gau, gau"
+                      />
+                    </label>
+
+                    <p className="helper-text">Học sinh sẽ mở từng ô đen rồi bấm mic để nói. Transcript sẽ được gửi lên AI để so với đáp án mẫu.</p>
                   </div>
                 ) : null}
 

@@ -10,12 +10,21 @@ from .base import TimestampMixin
 class Classroom(TimestampMixin, db.Model):
     __tablename__ = "classes"
 
+    UI_VARIANT_STANDARD = "standard"
+    UI_VARIANT_VISUAL_SUPPORT = "visual_support"
+    VISUAL_THEME_GARDEN = "garden"
+    VISUAL_THEME_OCEAN = "ocean"
+    VISUAL_THEME_COSMOS = "cosmos"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     teacher_id: Mapped[int] = mapped_column(ForeignKey("teacher_profiles.id"), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     grade_label: Mapped[str | None] = mapped_column(String(50), nullable=True)
     description: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     default_disability_level: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    ui_variant: Mapped[str] = mapped_column(String(30), nullable=False, default=UI_VARIANT_STANDARD)
+    visual_theme: Mapped[str] = mapped_column(String(30), nullable=False, default=VISUAL_THEME_GARDEN)
+    background_image_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     status: Mapped[str] = mapped_column(String(30), nullable=False, default="active")
 
     teacher = relationship("TeacherProfile", back_populates="classes")
@@ -31,6 +40,9 @@ class Classroom(TimestampMixin, db.Model):
             "grade_label": self.grade_label,
             "description": self.description,
             "default_disability_level": self.default_disability_level,
+            "ui_variant": self.ui_variant,
+            "visual_theme": self.visual_theme,
+            "background_image_url": self.background_image_url,
             "status": self.status,
             "student_count": len([item for item in self.students if item.status == "active"]),
             "subject_count": len([item for item in self.subjects if item.is_active]),

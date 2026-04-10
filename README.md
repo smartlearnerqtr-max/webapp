@@ -76,9 +76,28 @@ Project da co san file [render.yaml](d:/webapp/render.yaml).
 
 Luu y:
 
-- Backend start command dang chay `seed-base`, nhung gio chi bootstrap admin va mon hoc co ban, khong tao demo teacher/student/parent nua.
+- Backend start command dang chay `python init_and_seed.py && gunicorn ...`.
 - `ADMIN_EMAIL` va `ADMIN_PASSWORD` duoc doc tu env var de tao admin bootstrap.
+- `DATABASE_URL` tren Render duoc noi thang toi Render Postgres, nen du lieu se duoc giu lai sau moi lan deploy.
+- `SEED_PERSONA_DATA` da duoc tat trong `render.yaml` de tranh viec reset lai du lieu khong phai admin moi lan service khoi dong.
+- `SEED_VISUAL_SUPPORT_DEMO=true` se tao 1 bo demo on dinh cho giao dien visual support neu database chua co.
 - Health check backend dung `/api/v1/health`.
+
+### Tai khoan demo visual support
+
+Khi `SEED_VISUAL_SUPPORT_DEMO=true`, backend se dam bao co san:
+
+- teacher: `visual.teacher.demo@example.com`
+- student: `visual.student.demo@example.com`
+- class: `Lop Truc Quan Demo`
+- join password mac dinh: `VISUAL08`
+
+Mat khau teacher/student duoc lay tu env var:
+
+- `VISUAL_DEMO_TEACHER_PASSWORD`
+- `VISUAL_DEMO_STUDENT_PASSWORD`
+
+Neu khong set, backend se dung mat khau mac dinh trong code seed.
 
 ## Dua du lieu local hien tai len Render
 
@@ -101,3 +120,12 @@ Script nay se:
 - reset lai sequence ID tren Postgres sau khi copy
 
 Lay `External Database URL` trong dashboard database Render va gan vao `TARGET_DATABASE_URL` truoc khi chay.
+
+## Seed demo bang tay
+
+Neu can tao lai bo demo visual support o local hoac tren server:
+
+```powershell
+cd backend
+flask --app run.py seed-visual-demo
+```

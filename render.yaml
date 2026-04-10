@@ -21,9 +21,11 @@ services:
       - key: ADMIN_PASSWORD
         sync: false
       - key: SEED_PERSONA_DATA
-        value: "true"
+        value: "false"
       - key: SEED_PERSONA_RESET_NON_ADMIN
-        value: "true"
+        value: "false"
+      - key: SEED_VISUAL_SUPPORT_DEMO
+        value: "false"
       - key: GEMINI_MODEL_NAME
         value: gemini-2.5-flash
       - key: GEMINI_API_KEYS
