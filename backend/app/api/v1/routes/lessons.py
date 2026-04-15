@@ -55,7 +55,7 @@ def list_lessons():
     user, error = _require_teacher_user()
     if error:
         return error
-    query = Lesson.query.filter_by(created_by_teacher_id=user.teacher_profile.id)
+    query = Lesson.query.filter_by(created_by_teacher_id=user.teacher_profile.id, is_archived=False)
     if request.args.get('subject_id'):
         query = query.filter_by(subject_id=int(request.args['subject_id']))
     if request.args.get('primary_level'):

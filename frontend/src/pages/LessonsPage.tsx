@@ -1,14 +1,19 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Dispatch, FormEvent, SetStateAction } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { RequireAuth } from '../components/RequireAuth'
+import { ActivityCard } from '../components/activities/ActivityRenderer'
 import {
   createLesson,
   createLessonActivity,
+  deleteLessonActivity,
+  deleteLesson,
   fetchLesson,
   fetchLessons,
   fetchSubjects,
+  updateLesson,
+  updateLessonActivity,
   uploadLessonMedia,
 } from '../services/api'
 import { useAuthStore } from '../store/authStore'
@@ -42,18 +47,18 @@ const LEVEL_OPTIONS = [
 ]
 
 const ACTIVITY_TYPES: Array<{ value: ActivityType; label: string; description: string }> = [
-  { value: 'multiple_choice', label: 'Chọn đáp án', description: 'Tạo câu hỏi trắc nghiệm nhanh với 4 đáp án để giáo viên chọn đáp án đúng.' },
-  { value: 'image_choice', label: 'Nhìn ảnh chọn đáp án', description: 'Tải ảnh lên rồi đặt câu hỏi để học sinh nhìn ảnh và chọn 1 trong 4 đáp án.' },
-  { value: 'image_puzzle', label: 'Ghép mảnh ảnh', description: 'Giáo viên đưa 1 ảnh, hệ thống chia thành nhiều mảnh để học sinh kéo thả ghép lại.' },
-  { value: 'matching', label: 'Nối cặp', description: 'Dùng cho bài ghép khái niệm, ghép chữ với hình hoặc ghép đồ vật tương ứng.' },
-  { value: 'drag_drop', label: 'Kéo thả', description: 'Phù hợp với bài phân loại, sắp xếp đồ vật hoặc ghép mục vào đúng nhóm.' },
-  { value: 'listen_choose', label: 'Nghe và chọn', description: 'Giáo viên nhập câu đọc hoặc lời thoại ngắn, học sinh nghe và chọn đáp án.' },
-  { value: 'watch_answer', label: 'Xem rồi trả lời', description: 'Thêm ảnh hoặc video rồi cho học sinh trả lời ngắn sau khi quan sát.' },
-  { value: 'hidden_image_guess', label: 'Mở ô đoán hình', description: 'Ảnh được che bởi nhiều ô đen, học sinh mở dần rồi bấm mic để nói đáp án.' },
-  { value: 'step_by_step', label: 'Làm theo từng bước', description: 'Chia nhiệm vụ thành các bước nhỏ để học sinh hoàn thành tuần tự.' },
-  { value: 'aac', label: 'Thẻ giao tiếp', description: 'Tạo các thẻ để học sinh chọn ý muốn nói hoặc nhu cầu cần hỗ trợ.' },
-  { value: 'career_simulation', label: 'Mô phỏng tình huống', description: 'Dùng cho các hoạt động vào vai hoặc thực hành tình huống thực tế.' },
-  { value: 'ai_chat', label: 'Hỏi đáp với AI', description: 'Tạo cuộc hội thoại ngắn để học sinh luyện phản hồi hoặc giao tiếp.' },
+  { value: 'multiple_choice', label: 'Chọn đáp án', description: '4 đáp án' },
+  { value: 'image_choice', label: 'Nhìn ảnh chọn', description: 'Ảnh + đáp án' },
+  { value: 'image_puzzle', label: 'Ghép ảnh', description: 'Cắt mảnh' },
+  { value: 'matching', label: 'Nối cặp', description: 'Ghép đôi' },
+  { value: 'drag_drop', label: 'Kéo thả', description: 'Phân loại' },
+  { value: 'listen_choose', label: 'Nghe chọn', description: 'Audio ngắn' },
+  { value: 'watch_answer', label: 'Xem trả lời', description: 'Ảnh/video' },
+  { value: 'hidden_image_guess', label: 'Đoán hình', description: 'Mở ô' },
+  { value: 'step_by_step', label: 'Từng bước', description: 'Checklist' },
+  { value: 'aac', label: 'Thẻ chọn', description: 'Giao tiếp' },
+  { value: 'career_simulation', label: 'Tình huống', description: 'Đóng vai' },
+  { value: 'ai_chat', label: 'Chat AI', description: 'Hỏi đáp' },
 ]
 
 const CHOICE_SLOT_LABELS = ['A', 'B', 'C', 'D']
@@ -145,6 +150,97 @@ function compactFlexibleLines(rawValue: string) {
     .split(/\r?\n|,/)
     .map((item) => item.trim())
     .filter(Boolean)
+}
+
+type ActivityConfig = Record<string, unknown>
+
+function isImageUploadOnlyActivity(activityType: ActivityType) {
+  return activityType === 'image_choice' || activityType === 'image_puzzle' || activityType === 'hidden_image_guess'
+}
+
+function isSupportedMediaLink(rawValue: string) {
+  const normalizedValue = rawValue.trim().toLowerCase()
+  if (!normalizedValue) return false
+
+  return (
+    normalizedValue.includes('youtube.com') ||
+    normalizedValue.includes('youtu.be') ||
+    normalizedValue.includes('drive.google.com') ||
+    normalizedValue.includes('tiktok.com') ||
+    /\.(mp4|webm|ogg|mov)(\?.*)?$/.test(normalizedValue)
+  )
+}
+
+function parseConfigEditor(value: string): ActivityConfig {
+  const trimmedValue = value.trim()
+  if (!trimmedValue) return {}
+
+  const parsedValue = JSON.parse(trimmedValue)
+  if (!parsedValue || typeof parsedValue !== 'object' || Array.isArray(parsedValue)) {
+    throw new Error('Cấu hình phải là một object JSON.')
+  }
+
+  return parsedValue as ActivityConfig
+}
+
+function formatConfigEditor(config: ActivityConfig) {
+  return JSON.stringify(config, null, 2)
+}
+
+function normalizeConfigEditorText(configJson: string | null) {
+  if (!configJson?.trim()) return '{}'
+
+  try {
+    return formatConfigEditor(parseConfigEditor(configJson))
+  } catch {
+    return configJson
+  }
+}
+
+function extractEditablePrompt(activityType: ActivityType, config: ActivityConfig, fallback = '') {
+  if (typeof config.prompt === 'string') return config.prompt
+  if (activityType === 'career_simulation' && typeof config.scenario === 'string') return config.scenario
+  if (activityType === 'ai_chat' && typeof config.starter_prompt === 'string') return config.starter_prompt
+  return fallback
+}
+
+function writeEditablePrompt(activityType: ActivityType, config: ActivityConfig, nextPrompt: string) {
+  const nextConfig = { ...config }
+  if (activityType === 'career_simulation') {
+    nextConfig.scenario = nextPrompt
+    return nextConfig
+  }
+  if (activityType === 'ai_chat') {
+    nextConfig.starter_prompt = nextPrompt
+    return nextConfig
+  }
+  nextConfig.prompt = nextPrompt
+  return nextConfig
+}
+
+function extractEditableMediaUrl(config: ActivityConfig) {
+  if (typeof config.media_url === 'string') return config.media_url
+  if (typeof config.image_url === 'string') return config.image_url
+  if (typeof config.audio_url === 'string') return config.audio_url
+  return ''
+}
+
+function writeEditableMediaUrl(activityType: ActivityType, config: ActivityConfig, nextMediaUrl: string) {
+  const nextConfig = { ...config }
+  const mediaKey =
+    Object.prototype.hasOwnProperty.call(nextConfig, 'image_url') || activityType === 'image_puzzle' || activityType === 'hidden_image_guess'
+      ? 'image_url'
+      : Object.prototype.hasOwnProperty.call(nextConfig, 'audio_url') && !Object.prototype.hasOwnProperty.call(nextConfig, 'media_url')
+        ? 'audio_url'
+        : 'media_url'
+
+  if (nextMediaUrl.trim()) {
+    nextConfig[mediaKey] = nextMediaUrl.trim()
+  } else {
+    delete nextConfig[mediaKey]
+  }
+
+  return nextConfig
 }
 
 function ChoiceBuilder(props: {
@@ -267,6 +363,26 @@ export function LessonsPage() {
   const [primaryLevel, setPrimaryLevel] = useState('trung_binh')
   const [estimatedMinutes, setEstimatedMinutes] = useState('15')
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editSubjectId, setEditSubjectId] = useState('')
+  const [editPrimaryLevel, setEditPrimaryLevel] = useState('trung_binh')
+  const [editEstimatedMinutes, setEditEstimatedMinutes] = useState('15')
+  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
+  const [editActivityTitle, setEditActivityTitle] = useState('')
+  const [editActivityInstruction, setEditActivityInstruction] = useState('')
+  const [editActivityPrompt, setEditActivityPrompt] = useState('')
+  const [editActivityMediaUrl, setEditActivityMediaUrl] = useState('')
+  const [editActivityMediaSource, setEditActivityMediaSource] = useState<MediaSource>('upload')
+  const [editActivityMediaUploadPending, setEditActivityMediaUploadPending] = useState(false)
+  const [editActivityConfigJson, setEditActivityConfigJson] = useState('{}')
+  const [activityEditorError, setActivityEditorError] = useState<string | null>(null)
+  const [previewChoiceAnswers, setPreviewChoiceAnswers] = useState<Record<number, string>>({})
+  const [previewTextAnswers, setPreviewTextAnswers] = useState<Record<number, string>>({})
+  const [previewMatchingAnswers, setPreviewMatchingAnswers] = useState<Record<number, string[]>>({})
+  const [previewDragAnswers, setPreviewDragAnswers] = useState<Record<number, string[]>>({})
+  const [previewStepAnswers, setPreviewStepAnswers] = useState<Record<number, boolean[]>>({})
+  const [previewAacSelections, setPreviewAacSelections] = useState<Record<number, string>>({})
 
   const [activityTitle, setActivityTitle] = useState('')
   const [activityType, setActivityType] = useState<ActivityType>('multiple_choice')
@@ -280,13 +396,9 @@ export function LessonsPage() {
   const [correctChoiceIndex, setCorrectChoiceIndex] = useState(0)
 
   const [imageChoicePrompt, setImageChoicePrompt] = useState('Bạn nhìn thấy gì trong tấm ảnh này?')
-  const [imageChoiceSource, setImageChoiceSource] = useState<MediaSource>('upload')
-  const [imageChoiceUrl, setImageChoiceUrl] = useState('')
   const [imageChoiceFile, setImageChoiceFile] = useState<File | null>(null)
   const [imageChoiceOptions, setImageChoiceOptions] = useState<string[]>(createDefaultChoiceOptions())
   const [imageChoiceCorrectIndex, setImageChoiceCorrectIndex] = useState(0)
-  const [imagePuzzleSource, setImagePuzzleSource] = useState<MediaSource>('upload')
-  const [imagePuzzleUrl, setImagePuzzleUrl] = useState('')
   const [imagePuzzleFile, setImagePuzzleFile] = useState<File | null>(null)
   const [imagePuzzlePrompt, setImagePuzzlePrompt] = useState('Hãy ghép lại để thành hình con vật hoàn chỉnh.')
   const [imagePuzzleRows, setImagePuzzleRows] = useState('2')
@@ -307,8 +419,6 @@ export function LessonsPage() {
   const [watchAnswerMode, setWatchAnswerMode] = useState<WatchAnswerMode>('text')
   const [watchAnswerExpectedAnswer, setWatchAnswerExpectedAnswer] = useState('')
   const [watchAnswerAcceptedAnswers, setWatchAnswerAcceptedAnswers] = useState('')
-  const [hiddenGuessSource, setHiddenGuessSource] = useState<MediaSource>('upload')
-  const [hiddenGuessUrl, setHiddenGuessUrl] = useState('')
   const [hiddenGuessFile, setHiddenGuessFile] = useState<File | null>(null)
   const [hiddenGuessPrompt, setHiddenGuessPrompt] = useState('Trong bức ảnh này là con gì?')
   const [hiddenGuessExpectedAnswer, setHiddenGuessExpectedAnswer] = useState('')
@@ -347,8 +457,83 @@ export function LessonsPage() {
     () => lessonsQuery.data?.find((lesson) => lesson.id === resolvedSelectedLessonId) ?? null,
     [lessonsQuery.data, resolvedSelectedLessonId],
   )
+  const lessonActivities = lessonDetailQuery.data?.activities ?? []
+  const resolvedSelectedActivityId = selectedActivityId ?? lessonActivities[0]?.id ?? null
+  const selectedActivity = useMemo(
+    () => lessonActivities.find((activity) => activity.id === resolvedSelectedActivityId) ?? null,
+    [lessonActivities, resolvedSelectedActivityId],
+  )
+  const editablePreviewActivity = useMemo(
+    () =>
+      selectedActivity
+        ? {
+            ...selectedActivity,
+            title: editActivityTitle || selectedActivity.title,
+            instruction_text: editActivityInstruction,
+            config_json: editActivityConfigJson,
+          }
+        : null,
+    [editActivityConfigJson, editActivityInstruction, editActivityTitle, selectedActivity],
+  )
 
   const currentActivityDescription = ACTIVITY_TYPES.find((option) => option.value === activityType)?.description ?? ''
+
+  useEffect(() => {
+    if (!selectedLesson) return
+    setEditTitle(selectedLesson.title)
+    setEditDescription(selectedLesson.description ?? '')
+    setEditSubjectId(String(selectedLesson.subject_id))
+    setEditPrimaryLevel(selectedLesson.primary_level)
+    setEditEstimatedMinutes(String(selectedLesson.estimated_minutes ?? 15))
+  }, [selectedLesson])
+
+  useEffect(() => {
+    if (!lessonActivities.length) {
+      if (selectedActivityId !== null) {
+        setSelectedActivityId(null)
+      }
+      return
+    }
+
+    if (!lessonActivities.some((activity) => activity.id === resolvedSelectedActivityId)) {
+      setSelectedActivityId(lessonActivities[0].id)
+    }
+  }, [lessonActivities, resolvedSelectedActivityId, selectedActivityId])
+
+  useEffect(() => {
+    if (!selectedActivity) {
+      setEditActivityTitle('')
+      setEditActivityInstruction('')
+      setEditActivityPrompt('')
+      setEditActivityMediaUrl('')
+      setEditActivityMediaSource('upload')
+      setEditActivityConfigJson('{}')
+      setActivityEditorError(null)
+      return
+    }
+
+    const activityTypeValue = selectedActivity.activity_type as ActivityType
+    const configText = normalizeConfigEditorText(selectedActivity.config_json)
+    setEditActivityTitle(selectedActivity.title)
+    setEditActivityInstruction(selectedActivity.instruction_text ?? '')
+    setEditActivityConfigJson(configText)
+
+    try {
+      const config = parseConfigEditor(configText)
+      setEditActivityPrompt(extractEditablePrompt(activityTypeValue, config, selectedActivity.instruction_text ?? ''))
+      const nextMediaUrl = extractEditableMediaUrl(config)
+      setEditActivityMediaUrl(nextMediaUrl)
+      setEditActivityMediaSource(
+        activityTypeValue === 'watch_answer' && isSupportedMediaLink(nextMediaUrl) ? 'external' : 'upload',
+      )
+      setActivityEditorError(null)
+    } catch {
+      setEditActivityPrompt(selectedActivity.instruction_text ?? '')
+      setEditActivityMediaUrl('')
+      setEditActivityMediaSource('upload')
+      setActivityEditorError('JSON của hoạt động này chưa hợp lệ.')
+    }
+  }, [selectedActivity])
 
   const createLessonMutation = useMutation({
     mutationFn: () =>
@@ -367,6 +552,84 @@ export function LessonsPage() {
       setEstimatedMinutes('15')
       await queryClient.invalidateQueries({ queryKey: ['lessons', token] })
       setSelectedLessonId(createdLesson.id)
+    },
+  })
+
+  const updateLessonMutation = useMutation({
+    mutationFn: () =>
+      updateLesson(token!, resolvedSelectedLessonId!, {
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        subject_id: Number(editSubjectId || resolvedSubjectId),
+        primary_level: editPrimaryLevel,
+        estimated_minutes: Number(editEstimatedMinutes || 15),
+        is_published: true,
+      }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['lessons', token] }),
+        queryClient.invalidateQueries({ queryKey: ['lesson-detail', token, resolvedSelectedLessonId] }),
+      ])
+    },
+  })
+
+  const deleteLessonMutation = useMutation({
+    mutationFn: () => deleteLesson(token!, resolvedSelectedLessonId!),
+    onSuccess: async () => {
+      setSelectedLessonId(null)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['lessons', token] }),
+        queryClient.invalidateQueries({ queryKey: ['lesson-detail', token] }),
+      ])
+    },
+  })
+
+  const updateActivityMutation = useMutation({
+    mutationFn: async () => {
+      const parsedConfig = parseConfigEditor(editActivityConfigJson)
+      if (
+        selectedActivity?.activity_type === 'watch_answer' &&
+        editActivityMediaSource === 'external' &&
+        editActivityMediaUrl.trim() &&
+        !isSupportedMediaLink(editActivityMediaUrl)
+      ) {
+        throw new Error('Link video chỉ nên dùng YouTube, TikTok, Google Drive hoặc file video trực tiếp.')
+      }
+
+      return updateLessonActivity(token!, resolvedSelectedActivityId!, {
+        title: editActivityTitle.trim(),
+        activity_type: selectedActivity?.activity_type,
+        instruction_text: editActivityInstruction.trim(),
+        voice_answer_enabled: selectedActivity?.voice_answer_enabled ?? false,
+        is_required: selectedActivity?.is_required ?? true,
+        sort_order: selectedActivity?.sort_order ?? 1,
+        difficulty_stage: selectedActivity?.difficulty_stage ?? 1,
+        config_json: JSON.stringify(parsedConfig),
+      })
+    },
+    onSuccess: async () => {
+      setActivityEditorError(null)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['lessons', token] }),
+        queryClient.invalidateQueries({ queryKey: ['lesson-detail', token, resolvedSelectedLessonId] }),
+      ])
+    },
+    onError: (error) => {
+      setActivityEditorError(error instanceof Error ? error.message : 'Không thể lưu hoạt động.')
+    },
+  })
+
+  const deleteActivityMutation = useMutation({
+    mutationFn: () => deleteLessonActivity(token!, resolvedSelectedActivityId!),
+    onSuccess: async () => {
+      setSelectedActivityId(null)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['lessons', token] }),
+        queryClient.invalidateQueries({ queryKey: ['lesson-detail', token, resolvedSelectedLessonId] }),
+      ])
+    },
+    onError: (error) => {
+      setActivityEditorError(error instanceof Error ? error.message : 'Không thể xóa hoạt động.')
     },
   })
 
@@ -392,6 +655,76 @@ export function LessonsPage() {
     setter((current) => current.map((item, itemIndex) => (itemIndex === index ? value : item)))
   }
 
+  function handleActivityPromptChange(nextValue: string) {
+    setEditActivityPrompt(nextValue)
+    if (!selectedActivity) return
+
+    try {
+      const parsedConfig = parseConfigEditor(editActivityConfigJson)
+      const nextConfig = writeEditablePrompt(selectedActivity.activity_type as ActivityType, parsedConfig, nextValue)
+      setEditActivityConfigJson(formatConfigEditor(nextConfig))
+      setActivityEditorError(null)
+    } catch {
+      setActivityEditorError('JSON chưa hợp lệ. Sửa lại trước khi lưu.')
+    }
+  }
+
+  function handleActivityMediaUrlChange(nextValue: string) {
+    setEditActivityMediaUrl(nextValue)
+    if (!selectedActivity) return
+
+    try {
+      const parsedConfig = parseConfigEditor(editActivityConfigJson)
+      const nextConfig = writeEditableMediaUrl(selectedActivity.activity_type as ActivityType, parsedConfig, nextValue)
+      setEditActivityConfigJson(formatConfigEditor(nextConfig))
+      setActivityEditorError(null)
+    } catch {
+      setActivityEditorError('JSON chưa hợp lệ. Sửa lại trước khi lưu.')
+    }
+  }
+
+  async function handleActivityMediaFileChange(file: File | null) {
+    if (!selectedActivity || !file || !token) return
+
+    const activityTypeValue = selectedActivity.activity_type as ActivityType
+    const onlyImageUpload = isImageUploadOnlyActivity(activityTypeValue)
+
+    if (onlyImageUpload && !file.type.startsWith('image/')) {
+      setActivityEditorError('Hoạt động này chỉ nhận ảnh tải từ máy.')
+      return
+    }
+
+    if (activityTypeValue === 'watch_answer' && !file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      setActivityEditorError('Chỉ có thể tải ảnh hoặc video từ máy.')
+      return
+    }
+
+    setEditActivityMediaUploadPending(true)
+    setActivityEditorError(null)
+
+    try {
+      const uploadedMedia = await uploadLessonMedia(token, file)
+      const parsedConfig = parseConfigEditor(editActivityConfigJson)
+      const nextConfig = writeEditableMediaUrl(activityTypeValue, parsedConfig, uploadedMedia.url)
+
+      if (activityTypeValue === 'image_choice' || activityTypeValue === 'watch_answer') {
+        nextConfig.media_kind = uploadedMedia.media_kind
+      }
+
+      if (activityTypeValue === 'image_puzzle' || activityTypeValue === 'hidden_image_guess') {
+        nextConfig.image_kind = uploadedMedia.media_kind
+      }
+
+      setEditActivityMediaSource('upload')
+      setEditActivityMediaUrl(uploadedMedia.url)
+      setEditActivityConfigJson(formatConfigEditor(nextConfig))
+    } catch (error) {
+      setActivityEditorError(error instanceof Error ? error.message : 'Không thể tải media lên.')
+    } finally {
+      setEditActivityMediaUploadPending(false)
+    }
+  }
+
   function validateActivityForm() {
     if (!resolvedSelectedLessonId) return 'Hãy chọn bài học trước khi thêm hoạt động.'
 
@@ -412,14 +745,12 @@ export function LessonsPage() {
     if (activityType === 'image_choice') {
       if (!imageChoicePrompt.trim()) return 'Hãy nhập câu hỏi cho hoạt động nhìn ảnh.'
       if (imageChoiceOptions.some((option) => !option.trim())) return 'Hãy điền đủ 4 đáp án gợi ý cho hoạt động nhìn ảnh.'
-      if (imageChoiceSource === 'upload' && !imageChoiceFile) return 'Hãy tải lên một hình ảnh cho hoạt động nhìn ảnh.'
-      if (imageChoiceSource === 'external' && !imageChoiceUrl.trim()) return 'Hãy nhập link hình ảnh cho hoạt động nhìn ảnh.'
+      if (!imageChoiceFile) return 'Hãy tải lên một hình ảnh cho hoạt động nhìn ảnh.'
     }
 
     if (activityType === 'image_puzzle') {
       if (!imagePuzzlePrompt.trim()) return 'Hãy nhập hướng dẫn cho hoạt động ghép mảnh ảnh.'
-      if (imagePuzzleSource === 'upload' && !imagePuzzleFile) return 'Hãy tải lên một hình ảnh để cắt thành mảnh ghép.'
-      if (imagePuzzleSource === 'external' && !imagePuzzleUrl.trim()) return 'Hãy nhập link hình ảnh cho hoạt động ghép mảnh ảnh.'
+      if (!imagePuzzleFile) return 'Hãy tải lên một hình ảnh để cắt thành mảnh ghép.'
     }
 
     if (activityType === 'matching' && compactPairs(matchingPairs).length < 2) {
@@ -433,15 +764,17 @@ export function LessonsPage() {
 
     if (activityType === 'watch_answer') {
       if (!watchAnswerPrompt.trim()) return 'Hãy nhập câu hỏi sau khi xem.'
-      if (watchAnswerSource === 'upload' && !watchAnswerFile) return 'Hãy chọn file ảnh hoặc video trước khi thêm hoạt động.'
-      if (watchAnswerSource === 'external' && !watchAnswerUrl.trim()) return 'Hãy nhập link ảnh hoặc video trước khi thêm hoạt động.'
+      if (watchAnswerSource === 'upload' && !watchAnswerFile) return 'Hãy chọn ảnh hoặc video từ máy trước khi thêm hoạt động.'
+      if (watchAnswerSource === 'external' && !watchAnswerUrl.trim()) return 'Hãy nhập link video trước khi thêm hoạt động.'
+      if (watchAnswerSource === 'external' && !isSupportedMediaLink(watchAnswerUrl)) {
+        return 'Link video chỉ nên dùng YouTube, TikTok, Google Drive hoặc file video trực tiếp.'
+      }
       if (watchAnswerMode === 'voice_ai_grade' && !watchAnswerExpectedAnswer.trim()) return 'Hãy nhập đáp án mẫu để AI chấm câu trả lời bằng giọng nói.'
     }
 
     if (activityType === 'hidden_image_guess') {
       if (!hiddenGuessPrompt.trim()) return 'Hãy nhập câu hỏi cho hoạt động mở ô đoán hình.'
-      if (hiddenGuessSource === 'upload' && !hiddenGuessFile) return 'Hãy tải lên một hình ảnh cho hoạt động mở ô đoán hình.'
-      if (hiddenGuessSource === 'external' && !hiddenGuessUrl.trim()) return 'Hãy nhập link hình ảnh cho hoạt động mở ô đoán hình.'
+      if (!hiddenGuessFile) return 'Hãy tải lên một hình ảnh cho hoạt động mở ô đoán hình.'
       if (!hiddenGuessExpectedAnswer.trim()) return 'Hãy nhập đáp án mẫu để AI chấm phần nói của học sinh.'
     }
 
@@ -487,20 +820,13 @@ export function LessonsPage() {
     }
 
     if (activityType === 'image_choice') {
-      let mediaUrl = imageChoiceUrl.trim()
-      let mediaKind = inferMediaKind(imageChoiceUrl, imageChoiceFile, imageChoiceSource)
-
-      if (imageChoiceSource === 'upload' && imageChoiceFile) {
-        const uploadedMedia = await uploadLessonMedia(token!, imageChoiceFile)
-        mediaUrl = uploadedMedia.url
-        mediaKind = uploadedMedia.media_kind
-      }
+      const uploadedMedia = await uploadLessonMedia(token!, imageChoiceFile!)
 
       const choices = imageChoiceOptions.map((option) => option.trim())
       return {
         kind: 'image_choice',
-        media_url: mediaUrl,
-        media_kind: mediaKind || 'image',
+        media_url: uploadedMedia.url,
+        media_kind: uploadedMedia.media_kind || 'image',
         prompt: imageChoicePrompt.trim(),
         choices,
         correct: choices[imageChoiceCorrectIndex] ?? choices[0] ?? '',
@@ -508,14 +834,7 @@ export function LessonsPage() {
     }
 
     if (activityType === 'image_puzzle') {
-      let mediaUrl = imagePuzzleUrl.trim()
-      let mediaKind = inferMediaKind(imagePuzzleUrl, imagePuzzleFile, imagePuzzleSource)
-
-      if (imagePuzzleSource === 'upload' && imagePuzzleFile) {
-        const uploadedMedia = await uploadLessonMedia(token!, imagePuzzleFile)
-        mediaUrl = uploadedMedia.url
-        mediaKind = uploadedMedia.media_kind
-      }
+      const uploadedMedia = await uploadLessonMedia(token!, imagePuzzleFile!)
 
       const rows = Math.max(1, Number(imagePuzzleRows) || 2)
       const cols = Math.max(2, Number(imagePuzzleCols) || 3)
@@ -523,8 +842,8 @@ export function LessonsPage() {
       return {
         kind: 'image_puzzle',
         prompt: imagePuzzlePrompt.trim(),
-        image_url: mediaUrl,
-        image_kind: mediaKind || 'image',
+        image_url: uploadedMedia.url,
+        image_kind: uploadedMedia.media_kind || 'image',
         rows,
         cols,
         piece_count: rows * cols,
@@ -570,20 +889,13 @@ export function LessonsPage() {
     }
 
     if (activityType === 'hidden_image_guess') {
-      let mediaUrl = hiddenGuessUrl.trim()
-      let mediaKind = inferMediaKind(hiddenGuessUrl, hiddenGuessFile, hiddenGuessSource)
-
-      if (hiddenGuessSource === 'upload' && hiddenGuessFile) {
-        const uploadedMedia = await uploadLessonMedia(token!, hiddenGuessFile)
-        mediaUrl = uploadedMedia.url
-        mediaKind = uploadedMedia.media_kind
-      }
+      const uploadedMedia = await uploadLessonMedia(token!, hiddenGuessFile!)
 
       return {
         kind: 'hidden_image_guess',
         prompt: hiddenGuessPrompt.trim(),
-        image_url: mediaUrl,
-        image_kind: mediaKind || 'image',
+        image_url: uploadedMedia.url,
+        image_kind: uploadedMedia.media_kind || 'image',
         overlay_rows: Math.max(2, Number(hiddenGuessRows) || 3),
         overlay_cols: Math.max(2, Number(hiddenGuessCols) || 4),
         expected_answer: hiddenGuessExpectedAnswer.trim(),
@@ -646,11 +958,9 @@ export function LessonsPage() {
       setActivityFormError(null)
       if (activityType === 'image_choice') {
         setImageChoiceFile(null)
-        setImageChoiceUrl('')
       }
       if (activityType === 'image_puzzle') {
         setImagePuzzleFile(null)
-        setImagePuzzleUrl('')
       }
       if (activityType === 'watch_answer') {
         setWatchAnswerFile(null)
@@ -661,7 +971,6 @@ export function LessonsPage() {
       }
       if (activityType === 'hidden_image_guess') {
         setHiddenGuessFile(null)
-        setHiddenGuessUrl('')
         setHiddenGuessExpectedAnswer('')
         setHiddenGuessAcceptedAnswers('')
       }
@@ -697,18 +1006,51 @@ export function LessonsPage() {
 
   return (
     <RequireAuth allowedRoles={['teacher']}>
-      <div className="page-stack">
-        <section className="roadmap-panel">
-          <h2>Tạo bài học và thêm hoạt động</h2>
-          <p>
-            Form này được làm lại theo cách giáo viên dễ dùng hơn: mỗi loại hoạt động có ô nhập riêng, rõ từng bước và
-            không cần suy nghĩ theo kiểu cấu hình kỹ thuật.
-          </p>
+      <div className="page-stack teacher-clean-page">
+        <section className="roadmap-panel teacher-clean-hero">
+          <div>
+            <p className="eyebrow">Bài học</p>
+            <h2>Tạo bài, thêm hoạt động</h2>
+            <p>Giữ form sâu khi cần, còn phần chọn và xem nhanh được rút gọn.</p>
+          </div>
+          <div className="teacher-clean-hero-badges">
+            <span>{lessonsQuery.data?.length ?? 0} bài</span>
+            <span>{subjectsQuery.data?.length ?? 0} môn</span>
+            <span>{lessonDetailQuery.data?.activities?.length ?? 0} hoạt động</span>
+          </div>
+        </section>
+
+        <section className="teacher-clean-metrics">
+          <article className="mini-card teacher-clean-metric teacher-clean-metric-blue">
+            <span>Bài học</span>
+            <strong>{lessonsQuery.data?.length ?? 0}</strong>
+          </article>
+          <article className="mini-card teacher-clean-metric teacher-clean-metric-green">
+            <span>Hoạt động</span>
+            <strong>{lessonDetailQuery.data?.activities?.length ?? 0}</strong>
+          </article>
+          <article className="mini-card teacher-clean-metric teacher-clean-metric-gold">
+            <span>Môn</span>
+            <strong>{subjectsQuery.data?.length ?? 0}</strong>
+          </article>
+          <article className="mini-card teacher-clean-metric teacher-clean-metric-coral">
+            <span>Loại đang chọn</span>
+            <strong>{activityLabel(activityType)}</strong>
+          </article>
+          <article className="mini-card teacher-clean-metric teacher-clean-metric-ink">
+            <span>Mức</span>
+            <strong>{levelLabel(primaryLevel)}</strong>
+          </article>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tạo bài học mới</h3>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Tạo mới</p>
+                <h3>Bài học</h3>
+              </div>
+            </div>
             <form className="form-stack" onSubmit={handleLessonSubmit}>
               <label>
                 Tên bài học
@@ -759,7 +1101,12 @@ export function LessonsPage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chọn bài học đang sửa</h3>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Danh sách</p>
+                <h3>Chọn bài</h3>
+              </div>
+            </div>
             <div className="tag-wrap">
               {lessonsQuery.data?.map((lesson) => (
                 <button
@@ -779,14 +1126,14 @@ export function LessonsPage() {
         <section className="dashboard-grid">
           <article className="roadmap-panel">
             <button type="button" onClick={() => setIsActivityFormOpen((current) => !current)} className="simple-toggle-button">
-              <span>Thêm hoạt động vào bài học</span>
+              <span>Thêm hoạt động</span>
               <span>{isActivityFormOpen ? 'Ẩn bớt' : 'Mở nhanh'}</span>
             </button>
 
             {isActivityFormOpen ? (
               <form className="form-stack" onSubmit={handleActivitySubmit}>
                 <div className="detail-stack">
-                  <strong>1. Chọn loại hoạt động</strong>
+                  <strong>1. Chọn loại</strong>
                   <div className="builder-type-grid">
                     {ACTIVITY_TYPES.map((option) => (
                       <button
@@ -838,26 +1185,11 @@ export function LessonsPage() {
                     </label>
 
                     <label>
-                      Nguồn hình ảnh
-                      <select value={imageChoiceSource} onChange={(event) => setImageChoiceSource(event.target.value as MediaSource)}>
-                        <option value="upload">Tải ảnh từ máy</option>
-                        <option value="external">Dùng link ảnh</option>
-                      </select>
+                      Chọn ảnh từ máy
+                      <input type="file" accept="image/*" onChange={(event) => setImageChoiceFile(event.target.files?.[0] ?? null)} />
                     </label>
 
-                    {imageChoiceSource === 'upload' ? (
-                      <label>
-                        Chọn ảnh
-                        <input type="file" accept="image/*" onChange={(event) => setImageChoiceFile(event.target.files?.[0] ?? null)} />
-                      </label>
-                    ) : (
-                      <label>
-                        Link ảnh
-                        <input value={imageChoiceUrl} onChange={(event) => setImageChoiceUrl(event.target.value)} placeholder="https://..." />
-                      </label>
-                    )}
-
-                    {imageChoiceSource === 'upload' && imageChoiceFile ? <p className="helper-text">Đã chọn ảnh: {imageChoiceFile.name}</p> : null}
+                    {imageChoiceFile ? <p className="helper-text">Đã chọn ảnh: {imageChoiceFile.name}</p> : null}
 
                     <ChoiceBuilder
                       promptLabel="4. 4 đáp án gợi ý"
@@ -883,26 +1215,11 @@ export function LessonsPage() {
                     </label>
 
                     <label>
-                      Nguồn hình ảnh
-                      <select value={imagePuzzleSource} onChange={(event) => setImagePuzzleSource(event.target.value as MediaSource)}>
-                        <option value="upload">Tải ảnh từ máy</option>
-                        <option value="external">Dùng link ảnh</option>
-                      </select>
+                      Chọn ảnh từ máy
+                      <input type="file" accept="image/*" onChange={(event) => setImagePuzzleFile(event.target.files?.[0] ?? null)} />
                     </label>
 
-                    {imagePuzzleSource === 'upload' ? (
-                      <label>
-                        Chọn ảnh
-                        <input type="file" accept="image/*" onChange={(event) => setImagePuzzleFile(event.target.files?.[0] ?? null)} />
-                      </label>
-                    ) : (
-                      <label>
-                        Link ảnh
-                        <input value={imagePuzzleUrl} onChange={(event) => setImagePuzzleUrl(event.target.value)} placeholder="https://..." />
-                      </label>
-                    )}
-
-                    {imagePuzzleSource === 'upload' && imagePuzzleFile ? <p className="helper-text">Đã chọn ảnh: {imagePuzzleFile.name}</p> : null}
+                    {imagePuzzleFile ? <p className="helper-text">Đã chọn ảnh: {imagePuzzleFile.name}</p> : null}
 
                     <div className="builder-two-columns">
                       <label>
@@ -970,26 +1287,27 @@ export function LessonsPage() {
                   <div className="config-card detail-stack">
                     <strong>3. Nội dung để học sinh xem</strong>
                     <label>
-                      Nguồn media
+                      Nguồn video
                       <select value={watchAnswerSource} onChange={(event) => setWatchAnswerSource(event.target.value as MediaSource)}>
-                        <option value="external">Nhập link ngoài</option>
-                        <option value="upload">Tải file từ máy</option>
+                        <option value="external">Dán link video</option>
+                        <option value="upload">Tải ảnh hoặc video từ máy</option>
                       </select>
                     </label>
 
                     {watchAnswerSource === 'upload' ? (
                       <label>
-                        Chọn ảnh hoặc video
+                        Chọn ảnh hoặc video từ máy
                         <input type="file" accept="image/*,video/*" onChange={(event) => setWatchAnswerFile(event.target.files?.[0] ?? null)} />
                       </label>
                     ) : (
                       <label>
-                        Link ảnh hoặc video
-                        <input value={watchAnswerUrl} onChange={(event) => setWatchAnswerUrl(event.target.value)} placeholder="https://..." />
+                        Link video
+                        <input value={watchAnswerUrl} onChange={(event) => setWatchAnswerUrl(event.target.value)} placeholder="YouTube / TikTok / Google Drive" />
                       </label>
                     )}
 
                     {watchAnswerSource === 'upload' && watchAnswerFile ? <p className="helper-text">Đã chọn file: {watchAnswerFile.name}</p> : null}
+                    {watchAnswerSource === 'external' ? <p className="helper-text">Dùng link YouTube, TikTok, Google Drive hoặc file video trực tiếp.</p> : null}
 
                     <label>
                       Câu hỏi sau khi xem
@@ -1052,26 +1370,11 @@ export function LessonsPage() {
                     </label>
 
                     <label>
-                      Nguồn hình ảnh
-                      <select value={hiddenGuessSource} onChange={(event) => setHiddenGuessSource(event.target.value as MediaSource)}>
-                        <option value="upload">Tải ảnh từ máy</option>
-                        <option value="external">Dùng link ảnh</option>
-                      </select>
+                      Chọn ảnh từ máy
+                      <input type="file" accept="image/*" onChange={(event) => setHiddenGuessFile(event.target.files?.[0] ?? null)} />
                     </label>
 
-                    {hiddenGuessSource === 'upload' ? (
-                      <label>
-                        Chọn ảnh
-                        <input type="file" accept="image/*" onChange={(event) => setHiddenGuessFile(event.target.files?.[0] ?? null)} />
-                      </label>
-                    ) : (
-                      <label>
-                        Link ảnh
-                        <input value={hiddenGuessUrl} onChange={(event) => setHiddenGuessUrl(event.target.value)} placeholder="https://..." />
-                      </label>
-                    )}
-
-                    {hiddenGuessSource === 'upload' && hiddenGuessFile ? <p className="helper-text">Đã chọn ảnh: {hiddenGuessFile.name}</p> : null}
+                    {hiddenGuessFile ? <p className="helper-text">Đã chọn ảnh: {hiddenGuessFile.name}</p> : null}
 
                     <div className="builder-two-columns">
                       <label>
@@ -1180,32 +1483,232 @@ export function LessonsPage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chi tiết bài học đang chọn</h3>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Quản lý</p>
+                <h3>Bài đã tạo</h3>
+              </div>
+            </div>
             {selectedLesson ? (
               <div className="detail-stack">
-                <div className="student-row">
-                  <strong>{selectedLesson.title}</strong>
-                  <span>
-                    {selectedLesson.subject?.name ?? 'Chưa có môn'} / {levelLabel(selectedLesson.primary_level)}
-                  </span>
+                <div className="form-stack">
+                  <label>
+                    Tên bài
+                    <input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} placeholder="Tên bài học" />
+                  </label>
+                  <label>
+                    Môn
+                    <select value={editSubjectId} onChange={(event) => setEditSubjectId(event.target.value)}>
+                      {subjectsQuery.data?.map((subject) => (
+                        <option key={subject.id} value={subject.id}>
+                          {subject.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Mức
+                    <select value={editPrimaryLevel} onChange={(event) => setEditPrimaryLevel(event.target.value)}>
+                      {LEVEL_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Mô tả
+                    <input value={editDescription} onChange={(event) => setEditDescription(event.target.value)} placeholder="Mô tả ngắn" />
+                  </label>
+                  <label>
+                    Số phút
+                    <input value={editEstimatedMinutes} onChange={(event) => setEditEstimatedMinutes(event.target.value)} inputMode="numeric" />
+                  </label>
                 </div>
-                <p>{lessonDetailQuery.data?.description ?? selectedLesson.description ?? 'Chưa có mô tả.'}</p>
 
-                <div className="student-list compact-list">
-                  {lessonDetailQuery.data?.activities?.map((activity) => (
-                    <div key={activity.id} className="student-row">
-                      <strong>
-                        {activity.sort_order}. {activity.title}
-                      </strong>
-                      <span>{activityLabel(activity.activity_type as ActivityType)}</span>
-                      <p>{activity.instruction_text ?? 'Chưa có hướng dẫn.'}</p>
+                <div className="button-row">
+                  <button
+                    className="action-button"
+                    type="button"
+                    disabled={!resolvedSelectedLessonId || updateLessonMutation.isPending || !editTitle.trim()}
+                    onClick={() => updateLessonMutation.mutate()}
+                  >
+                    {updateLessonMutation.isPending ? 'Đang lưu...' : 'Lưu chỉnh sửa'}
+                  </button>
+                  <button
+                    className="ghost-button"
+                    type="button"
+                    disabled={!resolvedSelectedLessonId || deleteLessonMutation.isPending}
+                    onClick={() => {
+                      if (!window.confirm('Bạn muốn xóa bài học này khỏi danh sách?')) return
+                      deleteLessonMutation.mutate()
+                    }}
+                  >
+                    {deleteLessonMutation.isPending ? 'Đang xóa...' : 'Xóa bài học'}
+                  </button>
+                </div>
+
+                {updateLessonMutation.error ? <p className="error-text">{(updateLessonMutation.error as Error).message}</p> : null}
+                {deleteLessonMutation.error ? <p className="error-text">{(deleteLessonMutation.error as Error).message}</p> : null}
+
+                <div className="lesson-manage-layout">
+                  <div className="detail-stack">
+                    <div className="student-row">
+                      <strong>{selectedLesson.title}</strong>
+                      <span>{selectedLesson.subject?.name ?? 'Chưa có môn'} / {levelLabel(selectedLesson.primary_level)}</span>
+                      <p>{lessonActivities.length} hoạt động</p>
                     </div>
-                  ))}
-                  {!lessonDetailQuery.data?.activities?.length && !lessonDetailQuery.isLoading ? <p>Bài học này chưa có hoạt động nào.</p> : null}
+
+                    <div className="student-list compact-list lesson-activity-list">
+                      {lessonActivities.map((activity) => (
+                        <button
+                          key={activity.id}
+                          className={resolvedSelectedActivityId === activity.id ? 'student-row student-row-button student-row-button-active' : 'student-row student-row-button'}
+                          type="button"
+                          onClick={() => {
+                            setSelectedActivityId(activity.id)
+                            setActivityEditorError(null)
+                          }}
+                        >
+                          <strong>
+                            {activity.sort_order}. {activity.title}
+                          </strong>
+                          <span>{activityLabel(activity.activity_type as ActivityType)}</span>
+                          <p>{activity.instruction_text ?? 'Chưa có hướng dẫn.'}</p>
+                        </button>
+                      ))}
+                      {!lessonActivities.length && !lessonDetailQuery.isLoading ? <p>Bài học này chưa có hoạt động nào.</p> : null}
+                    </div>
+                  </div>
+
+                  <div className="detail-stack">
+                    {selectedActivity ? (
+                      <>
+                        <div className="lesson-activity-toolbar">
+                          <span className="subject-pill">Câu {selectedActivity.sort_order}</span>
+                          <span className="subject-pill muted-pill">{activityLabel(selectedActivity.activity_type as ActivityType)}</span>
+                        </div>
+
+                        <div className="lesson-preview-shell">
+                          <ActivityCard
+                            activity={editablePreviewActivity ?? selectedActivity}
+                            answers={{
+                              choiceAnswers: previewChoiceAnswers,
+                              textAnswers: previewTextAnswers,
+                              matchingAnswers: previewMatchingAnswers,
+                              dragAnswers: previewDragAnswers,
+                              stepAnswers: previewStepAnswers,
+                              aacSelections: previewAacSelections,
+                            }}
+                            setAnswers={{
+                              setChoiceAnswers: setPreviewChoiceAnswers,
+                              setTextAnswers: setPreviewTextAnswers,
+                              setMatchingAnswers: setPreviewMatchingAnswers,
+                              setDragAnswers: setPreviewDragAnswers,
+                              setStepAnswers: setPreviewStepAnswers,
+                              setAacSelections: setPreviewAacSelections,
+                            }}
+                          />
+                        </div>
+
+                        <div className="form-stack">
+                          <label>
+                            Tên hoạt động
+                            <input value={editActivityTitle} onChange={(event) => setEditActivityTitle(event.target.value)} placeholder="Tên hoạt động" />
+                          </label>
+
+                          <label>
+                            Hướng dẫn
+                            <textarea value={editActivityInstruction} onChange={(event) => setEditActivityInstruction(event.target.value)} rows={3} placeholder="Hướng dẫn ngắn" />
+                          </label>
+
+                          <label>
+                            Prompt chính
+                            <textarea value={editActivityPrompt} onChange={(event) => handleActivityPromptChange(event.target.value)} rows={3} placeholder="Câu hỏi hoặc nội dung chính" />
+                          </label>
+
+                          {isImageUploadOnlyActivity(selectedActivity.activity_type as ActivityType) ? (
+                            <label>
+                              Chọn ảnh từ máy
+                              <input
+                                type="file"
+                                accept="image/*"
+                                disabled={editActivityMediaUploadPending}
+                                onChange={(event) => void handleActivityMediaFileChange(event.target.files?.[0] ?? null)}
+                              />
+                              {editActivityMediaUrl ? <span className="helper-text">Đã có ảnh cho hoạt động này.</span> : null}
+                            </label>
+                          ) : null}
+
+                          {selectedActivity.activity_type === 'watch_answer' ? (
+                            <>
+                              <label>
+                                Nguồn video
+                                <select value={editActivityMediaSource} onChange={(event) => setEditActivityMediaSource(event.target.value as MediaSource)}>
+                                  <option value="external">Dán link video</option>
+                                  <option value="upload">Tải ảnh hoặc video từ máy</option>
+                                </select>
+                              </label>
+
+                              {editActivityMediaSource === 'external' ? (
+                                <label>
+                                  Link video
+                                  <input value={editActivityMediaUrl} onChange={(event) => handleActivityMediaUrlChange(event.target.value)} placeholder="YouTube / TikTok / Google Drive" />
+                                  <span className="helper-text">Dùng YouTube, TikTok, Google Drive hoặc file video trực tiếp.</span>
+                                </label>
+                              ) : (
+                                <label>
+                                  Chọn ảnh hoặc video từ máy
+                                  <input
+                                    type="file"
+                                    accept="image/*,video/*"
+                                    disabled={editActivityMediaUploadPending}
+                                    onChange={(event) => void handleActivityMediaFileChange(event.target.files?.[0] ?? null)}
+                                  />
+                                  {editActivityMediaUrl ? <span className="helper-text">Đã có media cho hoạt động này.</span> : null}
+                                </label>
+                              )}
+                            </>
+                          ) : null}
+
+                          {editActivityMediaUploadPending ? <p className="helper-text">Đang tải media lên...</p> : null}
+
+                        </div>
+
+                        <div className="button-row">
+                          <button
+                            className="action-button"
+                            type="button"
+                            disabled={!editActivityTitle.trim() || updateActivityMutation.isPending || editActivityMediaUploadPending}
+                            onClick={() => updateActivityMutation.mutate()}
+                          >
+                            {updateActivityMutation.isPending ? 'Đang lưu hoạt động...' : 'Lưu hoạt động'}
+                          </button>
+                          <button
+                            className="ghost-button"
+                            type="button"
+                            disabled={deleteActivityMutation.isPending}
+                            onClick={() => {
+                              if (!window.confirm('Bạn muốn xóa hoạt động này?')) return
+                              deleteActivityMutation.mutate()
+                            }}
+                          >
+                            {deleteActivityMutation.isPending ? 'Đang xóa hoạt động...' : 'Xóa hoạt động'}
+                          </button>
+                        </div>
+
+                        {activityEditorError ? <p className="error-text">{activityEditorError}</p> : null}
+                      </>
+                    ) : lessonDetailQuery.isLoading ? (
+                      <p>Đang tải hoạt động...</p>
+                    ) : (
+                      <p>Chọn một hoạt động để xem và sửa.</p>
+                    )}
+                  </div>
                 </div>
               </div>
             ) : (
-              <p>Hãy chọn một bài học để xem chi tiết.</p>
+              <p>Chọn một bài để sửa hoặc xóa.</p>
             )}
           </article>
         </section>

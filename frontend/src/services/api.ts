@@ -580,6 +580,23 @@ export async function createStudent(token: string, payload: { full_name: string;
   })
 }
 
+export async function updateStudent(token: string, studentId: number, payload: {
+  full_name?: string
+  disability_level?: string
+  support_note?: string | null
+  preferred_input?: string
+  preferred_read_speed?: string | null
+  preferred_font_size?: string | null
+  preferred_bg_color?: string | null
+  avatar_url?: string | null
+}) {
+  return request<StudentItem>(`/api/v1/students/${studentId}`, {
+    method: 'PUT',
+    token,
+    body: payload,
+  })
+}
+
 export async function fetchParents(token: string): Promise<ParentAccountItem[]> {
   return request<ParentAccountItem[]>('/api/v1/parents', { token })
 }
@@ -636,6 +653,30 @@ export async function createLesson(token: string, payload: {
   })
 }
 
+export async function updateLesson(token: string, lessonId: number, payload: {
+  title?: string
+  subject_id?: number
+  primary_level?: string
+  description?: string
+  estimated_minutes?: number
+  difficulty_stage?: number
+  is_published?: boolean
+  is_archived?: boolean
+}) {
+  return request<LessonItem>(`/api/v1/lessons/${lessonId}`, {
+    method: 'PUT',
+    token,
+    body: payload,
+  })
+}
+
+export async function deleteLesson(token: string, lessonId: number) {
+  return request<LessonItem>(`/api/v1/lessons/${lessonId}`, {
+    method: 'DELETE',
+    token,
+  })
+}
+
 export async function createLessonActivity(token: string, lessonId: number, payload: {
   title: string
   activity_type: string
@@ -650,6 +691,30 @@ export async function createLessonActivity(token: string, lessonId: number, payl
     method: 'POST',
     token,
     body: payload,
+  })
+}
+
+export async function updateLessonActivity(token: string, activityId: number, payload: {
+  title?: string
+  activity_type?: string
+  instruction_text?: string
+  voice_answer_enabled?: boolean
+  is_required?: boolean
+  sort_order?: number
+  difficulty_stage?: number
+  config_json?: string
+}) {
+  return request<LessonActivityItem>(`/api/v1/activities/${activityId}`, {
+    method: 'PUT',
+    token,
+    body: payload,
+  })
+}
+
+export async function deleteLessonActivity(token: string, activityId: number) {
+  return request<null>(`/api/v1/activities/${activityId}`, {
+    method: 'DELETE',
+    token,
   })
 }
 
@@ -813,6 +878,30 @@ export async function sendAIChat(token: string, payload: {
     token,
     body: payload,
   })
+}
+
+export async function synthesizeAISpeech(token: string, payload: { text: string }): Promise<Blob> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/ai/speech`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    let message = 'Khong the tao audio'
+    try {
+      const json = await response.json()
+      message = json.message ?? message
+    } catch {
+      // ignore parse errors and keep generic message
+    }
+    throw new Error(message)
+  }
+
+  return response.blob()
 }
 
 export async function gradeAIAnswer(token: string, payload: {

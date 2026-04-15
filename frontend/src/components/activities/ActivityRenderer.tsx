@@ -81,33 +81,8 @@ const activityTypeLabelMap: Record<string, string> = {
   ai_chat: 'Trao đổi với AI',
 }
 
-const activityInteractionHintMap: Record<string, string> = {
-  multiple_choice: 'Cách làm: Đọc câu hỏi rồi chạm vào một đáp án em cho là đúng.',
-  image_choice: 'Cách làm: Nhìn kỹ hình ảnh, vuốt nếu cần, rồi bấm chọn đúng ảnh phù hợp.',
-  image_puzzle: 'Cách làm: Kéo thả từng mảnh ảnh vào vị trí đúng để ghép thành bức tranh hoàn chỉnh.',
-  matching: 'Cách làm: Chọn từng ô để nối các cặp đúng với nhau.',
-  drag_drop: 'Cách làm: Gắn mỗi mục vào vị trí phù hợp.',
-  listen_choose: 'Cách làm: Nghe xong rồi chạm vào đáp án đúng.',
-  watch_answer: 'Cách làm: Xem xong rồi nói hoặc viết câu trả lời theo hướng dẫn.',
-  hidden_image_guess: 'Cách làm: Chạm mở từng ô đen, đoán vật trong ảnh, rồi bấm mic để nói đáp án.',
-  step_by_step: 'Cách làm: Làm lần lượt từng bước và đánh dấu khi xong.',
-  aac: 'Cách làm: Chạm vào thẻ giao tiếp phù hợp với điều em muốn nói.',
-  career_simulation: 'Cách làm: Đọc tình huống rồi trả lời em sẽ làm gì.',
-  ai_chat: 'Cách làm: Trả lời từng câu ngắn gọn để trợ lý tiếp tục hỏi đáp.',
-}
-
 function activityLabel(activityType: string) {
   return activityTypeLabelMap[activityType] ?? activityType
-}
-
-function activityInteractionHint(activity: LessonActivityItem, config: Record<string, unknown> | null) {
-  if (activity.activity_type === 'image_choice' && toText(config?.image_selection_mode) === 'carousel_find') {
-    return 'Cách làm: Bấm mũi tên trái phải hoặc vuốt ngang để xem từng ảnh, thấy đúng ảnh thì bấm chọn.'
-  }
-  if (activity.activity_type === 'watch_answer' && toText(config?.answer_mode) === 'voice_ai_grade') {
-    return 'Cách làm: Xem video xong bấm mic, nói câu trả lời, rồi chờ AI chấm.'
-  }
-  return activityInteractionHintMap[activity.activity_type] ?? 'Cách làm: Làm theo hướng dẫn hiện trên thẻ bài học.'
 }
 
 function parseActivityConfig(configJson: string | null) {
@@ -294,6 +269,12 @@ interface ActivityComponentProps {
   answers: any
   setAnswers: (fn: (prev: any) => any) => void
   presentationMode?: ActivityPresentationMode
+  onAutoAdvance?: (activityId: number) => void
+}
+
+function scheduleAutoAdvance(onAutoAdvance: ((activityId: number) => void) | undefined, activityId: number) {
+  if (!onAutoAdvance) return
+  window.setTimeout(() => onAutoAdvance(activityId), 220)
 }
 
 function CarouselImageChoiceActivity({
@@ -304,6 +285,7 @@ function CarouselImageChoiceActivity({
   selectedChoice,
   setAnswers,
   presentationMode = 'standard',
+  onAutoAdvance,
 }: {
   activity: LessonActivityItem
   prompt: string
@@ -312,6 +294,7 @@ function CarouselImageChoiceActivity({
   selectedChoice: string
   setAnswers: (fn: (prev: any) => any) => void
   presentationMode?: ActivityPresentationMode
+  onAutoAdvance?: (activityId: number) => void
 }) {
   const trackRef = React.useRef<HTMLDivElement | null>(null)
   const [activeIndex, setActiveIndex] = React.useState(0)
@@ -357,9 +340,13 @@ function CarouselImageChoiceActivity({
               <button
                 type="button"
                 className={selectedChoice === card.id ? 'interactive-option interactive-option-active image-carousel-select' : 'interactive-option image-carousel-select'}
-                onClick={() => setAnswers((current: any) => ({ ...current, [activity.id]: card.id }))}
+                aria-pressed={selectedChoice === card.id}
+                onClick={() => {
+                  setAnswers((current: any) => ({ ...current, [activity.id]: card.id }))
+                  scheduleAutoAdvance(onAutoAdvance, activity.id)
+                }}
               >
-                {selectedChoice === card.id ? 'Đã chọn ảnh này' : 'Chọn ảnh này'}
+                {selectedChoice === card.id ? 'Đã chọn' : 'Chọn'}
               </button>
             </div>
           </article>
@@ -523,8 +510,9 @@ function VoiceAiAnswerBox({
             type="button"
             className={isListening ? 'action-button voice-answer-button voice-answer-button-listening' : 'action-button voice-answer-button'}
             onClick={handleToggleListening}
+            aria-label={isListening ? 'Dừng ghi âm' : 'Bật micro'}
           >
-            {isListening ? 'Dừng ghi âm' : 'Trả lời bằng mic'}
+            <span aria-hidden="true">{isListening ? '⏹' : '🎙️'}</span>
           </button>
           <button
             type="button"
@@ -532,13 +520,13 @@ function VoiceAiAnswerBox({
             onClick={() => void submitVoiceAnswer(answer)}
             disabled={!answer.trim() || isGrading || !token || !expectedAnswer}
           >
-            {isGrading ? 'AI đang chấm...' : 'Chấm lại bằng AI'}
+            {isGrading ? 'Đang chấm...' : 'AI'}
           </button>
         </div>
 
         <div className="voice-answer-status-row">
           <span className={isListening ? 'voice-answer-chip voice-answer-chip-live' : 'voice-answer-chip'}>
-            {isListening ? 'Đang nghe em nói...' : supportsSpeechRecognition ? 'Sẵn sàng nghe em nói' : 'Trình duyệt không hỗ trợ mic'}
+            {isListening ? 'Đang nghe' : supportsSpeechRecognition ? 'Sẵn sàng' : 'Không có mic'}
           </span>
           {gradeResult ? (
             <span className={gradeResult.is_correct ? 'voice-answer-chip voice-answer-chip-success' : 'voice-answer-chip voice-answer-chip-warning'}>
@@ -741,7 +729,13 @@ function HiddenImageGuessActivity({ activity, answers, setAnswers }: ActivityCom
   )
 }
 
-export const MultipleChoiceActivity = React.memo(({ activity, answers, setAnswers, presentationMode = 'standard' }: ActivityComponentProps) => {
+export const MultipleChoiceActivity = React.memo(({
+  activity,
+  answers,
+  setAnswers,
+  presentationMode = 'standard',
+  onAutoAdvance,
+}: ActivityComponentProps) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const prompt = toText(config.prompt) || toText(config.audio_text) || activity.instruction_text || 'Hãy chọn đáp án đúng.'
@@ -768,6 +762,7 @@ export const MultipleChoiceActivity = React.memo(({ activity, answers, setAnswer
         selectedChoice={selectedChoice}
         setAnswers={setAnswers}
         presentationMode={presentationMode}
+        onAutoAdvance={onAutoAdvance}
       />
     )
   }
@@ -782,7 +777,11 @@ export const MultipleChoiceActivity = React.memo(({ activity, answers, setAnswer
             key={choice}
             type="button"
             className={selectedChoice === choice ? 'interactive-option interactive-option-active' : 'interactive-option'}
-            onClick={() => setAnswers((current: any) => ({ ...current, [activity.id]: choice }))}
+            aria-pressed={selectedChoice === choice}
+            onClick={() => {
+              setAnswers((current: any) => ({ ...current, [activity.id]: choice }))
+              scheduleAutoAdvance(onAutoAdvance, activity.id)
+            }}
           >
             {choice}
           </button>
@@ -943,7 +942,7 @@ export const StepByStepActivity = React.memo(({ activity, answers, setAnswers }:
   )
 })
 
-export const AACActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps) => {
+export const AACActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy chọn thẻ phù hợp.'
@@ -959,7 +958,11 @@ export const AACActivity = React.memo(({ activity, answers, setAnswers }: Activi
             key={card}
             type="button"
             className={selectedCard === card ? 'interactive-option interactive-option-active' : 'interactive-option'}
-            onClick={() => setAnswers((current: any) => ({ ...current, [activity.id]: card }))}
+            aria-pressed={selectedCard === card}
+            onClick={() => {
+              setAnswers((current: any) => ({ ...current, [activity.id]: card }))
+              scheduleAutoAdvance(onAutoAdvance, activity.id)
+            }}
           >
             {card}
           </button>
@@ -1023,26 +1026,30 @@ export const ActivityCard = React.memo(({
   answers,
   setAnswers,
   presentationMode = 'standard',
+  onAutoAdvance,
 }: {
   activity: LessonActivityItem
   answers: any
   setAnswers: any
   presentationMode?: ActivityPresentationMode
+  onAutoAdvance?: (activityId: number) => void
 }) => {
   const activityType = activity.activity_type as ActivityType
-  const config = parseActivityConfig(activity.config_json)
-  const interactionHint = activityInteractionHint(activity, config)
 
   return (
     <div className="activity-card">
       <div className="student-row">
         <strong>{activity.sort_order}. {activity.title}</strong>
-        <span>{activityLabel(activity.activity_type)} {activity.voice_answer_enabled ? '/ giọng nói' : ''}</span>
+        <span>{activityLabel(activity.activity_type)}</span>
       </div>
-      <p>{activity.instruction_text ?? 'Chưa có hướng dẫn.'}</p>
-      <p className="activity-guidance">{interactionHint}</p>
       {activityType === 'multiple_choice' || activityType === 'image_choice' || activityType === 'listen_choose' ? (
-        <MultipleChoiceActivity activity={activity} answers={answers.choiceAnswers} setAnswers={setAnswers.setChoiceAnswers} presentationMode={presentationMode} />
+        <MultipleChoiceActivity
+          activity={activity}
+          answers={answers.choiceAnswers}
+          setAnswers={setAnswers.setChoiceAnswers}
+          presentationMode={presentationMode}
+          onAutoAdvance={onAutoAdvance}
+        />
       ) : activityType === 'image_puzzle' ? (
         <ImagePuzzleActivity activity={activity} answers={answers.dragAnswers} setAnswers={setAnswers.setDragAnswers} presentationMode={presentationMode} />
       ) : activityType === 'matching' ? (
@@ -1056,13 +1063,18 @@ export const ActivityCard = React.memo(({
       ) : activityType === 'step_by_step' ? (
         <StepByStepActivity activity={activity} answers={answers.stepAnswers} setAnswers={setAnswers.setStepAnswers} />
       ) : activityType === 'aac' ? (
-        <AACActivity activity={activity} answers={answers.aacSelections} setAnswers={setAnswers.setAacSelections} />
+        <AACActivity
+          activity={activity}
+          answers={answers.aacSelections}
+          setAnswers={setAnswers.setAacSelections}
+          onAutoAdvance={onAutoAdvance}
+        />
       ) : activityType === 'career_simulation' ? (
         <CareerSimulationActivity activity={activity} answers={answers.textAnswers} setAnswers={setAnswers.setTextAnswers} />
       ) : activityType === 'ai_chat' ? (
         <AIChatActivity activity={activity} answers={answers.textAnswers} setAnswers={setAnswers.setTextAnswers} />
       ) : (
-        <p className="helper-text">Hoạt động này chưa có cấu hình chi tiết nên đang hiển thị ở chế độ mô tả.</p>
+        <p className="helper-text">Chưa có cấu hình.</p>
       )}
     </div>
   )

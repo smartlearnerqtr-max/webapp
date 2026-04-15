@@ -75,6 +75,11 @@ class Config:
     CORS_ORIGINS = _parse_cors_origins(os.getenv('CORS_ORIGINS', 'http://localhost:5173'))
     API_TITLE = 'Ban hoc thong minh API'
     GEMINI_MODEL_NAME = (os.getenv('GEMINI_MODEL_NAME') or 'gemini-2.5-flash').strip() or 'gemini-2.5-flash'
+    GEMINI_TTS_MODEL_NAME = (os.getenv('GEMINI_TTS_MODEL_NAME') or 'gemini-2.5-flash-preview-tts').strip() or 'gemini-2.5-flash-preview-tts'
+    GEMINI_TTS_VOICE_NAME = (os.getenv('GEMINI_TTS_VOICE_NAME') or 'Kore').strip() or 'Kore'
+    EDGE_TTS_VOICE_NAME = (os.getenv('EDGE_TTS_VOICE_NAME') or 'vi-VN-HoaiMyNeural').strip() or 'vi-VN-HoaiMyNeural'
+    EDGE_TTS_RATE = (os.getenv('EDGE_TTS_RATE') or '+8%').strip() or '+8%'
+    EDGE_TTS_PITCH = (os.getenv('EDGE_TTS_PITCH') or '+0Hz').strip() or '+0Hz'
     GEMINI_API_KEYS = _parse_gemini_api_keys()
 
 

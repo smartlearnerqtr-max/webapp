@@ -1,22 +1,24 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { createStudent, fetchStudents, fetchStudentTeachers } from '../services/api'
+import { fetchStudentTeachers, fetchStudents, updateStudent } from '../services/api'
 import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
 const LEVEL_OPTIONS = [
-  { value: 'nang', label: 'Nặng' },
-  { value: 'trung_binh', label: 'Trung bình' },
-  { value: 'nhe', label: 'Nhẹ' },
+  { value: 'nhe', label: 'Nhẹ', icon: 'N' },
+  { value: 'trung_binh', label: 'Trung bình', icon: 'TB' },
+  { value: 'nang', label: 'Nặng', icon: 'NG' },
 ]
+
+const levelLabelMap = LEVEL_OPTIONS.reduce<Record<string, string>>((accumulator, option) => {
+  accumulator[option.value] = option.label
+  return accumulator
+}, {})
 
 export function StudentsPage() {
   const token = useAuthStore((state) => state.accessToken)
   const queryClient = useQueryClient()
-  const [fullName, setFullName] = useState('')
-  const [disabilityLevel, setDisabilityLevel] = useState('trung_binh')
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
 
   const studentsQuery = useQuery({
@@ -25,7 +27,17 @@ export function StudentsPage() {
     enabled: Boolean(token),
   })
 
+  const groupedStudents = useMemo(() => {
+    const groups = new Map(LEVEL_OPTIONS.map((level) => [level.value, [] as NonNullable<typeof studentsQuery.data>]))
+    for (const student of studentsQuery.data ?? []) {
+      const targetGroup = groups.get(student.disability_level) ?? groups.get('trung_binh')
+      targetGroup?.push(student)
+    }
+    return groups
+  }, [studentsQuery.data])
+
   const resolvedSelectedStudentId = selectedStudentId ?? studentsQuery.data?.[0]?.id ?? null
+  const selectedStudent = studentsQuery.data?.find((student) => student.id === resolvedSelectedStudentId) ?? null
 
   const studentTeachersQuery = useQuery({
     queryKey: ['student-teachers', token, resolvedSelectedStudentId],
@@ -33,123 +45,127 @@ export function StudentsPage() {
     enabled: Boolean(token && resolvedSelectedStudentId),
   })
 
-  const createMutation = useMutation({
-    mutationFn: () => createStudent(token!, { full_name: fullName, disability_level: disabilityLevel }),
+  const updateLevelMutation = useMutation({
+    mutationFn: (nextLevel: string) => updateStudent(token!, resolvedSelectedStudentId!, { disability_level: nextLevel }),
     onSuccess: async () => {
-      setFullName('')
-      setDisabilityLevel('trung_binh')
       await queryClient.invalidateQueries({ queryKey: ['students', token] })
     },
   })
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!fullName.trim()) return
-    createMutation.mutate()
-  }
-
-  const selectedStudent = studentsQuery.data?.find((student) => student.id === resolvedSelectedStudentId) ?? null
-
   return (
     <RequireAuth allowedRoles={['teacher']}>
-      <div className="page-stack">
-        <section className="roadmap-panel">
-          <p className="eyebrow">Học sinh</p>
-          <h2>Quản lý hồ sơ học sinh</h2>
-          <p>Thêm hồ sơ nhanh, chọn học sinh để xem mức hỗ trợ và giáo viên đang phối hợp.</p>
+      <div className="page-stack teacher-clean-page">
+        <section className="roadmap-panel teacher-clean-hero">
+          <div>
+            <p className="eyebrow">Học sinh</p>
+            <h2>Phân nhóm học sinh</h2>
+          </div>
+          <div className="teacher-clean-hero-badges">
+            <span>{studentsQuery.data?.length ?? 0} học sinh</span>
+            <span>{groupedStudents.get('nhe')?.length ?? 0} nhẹ</span>
+            <span>{groupedStudents.get('nang')?.length ?? 0} nặng</span>
+          </div>
         </section>
 
-        <section className="auth-layout">
-          <article className="roadmap-panel">
-            <h3>Tạo học sinh mới</h3>
-            <form className="form-stack" onSubmit={handleSubmit}>
-              <label>
-                Họ tên học sinh
-                <input value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Ví dụ: Nguyễn Văn A" />
-              </label>
+        <section className="teacher-clean-metrics">
+          {LEVEL_OPTIONS.map((level, index) => (
+            <article key={level.value} className={`mini-card teacher-clean-metric ${index === 0 ? 'teacher-clean-metric-green' : index === 1 ? 'teacher-clean-metric-blue' : 'teacher-clean-metric-coral'}`}>
+              <span>{level.label}</span>
+              <strong>{groupedStudents.get(level.value)?.length ?? 0}</strong>
+            </article>
+          ))}
+        </section>
 
-              <details className="config-card">
-                <summary className="simple-summary">Tùy chọn thêm</summary>
-                <label>
-                  Mức độ khuyết tật
-                  <select value={disabilityLevel} onChange={(event) => setDisabilityLevel(event.target.value)}>
-                    {LEVEL_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </label>
-              </details>
+        <section className="student-group-grid">
+          {LEVEL_OPTIONS.map((level) => {
+            const students = groupedStudents.get(level.value) ?? []
+            return (
+              <article key={level.value} className="roadmap-panel student-group-panel">
+                <div className="teacher-clean-section-head">
+                  <div>
+                    <p className="eyebrow">Nhóm</p>
+                    <h3>{level.label}</h3>
+                  </div>
+                  <span className="subject-pill muted-pill">{students.length}</span>
+                </div>
 
-              <button className="action-button" type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Đang tạo...' : 'Tạo học sinh'}
-              </button>
-              {createMutation.error ? <p className="error-text">{(createMutation.error as Error).message}</p> : null}
-            </form>
-          </article>
-
-          <article className="roadmap-panel">
-            <h3>Danh sách học sinh</h3>
-            <p className="helper-text">Bấm vào một học sinh để xem hồ sơ chi tiết.</p>
-            <div className="student-list compact-list">
-              {studentsQuery.data?.map((student) => (
-                <button
-                  key={student.id}
-                  type="button"
-                  className={resolvedSelectedStudentId === student.id ? 'student-row student-row-button student-row-button-active' : 'student-row student-row-button'}
-                  onClick={() => setSelectedStudentId(student.id)}
-                >
-                  <strong>{student.full_name}</strong>
-                  <span>{LEVEL_OPTIONS.find((option) => option.value === student.disability_level)?.label ?? student.disability_level}</span>
-                </button>
-              ))}
-              {!studentsQuery.data?.length && !studentsQuery.isLoading ? <p>Chưa có học sinh nào.</p> : null}
-            </div>
-          </article>
+                <div className="student-list compact-list">
+                  {students.map((student) => (
+                    <button
+                      key={student.id}
+                      type="button"
+                      className={resolvedSelectedStudentId === student.id ? 'student-row student-row-button student-row-button-active' : 'student-row student-row-button'}
+                      onClick={() => setSelectedStudentId(student.id)}
+                    >
+                      <strong>{student.full_name}</strong>
+                      <span>{student.preferred_input === 'touch' ? 'Cảm ứng' : 'Bàn phím'} / ID {student.id}</span>
+                    </button>
+                  ))}
+                  {!students.length ? <p>Chưa có học sinh.</p> : null}
+                </div>
+              </article>
+            )
+          })}
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Thông tin học sinh đang chọn</h3>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Phân loại</p>
+                <h3>Học sinh đang chọn</h3>
+              </div>
+            </div>
+
             {selectedStudent ? (
               <div className="detail-stack">
                 <div className="student-row">
                   <strong>{selectedStudent.full_name}</strong>
-                  <span>
-                    {LEVEL_OPTIONS.find((option) => option.value === selectedStudent.disability_level)?.label ?? selectedStudent.disability_level}
-                    {' / '}
-                    {selectedStudent.preferred_input === 'touch' ? 'Cảm ứng' : 'Bàn phím'}
-                  </span>
+                  <span>{levelLabelMap[selectedStudent.disability_level] ?? selectedStudent.disability_level}</span>
+                  <p>{selectedStudent.support_note ?? 'Chưa có ghi chú hỗ trợ.'}</p>
                 </div>
-                <div className="metrics-grid">
-                  <div className="mini-card">
-                    <span>Giáo viên liên kết</span>
-                    <strong>{studentTeachersQuery.data?.length ?? 0}</strong>
-                  </div>
-                  <div className="mini-card">
-                    <span>Trạng thái hỗ trợ</span>
-                    <strong>{selectedStudent.support_note ? 'Đã có ghi chú' : 'Chưa ghi chú'}</strong>
-                  </div>
+
+                <div className="student-level-actions">
+                  {LEVEL_OPTIONS.map((level) => (
+                    <button
+                      key={level.value}
+                      type="button"
+                      className={selectedStudent.disability_level === level.value ? 'builder-type-card builder-type-card-active' : 'builder-type-card'}
+                      disabled={updateLevelMutation.isPending}
+                      onClick={() => updateLevelMutation.mutate(level.value)}
+                    >
+                      <strong>{level.icon}</strong>
+                      <span>{level.label}</span>
+                    </button>
+                  ))}
                 </div>
-                <p>Ghi chú hỗ trợ: {selectedStudent.support_note ?? 'Chưa có ghi chú.'}</p>
+
+                {updateLevelMutation.error ? <p className="error-text">{(updateLevelMutation.error as Error).message}</p> : null}
               </div>
             ) : (
-              <p>Hãy chọn một học sinh để xem chi tiết.</p>
+              <p>Chọn một học sinh để phân loại.</p>
             )}
           </article>
 
           <article className="roadmap-panel">
-            <h3>Giáo viên đang dạy học sinh này</h3>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Liên kết</p>
+                <h3>Giáo viên đang dạy</h3>
+              </div>
+              <span className="subject-pill muted-pill">{studentTeachersQuery.data?.length ?? 0}</span>
+            </div>
+
             <div className="student-list compact-list">
               {(studentTeachersQuery.data ?? []).map((item) => (
                 <div key={item.link_id} className="student-row">
                   <strong>{item.teacher.full_name}</strong>
-                  <span>Teacher ID {item.teacher.id} / {item.teacher.school_name ?? 'Chưa cập nhật trường'}</span>
-                  <p>Email: {item.teacher.email ?? 'Chưa cập nhật'} | Số điện thoại: {item.teacher.phone ?? 'Chưa cập nhật'}</p>
-                  <p>Số lớp đang dạy học sinh này: {item.active_class_count}</p>
+                  <span>{item.teacher.school_name ?? 'Chưa cập nhật trường'}</span>
+                  <p>{item.teacher.email ?? item.teacher.phone ?? 'Chưa có liên hệ'}</p>
                 </div>
               ))}
               {!studentTeachersQuery.data?.length && resolvedSelectedStudentId && !studentTeachersQuery.isLoading ? (
-                <p>Học sinh này hiện chỉ có giáo viên đang xem hồ sơ hoặc chưa vào lớp nào.</p>
+                <p>Học sinh này chưa có liên kết giáo viên khác.</p>
               ) : null}
             </div>
           </article>

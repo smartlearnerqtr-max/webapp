@@ -15,41 +15,25 @@ import {
 import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
-const classUiVariants = [
-  {
-    value: 'standard',
-    title: 'Lớp tiêu chuẩn',
-    description: 'Giữ giao diện hiện tại cho nhóm học sinh bình thường, thao tác và bố cục quen thuộc.',
-  },
-  {
-    value: 'visual_support',
-    title: 'Lớp hỗ trợ trực quan',
-    description: 'Dành cho nhóm cần giao diện cuộn dọc, card lớn, màu sinh động và ít phụ thuộc vào chữ.',
-  },
-] as const
-
-const classUiVariantLabelMap: Record<(typeof classUiVariants)[number]['value'], string> = {
-  standard: 'Giao diện tiêu chuẩn',
-  visual_support: 'Giao diện trực quan',
+const classUiVariantLabelMap: Record<string, string> = {
+  standard: 'Chuẩn',
+  visual_support: 'Trực quan',
 }
 
 const visualThemeOptions = [
   {
     value: 'garden',
     title: 'Vườn dịu mắt',
-    description: 'Xanh lá, vàng kem, hợp cho học lâu và ít gây mỏi mắt.',
     imageUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
   },
   {
     value: 'ocean',
     title: 'Mặt hồ êm',
-    description: 'Xanh ngọc sáng, cảm giác nhẹ và sạch, hợp thao tác chạm.',
     imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80',
   },
   {
     value: 'cosmos',
     title: 'Phiêu lưu vũ trụ',
-    description: 'Tím xanh nổi bật hơn, hợp với nhóm thích cảm giác khám phá.',
     imageUrl: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1600&q=80',
   },
 ] as const
@@ -65,7 +49,6 @@ export function ClassesPage() {
   const token = useAuthStore((state) => state.accessToken)
   const [name, setName] = useState('')
   const [grade, setGrade] = useState('')
-  const [uiVariant, setUiVariant] = useState<(typeof classUiVariants)[number]['value']>('standard')
   const [visualTheme, setVisualTheme] = useState<(typeof visualThemeOptions)[number]['value']>('garden')
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string>(visualThemeOptions[0].imageUrl)
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null)
@@ -123,14 +106,13 @@ export function ClassesPage() {
       createClass(token!, {
         name,
         grade_label: grade,
-        ui_variant: uiVariant,
+        ui_variant: 'visual_support',
         visual_theme: visualTheme,
         background_image_url: backgroundImageUrl.trim() || undefined,
       }),
     onSuccess: async (createdClass) => {
       setName('')
       setGrade('')
-      setUiVariant('standard')
       setVisualTheme('garden')
       setBackgroundImageUrl(visualThemeOptions[0].imageUrl)
       await queryClient.invalidateQueries({ queryKey: ['classes', token] })
@@ -168,77 +150,92 @@ export function ClassesPage() {
 
   return (
     <RequireAuth allowedRoles={['teacher']}>
-      <div className="page-stack">
-        <section className="roadmap-panel">
-          <p className="eyebrow">Lớp học</p>
-          <h2>Quản lý lớp học</h2>
-          <p>Tạo lớp nhanh, chọn lớp đang dạy và thêm học sinh hoặc môn học trong vài bước ngắn.</p>
+      <div className="page-stack teacher-clean-page">
+        <section className="roadmap-panel teacher-clean-hero">
+          <div>
+            <p className="eyebrow">Lớp học</p>
+            <h2>Mã lớp, học sinh, môn</h2>
+            <p>Giữ phần vào lớp cho học sinh thật rõ, phần thêm tay chỉ để hỗ trợ khi cần.</p>
+          </div>
+          <div className="teacher-clean-hero-badges">
+            <span>{classesQuery.data?.length ?? 0} lớp</span>
+            <span>{selectedClass?.id ?? '---'} ID lớp</span>
+            <span>{selectedClass?.join_credential?.class_password ?? '---'} mật khẩu</span>
+          </div>
+        </section>
+
+        <section className="teacher-clean-metrics">
+          <article className="mini-card teacher-clean-metric teacher-clean-metric-blue">
+            <span>Lớp</span>
+            <strong>{classesQuery.data?.length ?? 0}</strong>
+          </article>
+          <article className="mini-card teacher-clean-metric teacher-clean-metric-green">
+            <span>Học sinh trong lớp</span>
+            <strong>{classStudentsQuery.data?.length ?? 0}</strong>
+          </article>
+          <article className="mini-card teacher-clean-metric teacher-clean-metric-gold">
+            <span>Môn trong lớp</span>
+            <strong>{classSubjectsQuery.data?.length ?? 0}</strong>
+          </article>
+          <article className="mini-card teacher-clean-metric teacher-clean-metric-coral">
+            <span>Mật khẩu</span>
+            <strong>{selectedClass?.join_credential?.class_password ?? '---'}</strong>
+          </article>
+          <article className="mini-card teacher-clean-metric teacher-clean-metric-ink">
+            <span>Theme</span>
+            <strong>{selectedClass ? visualThemeLabelMap[selectedClass.visual_theme] ?? selectedClass.visual_theme : '---'}</strong>
+          </article>
         </section>
 
         <section className="auth-layout">
           <article className="roadmap-panel">
-            <h3>Tạo lớp mới</h3>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Tạo mới</p>
+                <h3>Tạo lớp</h3>
+              </div>
+            </div>
             <form className="form-stack" onSubmit={handleSubmit}>
               <label>
                 Tên lớp
                 <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Ví dụ: Lớp 6A buổi chiều" />
               </label>
 
+              <label>
+                Khối lớp
+                <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder="Ví dụ: 6" />
+              </label>
+
               <div className="detail-stack">
-                <strong>Kiểu giao diện của lớp</strong>
+                <strong>Theme</strong>
                 <div className="builder-type-grid">
-                  {classUiVariants.map((variant) => (
+                  {visualThemeOptions.map((theme) => (
                     <button
-                      key={variant.value}
+                      key={theme.value}
                       type="button"
-                      className={uiVariant === variant.value ? 'builder-type-card builder-type-card-active' : 'builder-type-card'}
-                      onClick={() => setUiVariant(variant.value)}
+                      className={visualTheme === theme.value ? 'builder-type-card builder-type-card-active' : 'builder-type-card'}
+                      onClick={() => {
+                        setVisualTheme(theme.value)
+                        if (!backgroundImageUrl.trim() || backgroundImageUrl === visualThemeOptions.find((item) => item.value === visualTheme)?.imageUrl) {
+                          setBackgroundImageUrl(theme.imageUrl)
+                        }
+                      }}
                     >
-                      <strong>{variant.title}</strong>
-                      <span>{variant.description}</span>
+                      <strong>{theme.title}</strong>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {uiVariant === 'visual_support' ? (
-                <div className="detail-stack">
-                  <strong>Theme cho lớp hỗ trợ</strong>
-                  <div className="builder-type-grid">
-                    {visualThemeOptions.map((theme) => (
-                      <button
-                        key={theme.value}
-                        type="button"
-                        className={visualTheme === theme.value ? 'builder-type-card builder-type-card-active' : 'builder-type-card'}
-                        onClick={() => {
-                          setVisualTheme(theme.value)
-                          if (!backgroundImageUrl.trim() || backgroundImageUrl === visualThemeOptions.find((item) => item.value === visualTheme)?.imageUrl) {
-                            setBackgroundImageUrl(theme.imageUrl)
-                          }
-                        }}
-                      >
-                        <strong>{theme.title}</strong>
-                        <span>{theme.description}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <label>
-                    Ảnh nền từ bên ngoài
-                    <input
-                      value={backgroundImageUrl}
-                      onChange={(event) => setBackgroundImageUrl(event.target.value)}
-                      placeholder="Dán URL ảnh nền cho lớp hỗ trợ"
-                    />
-                  </label>
-                  <p className="helper-text">Bạn có thể dùng ảnh ngoài. Hệ thống sẽ lấy ảnh này làm nền chính cho giao diện học sinh của lớp hỗ trợ.</p>
-                </div>
-              ) : null}
-
               <details className="config-card">
-                <summary className="simple-summary">Tùy chọn thêm</summary>
+                <summary className="simple-summary">Ảnh nền riêng</summary>
                 <label>
-                  Khối lớp
-                  <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder="Ví dụ: 6" />
+                  URL ảnh nền
+                  <input
+                    value={backgroundImageUrl}
+                    onChange={(event) => setBackgroundImageUrl(event.target.value)}
+                    placeholder="Dán URL ảnh nền nếu muốn thay theme mặc định"
+                  />
                 </label>
               </details>
 
@@ -250,17 +247,23 @@ export function ClassesPage() {
           </article>
 
           <article className="roadmap-panel">
-            <h3>Chọn lớp để quản lý</h3>
-            <p className="helper-text">Bấm vào một lớp để xem thông tin và thao tác nhanh.</p>
-            <div className="tag-wrap">
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Danh sách</p>
+                <h3>Chọn lớp</h3>
+              </div>
+            </div>
+            <div className="student-list compact-list">
               {classesQuery.data?.map((classItem) => (
                 <button
                   key={classItem.id}
                   type="button"
-                  className={resolvedSelectedClassId === classItem.id ? 'subject-pill pill-button pill-button-active' : 'subject-pill pill-button'}
+                  className={resolvedSelectedClassId === classItem.id ? 'student-row student-row-button student-row-button-active' : 'student-row student-row-button'}
                   onClick={() => setSelectedClassId(classItem.id)}
                 >
-                  {classItem.name}
+                  <strong>{classItem.name}</strong>
+                  <span>{classItem.grade_label ? `Khối ${classItem.grade_label}` : 'Chưa gắn khối'} / {classItem.student_count} học sinh</span>
+                  <p>Mật khẩu: {classItem.join_credential?.class_password ?? 'Chưa cập nhật'}</p>
                 </button>
               ))}
             </div>
@@ -271,10 +274,16 @@ export function ClassesPage() {
         {selectedClass ? (
           <section className="dashboard-grid">
             <article className="roadmap-panel">
-              <h3>Thông tin nhanh</h3>
+              <div className="teacher-clean-section-head">
+                <div>
+                  <p className="eyebrow">Đang chọn</p>
+                  <h3>{selectedClass.name}</h3>
+                </div>
+              </div>
               <div className="student-row">
                 <strong>{selectedClass.name}</strong>
                 <span>{selectedClass.grade_label ? `Khối ${selectedClass.grade_label}` : 'Chưa gắn khối lớp'}</span>
+                <p>Học sinh dùng `ID lớp + mật khẩu lớp` để tự vào lớp này.</p>
               </div>
               <div className="tag-wrap">
                 <span className="subject-pill">{classUiVariantLabelMap[selectedClass.ui_variant] ?? selectedClass.ui_variant}</span>
@@ -303,37 +312,31 @@ export function ClassesPage() {
             </article>
 
             <article className="roadmap-panel">
-              <h3>Trạng thái lớp</h3>
+              <div className="teacher-clean-section-head">
+                <div>
+                  <p className="eyebrow">Vào lớp</p>
+                  <h3>Thông tin gửi học sinh</h3>
+                </div>
+              </div>
               <div className="detail-stack">
+                <div className="metrics-grid">
+                  <div className="mini-card">
+                    <span>ID lớp</span>
+                    <strong>{selectedClass.id}</strong>
+                  </div>
+                  <div className="mini-card">
+                    <span>Mật khẩu</span>
+                    <strong>{selectedClass.join_credential?.class_password ?? 'Chưa cập nhật'}</strong>
+                  </div>
+                </div>
                 <div className="tag-wrap">
                   <span className="subject-pill">{selectedClass.status === 'active' ? 'Đang hoạt động' : selectedClass.status}</span>
                   {selectedClass.grade_label ? <span className="subject-pill muted-pill">{`Khối ${selectedClass.grade_label}`}</span> : null}
-                  <span className="subject-pill muted-pill">{classUiVariantLabelMap[selectedClass.ui_variant] ?? selectedClass.ui_variant}</span>
-                  {selectedClass.ui_variant === 'visual_support' ? (
-                    <span className="subject-pill muted-pill">{visualThemeLabelMap[selectedClass.visual_theme] ?? selectedClass.visual_theme}</span>
-                  ) : null}
                 </div>
-                <p>
-                  {selectedClass.ui_variant === 'visual_support'
-                    ? 'Lớp này sẽ tự mở giao diện học sinh cuộn dọc, card lớn và nền sinh động cho các bài được giao từ lớp này.'
-                    : 'Đây là lớp đang dùng giao diện tiêu chuẩn để thêm học sinh, gắn môn học và theo dõi danh sách hiện tại.'}
-                </p>
                 {selectedClass.ui_variant === 'visual_support' && selectedClass.background_image_url ? (
-                  <p>Ảnh nền đang dùng: {selectedClass.background_image_url}</p>
+                  <p>Ảnh nền: {selectedClass.background_image_url}</p>
                 ) : null}
-                <details className="config-card">
-                  <summary className="simple-summary">Thông tin thêm</summary>
-                  <div className="metrics-grid">
-                    <div className="mini-card">
-                      <span>ID giáo viên</span>
-                      <strong>{selectedClass.teacher_id}</strong>
-                    </div>
-                    <div className="mini-card">
-                      <span>Tên lớp</span>
-                      <strong>{selectedClass.name}</strong>
-                    </div>
-                  </div>
-                </details>
+                <p>Luồng chính: học sinh tự đăng ký tài khoản rồi nhập `ID lớp` và `mật khẩu` để tham gia.</p>
               </div>
             </article>
           </section>
@@ -346,28 +349,12 @@ export function ClassesPage() {
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Thêm học sinh vào lớp</h3>
-            <div className="form-stack">
-              <label>
-                Học sinh chưa vào lớp
-                <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)} disabled={!resolvedSelectedClassId}>
-                  <option value="">Chọn học sinh</option>
-                  {availableStudents.map((student) => (
-                    <option key={student.id} value={student.id}>{student.full_name} - {student.disability_level}</option>
-                  ))}
-                </select>
-              </label>
-              <button
-                className="action-button"
-                type="button"
-                disabled={!resolvedSelectedClassId || !selectedStudentId || addStudentMutation.isPending}
-                onClick={() => addStudentMutation.mutate()}
-              >
-                {addStudentMutation.isPending ? 'Đang thêm...' : 'Thêm vào lớp'}
-              </button>
-              {addStudentMutation.error ? <p className="error-text">{(addStudentMutation.error as Error).message}</p> : null}
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Học sinh</p>
+                <h3>Trong lớp</h3>
+              </div>
             </div>
-
             <div className="student-list compact-list">
               {classStudentsQuery.data?.map((item) => (
                 <div key={item.id} className="student-row">
@@ -377,61 +364,70 @@ export function ClassesPage() {
               ))}
               {resolvedSelectedClassId && !classStudentsQuery.data?.length && !classStudentsQuery.isLoading ? <p>Lớp này chưa có học sinh nào.</p> : null}
             </div>
+
+            <details className="config-card">
+              <summary className="simple-summary">Thêm thủ công</summary>
+              <div className="form-stack">
+                <label>
+                  Học sinh chưa vào lớp
+                  <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)} disabled={!resolvedSelectedClassId}>
+                    <option value="">Chọn học sinh</option>
+                    {availableStudents.map((student) => (
+                      <option key={student.id} value={student.id}>{student.full_name} - {student.disability_level}</option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  className="action-button"
+                  type="button"
+                  disabled={!resolvedSelectedClassId || !selectedStudentId || addStudentMutation.isPending}
+                  onClick={() => addStudentMutation.mutate()}
+                >
+                  {addStudentMutation.isPending ? 'Đang thêm...' : 'Thêm vào lớp'}
+                </button>
+                {addStudentMutation.error ? <p className="error-text">{(addStudentMutation.error as Error).message}</p> : null}
+              </div>
+            </details>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Gắn môn học cho lớp</h3>
-            <div className="form-stack">
-              <label>
-                Môn học có sẵn
-                <select value={selectedSubjectId} onChange={(event) => setSelectedSubjectId(event.target.value)} disabled={!resolvedSelectedClassId}>
-                  <option value="">Chọn môn học</option>
-                  {availableSubjects.map((subject) => (
-                    <option key={subject.id} value={subject.id}>{subject.name}</option>
-                  ))}
-                </select>
-              </label>
-              <button
-                className="action-button"
-                type="button"
-                disabled={!resolvedSelectedClassId || !selectedSubjectId || addSubjectMutation.isPending}
-                onClick={() => addSubjectMutation.mutate()}
-              >
-                {addSubjectMutation.isPending ? 'Đang gắn...' : 'Gắn môn học'}
-              </button>
-              {addSubjectMutation.error ? <p className="error-text">{(addSubjectMutation.error as Error).message}</p> : null}
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Môn học</p>
+                <h3>Trong lớp</h3>
+              </div>
             </div>
-
             <div className="tag-wrap">
               {classSubjectsQuery.data?.map((item) => (
                 <span key={item.id} className="subject-pill">{item.subject?.name ?? `Môn #${item.subject_id}`}</span>
               ))}
               {resolvedSelectedClassId && !classSubjectsQuery.data?.length && !classSubjectsQuery.isLoading ? <p>Lớp này chưa có môn học nào.</p> : null}
             </div>
-          </article>
-        </section>
 
-        <section className="roadmap-panel">
-          <h3>Danh sách lớp</h3>
-          <div className="card-grid classes-grid">
-            {classesQuery.data?.map((classItem) => (
-              <article key={classItem.id} className="info-card">
-                <span>{classItem.grade_label ? `Khối ${classItem.grade_label}` : 'Lớp học'}</span>
-                <strong>{classItem.name}</strong>
-                <p>{classItem.student_count} học sinh, {classItem.subject_count} môn học</p>
-                <p>{classUiVariantLabelMap[classItem.ui_variant] ?? classItem.ui_variant}</p>
-                {classItem.ui_variant === 'visual_support' ? <p>{visualThemeLabelMap[classItem.visual_theme] ?? classItem.visual_theme}</p> : null}
-                <p>Mật khẩu: {classItem.join_credential?.class_password ?? 'Chưa cập nhật'}</p>
+            <details className="config-card">
+              <summary className="simple-summary">Gắn môn</summary>
+              <div className="form-stack">
+                <label>
+                  Môn học có sẵn
+                  <select value={selectedSubjectId} onChange={(event) => setSelectedSubjectId(event.target.value)} disabled={!resolvedSelectedClassId}>
+                    <option value="">Chọn môn học</option>
+                    {availableSubjects.map((subject) => (
+                      <option key={subject.id} value={subject.id}>{subject.name}</option>
+                    ))}
+                  </select>
+                </label>
                 <button
+                  className="action-button"
                   type="button"
-                  className={resolvedSelectedClassId === classItem.id ? 'pill-button pill-button-active' : 'pill-button'}
-                  onClick={() => setSelectedClassId(classItem.id)}
+                  disabled={!resolvedSelectedClassId || !selectedSubjectId || addSubjectMutation.isPending}
+                  onClick={() => addSubjectMutation.mutate()}
                 >
-                  {resolvedSelectedClassId === classItem.id ? 'Đang chọn' : 'Quản lý lớp này'}
+                  {addSubjectMutation.isPending ? 'Đang gắn...' : 'Gắn môn học'}
                 </button>
-              </article>
-            ))}
-          </div>
+                {addSubjectMutation.error ? <p className="error-text">{(addSubjectMutation.error as Error).message}</p> : null}
+              </div>
+            </details>
+          </article>
         </section>
       </div>
     </RequireAuth>

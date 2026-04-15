@@ -21,30 +21,23 @@ import { getDefaultRouteForRole } from './utils/roleRoutes'
 
 const navItemsByRole: Record<string, Array<{ to: string; label: string }>> = {
   admin: [
-    { to: '/admin', label: 'Quản trị' },
+    { to: '/admin', label: 'Admin' },
   ],
   teacher: [
-    { to: '/giao-vien', label: 'Trang giáo viên' },
-    { to: '/hoc-sinh', label: 'Học sinh' },
-    { to: '/lop-hoc', label: 'Lớp học' },
-    { to: '/bai-hoc', label: 'Bài học' },
-    { to: '/giao-bai', label: 'Giao bài' },
+    { to: '/giao-vien', label: 'Nhà' },
+    { to: '/hoc-sinh', label: 'HS' },
+    { to: '/lop-hoc', label: 'Lớp' },
+    { to: '/bai-hoc', label: 'Bài' },
+    { to: '/giao-bai', label: 'Giao' },
     { to: '/tien-do', label: 'Tiến độ' },
-    { to: '/cai-dat-ai', label: 'Cài đặt AI' },
+    { to: '/cai-dat-ai', label: 'AI' },
   ],
   student: [
-    { to: '/hoc-tap', label: 'Trang học sinh' },
+    { to: '/hoc-tap', label: 'Học' },
   ],
   parent: [
-    { to: '/phu-huynh', label: 'Trang phụ huynh' },
+    { to: '/phu-huynh', label: 'Con' },
   ],
-}
-
-const roleDescriptions: Record<string, string> = {
-  admin: 'Quản lý tài khoản và hệ thống.',
-  teacher: 'Quản lý lớp học, bài học và phụ huynh.',
-  student: 'Xem bài được giao và theo dõi tiến độ học tập.',
-  parent: 'Theo dõi tình hình học tập của con.',
 }
 
 const roleLabels: Record<string, string> = {
@@ -84,8 +77,6 @@ function App() {
     return navItemsByRole[user.role] ?? [{ to: getDefaultRouteForRole(user.role), label: 'Trang của tôi' }]
   }, [user])
 
-  const activeDescription = user ? roleDescriptions[user.role] ?? 'Không gian học tập của bạn đã sẵn sàng.' : 'Đăng nhập để sử dụng hệ thống.'
-
   function handleLogout() {
     clearSession()
     setIsMenuOpen(false)
@@ -118,7 +109,7 @@ function App() {
         <div className="sidebar-top">
           <div className="sidebar-brand-block">
             <h2 className="sidebar-title">Bạn học thông minh</h2>
-            <p className="sidebar-copy">{activeDescription}</p>
+            <span className="sidebar-card-label">{user ? roleLabels[user.role] ?? user.role : 'Đăng nhập'}</span>
           </div>
 
         </div>
@@ -139,12 +130,12 @@ function App() {
         </nav>
 
         <div className="sidebar-card">
-          <span className="sidebar-card-label">Phiên hiện tại</span>
+          <span className="sidebar-card-label">Phiên</span>
           <strong>{user ? `${user.email ?? user.phone}` : 'Chưa đăng nhập'}</strong>
-          <p>{user ? `Vai trò: ${roleLabels[user.role] ?? user.role}` : 'Đăng nhập để mở màn hình học tập riêng của bạn.'}</p>
+          <p>{user ? roleLabels[user.role] ?? user.role : 'Chưa vào'}</p>
           {user ? (
             <p className="sidebar-notification-copy">
-              Thông báo mới: <span className="sidebar-notification-badge">{unreadNotificationCount}</span>
+              Nhắc <span className="sidebar-notification-badge">{unreadNotificationCount}</span>
             </p>
           ) : null}
           {user ? (

@@ -21,12 +21,12 @@ import type { ParentTeacherConversationItem } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
 const quickLinks = [
-  { to: '/hoc-sinh', title: 'Hồ sơ học sinh', description: 'Thêm và cập nhật thông tin nền của học sinh.' },
-  { to: '/lop-hoc', title: 'Lớp học', description: 'Tạo lớp, lấy mã vào lớp và quản lý sĩ số.' },
-  { to: '/bai-hoc', title: 'Bài học', description: 'Tạo bài học và hoạt động theo từng bước dễ nhập.' },
-  { to: '/giao-bai', title: 'Giao bài', description: 'Chọn lớp, chọn bài học rồi giao trong vài thao tác.' },
-  { to: '/tien-do', title: 'Tiến độ', description: 'Theo dõi dữ liệu học tập mà hệ thống tự cập nhật từ học sinh.' },
-  { to: '/cai-dat-ai', title: 'Cài đặt AI', description: 'Kiểm tra trợ lý AI và trạng thái kết nối.' },
+  { to: '/hoc-sinh', title: 'Học sinh', icon: 'HS', description: 'Hồ sơ' },
+  { to: '/lop-hoc', title: 'Lớp', icon: 'LP', description: 'Mã vào' },
+  { to: '/bai-hoc', title: 'Bài', icon: 'BH', description: 'Hoạt động' },
+  { to: '/giao-bai', title: 'Giao', icon: 'GB', description: 'Chọn lớp' },
+  { to: '/tien-do', title: 'Tiến độ', icon: '%', description: 'Theo dõi' },
+  { to: '/cai-dat-ai', title: 'AI', icon: 'AI', description: 'Kết nối' },
 ]
 
 const readinessLabelMap: Record<string, string> = {
@@ -267,116 +267,85 @@ export function TeacherHomePage() {
 
   return (
     <RequireAuth allowedRoles={['teacher']}>
-      <div className="page-stack">
-        <section className="roadmap-panel">
-          <p className="eyebrow">Giáo viên</p>
-          <h2>Trung tâm điều hành gọn gàng và sạch hơn</h2>
-          <p>Mình đã tách chat thành cửa sổ nổi riêng. Trang giáo viên giờ tập trung vào vận hành, còn trao đổi với phụ huynh sẽ mở bằng một nút chat ở góc màn hình.</p>
+      <div className="page-stack teacher-clean-page">
+        <section className="roadmap-panel teacher-clean-hero">
+          <div>
+            <p className="eyebrow teacher-clean-title-label">Giáo viên</p>
+          </div>
+          <div className="teacher-clean-hero-badges">
+            <span>ID {teacherId ?? '---'}</span>
+            <span>{unreadConversationCount} chat</span>
+            <span>{averageLatestProgress}% tiến độ</span>
+          </div>
+        </section>
+
+        <section className="teacher-clean-metrics">
+          {[
+            { label: 'Học sinh', value: studentCount, tone: 'blue' },
+            { label: 'Phụ huynh', value: parentGroupCount, tone: 'green' },
+            { label: 'Báo cáo', value: reportCount, tone: 'gold' },
+            { label: 'Chưa đọc', value: unreadConversationCount, tone: 'coral' },
+            { label: 'Phối hợp', value: sharedStudentCount, tone: 'ink' },
+          ].map((item) => (
+            <article key={item.label} className={`mini-card teacher-clean-metric teacher-clean-metric-${item.tone}`}>
+              <span>{item.label}</span>
+              <strong>{item.value}</strong>
+            </article>
+          ))}
+        </section>
+
+        <section className="teacher-clean-shortcuts">
+          {quickLinks.map((item) => (
+            <Link key={item.to} className="teacher-clean-shortcut" to={item.to}>
+              <span className="teacher-clean-shortcut-icon">{item.icon}</span>
+              <strong>{item.title}</strong>
+              <small>{item.description}</small>
+            </Link>
+          ))}
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Tiến độ được cập nhật tự động</h3>
-            <div className="detail-stack">
-              <div className="student-row">
-                <strong>Không cần nhập tay tiến độ</strong>
-                <span>Hệ thống tự ghi nhận từ hoạt động học sinh đã làm trong từng bài học.</span>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Tổng quan</p>
+                <h3>Hôm nay</h3>
               </div>
-              <div className="student-row">
-                <strong>Giáo viên tập trung vào điều phối</strong>
-                <span>Tạo bài, giao bài, xem dữ liệu và hỗ trợ đúng học sinh đang cần thêm trợ giúp.</span>
-              </div>
+              <span className="subject-pill muted-pill">{studentCount} HS</span>
             </div>
-          </article>
-
-          <article className="roadmap-panel">
-            <h3>Luồng làm việc đề xuất</h3>
-            <div className="detail-stack">
-              <div className="student-row">
-                <strong>1. Tạo bài và hoạt động</strong>
-                <span>Thiết kế bài học ngắn, rõ và vừa sức với học sinh.</span>
-              </div>
-              <div className="student-row">
-                <strong>2. Giao bài cho lớp</strong>
-                <span>Sau khi giao, hệ thống tự theo dõi trạng thái học tập và phần trăm hoàn thành.</span>
-              </div>
-              <div className="student-row">
-                <strong>3. Chat và gửi báo cáo</strong>
-                <span>Dùng dữ liệu học thật để phản hồi cho phụ huynh nhanh, rõ và đúng ngữ cảnh.</span>
-              </div>
-            </div>
-          </article>
-        </section>
-
-        <section className="metrics-grid">
-          <article className="mini-card">
-            <span>Teacher ID</span>
-            <strong>{teacherId ?? '---'}</strong>
-          </article>
-          <article className="mini-card">
-            <span>Học sinh</span>
-            <strong>{studentCount}</strong>
-          </article>
-          <article className="mini-card">
-            <span>Phụ huynh đã liên kết</span>
-            <strong>{parentGroupCount}</strong>
-          </article>
-          <article className="mini-card">
-            <span>Báo cáo đã gửi</span>
-            <strong>{reportCount}</strong>
-          </article>
-          <article className="mini-card">
-            <span>Tin nhắn chưa đọc</span>
-            <strong>{unreadConversationCount}</strong>
-          </article>
-          <article className="mini-card">
-            <span>Học sinh học cùng GV khác</span>
-            <strong>{sharedStudentCount}</strong>
-          </article>
-        </section>
-
-        <section className="dashboard-grid">
-          <article className="roadmap-panel">
-            <h3>Tổng quan nhanh</h3>
             <BarChartCard
-              title="Thống kê hiện tại"
-              description="Nhìn nhanh khối lượng theo dõi và phối hợp trong ngày."
+              title="Nhìn nhanh"
+              description="Theo dõi chung"
               items={teacherOverviewChartItems}
             />
           </article>
 
           <article className="roadmap-panel">
-            <h3>Readiness</h3>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Ưu tiên</p>
+                <h3>Readiness</h3>
+              </div>
+              <span className="subject-pill muted-pill">{parentGroupCount} nhóm</span>
+            </div>
             <BarChartCard
-              title="Mức độ sẵn sàng"
-              description="Dữ liệu này đến từ quá trình học của học sinh, giúp ưu tiên nhóm cần hỗ trợ trước."
+              title="Mức sẵn sàng"
+              description="Ưu tiên hỗ trợ"
               items={readinessChartItems}
-              emptyMessage="Chưa có liên kết phụ huynh nên chưa có dữ liệu readiness."
+              emptyMessage="Chưa có dữ liệu readiness."
             />
           </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Việc cần làm hôm nay</h3>
-            <div className="detail-stack">
-              <div className="student-row">
-                <strong>1. Tạo hoặc chọn lớp</strong>
-                <span>Lấy ID lớp và mật khẩu để học sinh vào lớp nhanh.</span>
-              </div>
-              <div className="student-row">
-                <strong>2. Gắn phụ huynh</strong>
-                <span>Phụ huynh sẽ thấy tiến độ tự động khi đã được liên kết đúng với học sinh.</span>
-              </div>
-              <div className="student-row">
-                <strong>3. Trả lời nhanh bằng icon chat</strong>
-                <span>Không còn khung chat chen vào giữa dashboard, chỉ bấm icon là mở hộp chat riêng.</span>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Liên kết</p>
+                <h3>Gắn phụ huynh</h3>
               </div>
             </div>
-          </article>
 
-          <article className="roadmap-panel">
-            <h3>Gắn phụ huynh vào học sinh</h3>
             <div className="form-stack">
               <label>
                 Học sinh
@@ -408,35 +377,34 @@ export function TeacherHomePage() {
                 disabled={!selectedStudentId || !selectedParentId || linkMutation.isPending}
                 onClick={() => linkMutation.mutate()}
               >
-                {linkMutation.isPending ? 'Đang liên kết...' : 'Thêm vào nhóm phụ huynh'}
+                {linkMutation.isPending ? 'Đang gắn...' : 'Gắn phụ huynh'}
               </button>
 
               {selectedSharedStudent ? (
-                <details className="config-card">
-                  <summary className="simple-summary">Thông tin phối hợp</summary>
-                  <p>Học sinh này đang học với {selectedSharedStudent.teachers.length} giáo viên.</p>
-                  <p>Giáo viên khác: {selectedSharedStudent.peer_teachers.map((teacher) => teacher.full_name).join(', ') || 'Không có'}</p>
-                </details>
+                <article className="teacher-clean-note-card">
+                  <strong>{selectedSharedStudent.student.full_name}</strong>
+                  <p>{selectedSharedStudent.teachers.length} giáo viên theo dõi</p>
+                  <p>{selectedSharedStudent.peer_teachers.map((teacher) => teacher.full_name).join(', ') || 'Chưa có giáo viên phối hợp'}</p>
+                </article>
               ) : null}
 
               {linkMutation.error ? <p className="error-text">{(linkMutation.error as Error).message}</p> : null}
             </div>
           </article>
-        </section>
 
-        <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Gửi báo cáo học tập</h3>
-            <div className="form-stack">
-              <div className="config-card">
-                <strong>Dữ liệu báo cáo được lấy tự động</strong>
-                <p className="helper-text">Báo cáo dùng tiến độ, độ sẵn sàng và mức hoàn thành gần nhất từ quá trình học của học sinh.</p>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Báo cáo</p>
+                <h3>Gửi nhanh</h3>
               </div>
+            </div>
 
+            <div className="form-stack">
               <label>
-                Gửi theo học sinh
+                Học sinh
                 <select value={reportStudentId} onChange={(event) => setReportStudentId(event.target.value)}>
-                  <option value="">Tất cả phụ huynh đang liên kết</option>
+                  <option value="">Tất cả phụ huynh đã liên kết</option>
                   {(studentsQuery.data ?? []).map((student) => (
                     <option key={student.id} value={student.id}>
                       {student.full_name}
@@ -448,12 +416,12 @@ export function TeacherHomePage() {
               <details className="config-card">
                 <summary className="simple-summary">Tùy chọn thêm</summary>
                 <label>
-                  Tiêu đề báo cáo
-                  <input value={reportTitle} onChange={(event) => setReportTitle(event.target.value)} placeholder="Bỏ trống để dùng tiêu đề mặc định" />
+                  Tiêu đề
+                  <input value={reportTitle} onChange={(event) => setReportTitle(event.target.value)} placeholder="Để trống nếu dùng mặc định" />
                 </label>
                 <label>
-                  Ghi chú giáo viên
-                  <textarea value={reportNote} onChange={(event) => setReportNote(event.target.value)} rows={4} placeholder="Viết ngắn gọn điều phụ huynh cần lưu ý thêm." />
+                  Ghi chú
+                  <textarea value={reportNote} onChange={(event) => setReportNote(event.target.value)} rows={4} placeholder="Viết ngắn gọn." />
                 </label>
               </details>
 
@@ -464,7 +432,7 @@ export function TeacherHomePage() {
                   disabled={reportMutation.isPending || !parentGroupCount}
                   onClick={() => reportMutation.mutate(reportStudentId ? Number(reportStudentId) : undefined)}
                 >
-                  {reportMutation.isPending ? 'Đang gửi...' : reportStudentId ? 'Gửi cho học sinh đã chọn' : 'Gửi tất cả'}
+                  {reportMutation.isPending ? 'Đang gửi...' : reportStudentId ? 'Gửi 1 học sinh' : 'Gửi tất cả'}
                 </button>
                 <button
                   className="ghost-button"
@@ -475,43 +443,51 @@ export function TeacherHomePage() {
                     reportMutation.mutate(undefined)
                   }}
                 >
-                  Gửi cho toàn bộ phụ huynh
+                  Gửi toàn bộ
                 </button>
               </div>
 
               {reportMutation.error ? <p className="error-text">{(reportMutation.error as Error).message}</p> : null}
             </div>
           </article>
-
-          <article className="roadmap-panel">
-            <h3>Nhóm phụ huynh đang theo dõi</h3>
-            <BarChartCard
-              title="Tiến độ của nhóm phụ huynh"
-              description="Tổng hợp dữ liệu học tập được hệ thống tự đồng bộ sang phía phụ huynh."
-              items={parentGroupProgressChartItems}
-              emptyMessage="Chưa có liên kết phụ huynh nên chưa có tiến độ để hiển thị."
-            />
-            <p className="helper-text">Tiến độ gần nhất trung bình của nhóm: {averageLatestProgress}%.</p>
-            <div className="student-list compact-list">
-              {(parentGroupsQuery.data ?? []).map((item) => (
-                <div key={item.link_id} className="student-row">
-                  <strong>{item.student?.full_name ?? 'Học sinh'}</strong>
-                  <span>{item.parent?.full_name ?? 'Phụ huynh'} - parent ID {item.parent?.id ?? '---'}</span>
-                  <p>Tiến độ gần nhất: {item.progress_summary.last_progress_percent}%</p>
-                  <p>Readiness: {readinessLabelMap[item.progress_summary.readiness_status] ?? item.progress_summary.readiness_status}</p>
-                  <p>Lớp: {item.classes.map((classroom) => classroom.name).join(', ') || 'Chưa vào lớp nào'}</p>
-                </div>
-              ))}
-              {!parentGroupsQuery.data?.length && !parentGroupsQuery.isLoading ? <p>Chưa có liên kết phụ huynh nào.</p> : null}
-            </div>
-          </article>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Học sinh học cùng giáo viên khác</h3>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Phụ huynh</p>
+                <h3>Nhóm đang theo dõi</h3>
+              </div>
+              <span className="subject-pill muted-pill">{averageLatestProgress}% TB</span>
+            </div>
+            <BarChartCard
+              title="Tiến độ nhóm"
+              description="Tự cập nhật"
+              items={parentGroupProgressChartItems}
+              emptyMessage="Chưa có liên kết phụ huynh."
+            />
             <div className="student-list compact-list">
-              {(sharedStudentsQuery.data ?? []).map((item) => (
+              {(parentGroupsQuery.data ?? []).slice(0, 6).map((item) => (
+                <div key={item.link_id} className="student-row">
+                  <strong>{item.student?.full_name ?? 'Học sinh'}</strong>
+                  <span>{item.parent?.full_name ?? 'Phụ huynh'}</span>
+                  <p>{item.progress_summary.last_progress_percent}% • {readinessLabelMap[item.progress_summary.readiness_status] ?? item.progress_summary.readiness_status}</p>
+                </div>
+              ))}
+              {!parentGroupsQuery.data?.length && !parentGroupsQuery.isLoading ? <p>Chưa có nhóm phụ huynh.</p> : null}
+            </div>
+          </article>
+
+          <article className="roadmap-panel">
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Phối hợp</p>
+                <h3>Học sinh chung</h3>
+              </div>
+            </div>
+            <div className="student-list compact-list">
+              {(sharedStudentsQuery.data ?? []).slice(0, 8).map((item) => (
                 <button
                   key={item.student.id}
                   type="button"
@@ -519,63 +495,64 @@ export function TeacherHomePage() {
                   onClick={() => setSelectedStudentId(String(item.student.id))}
                 >
                   <strong>{item.student.full_name}</strong>
-                  <span>{item.student.disability_level} | Lớp với mình: {item.my_active_class_count}</span>
-                  <p>Phụ huynh đã vào nhóm với mình: {item.parent_group_count}</p>
-                  <p>Đang học cùng: {item.peer_teachers.map((teacher) => teacher.full_name).join(', ')}</p>
+                  <span>{item.parent_group_count} phụ huynh • {item.my_active_class_count} lớp</span>
+                  <p>{item.peer_teachers.map((teacher) => teacher.full_name).join(', ') || 'Chưa có phối hợp'}</p>
                 </button>
               ))}
-              {!sharedStudentsQuery.data?.length && !sharedStudentsQuery.isLoading ? <p>Chưa có học sinh nào học cùng giáo viên khác.</p> : null}
+              {!sharedStudentsQuery.data?.length && !sharedStudentsQuery.isLoading ? <p>Chưa có học sinh phối hợp.</p> : null}
+            </div>
+          </article>
+        </section>
+
+        <section className="dashboard-grid">
+          <article className="roadmap-panel">
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Lịch sử</p>
+                <h3>Báo cáo gần đây</h3>
+              </div>
+              <span className="subject-pill muted-pill">{reportCount}</span>
+            </div>
+            <div className="student-list compact-list">
+              {(reportsQuery.data ?? []).slice(0, 6).map((report) => (
+                <div key={report.id} className="student-row">
+                  <strong>{report.student?.full_name ?? `Học sinh #${report.student_id}`}</strong>
+                  <span>{report.report_date} • {report.parent?.full_name ?? `Phụ huynh #${report.parent_id}`}</span>
+                  <p>{report.summary_text}</p>
+                </div>
+              ))}
+              {!reportsQuery.data?.length && !reportsQuery.isLoading ? <p>Chưa có báo cáo.</p> : null}
             </div>
           </article>
 
           <article className="roadmap-panel">
-            <h3>Lịch sử báo cáo và điều hướng</h3>
-            <div className="detail-stack">
-              <details className="config-card" open>
-                <summary className="simple-summary">Lịch sử báo cáo</summary>
-                <div className="student-list compact-list">
-                  {(reportsQuery.data ?? []).map((report) => (
-                    <div key={report.id} className="student-row">
-                      <strong>{report.student?.full_name ?? `Học sinh #${report.student_id}`}</strong>
-                      <span>{report.report_date} - {report.parent?.full_name ?? `Phụ huynh #${report.parent_id}`}</span>
-                      <p>{report.summary_text}</p>
-                      {report.teacher_note ? <p>Ghi chú: {report.teacher_note}</p> : null}
-                    </div>
-                  ))}
-                  {!reportsQuery.data?.length && !reportsQuery.isLoading ? <p>Chưa có báo cáo nào được gửi.</p> : null}
-                </div>
-              </details>
-
-              <details className="config-card">
-                <summary className="simple-summary">Điều hướng nhanh</summary>
-                <div className="detail-stack">
-                  {quickLinks.map((item) => (
-                    <div key={item.to} className="student-row">
-                      <strong>{item.title}</strong>
-                      <span>{item.description}</span>
-                      <Link className="action-button" to={item.to}>
-                        Mở chức năng
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              </details>
-
-              {selectedSharedStudent ? (
-                <details className="config-card">
-                  <summary className="simple-summary">Danh sách giáo viên phối hợp</summary>
-                  <div className="detail-stack">
-                    {selectedSharedStudent.teachers.map((teacher) => (
-                      <div key={teacher.id} className="student-row">
-                        <strong>{teacher.full_name}</strong>
-                        <span>{teacher.is_current_teacher ? 'Giáo viên hiện tại' : 'Giáo viên phối hợp'}</span>
-                        <p>{teacher.school_name ?? 'Chưa cập nhật trường'} | {teacher.email ?? teacher.phone ?? 'Chưa có liên hệ'}</p>
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              ) : null}
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Phối hợp</p>
+                <h3>Giáo viên liên quan</h3>
+              </div>
             </div>
+
+            {selectedSharedStudent ? (
+              <div className="detail-stack">
+                <article className="teacher-clean-note-card">
+                  <strong>{selectedSharedStudent.student.full_name}</strong>
+                  <p>{selectedSharedStudent.teachers.length} giáo viên cùng theo dõi</p>
+                </article>
+                {selectedSharedStudent.teachers.map((teacher) => (
+                  <div key={teacher.id} className="student-row">
+                    <strong>{teacher.full_name}</strong>
+                    <span>{teacher.is_current_teacher ? 'Hiện tại' : 'Phối hợp'}</span>
+                    <p>{teacher.school_name ?? 'Chưa cập nhật trường'} • {teacher.email ?? teacher.phone ?? 'Chưa có liên hệ'}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="teacher-clean-empty">
+                <strong>Chọn một học sinh ở khung bên trái.</strong>
+                <p>Mình sẽ hiện giáo viên phối hợp và thông tin liên hệ tại đây.</p>
+              </div>
+            )}
           </article>
         </section>
       </div>

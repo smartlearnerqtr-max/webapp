@@ -5,10 +5,11 @@ import re
 import unicodedata
 from difflib import SequenceMatcher
 
-from flask import current_app, request
+from flask import Response, current_app, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from ....models import User
+from ....services.edge_tts_service import EdgeTTSServiceError, synthesize_vietnamese_mp3
 from ....services.gemini_service import DEFAULT_MODEL, GeminiServiceError, generate_text, generate_text_with_prompts
 from ....services.logger import log_server_event
 from ....utils.responses import error_response, success_response
@@ -208,7 +209,6 @@ def chat_with_ai():
     context = payload.get('context') or {}
     context.setdefault('target_role', user.role)
     model_name = _configured_model_name()
-
     try:
         result = generate_text(
             api_keys=api_keys,
@@ -244,6 +244,55 @@ def chat_with_ai():
             'prompt_feedback': result.prompt_feedback,
         },
         'Lay phan hoi AI thanh cong',
+    )
+
+
+@api_v1.post('/ai/speech')
+@jwt_required()
+def synthesize_ai_speech():
+    user = _current_user()
+    if not user:
+        return error_response('Khong tim thay nguoi dung', 'USER_NOT_FOUND', 404)
+
+    payload = request.get_json(silent=True) or {}
+    text = str(payload.get('text') or '').strip()
+    if not text:
+        return error_response('Noi dung can doc khong duoc de trong', 'VALIDATION_ERROR', 422)
+
+    try:
+        audio_bytes = synthesize_vietnamese_mp3(
+            text=text,
+            voice_name=str(current_app.config.get('EDGE_TTS_VOICE_NAME') or 'vi-VN-HoaiMyNeural'),
+            rate=str(current_app.config.get('EDGE_TTS_RATE') or '-12%'),
+            pitch=str(current_app.config.get('EDGE_TTS_PITCH') or '+0Hz'),
+        )
+    except EdgeTTSServiceError as exc:
+        log_server_event(
+            level='error',
+            module='ai_speech',
+            message='Tao audio huong dan bang Edge TTS that bai',
+            error_code='EDGE_TTS_FAILED',
+            action_name='ai_speech_failed',
+            user_id=user.id,
+            metadata={'status': exc.status_code},
+        )
+        return error_response(exc.message, 'EDGE_TTS_FAILED', exc.status_code)
+
+    log_server_event(
+        level='info',
+        module='ai_speech',
+        message='Tao audio huong dan bang Edge TTS thanh cong',
+        action_name='ai_speech_success',
+        user_id=user.id,
+        metadata={'voice_name': current_app.config.get('EDGE_TTS_VOICE_NAME'), 'text_length': len(text)},
+    )
+    return Response(
+        audio_bytes,
+        mimetype='audio/mpeg',
+        headers={
+            'Cache-Control': 'no-store',
+            'Content-Disposition': 'inline; filename="career-voice.mp3"',
+        },
     )
 
 
