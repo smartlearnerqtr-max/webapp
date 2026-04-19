@@ -1,3 +1,5 @@
+import { useAuthStore } from '../store/authStore'
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000'
 
 type RequestOptions = {
@@ -6,19 +8,104 @@ type RequestOptions = {
   body?: unknown
 }
 
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: options.method ?? 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  })
+let refreshAccessTokenRequest: Promise<string | null> | null = null
 
-  const json = await response.json()
-  if (!response.ok || !json.success) {
-    throw new Error(json.message ?? 'Request failed')
+async function parseJsonResponse(response: Response) {
+  try {
+    return await response.json()
+  } catch {
+    return null
+  }
+}
+
+async function refreshAccessToken() {
+  if (!refreshAccessTokenRequest) {
+    refreshAccessTokenRequest = (async () => {
+      const { refreshToken, user, profile, setSession, clearSession } = useAuthStore.getState()
+      if (!refreshToken) return null
+
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+        },
+      })
+      const json = await parseJsonResponse(response)
+      const nextAccessToken = typeof json?.data?.access_token === 'string' ? json.data.access_token : null
+
+      if (!response.ok || !json?.success || !nextAccessToken) {
+        clearSession()
+        return null
+      }
+
+      if (user) {
+        setSession({ accessToken: nextAccessToken, refreshToken, user, profile })
+      } else {
+        useAuthStore.setState({ accessToken: nextAccessToken })
+      }
+
+      return nextAccessToken
+    })().finally(() => {
+      refreshAccessTokenRequest = null
+    })
+  }
+
+  return refreshAccessTokenRequest
+}
+
+async function fetchJsonWithAuthRetry(path: string, options: RequestOptions) {
+  const buildRequest = (token?: string | null) =>
+    fetch(`${API_BASE_URL}${path}`, {
+      method: options.method ?? 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    })
+
+  let response = await buildRequest(options.token)
+  let json = await parseJsonResponse(response)
+
+  if (response.status === 401 && options.token) {
+    const nextAccessToken = await refreshAccessToken()
+    if (nextAccessToken) {
+      response = await buildRequest(nextAccessToken)
+      json = await parseJsonResponse(response)
+    }
+  }
+
+  return { response, json }
+}
+
+async function fetchWithAccessTokenRetry(path: string, init: RequestInit, token?: string | null) {
+  const buildRequest = (accessToken?: string | null) => {
+    const headers = new Headers(init.headers)
+    if (accessToken) {
+      headers.set('Authorization', `Bearer ${accessToken}`)
+    }
+    return fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers,
+    })
+  }
+
+  let response = await buildRequest(token)
+
+  if (response.status === 401 && token) {
+    const nextAccessToken = await refreshAccessToken()
+    if (nextAccessToken) {
+      response = await buildRequest(nextAccessToken)
+    }
+  }
+
+  return response
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const { response, json } = await fetchJsonWithAuthRetry(path, options)
+  if (!response.ok || !json?.success) {
+    throw new Error(json?.message ?? 'Request failed')
   }
 
   return json.data as T
@@ -722,17 +809,14 @@ export async function uploadLessonMedia(token: string, file: File): Promise<Uplo
   const formData = new FormData()
   formData.append('file', file)
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/media/upload`, {
+  const response = await fetchWithAccessTokenRetry('/api/v1/media/upload', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: formData,
-  })
+  }, token)
 
-  const json = await response.json()
-  if (!response.ok || !json.success) {
-    throw new Error(json.message ?? 'Upload failed')
+  const json = await parseJsonResponse(response)
+  if (!response.ok || !json?.success) {
+    throw new Error(json?.message ?? 'Upload failed')
   }
 
   return json.data as UploadedMediaItem
@@ -881,14 +965,13 @@ export async function sendAIChat(token: string, payload: {
 }
 
 export async function synthesizeAISpeech(token: string, payload: { text: string }): Promise<Blob> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/ai/speech`, {
+  const response = await fetchWithAccessTokenRetry('/api/v1/ai/speech', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(payload),
-  })
+  }, token)
 
   if (!response.ok) {
     let message = 'Khong the tao audio'

@@ -14,6 +14,10 @@ type ActivityType =
   | 'hidden_image_guess'
   | 'step_by_step'
   | 'aac'
+  | 'memory_match'
+  | 'quick_tap'
+  | 'size_order'
+  | 'habitat_match'
   | 'career_simulation'
   | 'ai_chat'
 
@@ -23,6 +27,34 @@ type ActivityPair = {
 }
 
 type ImageChoiceCard = {
+  id: string
+  label: string
+  mediaUrl: string
+  mediaKind: string | null
+}
+
+type QuickTapVisibleCard = ImageChoiceCard & {
+  isTarget: boolean
+  slotKey: string
+}
+
+type QuickTapFallingCard = QuickTapVisibleCard & {
+  xPercent: number
+  durationSeconds: number
+  tiltDeg: number
+  delayMs: number
+}
+
+type OrderedImageItem = ImageChoiceCard & {
+  rank: number
+}
+
+type HabitatMatchItem = ImageChoiceCard & {
+  habitat: string
+  habitatId: string
+}
+
+type HabitatOption = {
   id: string
   label: string
   mediaUrl: string
@@ -67,6 +99,10 @@ type BrowserSpeechRecognitionConstructor = new () => BrowserSpeechRecognition
 type ActivityPresentationMode = 'standard' | 'immersive_square'
 
 const activityTypeLabelMap: Record<string, string> = {
+  memory_match: 'Lật thẻ ghi nhớ',
+  quick_tap: 'Chạm đúng nhanh',
+  size_order: 'Sắp xếp lớn nhỏ',
+  habitat_match: 'Ghép nơi sống',
   multiple_choice: 'Chọn đáp án',
   image_choice: 'Nhìn ảnh chọn đáp án',
   image_puzzle: 'Ghép mảnh ảnh',
@@ -134,8 +170,101 @@ function toImageChoiceCardArray(value: unknown) {
         mediaUrl,
         mediaKind: toText(rawItem.media_kind) || inferMediaKind(mediaUrl, null),
       }
-    })
+  })
   return cards.filter((item): item is ImageChoiceCard => item !== null)
+}
+
+function toOrderedImageItemArray(value: unknown) {
+  if (!Array.isArray(value)) return []
+  const items: Array<OrderedImageItem | null> = value.map((item, index) => {
+    if (!item || typeof item !== 'object') return null
+    const rawItem = item as {
+      id?: unknown
+      label?: unknown
+      media_url?: unknown
+      media_kind?: unknown
+      rank?: unknown
+    }
+    const mediaUrl = toText(rawItem.media_url)
+    if (!mediaUrl) return null
+    return {
+      id: toText(rawItem.id) || `size-item-${index + 1}`,
+      label: toText(rawItem.label) || `Vật ${index + 1}`,
+      mediaUrl,
+      mediaKind: toText(rawItem.media_kind) || inferMediaKind(mediaUrl, null),
+      rank: Number(rawItem.rank ?? index + 1) || index + 1,
+    }
+  })
+  return items.filter((item): item is OrderedImageItem => item !== null)
+}
+
+function toHabitatMatchItemArray(value: unknown) {
+  if (!Array.isArray(value)) return []
+  const items: Array<HabitatMatchItem | null> = value.map((item, index) => {
+    if (!item || typeof item !== 'object') return null
+    const rawItem = item as {
+      id?: unknown
+      label?: unknown
+      media_url?: unknown
+      media_kind?: unknown
+      habitat?: unknown
+      habitat_id?: unknown
+    }
+    const mediaUrl = toText(rawItem.media_url)
+    const habitat = toText(rawItem.habitat)
+    const habitatId = toText(rawItem.habitat_id) || habitat
+    if (!mediaUrl || !habitatId) return null
+    return {
+      id: toText(rawItem.id) || `habitat-item-${index + 1}`,
+      label: toText(rawItem.label) || `Vật ${index + 1}`,
+      mediaUrl,
+      mediaKind: toText(rawItem.media_kind) || inferMediaKind(mediaUrl, null),
+      habitat: habitat || habitatId,
+      habitatId,
+    }
+  })
+  return items.filter((item): item is HabitatMatchItem => item !== null)
+}
+
+function toHabitatOptionArray(habitatCardsValue: unknown, habitatsValue: unknown) {
+  if (Array.isArray(habitatCardsValue)) {
+    const options: Array<HabitatOption | null> = habitatCardsValue.map((item, index) => {
+      if (!item || typeof item !== 'object') return null
+      const rawItem = item as {
+        id?: unknown
+        label?: unknown
+        media_url?: unknown
+        media_kind?: unknown
+      }
+      const label = toText(rawItem.label)
+      const id = toText(rawItem.id) || label
+      if (!id) return null
+      const mediaUrl = toText(rawItem.media_url)
+      return {
+        id,
+        label: label || `Nơi sống ${index + 1}`,
+        mediaUrl,
+        mediaKind: mediaUrl ? toText(rawItem.media_kind) || inferMediaKind(mediaUrl, null) : null,
+      }
+    })
+    const resolvedOptions = options.filter((item): item is HabitatOption => item !== null)
+    if (resolvedOptions.length) return resolvedOptions
+  }
+
+  return toStringArray(habitatsValue).map((habitat, index) => ({
+    id: habitat,
+    label: habitat || `Nơi sống ${index + 1}`,
+    mediaUrl: '',
+    mediaKind: null,
+  }))
+}
+
+function stableHash(value: string) {
+  let hash = 0
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) % 1000003
+  }
+  return hash
 }
 
 function speechRecognitionConstructor(): BrowserSpeechRecognitionConstructor | null {
@@ -595,7 +724,7 @@ function renderPuzzlePiece({
 }
 
 function ImagePuzzleActivity({ activity, answers, setAnswers }: ActivityComponentProps) {
-  const config = parseActivityConfig(activity.config_json)
+  const config = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
   if (!config) return null
   const imageUrl = toText(config.image_url)
   const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy ghép lại thành bức tranh hoàn chỉnh.'
@@ -942,12 +1071,728 @@ export const StepByStepActivity = React.memo(({ activity, answers, setAnswers }:
   )
 })
 
+export const MemoryMatchActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
+  const config = parseActivityConfig(activity.config_json)
+  if (!config) return null
+  const prompt = toText(config.prompt) || activity.instruction_text || 'Lật 2 thẻ giống nhau để ghi điểm.'
+  const requestedPairCount = Math.max(1, Number(config.pair_count ?? 5) || 5)
+  const cards = toImageChoiceCardArray(config.image_cards).slice(0, requestedPairCount)
+  const deckKey = cards.map((card) => `${card.id}:${card.mediaUrl}`).join('|')
+  const deck = React.useMemo(
+    () =>
+      cards
+        .flatMap((card) => [
+          { ...card, deckId: `${card.id}-a`, pairId: card.id },
+          { ...card, deckId: `${card.id}-b`, pairId: card.id },
+        ])
+        .sort((left, right) => stableHash(`${activity.id}:${left.deckId}`) - stableHash(`${activity.id}:${right.deckId}`)),
+    [activity.id, deckKey],
+  )
+  const matchedIds = Array.isArray(answers[activity.id]) ? answers[activity.id] : []
+  const [openDeckIds, setOpenDeckIds] = React.useState<string[]>([])
+  const [isChecking, setIsChecking] = React.useState(false)
+
+  function handleCardClick(deckCard: (typeof deck)[number]) {
+    if (isChecking || matchedIds.includes(deckCard.pairId) || openDeckIds.includes(deckCard.deckId)) return
+    if (openDeckIds.length === 0) {
+      setOpenDeckIds([deckCard.deckId])
+      return
+    }
+
+    const firstDeckCard = deck.find((card) => card.deckId === openDeckIds[0])
+    if (!firstDeckCard) {
+      setOpenDeckIds([deckCard.deckId])
+      return
+    }
+
+    setOpenDeckIds([firstDeckCard.deckId, deckCard.deckId])
+
+    if (firstDeckCard.pairId === deckCard.pairId) {
+      const nextMatchedIds = matchedIds.includes(deckCard.pairId) ? matchedIds : [...matchedIds, deckCard.pairId]
+      setAnswers((current: any) => ({ ...current, [activity.id]: nextMatchedIds }))
+      window.setTimeout(() => setOpenDeckIds([]), 250)
+      if (nextMatchedIds.length >= cards.length) {
+        scheduleAutoAdvance(onAutoAdvance, activity.id)
+      }
+      return
+    }
+
+    setIsChecking(true)
+    window.setTimeout(() => {
+      setOpenDeckIds([])
+      setIsChecking(false)
+    }, 850)
+  }
+
+  if (!cards.length) {
+    return <p className="helper-text">Hoạt động lật thẻ chưa có ảnh.</p>
+  }
+
+  return (
+    <div className="activity-playground memory-match-shell">
+      <p className="activity-prompt">{prompt}</p>
+      <div className="memory-match-grid" aria-label="Lưới lật thẻ ghi nhớ">
+        {deck.map((deckCard) => {
+          const isMatched = matchedIds.includes(deckCard.pairId)
+          const isOpen = isMatched || openDeckIds.includes(deckCard.deckId)
+          return (
+            <button
+              key={deckCard.deckId}
+              type="button"
+              className={isOpen ? 'memory-card memory-card-open' : 'memory-card'}
+              onClick={() => handleCardClick(deckCard)}
+              aria-pressed={isOpen}
+              aria-label={isOpen ? deckCard.label : 'Thẻ đang úp'}
+            >
+              <span className="memory-card-inner">
+                <span className="memory-card-face memory-card-back">?</span>
+                <span className="memory-card-face memory-card-front">
+                  <img src={deckCard.mediaUrl} alt={deckCard.label} />
+                </span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
+      <p className={matchedIds.length >= cards.length ? 'feedback-note feedback-note-success' : 'feedback-note'}>
+        Đã ghép {matchedIds.length}/{cards.length} cặp.
+      </p>
+    </div>
+  )
+})
+
+export const QuickTapActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
+  const config = parseActivityConfig(activity.config_json)
+  if (!config) return null
+  const prompt = toText(config.prompt) || activity.instruction_text || 'Chạm nhanh vào các thẻ con vật trước khi hết giờ.'
+  const cards = toImageChoiceCardArray(config.image_cards)
+  const distractorCards = toImageChoiceCardArray(config.distractor_cards)
+  const durationSeconds = Math.max(5, Number(config.duration_seconds ?? 10) || 10)
+  const targetHits = Math.max(1, Number(config.target_hits ?? 6) || 6)
+  const simultaneousCards = Math.max(1, Number(config.simultaneous_cards ?? 4) || 4)
+  const spawnIntervalMs = Math.max(1000, Number(config.spawn_interval_ms ?? 1600) || 1600)
+  const fallSpeedPercent = Math.max(1, Number(config.fall_speed_percent ?? 4) || 4)
+  const fallDurationSeconds = Math.max(4.2, Number(config.fall_duration_seconds ?? (5.2 + Math.max(0, 6 - fallSpeedPercent) * 0.08)) || 5.2)
+  const storedAnswer = toText(answers[activity.id])
+  const completedHits = storedAnswer.startsWith('completed:') ? Number(storedAnswer.split(':')[1]) || 0 : 0
+  const [isRunning, setIsRunning] = React.useState(false)
+  const [timeLeft, setTimeLeft] = React.useState(durationSeconds)
+  const [hits, setHits] = React.useState(completedHits)
+  const [fallingCards, setFallingCards] = React.useState<QuickTapFallingCard[]>([])
+  const hitsRef = React.useRef(hits)
+  const spawnSeedRef = React.useRef(0)
+  const cardInstanceRef = React.useRef(0)
+  const removalTimeoutsRef = React.useRef<Record<string, number>>({})
+
+  const clearFallingCards = React.useCallback(() => {
+    Object.values(removalTimeoutsRef.current).forEach((timeoutId) => window.clearTimeout(timeoutId))
+    removalTimeoutsRef.current = {}
+    setFallingCards([])
+  }, [])
+
+  const spawnWave = React.useCallback(() => {
+    if (!cards.length) return
+    const seed = spawnSeedRef.current + 1
+    spawnSeedRef.current = seed
+    const nextCards: QuickTapVisibleCard[] = []
+    const distractorVisibleCount = distractorCards.length ? Math.max(1, Math.floor(simultaneousCards / 3)) : 0
+    const targetVisibleCount = Math.max(1, simultaneousCards - distractorVisibleCount)
+
+    for (let index = 0; index < targetVisibleCount; index += 1) {
+      const targetCard = cards[(seed + index) % cards.length]
+      if (!targetCard) continue
+      nextCards.push({
+        ...targetCard,
+        isTarget: true,
+        slotKey: `target-${seed}-${targetCard.id}-${index}`,
+      })
+    }
+
+    for (let index = 0; index < distractorVisibleCount; index += 1) {
+      const distractorCard = distractorCards[(seed + index) % distractorCards.length]
+      if (!distractorCard) continue
+      nextCards.push({
+        ...distractorCard,
+        isTarget: false,
+        slotKey: `distractor-${seed}-${distractorCard.id}-${index}`,
+      })
+    }
+
+    const waveCards = nextCards
+      .slice(0, simultaneousCards)
+      .sort((left, right) => stableHash(left.slotKey) - stableHash(right.slotKey))
+      .map((card, index) => {
+        const slotKey = `${card.slotKey}-${cardInstanceRef.current + index}`
+        return {
+          ...card,
+          slotKey,
+          xPercent: 10 + (((index + seed * 3) * 17) % 78),
+          durationSeconds: fallDurationSeconds + index * 0.12,
+          tiltDeg: (((seed + index) % 7) - 3) * 4,
+          delayMs: index * 180,
+        }
+      })
+
+    cardInstanceRef.current += waveCards.length
+    setFallingCards((currentCards) => [...currentCards, ...waveCards])
+    waveCards.forEach((card) => {
+      removalTimeoutsRef.current[card.slotKey] = window.setTimeout(() => {
+        setFallingCards((currentCards) => currentCards.filter((currentCard) => currentCard.slotKey !== card.slotKey))
+        delete removalTimeoutsRef.current[card.slotKey]
+      }, card.durationSeconds * 1000 + card.delayMs + 180)
+    })
+  }, [cards, distractorCards, fallDurationSeconds, simultaneousCards])
+
+  React.useEffect(() => {
+    hitsRef.current = hits
+  }, [hits])
+
+  React.useEffect(() => {
+    if (!isRunning) return undefined
+    const intervalId = window.setInterval(() => {
+      setTimeLeft((currentTimeLeft) => {
+        if (currentTimeLeft <= 1) {
+          window.clearInterval(intervalId)
+          setIsRunning(false)
+          clearFallingCards()
+          setAnswers((current: any) => ({ ...current, [activity.id]: `completed:${hitsRef.current}` }))
+          scheduleAutoAdvance(onAutoAdvance, activity.id)
+          return 0
+        }
+        return currentTimeLeft - 1
+      })
+    }, 1000)
+    return () => window.clearInterval(intervalId)
+  }, [activity.id, clearFallingCards, isRunning, onAutoAdvance, setAnswers])
+
+  React.useEffect(() => {
+    if (!isRunning) return undefined
+    const intervalId = window.setInterval(() => {
+      spawnWave()
+    }, spawnIntervalMs)
+    return () => window.clearInterval(intervalId)
+  }, [isRunning, spawnIntervalMs, spawnWave])
+
+  React.useEffect(() => () => {
+    Object.values(removalTimeoutsRef.current).forEach((timeoutId) => window.clearTimeout(timeoutId))
+  }, [])
+
+  function startRound() {
+    setHits(0)
+    hitsRef.current = 0
+    setTimeLeft(durationSeconds)
+    clearFallingCards()
+    spawnSeedRef.current = 0
+    setIsRunning(true)
+    spawnWave()
+    setAnswers((current: any) => {
+      const nextAnswers = { ...current }
+      delete nextAnswers[activity.id]
+      return nextAnswers
+    })
+  }
+
+  function finishRound(nextHits: number) {
+    setIsRunning(false)
+    clearFallingCards()
+    setAnswers((current: any) => ({ ...current, [activity.id]: `completed:${nextHits}` }))
+    scheduleAutoAdvance(onAutoAdvance, activity.id)
+  }
+
+  function handleTap(card: QuickTapFallingCard) {
+    const timeoutId = removalTimeoutsRef.current[card.slotKey]
+    if (timeoutId) {
+      window.clearTimeout(timeoutId)
+      delete removalTimeoutsRef.current[card.slotKey]
+    }
+    setFallingCards((currentCards) => currentCards.filter((currentCard) => currentCard.slotKey !== card.slotKey))
+
+    const isTarget = card.isTarget
+    if (!isTarget) {
+      return
+    }
+
+    if (!isRunning) {
+      const firstHit = 1
+      hitsRef.current = firstHit
+      setHits(firstHit)
+      setTimeLeft(durationSeconds)
+      clearFallingCards()
+      spawnSeedRef.current = 0
+      setIsRunning(true)
+      spawnWave()
+      setAnswers((current: any) => {
+        const nextAnswers = { ...current }
+        delete nextAnswers[activity.id]
+        return nextAnswers
+      })
+      if (firstHit >= targetHits) {
+        finishRound(firstHit)
+      }
+      return
+    }
+
+    const nextHits = hitsRef.current + 1
+    hitsRef.current = nextHits
+    setHits(nextHits)
+    if (nextHits >= targetHits) {
+      finishRound(nextHits)
+    }
+  }
+
+  if (!cards.length) {
+    return <p className="helper-text">Hoạt động chạm nhanh chưa có ảnh.</p>
+  }
+
+  return (
+    <div className="activity-playground quick-tap-shell">
+      <p className="activity-prompt">{prompt}</p>
+      <div className="quick-tap-score-row">
+        <span>{timeLeft}s</span>
+        <span>{hits}/{targetHits}</span>
+      </div>
+      <div className={isRunning ? 'quick-tap-stage quick-tap-stage-live' : 'quick-tap-stage'}>
+        {fallingCards.map((card) => (
+          <button
+            key={card.slotKey}
+            type="button"
+            className={card.isTarget ? 'quick-tap-card' : 'quick-tap-card quick-tap-card-distractor'}
+            style={{
+              ['--quick-x' as string]: `${card.xPercent}%`,
+              ['--quick-duration' as string]: `${card.durationSeconds}s`,
+              ['--quick-tilt' as string]: `${card.tiltDeg}deg`,
+              animationDelay: `${card.delayMs}ms`,
+            }}
+            onClick={() => handleTap(card)}
+            aria-label={`Chạm ${card.label}`}
+          >
+            <img src={card.mediaUrl} alt={card.label} />
+          </button>
+        ))}
+      </div>
+      <button type="button" className="action-button quick-tap-start" onClick={startRound} disabled={isRunning}>
+        {isRunning ? 'Đang chơi' : completedHits ? 'Chơi lại' : 'Bắt đầu'}
+      </button>
+      {storedAnswer.startsWith('completed:') ? (
+        <p className={completedHits >= targetHits ? 'feedback-note feedback-note-success' : 'feedback-note feedback-note-warning'}>
+          Lượt này em chạm được {completedHits}/{targetHits} thẻ.
+        </p>
+      ) : null}
+    </div>
+  )
+})
+
+export const SizeOrderActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
+  const config = parseActivityConfig(activity.config_json)
+  if (!config) return null
+  const prompt = toText(config.prompt) || activity.instruction_text || 'Sắp xếp các con vật từ bé đến lớn.'
+  const items = toOrderedImageItemArray(config.items)
+  const correctOrder: string[] = [...items].sort((left, right) => left.rank - right.rank).map((item) => item.id)
+  const currentOrder: string[] = Array.isArray(answers[activity.id]) ? answers[activity.id].filter((item: unknown): item is string => typeof item === 'string') : []
+  const [draggingItemId, setDraggingItemId] = React.useState<string | null>(null)
+  const availableItems = items.filter((item) => !currentOrder.includes(item.id))
+  const isCorrect = currentOrder.length === correctOrder.length && currentOrder.every((itemId, index) => itemId === correctOrder[index])
+
+  function updateOrder(nextOrder: string[]) {
+    setAnswers((current: any) => ({ ...current, [activity.id]: nextOrder }))
+    if (nextOrder.length === correctOrder.length && nextOrder.every((itemId, index) => itemId === correctOrder[index])) {
+      scheduleAutoAdvance(onAutoAdvance, activity.id)
+    }
+  }
+
+  function placeItemAtIndex(itemId: string, index: number) {
+    const sanitizedIndex = Math.max(0, Math.min(index, items.length - 1))
+    const nextOrder = [...currentOrder]
+    const existingIndex = nextOrder.indexOf(itemId)
+    if (existingIndex >= 0) {
+      nextOrder.splice(existingIndex, 1)
+    }
+    const replacedItemId = nextOrder[sanitizedIndex]
+    nextOrder[sanitizedIndex] = itemId
+    const compactOrder = nextOrder.filter(Boolean)
+    if (replacedItemId && replacedItemId !== itemId && !compactOrder.includes(replacedItemId)) {
+      compactOrder.push(replacedItemId)
+    }
+    updateOrder(compactOrder.slice(0, items.length))
+  }
+
+  if (!items.length) {
+    return <p className="helper-text">Hoạt động sắp xếp chưa có ảnh.</p>
+  }
+
+  return (
+    <div className="activity-playground size-order-shell">
+      <p className="activity-prompt">{prompt}</p>
+      <div className="size-order-pool" aria-label="Các con vật chưa xếp">
+        {availableItems.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className="size-order-animal-card"
+            draggable
+            onDragStart={(event) => {
+              setDraggingItemId(item.id)
+              event.dataTransfer.setData('text/plain', item.id)
+              event.dataTransfer.effectAllowed = 'move'
+            }}
+            onDragEnd={() => setDraggingItemId(null)}
+            onClick={() => updateOrder([...currentOrder, item.id])}
+          >
+            <img src={item.mediaUrl} alt={item.label} />
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </div>
+      <div className="size-order-slots" aria-label="Thứ tự từ bé đến lớn">
+        {items.map((_, index) => {
+          const item = items.find((candidate) => candidate.id === currentOrder[index])
+          return (
+            <button
+              key={`${activity.id}-slot-${index}`}
+              type="button"
+              className={item ? 'size-order-slot size-order-slot-filled' : 'size-order-slot'}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault()
+                const droppedItemId = event.dataTransfer.getData('text/plain') || draggingItemId
+                if (droppedItemId) {
+                  placeItemAtIndex(droppedItemId, index)
+                }
+                setDraggingItemId(null)
+              }}
+              onClick={() => updateOrder(currentOrder.filter((__, itemIndex) => itemIndex !== index))}
+            >
+              <span className="size-order-slot-label">{index === 0 ? 'Bé nhất' : index === items.length - 1 ? 'Lớn nhất' : `Vị trí ${index + 1}`}</span>
+              {item ? (
+                <>
+                  <img
+                    src={item.mediaUrl}
+                    alt={item.label}
+                    draggable
+                    onDragStart={(event) => {
+                      setDraggingItemId(item.id)
+                      event.dataTransfer.setData('text/plain', item.id)
+                      event.dataTransfer.effectAllowed = 'move'
+                    }}
+                    onDragEnd={() => setDraggingItemId(null)}
+                  />
+                  <strong>{item.label}</strong>
+                </>
+              ) : (
+                <span>Chạm ảnh để xếp</span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+      <p className={isCorrect ? 'feedback-note feedback-note-success' : currentOrder.length === items.length ? 'feedback-note feedback-note-warning' : 'feedback-note'}>
+        {isCorrect ? 'Đúng thứ tự rồi.' : currentOrder.length === items.length ? 'Thứ tự chưa đúng, chạm vào ô để xếp lại nhé.' : `Đã xếp ${currentOrder.length}/${items.length} con vật.`}
+      </p>
+    </div>
+  )
+})
+
+export const HabitatMatchActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
+  const config = parseActivityConfig(activity.config_json)
+  if (!config) return null
+  const prompt = toText(config.prompt) || activity.instruction_text || 'Nối con vật với nơi sống phù hợp.'
+  const items = React.useMemo(() => toHabitatMatchItemArray(config.items), [config])
+  const habitatOptions = React.useMemo(() => toHabitatOptionArray(config.habitat_cards, config.habitats), [config])
+  const storedAnswers = Array.isArray(answers[activity.id]) ? answers[activity.id] : []
+  const currentAnswers = items.map((__, index) => toText(storedAnswers[index]))
+  const [activeItemIndex, setActiveItemIndex] = React.useState<number | null>(null)
+  const [draggingItemIndex, setDraggingItemIndex] = React.useState<number | null>(null)
+  const correctCount = currentAnswers.filter((answer: string, index: number) => answer === items[index]?.habitatId).length
+  const isComplete = items.length > 0 && correctCount === items.length
+  function updateMatch(index: number, habitatId: string) {
+    const nextAnswers = [...currentAnswers]
+    nextAnswers[index] = habitatId
+    setAnswers((current: any) => ({ ...current, [activity.id]: nextAnswers }))
+    if (nextAnswers.length >= items.length && nextAnswers.every((answer, answerIndex) => answer === items[answerIndex]?.habitatId)) {
+      scheduleAutoAdvance(onAutoAdvance, activity.id)
+    }
+  }
+
+  function connectActiveItem(habitatId: string) {
+    if (activeItemIndex === null) return
+    updateMatch(activeItemIndex, habitatId)
+    setActiveItemIndex(null)
+  }
+
+  void draggingItemIndex
+  void setDraggingItemIndex
+  void connectActiveItem
+
+  if (!items.length) {
+    return <p className="helper-text">Hoạt động ghép nơi sống chưa có ảnh.</p>
+  }
+
+  return (
+    <div className="activity-playground habitat-match-shell">
+      <p className="activity-prompt">{prompt}</p>
+      <div className="habitat-connect-board">
+        {items.map((item, index) => (
+          <label key={item.id} className="habitat-match-row">
+            <span className="habitat-match-animal">
+              <img src={item.mediaUrl} alt={item.label} />
+              <strong>{item.label}</strong>
+            </span>
+            <select value={currentAnswers[index] ?? ''} onChange={(event) => updateMatch(index, event.target.value)}>
+              <option value="">Chọn nơi sống</option>
+              {habitatOptions.map((habitat) => (
+                <option key={`${item.id}-${habitat.id}`} value={habitat.id}>{habitat.label}</option>
+              ))}
+            </select>
+          </label>
+        ))}
+      </div>
+      <p className={isComplete ? 'feedback-note feedback-note-success' : 'feedback-note'}>
+        Đúng {correctCount}/{items.length} con vật.
+      </p>
+    </div>
+  )
+})
+
+export const HabitatConnectActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
+  const config = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
+  if (!config) return null
+  const prompt = toText(config.prompt) || activity.instruction_text || 'Ná»‘i con váº­t vá»›i nÆ¡i sá»‘ng phÃ¹ há»£p.'
+  const items = React.useMemo(() => toHabitatMatchItemArray(config.items), [config])
+  const habitatOptions = React.useMemo(() => toHabitatOptionArray(config.habitat_cards, config.habitats), [config])
+  const storedAnswers = Array.isArray(answers[activity.id]) ? answers[activity.id] : []
+  const currentAnswers = items.map((__, index) => toText(storedAnswers[index]))
+  const [activeItemIndex, setActiveItemIndex] = React.useState<number | null>(null)
+  const [draggingItemIndex, setDraggingItemIndex] = React.useState<number | null>(null)
+  const correctCount = currentAnswers.filter((answer: string, index: number) => answer === items[index]?.habitatId).length
+  const isComplete = items.length > 0 && correctCount === items.length
+  const boardRef = React.useRef<HTMLDivElement | null>(null)
+  const animalRefs = React.useRef<Array<HTMLButtonElement | null>>([])
+  const habitatRefs = React.useRef<Record<string, HTMLButtonElement | null>>({})
+  const answerKey = currentAnswers.join('|')
+  const [connectorLines, setConnectorLines] = React.useState<Array<{
+    key: string
+    x1: number
+    y1: number
+    x2: number
+    y2: number
+    isCorrect: boolean
+  }>>([])
+
+  React.useLayoutEffect(() => {
+    function refreshLines() {
+      const boardElement = boardRef.current
+      if (!boardElement) return
+      const boardRect = boardElement.getBoundingClientRect()
+      const nextLines = items.flatMap((item, index) => {
+        const habitatId = currentAnswers[index]
+        if (!habitatId) return []
+        const animalElement = animalRefs.current[index]
+        const habitatElement = habitatRefs.current[habitatId]
+        if (!animalElement || !habitatElement) return []
+        const animalRect = animalElement.getBoundingClientRect()
+        const habitatRect = habitatElement.getBoundingClientRect()
+        return [{
+          key: `${item.id}-${habitatId}`,
+          x1: animalRect.right - boardRect.left + 8,
+          y1: animalRect.top - boardRect.top + animalRect.height / 2,
+          x2: habitatRect.left - boardRect.left - 8,
+          y2: habitatRect.top - boardRect.top + habitatRect.height / 2,
+          isCorrect: habitatId === item.habitatId,
+        }]
+      })
+      setConnectorLines((currentLines) => {
+        const isSame =
+          currentLines.length === nextLines.length &&
+          currentLines.every((line, index) => {
+            const nextLine = nextLines[index]
+            return (
+              nextLine &&
+              line.key === nextLine.key &&
+              Math.abs(line.x1 - nextLine.x1) < 0.5 &&
+              Math.abs(line.y1 - nextLine.y1) < 0.5 &&
+              Math.abs(line.x2 - nextLine.x2) < 0.5 &&
+              Math.abs(line.y2 - nextLine.y2) < 0.5 &&
+              line.isCorrect === nextLine.isCorrect
+            )
+          })
+        return isSame ? currentLines : nextLines
+      })
+    }
+
+    refreshLines()
+    const animationFrame = window.requestAnimationFrame(refreshLines)
+    const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(refreshLines) : null
+    if (boardRef.current) {
+      resizeObserver?.observe(boardRef.current)
+    }
+    window.addEventListener('resize', refreshLines)
+    return () => {
+      window.cancelAnimationFrame(animationFrame)
+      resizeObserver?.disconnect()
+      window.removeEventListener('resize', refreshLines)
+    }
+  }, [answerKey, habitatOptions.length, items])
+
+  function updateMatch(index: number, habitatId: string) {
+    const nextAnswers = [...currentAnswers]
+    nextAnswers[index] = habitatId
+    setAnswers((current: any) => ({ ...current, [activity.id]: nextAnswers }))
+    if (nextAnswers.length >= items.length && nextAnswers.every((answer, answerIndex) => answer === items[answerIndex]?.habitatId)) {
+      scheduleAutoAdvance(onAutoAdvance, activity.id)
+    }
+  }
+
+  function connectActiveItem(habitatId: string) {
+    if (activeItemIndex === null) return
+    updateMatch(activeItemIndex, habitatId)
+    setActiveItemIndex(null)
+  }
+
+  if (!items.length) {
+    return <p className="helper-text">Hoáº¡t Ä‘á»™ng ghÃ©p nÆ¡i sá»‘ng chÆ°a cÃ³ áº£nh.</p>
+  }
+
+  return (
+    <div className="activity-playground habitat-match-shell">
+      <p className="activity-prompt">{prompt}</p>
+      <div ref={boardRef} className="habitat-connect-board">
+        <svg className="habitat-connect-svg" aria-hidden="true">
+          <defs>
+            <marker
+              id={`habitat-arrow-${activity.id}`}
+              markerWidth="12"
+              markerHeight="12"
+              refX="10"
+              refY="6"
+              orient="auto"
+              markerUnits="userSpaceOnUse"
+            >
+              <path d="M0,0 L12,6 L0,12 z" fill="currentColor" />
+            </marker>
+          </defs>
+          {connectorLines.map((line) => (
+            <line
+              key={line.key}
+              x1={line.x1}
+              y1={line.y1}
+              x2={line.x2}
+              y2={line.y2}
+              className={line.isCorrect ? 'habitat-connect-svg-line habitat-connect-svg-line-correct' : 'habitat-connect-svg-line'}
+              markerEnd={`url(#habitat-arrow-${activity.id})`}
+            />
+          ))}
+        </svg>
+        <div className="habitat-connect-column">
+          <div className="habitat-connect-column-head">Cột A: Con vật</div>
+          {items.map((item, index) => {
+            const selectedHabitat = habitatOptions.find((option) => option.id === currentAnswers[index])
+            return (
+              <button
+                ref={(element) => {
+                  animalRefs.current[index] = element
+                }}
+                key={item.id}
+                type="button"
+                className={activeItemIndex === index ? 'habitat-connect-card habitat-connect-card-active' : 'habitat-connect-card'}
+                draggable
+                onDragStart={(event) => {
+                  setDraggingItemIndex(index)
+                  setActiveItemIndex(index)
+                  event.dataTransfer.setData('text/plain', String(index))
+                  event.dataTransfer.effectAllowed = 'move'
+                }}
+                onDragEnd={() => setDraggingItemIndex(null)}
+                onClick={() => setActiveItemIndex(index)}
+              >
+                <span className="habitat-connect-media">
+                  <img src={item.mediaUrl} alt={item.label} />
+                </span>
+                <strong>{item.label}</strong>
+                <span className="habitat-connect-arrow-hint">
+                  {selectedHabitat ? `Da noi: ${selectedHabitat.label}` : 'Keo hoac cham de noi'}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="habitat-connect-divider" aria-hidden="true" />
+
+        <div className="habitat-connect-column">
+          <div className="habitat-connect-column-head">Cột B: Nơi sống</div>
+          {habitatOptions.map((habitat) => (
+            <button
+              ref={(element) => {
+                habitatRefs.current[habitat.id] = element
+              }}
+              key={habitat.id}
+              type="button"
+              className="habitat-connect-card habitat-connect-card-habitat"
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault()
+                const rawDroppedIndex = event.dataTransfer.getData('text/plain')
+                const droppedIndex = rawDroppedIndex ? Number(rawDroppedIndex) : NaN
+                const resolvedIndex = Number.isInteger(droppedIndex) ? droppedIndex : draggingItemIndex
+                if (resolvedIndex !== null && resolvedIndex >= 0) {
+                  updateMatch(resolvedIndex, habitat.id)
+                }
+                setActiveItemIndex(null)
+                setDraggingItemIndex(null)
+              }}
+              onClick={() => connectActiveItem(habitat.id)}
+            >
+              <span className="habitat-connect-media">
+                {habitat.mediaUrl ? <img src={habitat.mediaUrl} alt={habitat.label} /> : <span className="habitat-connect-placeholder">{habitat.label}</span>}
+              </span>
+              <strong>{habitat.label}</strong>
+            </button>
+          ))}
+        </div>
+      </div>
+      <p className={isComplete ? 'feedback-note feedback-note-success' : 'feedback-note'}>
+        ÄÃºng {correctCount}/{items.length} con váº­t.
+      </p>
+    </div>
+  )
+})
+
 export const AACActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy chọn thẻ phù hợp.'
   const cards = toStringArray(config.cards)
+  const imageCards = toImageChoiceCardArray(config.image_cards).slice(0, 4)
   const selectedCard = answers[activity.id] ?? ''
+  const selectedImageCard = imageCards.find((card) => card.id === selectedCard) ?? null
+
+  if (imageCards.length > 0) {
+    return (
+      <div className="activity-playground">
+        <p>{prompt}</p>
+        <div className="activity-option-grid aac-image-grid">
+          {imageCards.map((card) => (
+            <button
+              key={card.id}
+              type="button"
+              className={selectedCard === card.id ? 'interactive-option aac-image-option interactive-option-active' : 'interactive-option aac-image-option'}
+              aria-pressed={selectedCard === card.id}
+              aria-label={card.label}
+              onClick={() => {
+                setAnswers((current: any) => ({ ...current, [activity.id]: card.id }))
+                scheduleAutoAdvance(onAutoAdvance, activity.id)
+              }}
+            >
+              <span className="aac-image-media">
+                <img src={card.mediaUrl} alt={card.label} />
+              </span>
+            </button>
+          ))}
+        </div>
+        {selectedImageCard ? <p className="feedback-note feedback-note-success">Em đang chọn: {selectedImageCard.label}</p> : null}
+      </div>
+    )
+  }
 
   return (
     <div className="activity-playground">
@@ -1052,6 +1897,14 @@ export const ActivityCard = React.memo(({
         />
       ) : activityType === 'image_puzzle' ? (
         <ImagePuzzleActivity activity={activity} answers={answers.dragAnswers} setAnswers={setAnswers.setDragAnswers} presentationMode={presentationMode} />
+      ) : activityType === 'memory_match' ? (
+        <MemoryMatchActivity activity={activity} answers={answers.dragAnswers} setAnswers={setAnswers.setDragAnswers} onAutoAdvance={onAutoAdvance} />
+      ) : activityType === 'quick_tap' ? (
+        <QuickTapActivity activity={activity} answers={answers.textAnswers} setAnswers={setAnswers.setTextAnswers} onAutoAdvance={onAutoAdvance} />
+      ) : activityType === 'size_order' ? (
+        <SizeOrderActivity activity={activity} answers={answers.dragAnswers} setAnswers={setAnswers.setDragAnswers} onAutoAdvance={onAutoAdvance} />
+      ) : activityType === 'habitat_match' ? (
+        <HabitatConnectActivity activity={activity} answers={answers.matchingAnswers} setAnswers={setAnswers.setMatchingAnswers} onAutoAdvance={onAutoAdvance} />
       ) : activityType === 'matching' ? (
         <MatchingActivity activity={activity} answers={answers.matchingAnswers} setAnswers={setAnswers.setMatchingAnswers} />
       ) : activityType === 'drag_drop' ? (

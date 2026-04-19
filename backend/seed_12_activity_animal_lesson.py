@@ -135,7 +135,13 @@ def build_activities() -> list[dict[str, object]]:
             'config': {
                 'kind': 'aac',
                 'prompt': 'Em muốn nói gì khi thấy con mèo dễ thương?',
-                'cards': ['Con thích mèo', 'Con muốn cho ăn', 'Con muốn vuốt nhẹ', 'Con thấy vui'],
+                'cards': ['Con thich meo', 'Con muon cho an', 'Con muon vuot nhe', 'Con thay vui'],
+                'image_cards': [
+                    {'id': 'aac-card-1', 'label': 'Con thich meo', 'media_url': '/demo-media/conmeo.jpg', 'media_kind': 'image'},
+                    {'id': 'aac-card-2', 'label': 'Con muon cho an', 'media_url': '/demo-media/concho.jpg', 'media_kind': 'image'},
+                    {'id': 'aac-card-3', 'label': 'Con muon vuot nhe', 'media_url': '/demo-media/gau.webp', 'media_kind': 'image'},
+                    {'id': 'aac-card-4', 'label': 'Con thay vui', 'media_url': '/demo-media/conca.jpg', 'media_kind': 'image'},
+                ],
                 'audio_url': '/demo-audio/animal-demo-07-vi-v3.mp3',
             },
         },

@@ -65,6 +65,10 @@ const readinessLabelMap: Record<string, string> = {
 }
 
 const activityTypeVisualLabelMap: Record<string, string> = {
+  memory_match: 'Lật thẻ ghi nhớ',
+  quick_tap: 'Chạm đúng nhanh',
+  size_order: 'Sắp xếp lớn nhỏ',
+  habitat_match: 'Ghép nơi sống',
   image_puzzle: 'Ghép ảnh',
   hidden_image_guess: 'Mở ô đoán hình',
   multiple_choice: 'Chọn đáp án',
@@ -80,6 +84,10 @@ const activityTypeVisualLabelMap: Record<string, string> = {
 }
 
 const activityIconMap: Record<string, string> = {
+  memory_match: '🧠',
+  quick_tap: '⚡',
+  size_order: '📏',
+  habitat_match: '🏡',
   image_puzzle: '◫',
   hidden_image_guess: '◪',
   multiple_choice: '◉',
@@ -155,6 +163,10 @@ const cleanReadinessLabelMap: Record<string, string> = {
 }
 
 const cleanActivityTypeVisualLabelMap: Record<string, string> = {
+  memory_match: 'Lật thẻ',
+  quick_tap: 'Chạm nhanh',
+  size_order: 'Lớn nhỏ',
+  habitat_match: 'Nơi sống',
   image_puzzle: 'Ghép ảnh',
   hidden_image_guess: 'Đoán hình',
   multiple_choice: 'Chọn đáp án',
@@ -170,6 +182,10 @@ const cleanActivityTypeVisualLabelMap: Record<string, string> = {
 }
 
 const cleanActivityIconMap: Record<string, string> = {
+  memory_match: '🧠',
+  quick_tap: '⚡',
+  size_order: '📏',
+  habitat_match: '🏡',
   image_puzzle: '[]',
   hidden_image_guess: '<>',
   multiple_choice: '()',
@@ -271,17 +287,40 @@ function resolveActivityGuidanceAudioUrl(activity: LessonActivityItem) {
   return textFromConfig(config?.audio_url) || textFromConfig(config?.guidance_audio_url)
 }
 
+function resolveActivityGuidanceText(activity: LessonActivityItem) {
+  const config = parseActivityConfig(activity.config_json)
+  return textFromConfig(config?.guidance_text) || textFromConfig(config?.prompt) || activity.instruction_text || activity.title
+}
+
+const studentEncouragementMessages = [
+  'Giỏi lắm!',
+  'Em giỏi lắm!',
+  'Hay quá luôn!',
+  'Hôm nay em giỏi quá!',
+  'Tuyệt vời, làm tiếp nhé!',
+]
+
+const studentEncouragementMessagesVi = [
+  'Giỏi lắm!',
+  'Em giỏi lắm!',
+  'Hay quá luôn!',
+  'Hôm nay em giỏi quá!',
+  'Tuyệt vời, làm tiếp nhé!',
+]
+
 let activeGuidanceAudio: HTMLAudioElement | null = null
 let activeGuidancePlaybackToken = 0
 let activeGuidanceAudioUrl: string | null = null
+let activeGuidanceAudioShouldRevoke = false
 
 function clearActiveGuidanceAudio() {
   activeGuidanceAudio?.pause()
   activeGuidanceAudio = null
-  if (activeGuidanceAudioUrl?.startsWith('blob:')) {
+  if (activeGuidanceAudioShouldRevoke && activeGuidanceAudioUrl?.startsWith('blob:')) {
     window.URL.revokeObjectURL(activeGuidanceAudioUrl)
   }
   activeGuidanceAudioUrl = null
+  activeGuidanceAudioShouldRevoke = false
 }
 
 function speechRecognitionConstructor(): BrowserSpeechRecognitionConstructor | null {
@@ -291,6 +330,36 @@ function speechRecognitionConstructor(): BrowserSpeechRecognitionConstructor | n
     webkitSpeechRecognition?: BrowserSpeechRecognitionConstructor
   }
   return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null
+}
+
+function stopStudentEncouragement() {
+  activeGuidancePlaybackToken += 1
+  if (typeof window !== 'undefined') {
+    clearActiveGuidanceAudio()
+  }
+}
+
+function resolveStudentEncouragement(activityId: number) {
+  return (
+    studentEncouragementMessagesVi[Math.abs(activityId) % studentEncouragementMessagesVi.length] ??
+    studentEncouragementMessagesVi[0] ??
+    studentEncouragementMessages[0]
+  )
+}
+
+async function playStudentEncouragement(token: string, message: string, cachedAudioUrl?: string) {
+  if (typeof window === 'undefined' || !token.trim() || !message.trim()) return false
+  stopStudentEncouragement()
+  try {
+    if (cachedAudioUrl) {
+      return await playStudentGuidanceAudio(cachedAudioUrl)
+    }
+    const audioBlob = await synthesizeAISpeech(token, { text: message })
+    const audioUrl = window.URL.createObjectURL(audioBlob)
+    return await playStudentGuidanceAudio(audioUrl, { revokeOnEnd: true })
+  } catch {
+    return false
+  }
 }
 
 let activeCareerAudio: HTMLAudioElement | null = null
@@ -375,37 +444,53 @@ function buildCareerSpeechText(text: string) {
   return `${safeText.trim()}.`
 }
 
-async function playStudentGuidanceAudio(audioUrl: string) {
+async function playStudentGuidanceAudio(audioUrl: string, options?: { revokeOnEnd?: boolean }) {
   if (typeof window === 'undefined' || !audioUrl.trim()) return false
   activeGuidancePlaybackToken += 1
   const playbackToken = activeGuidancePlaybackToken
   clearActiveGuidanceAudio()
 
-  try {
+  return await new Promise<boolean>((resolve) => {
+    let isSettled = false
     const audio = new Audio(audioUrl)
-    audio.preload = 'auto'
-    audio.volume = 1
-    audio.onended = () => {
-      if (activeGuidanceAudio === audio) {
+    const cancelWatcher = window.setInterval(() => {
+      if (playbackToken !== activeGuidancePlaybackToken) {
+        window.clearInterval(cancelWatcher)
+        finish(false)
+      }
+    }, 120)
+
+    const finish = (result: boolean) => {
+      if (isSettled) return
+      isSettled = true
+      window.clearInterval(cancelWatcher)
+      if (playbackToken === activeGuidancePlaybackToken && activeGuidanceAudio === audio) {
         clearActiveGuidanceAudio()
       }
+      resolve(result)
     }
-    audio.onerror = () => {
-      if (activeGuidanceAudio === audio) {
-        clearActiveGuidanceAudio()
+
+    try {
+      audio.preload = 'auto'
+      audio.volume = 1
+      audio.currentTime = 0
+      audio.onended = () => finish(true)
+      audio.onerror = () => finish(false)
+      activeGuidanceAudioUrl = audioUrl
+      activeGuidanceAudioShouldRevoke = Boolean(options?.revokeOnEnd)
+      activeGuidanceAudio = audio
+      if (playbackToken !== activeGuidancePlaybackToken) {
+        finish(false)
+        return
       }
+
+      void audio.play().catch(() => {
+        finish(false)
+      })
+    } catch {
+      finish(false)
     }
-    activeGuidanceAudioUrl = audioUrl
-    activeGuidanceAudio = audio
-    if (playbackToken !== activeGuidancePlaybackToken) return false
-    await audio.play()
-    return true
-  } catch {
-    if (playbackToken === activeGuidancePlaybackToken) {
-      clearActiveGuidanceAudio()
-    }
-    return false
-  }
+  })
 }
 
 function stopStudentGuidance() {
@@ -446,6 +531,47 @@ function isPuzzleSolved(activity: LessonActivityItem, answers: StudentAnswerStat
   return slots.every((pieceId, index) => pieceId === `piece-${index}`)
 }
 
+function configObjectArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object' && !Array.isArray(item))) : []
+}
+
+function configStringArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+}
+
+function isMemoryMatchSolved(activity: LessonActivityItem, answers: StudentAnswerState) {
+  const config = parseActivityConfig(activity.config_json)
+  const cards = configObjectArray(config?.image_cards)
+  const requestedPairCount = Number(config?.pair_count ?? cards.length)
+  const pairCount = Math.max(0, Math.min(cards.length || requestedPairCount || 0, requestedPairCount || cards.length || 0))
+  const matchedIds = configStringArray(answers.dragAnswers[activity.id])
+  return pairCount > 0 && matchedIds.length >= pairCount
+}
+
+function isQuickTapCompleted(activity: LessonActivityItem, answers: StudentAnswerState) {
+  return textFromConfig(answers.textAnswers[activity.id]).startsWith('completed:')
+}
+
+function isSizeOrderSolved(activity: LessonActivityItem, answers: StudentAnswerState) {
+  const config = parseActivityConfig(activity.config_json)
+  const items = configObjectArray(config?.items)
+    .map((item, index) => ({
+      id: textFromConfig(item.id) || `size-item-${index + 1}`,
+      rank: Number(item.rank ?? index + 1) || index + 1,
+    }))
+    .filter((item) => item.id)
+  const correctOrder = [...items].sort((left, right) => left.rank - right.rank).map((item) => item.id)
+  const currentOrder = configStringArray(answers.dragAnswers[activity.id])
+  return correctOrder.length > 0 && currentOrder.length === correctOrder.length && currentOrder.every((itemId, index) => itemId === correctOrder[index])
+}
+
+function isHabitatMatchSolved(activity: LessonActivityItem, answers: StudentAnswerState) {
+  const config = parseActivityConfig(activity.config_json)
+  const expectedHabitats = configObjectArray(config?.items).map((item) => textFromConfig(item.habitat_id) || textFromConfig(item.habitat))
+  const currentAnswers = configStringArray(answers.matchingAnswers[activity.id])
+  return expectedHabitats.length > 0 && currentAnswers.length >= expectedHabitats.length && expectedHabitats.every((habitat, index) => habitat && currentAnswers[index] === habitat)
+}
+
 function isActivityCompleted(activity: LessonActivityItem, answers: StudentAnswerState) {
   switch (activity.activity_type) {
     case 'multiple_choice':
@@ -454,6 +580,14 @@ function isActivityCompleted(activity: LessonActivityItem, answers: StudentAnswe
       return hasFilledString(answers.choiceAnswers[activity.id])
     case 'image_puzzle':
       return isPuzzleSolved(activity, answers)
+    case 'memory_match':
+      return isMemoryMatchSolved(activity, answers)
+    case 'quick_tap':
+      return isQuickTapCompleted(activity, answers)
+    case 'size_order':
+      return isSizeOrderSolved(activity, answers)
+    case 'habitat_match':
+      return isHabitatMatchSolved(activity, answers)
     case 'matching':
       return hasFilledStringArray(answers.matchingAnswers[activity.id])
     case 'drag_drop':
@@ -639,6 +773,8 @@ export function StudentHomePage() {
   const autoActionKeyRef = useRef('')
   const activeQuestionRef = useRef<HTMLElement | null>(null)
   const spokenActivityIdsRef = useRef<Set<number>>(new Set())
+  const encouragedActivityIdsRef = useRef<Set<number>>(new Set())
+  const encouragementAudioCacheRef = useRef<Record<string, string>>({})
   const careerRecognitionRef = useRef<BrowserSpeechRecognition | null>(null)
   const careerTranscriptRef = useRef('')
   const careerAudioCacheRef = useRef<Record<string, string>>({})
@@ -688,6 +824,7 @@ export function StudentHomePage() {
 
   const resetActivityAnswers = () => {
     stopStudentGuidance()
+    stopStudentEncouragement()
     setChoiceAnswers({})
     setMatchingAnswers({})
     setDragAnswers({})
@@ -697,6 +834,7 @@ export function StudentHomePage() {
     setActiveActivityIndex(0)
     autoActionKeyRef.current = ''
     spokenActivityIdsRef.current = new Set()
+    encouragedActivityIdsRef.current = new Set()
   }
 
   const closeLessonView = () => {
@@ -730,6 +868,7 @@ export function StudentHomePage() {
   const completeMutation = useMutation({
     mutationFn: () => completeMyAssignment(token!, effectiveSelectedAssignmentId!),
     onSuccess: async (updatedProgress) => {
+      const assignmentId = updatedProgress.assignment_id ?? effectiveSelectedAssignmentId
       const title = sanitizeStudentFacingText(detail?.lesson?.title ?? detail?.assignment?.lesson?.title, 'Bài học')
       setCompletedLessonTitle(title)
       setCompletionSummary({
@@ -742,6 +881,15 @@ export function StudentHomePage() {
       })
       setCompletionLastInteractionAt(Date.now())
       lastAutoSyncKeyRef.current = ''
+      if (assignmentId) {
+        queryClient.setQueryData<MyAssignmentItem[] | undefined>(['my-assignments', token], (current) =>
+          updateAssignmentListCache(current, assignmentId, updatedProgress),
+        )
+        queryClient.setQueryData<MyAssignmentDetail | undefined>(
+          ['my-assignment-detail', token, assignmentId],
+          (current) => (current ? { ...current, ...updatedProgress } : current),
+        )
+      }
       await refreshStudentQueries()
       window.scrollTo({ top: 0, behavior: 'smooth' })
     },
@@ -819,7 +967,6 @@ export function StudentHomePage() {
   }, [detail?.id, detail?.status, effectiveSelectedAssignmentId])
 
   const totalAssignments = assignmentsQuery.data?.length ?? 0
-  const completedCount = assignmentsQuery.data?.filter((item) => item.status === 'completed').length ?? 0
   const selectedAssignment =
     assignmentsQuery.data?.find((item) => item.assignment_id === effectiveSelectedAssignmentId) ?? null
   const visualAssignments = useMemo(
@@ -905,10 +1052,53 @@ export function StudentHomePage() {
     ? Math.max(detail?.completion_score ?? 0, activityProgress.completionScore)
     : detail?.completion_score ?? 0
 
+  const displayAssignments = useMemo(
+    () =>
+      allAssignments.map((item) => {
+        if (item.assignment_id !== effectiveSelectedAssignmentId) return item
+        if (completionSummary) {
+          return {
+            ...item,
+            status: 'completed',
+            progress_percent: Math.max(item.progress_percent, completionSummary.progressPercent),
+            completion_score: Math.max(item.completion_score, completionSummary.completionScore),
+          }
+        }
+        if (!detail) return item
+        return {
+          ...item,
+          status: detail.status ?? item.status,
+          progress_percent: Math.max(item.progress_percent, liveProgressPercent),
+          completion_score: Math.max(item.completion_score, liveCompletionScore),
+        }
+      }),
+    [allAssignments, completionSummary, detail, effectiveSelectedAssignmentId, liveCompletionScore, liveProgressPercent],
+  )
+  const displayCompletedCount = displayAssignments.filter((item) => item.status === 'completed').length
+
   const lessonActivities = useMemo(() => detail?.lesson?.activities ?? [], [detail?.lesson?.activities])
   const currentActivity = lessonActivities[activeActivityIndex] ?? null
   const currentActivityCompleted = currentActivity ? isActivityCompleted(currentActivity, answers) : false
   const currentActivityGuidanceAudioUrl = currentActivity ? resolveActivityGuidanceAudioUrl(currentActivity) : ''
+  const playActivityGuidance = async (activity: LessonActivityItem | null) => {
+    if (!activity) return false
+    const guidanceAudioUrl = resolveActivityGuidanceAudioUrl(activity)
+    if (guidanceAudioUrl) {
+      const played = await playStudentGuidanceAudio(guidanceAudioUrl)
+      if (played) return true
+    }
+
+    const guidanceText = resolveActivityGuidanceText(activity)
+    if (!token || !guidanceText.trim()) return false
+
+    try {
+      const audioBlob = await synthesizeAISpeech(token, { text: guidanceText })
+      const audioUrl = window.URL.createObjectURL(audioBlob)
+      return await playStudentGuidanceAudio(audioUrl, { revokeOnEnd: true })
+    } catch {
+      return false
+    }
+  }
 
   useEffect(() => {
     if (activeActivityIndex >= lessonActivities.length && lessonActivities.length > 0) {
@@ -925,21 +1115,50 @@ export function StudentHomePage() {
   }, [completionSummary, detail?.id])
 
   useEffect(() => {
-    if (!currentActivity || !currentActivityGuidanceAudioUrl || activePanel !== 'home' || completionSummary) return
+    if (!currentActivity || activePanel !== 'home' || completionSummary) return
     if (spokenActivityIdsRef.current.has(currentActivity.id)) return
 
     spokenActivityIdsRef.current.add(currentActivity.id)
 
     const timeout = window.setTimeout(() => {
-      void playStudentGuidanceAudio(currentActivityGuidanceAudioUrl)
+      void playActivityGuidance(currentActivity)
     }, 320)
 
     return () => window.clearTimeout(timeout)
-  }, [activePanel, completionSummary, currentActivity, currentActivityGuidanceAudioUrl])
+  }, [activePanel, completionSummary, currentActivity, currentActivityGuidanceAudioUrl, token])
 
   useEffect(() => () => {
     stopStudentGuidance()
+    stopStudentEncouragement()
+    Object.values(encouragementAudioCacheRef.current).forEach((audioUrl) => {
+      if (audioUrl.startsWith('blob:')) {
+        window.URL.revokeObjectURL(audioUrl)
+      }
+    })
+    encouragementAudioCacheRef.current = {}
   }, [])
+
+  useEffect(() => {
+    if (!token) return undefined
+    let isActive = true
+
+    void Promise.allSettled(
+      studentEncouragementMessagesVi.map(async (message) => {
+        if (encouragementAudioCacheRef.current[message]) return
+        const audioBlob = await synthesizeAISpeech(token, { text: message })
+        const audioUrl = window.URL.createObjectURL(audioBlob)
+        if (!isActive) {
+          window.URL.revokeObjectURL(audioUrl)
+          return
+        }
+        encouragementAudioCacheRef.current[message] = audioUrl
+      }),
+    )
+
+    return () => {
+      isActive = false
+    }
+  }, [token])
 
   useEffect(() => {
     if (!user?.id || user.role !== 'student') return
@@ -1062,28 +1281,52 @@ export function StudentHomePage() {
     if (autoActionKeyRef.current === actionKey) return
     autoActionKeyRef.current = actionKey
 
-    const currentIndex = lessonActivities.findIndex((activity) => activity.id === activityId)
-    const nextActivity = lessonActivities[currentIndex + 1]
-    if (!nextActivity) {
-      if (!completeMutation.isPending) {
-        completeMutation.mutate()
+    const advanceToNextStep = () => {
+      const currentIndex = lessonActivities.findIndex((activity) => activity.id === activityId)
+      const nextActivity = lessonActivities[currentIndex + 1]
+      if (!nextActivity) {
+        if (!completeMutation.isPending) {
+          completeMutation.mutate()
+        }
+        return
       }
+
+      setActiveActivityIndex(currentIndex + 1)
+
+      window.requestAnimationFrame(() => {
+        activeQuestionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        activeQuestionRef.current?.focus({ preventScroll: true })
+      })
+    }
+
+    const shouldEncourage = !encouragedActivityIdsRef.current.has(activityId)
+    if (!shouldEncourage) {
+      advanceToNextStep()
       return
     }
 
-    setActiveActivityIndex(currentIndex + 1)
+    encouragedActivityIdsRef.current.add(activityId)
+    const encouragementMessage = resolveStudentEncouragement(activityId)
+    const cachedEncouragementAudioUrl = encouragementAudioCacheRef.current[encouragementMessage]
 
-    window.requestAnimationFrame(() => {
-      activeQuestionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      activeQuestionRef.current?.focus({ preventScroll: true })
-    })
+    stopStudentGuidance()
+
+    const playEncouragement = token
+      ? playStudentEncouragement(token, encouragementMessage, cachedEncouragementAudioUrl)
+      : Promise.resolve(false)
+
+    void playEncouragement
+      .catch(() => false)
+      .finally(() => {
+        advanceToNextStep()
+      })
   }
 
   useEffect(() => {
     if (!currentActivity || !currentActivityCompleted || completionSummary) return
     const timeout = window.setTimeout(() => {
       handleAutoAdvance(currentActivity.id)
-    }, 420)
+    }, 120)
     return () => window.clearTimeout(timeout)
   }, [completionSummary, currentActivity, currentActivityCompleted, handleAutoAdvance])
 
@@ -1106,8 +1349,8 @@ export function StudentHomePage() {
   }
 
   const handleReplayGuidance = () => {
-    if (!currentActivityGuidanceAudioUrl) return
-    void playStudentGuidanceAudio(currentActivityGuidanceAudioUrl)
+    stopStudentEncouragement()
+    void playActivityGuidance(currentActivity)
   }
 
   const handleRestartAssignment = () => {
@@ -1279,18 +1522,18 @@ export function StudentHomePage() {
           <p className="eyebrow">Theo dõi</p>
           <h3 id="student-progress-heading">Tiến độ</h3>
         </div>
-        <span className="subject-pill muted-pill">{completedCount}/{allAssignments.length || totalAssignments || 0}</span>
+        <span className="subject-pill muted-pill">{displayCompletedCount}/{displayAssignments.length || totalAssignments || 0}</span>
       </div>
 
       <div className="student-visual-overview-grid student-visual-overview-grid-compact">
         <article className="student-visual-glass-card">
           <span>Bai</span>
-          <strong>{allAssignments.length || totalAssignments}</strong>
+          <strong>{displayAssignments.length || totalAssignments}</strong>
           <p>Sẵn sàng</p>
         </article>
         <article className="student-visual-glass-card">
           <span>Xong</span>
-          <strong>{completedCount}</strong>
+          <strong>{displayCompletedCount}</strong>
           <p>Da hoan thanh</p>
         </article>
         <article className="student-visual-glass-card">
@@ -1301,7 +1544,7 @@ export function StudentHomePage() {
       </div>
 
       <div className="student-visual-progress-list">
-        {allAssignments.map((item) => (
+        {displayAssignments.map((item) => (
           <article key={item.id} className="student-visual-mini-card">
             <div className="student-visual-mini-card-head">
               <strong>{sanitizeStudentFacingText(item.assignment?.lesson?.title, `Bài ${item.assignment_id}`)}</strong>
@@ -1538,7 +1781,7 @@ export function StudentHomePage() {
 
             <div className="student-visual-badges">
               <span className="student-visual-badge">Bài {allAssignments.length || totalAssignments}</span>
-              <span className="student-visual-badge">Xong {completedCount}</span>
+              <span className="student-visual-badge">Xong {displayCompletedCount}</span>
               <span className="student-visual-badge">GV {myTeachersQuery.data?.length ?? 0}</span>
             </div>
 
@@ -1582,9 +1825,12 @@ export function StudentHomePage() {
                   <span>{completionSummary.completedActivities}/{completionSummary.totalActivities || 0}</span>
                 </div>
               </div>
-              <button type="button" className="student-home-icon" onClick={handleGoHome} aria-label="Về trang chủ">
-                []
-              </button>
+              <div className="student-visual-celebration-actions">
+                <span className="student-visual-celebration-star" aria-hidden="true" />
+                <button type="button" className="student-home-icon" onClick={handleGoHome} aria-label="Về trang chủ">
+                  []
+                </button>
+              </div>
             </section>
           ) : null}
 
@@ -1596,11 +1842,11 @@ export function StudentHomePage() {
                   <p className="eyebrow">Học</p>
                   <h3>Chọn bài</h3>
                 </div>
-                <span className="subject-pill muted-pill">{allAssignments.length || totalAssignments}</span>
+                <span className="subject-pill muted-pill">{displayAssignments.length || totalAssignments}</span>
               </div>
 
               <div className="student-visual-assignment-list">
-                {allAssignments.map((item) => {
+                {displayAssignments.map((item) => {
                   const isActive = effectiveSelectedAssignmentId === item.assignment_id
                   const art = resolveStudentArtwork(item.assignment_id)
                   return (
@@ -1689,7 +1935,7 @@ export function StudentHomePage() {
                           className="student-visual-audio-button"
                           onClick={handleReplayGuidance}
                           aria-label="Phát lại hướng dẫn"
-                          disabled={!currentActivityGuidanceAudioUrl}
+                          disabled={!currentActivity}
                         >
                           <span aria-hidden="true">🔊</span>
                         </button>

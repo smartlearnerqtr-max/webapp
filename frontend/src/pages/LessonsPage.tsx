@@ -29,6 +29,10 @@ type ActivityType =
   | 'hidden_image_guess'
   | 'step_by_step'
   | 'aac'
+  | 'memory_match'
+  | 'quick_tap'
+  | 'size_order'
+  | 'habitat_match'
   | 'career_simulation'
   | 'ai_chat'
 
@@ -40,13 +44,24 @@ type PairItem = {
   right: string
 }
 
+type AacImageDraft = {
+  label: string
+  file: File | null
+}
+
 const LEVEL_OPTIONS = [
   { value: 'nang', label: 'Nặng' },
   { value: 'trung_binh', label: 'Trung bình' },
   { value: 'nhe', label: 'Nhẹ' },
 ]
 
-const ACTIVITY_TYPES: Array<{ value: ActivityType; label: string; description: string }> = [
+const RETIRED_ACTIVITY_TYPES = new Set<string>(['matching', 'step_by_step', 'career_simulation', 'ai_chat', 'drag_drop', 'listen_choose'])
+
+const ACTIVITY_TYPES: Array<{ value: ActivityType; label: string; description: string }> = ([
+  { value: 'memory_match', label: 'Lật thẻ ghi nhớ', description: '10 thẻ / 5 cặp' },
+  { value: 'quick_tap', label: 'Chạm đúng nhanh', description: '10 giây phản xạ' },
+  { value: 'size_order', label: 'Sắp xếp lớn nhỏ', description: 'Xếp theo thứ tự' },
+  { value: 'habitat_match', label: 'Ghép nơi sống', description: 'Ảnh + nơi sống' },
   { value: 'multiple_choice', label: 'Chọn đáp án', description: '4 đáp án' },
   { value: 'image_choice', label: 'Nhìn ảnh chọn', description: 'Ảnh + đáp án' },
   { value: 'image_puzzle', label: 'Ghép ảnh', description: 'Cắt mảnh' },
@@ -59,7 +74,7 @@ const ACTIVITY_TYPES: Array<{ value: ActivityType; label: string; description: s
   { value: 'aac', label: 'Thẻ chọn', description: 'Giao tiếp' },
   { value: 'career_simulation', label: 'Tình huống', description: 'Đóng vai' },
   { value: 'ai_chat', label: 'Chat AI', description: 'Hỏi đáp' },
-]
+] as Array<{ value: ActivityType; label: string; description: string }>).filter((item) => !RETIRED_ACTIVITY_TYPES.has(item.value))
 
 const CHOICE_SLOT_LABELS = ['A', 'B', 'C', 'D']
 
@@ -76,6 +91,13 @@ function createDefaultPairs(): PairItem[] {
 
 function createDefaultList(count = 3) {
   return Array.from({ length: count }, () => '')
+}
+
+function createDefaultAacImageDrafts(): AacImageDraft[] {
+  return Array.from({ length: 4 }, (_, index) => ({
+    label: `Đáp án ${index + 1}`,
+    file: null,
+  }))
 }
 
 function activityLabel(activityType: ActivityType) {
@@ -108,6 +130,14 @@ function defaultInstructionForType(activityType: ActivityType) {
       return 'Hãy làm lần lượt từng bước theo hướng dẫn.'
     case 'aac':
       return 'Hãy chọn thẻ phù hợp với điều em muốn nói.'
+    case 'memory_match':
+      return 'Lật 2 thẻ giống nhau để ghi nhớ con vật.'
+    case 'quick_tap':
+      return 'Chạm thật nhanh vào các thẻ con vật trước khi hết giờ.'
+    case 'size_order':
+      return 'Sắp xếp các con vật theo thứ tự từ bé đến lớn.'
+    case 'habitat_match':
+      return 'Chọn nơi sống đúng cho từng con vật.'
     case 'career_simulation':
       return 'Hãy làm theo tình huống mô phỏng.'
     case 'ai_chat':
@@ -153,6 +183,67 @@ function compactFlexibleLines(rawValue: string) {
 }
 
 type ActivityConfig = Record<string, unknown>
+
+const demoAnimalImageCards = [
+  { id: 'dog', label: 'Con chó', media_url: '/demo-media/concho.jpg', media_kind: 'image' },
+  { id: 'cat', label: 'Con mèo', media_url: '/demo-media/conmeo.jpg', media_kind: 'image' },
+  { id: 'fish', label: 'Con cá', media_url: '/demo-media/conca.jpg', media_kind: 'image' },
+  { id: 'tiger', label: 'Con hổ', media_url: '/demo-media/conho.webp', media_kind: 'image' },
+  { id: 'rabbit', label: 'Con thỏ', media_url: '/demo-media/contho.png', media_kind: 'image' },
+]
+
+function buildMemoryMatchDemoConfig(): ActivityConfig {
+  return {
+    kind: 'memory_match',
+    prompt: 'Lật 2 thẻ giống nhau để ghi điểm.',
+    pair_count: 5,
+    image_cards: demoAnimalImageCards,
+  }
+}
+
+function buildQuickTapDemoConfig(): ActivityConfig {
+  return {
+    kind: 'quick_tap',
+    prompt: 'Chạm nhanh vào các thẻ con vật trước khi hết giờ.',
+    duration_seconds: 10,
+    target_hits: 6,
+    simultaneous_cards: 4,
+    image_cards: demoAnimalImageCards,
+  }
+}
+
+function buildSizeOrderDemoConfig(): ActivityConfig {
+  return {
+    kind: 'size_order',
+    prompt: 'Sắp xếp các con vật từ bé đến lớn.',
+    items: [
+      { id: 'cat', label: 'Mèo', media_url: '/demo-media/conmeo.jpg', media_kind: 'image', rank: 1 },
+      { id: 'dog', label: 'Chó', media_url: '/demo-media/concho.jpg', media_kind: 'image', rank: 2 },
+      { id: 'tiger', label: 'Hổ', media_url: '/demo-media/conho.webp', media_kind: 'image', rank: 3 },
+      { id: 'buffalo', label: 'Trâu', media_url: '/demo-media/trau.webp', media_kind: 'image', rank: 4 },
+      { id: 'elephant', label: 'Voi', media_url: '/demo-media/voi.jpg', media_kind: 'image', rank: 5 },
+    ],
+  }
+}
+
+function buildHabitatMatchDemoConfig(): ActivityConfig {
+  return {
+    kind: 'habitat_match',
+    prompt: 'Nối con vật với nơi sống phù hợp.',
+    habitat_cards: [
+      { id: 'home', label: 'Trong nhà', media_url: '', media_kind: 'image' },
+      { id: 'forest', label: 'Rừng', media_url: '', media_kind: 'image' },
+      { id: 'water', label: 'Dưới nước', media_url: '', media_kind: 'image' },
+      { id: 'grassland', label: 'Đồng cỏ', media_url: '', media_kind: 'image' },
+    ],
+    items: [
+      { id: 'cat', label: 'Mèo', media_url: '/demo-media/conmeo.jpg', media_kind: 'image', habitat_id: 'home', habitat: 'Trong nhà' },
+      { id: 'tiger', label: 'Hổ', media_url: '/demo-media/conho.webp', media_kind: 'image', habitat_id: 'forest', habitat: 'Rừng' },
+      { id: 'fish', label: 'Cá', media_url: '/demo-media/conca.jpg', media_kind: 'image', habitat_id: 'water', habitat: 'Dưới nước' },
+      { id: 'buffalo', label: 'Trâu', media_url: '/demo-media/trau.webp', media_kind: 'image', habitat_id: 'grassland', habitat: 'Đồng cỏ' },
+    ],
+  }
+}
 
 function isImageUploadOnlyActivity(activityType: ActivityType) {
   return activityType === 'image_choice' || activityType === 'image_puzzle' || activityType === 'hidden_image_guess'
@@ -427,7 +518,7 @@ export function LessonsPage() {
   const [hiddenGuessCols, setHiddenGuessCols] = useState('4')
 
   const [stepList, setStepList] = useState<string[]>(createDefaultList())
-  const [aacCards, setAacCards] = useState<string[]>(createDefaultList())
+  const [aacImageDrafts, setAacImageDrafts] = useState<AacImageDraft[]>(createDefaultAacImageDrafts())
   const [scenarioText, setScenarioText] = useState('Em vào vai nhân viên thư viện và giúp bạn nhỏ chọn đúng cuốn sách cần tìm.')
   const [successCriteriaText, setSuccessCriteriaText] = useState('Chọn đúng vai trò, trả lời lịch sự và làm đủ các bước.')
   const [aiStarterPrompt, setAiStarterPrompt] = useState('Hãy hỏi em 3 câu ngắn về bài học này.')
@@ -782,8 +873,8 @@ export function LessonsPage() {
       return 'Hãy nhập ít nhất 2 bước cho hoạt động.'
     }
 
-    if (activityType === 'aac' && compactLines(aacCards).length < 2) {
-      return 'Hãy nhập ít nhất 2 thẻ giao tiếp.'
+    if (activityType === 'aac' && aacImageDrafts.some((item) => !item.file)) {
+      return 'Hay tai du 4 anh cho hoat dong the giao tiep.'
     }
 
     if (activityType === 'career_simulation' && !scenarioText.trim()) {
@@ -912,11 +1003,40 @@ export function LessonsPage() {
     }
 
     if (activityType === 'aac') {
+      const uploadedCards = await Promise.all(
+        aacImageDrafts.map(async (item, index) => {
+          const uploadedMedia = await uploadLessonMedia(token!, item.file!)
+          return {
+            id: `aac-card-${index + 1}`,
+            label: item.label.trim() || `Đáp án ${index + 1}`,
+            media_url: uploadedMedia.url,
+            media_kind: uploadedMedia.media_kind || 'image',
+          }
+        }),
+      )
+
       return {
         kind: 'aac',
         prompt: instructionText.trim(),
-        cards: compactLines(aacCards),
+        cards: uploadedCards.map((item) => item.label),
+        image_cards: uploadedCards,
       }
+    }
+
+    if (activityType === 'memory_match') {
+      return buildMemoryMatchDemoConfig()
+    }
+
+    if (activityType === 'quick_tap') {
+      return buildQuickTapDemoConfig()
+    }
+
+    if (activityType === 'size_order') {
+      return buildSizeOrderDemoConfig()
+    }
+
+    if (activityType === 'habitat_match') {
+      return buildHabitatMatchDemoConfig()
     }
 
     if (activityType === 'career_simulation') {
@@ -1419,15 +1539,43 @@ export function LessonsPage() {
                 ) : null}
 
                 {activityType === 'aac' ? (
-                  <ListBuilder
-                    title="3. Các thẻ giao tiếp"
-                    helper="Mỗi dòng là một câu hoặc ý ngắn để học sinh chọn."
-                    items={aacCards}
-                    itemPlaceholder="Thẻ giao tiếp"
-                    onChange={(index, value) => updateList(setAacCards, index, value)}
-                    onAdd={() => setAacCards((current) => [...current, ''])}
-                    onRemove={(index) => setAacCards((current) => current.filter((_, itemIndex) => itemIndex !== index))}
-                  />
+                  <div className="config-card detail-stack">
+                    <strong>3. 4 đáp án bằng ảnh</strong>
+                    <p className="helper-text">Tải lên đủ 4 ảnh. Nhãn phụ chỉ dùng để giáo viên dễ nhận biết, học sinh sẽ chọn bằng hình ảnh.</p>
+                    <div className="builder-two-columns">
+                      {aacImageDrafts.map((item, index) => (
+                        <div key={`aac-image-${index}`} className="config-card detail-stack">
+                          <strong>Ảnh {index + 1}</strong>
+                          <label>
+                            Chọn ảnh đáp án
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(event) => {
+                                const nextFile = event.target.files?.[0] ?? null
+                                setAacImageDrafts((current) =>
+                                  current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, file: nextFile } : draft)),
+                                )
+                              }}
+                            />
+                          </label>
+                          {item.file ? <p className="helper-text">Đã chọn: {item.file.name}</p> : null}
+                          <label>
+                            Nhãn phụ
+                            <input
+                              value={item.label}
+                              onChange={(event) =>
+                                setAacImageDrafts((current) =>
+                                  current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, label: event.target.value } : draft)),
+                                )
+                              }
+                              placeholder={`Đáp án ${index + 1}`}
+                            />
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ) : null}
 
                 {activityType === 'career_simulation' ? (
