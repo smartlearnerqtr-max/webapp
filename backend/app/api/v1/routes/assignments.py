@@ -437,10 +437,22 @@ def complete_my_assignment(assignment_id: int):
     progress = StudentLessonProgress.query.filter_by(assignment_id=assignment_id, student_id=user.student_profile.id).first()
     if not progress:
         return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
+    payload = request.get_json(silent=True) or {}
+    requested_completion_score = payload.get('completion_score')
+    requested_reward_star_count = payload.get('reward_star_count')
+    requested_total_learning_seconds = payload.get('total_learning_seconds')
     progress.status = 'completed'
     progress.progress_percent = 100
-    progress.completion_score = max(progress.completion_score, 100)
-    progress.reward_star_count = max(progress.reward_star_count, 3)
+    if requested_total_learning_seconds is not None:
+        progress.total_learning_seconds = max(progress.total_learning_seconds, int(requested_total_learning_seconds))
+    if requested_completion_score is not None:
+        progress.completion_score = max(0, min(100, int(requested_completion_score)))
+    else:
+        progress.completion_score = max(progress.completion_score, 100)
+    if requested_reward_star_count is not None:
+        progress.reward_star_count = max(0, min(3, int(requested_reward_star_count)))
+    else:
+        progress.reward_star_count = max(progress.reward_star_count, 3)
     progress.completed_at = datetime.now(UTC)
     _publish_assignment_progress_event(progress, 'assignment_completed', f'Bai hoc {assignment_id} da hoan thanh.')
     db.session.commit()

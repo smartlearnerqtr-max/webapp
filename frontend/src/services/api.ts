@@ -877,10 +877,15 @@ export async function updateMyAssignmentProgress(token: string, assignmentId: nu
   })
 }
 
-export async function completeMyAssignment(token: string, assignmentId: number): Promise<MyAssignmentItem> {
+export async function completeMyAssignment(token: string, assignmentId: number, payload?: {
+  completion_score?: number
+  reward_star_count?: number
+  total_learning_seconds?: number
+}): Promise<MyAssignmentItem> {
   return request<MyAssignmentItem>(`/api/v1/my/assignments/${assignmentId}/complete`, {
     method: 'POST',
     token,
+    body: payload,
   })
 }
 

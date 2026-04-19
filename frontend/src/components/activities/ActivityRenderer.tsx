@@ -267,6 +267,17 @@ function stableHash(value: string) {
   return hash
 }
 
+function shuffledCopy<T>(items: T[]) {
+  const nextItems = [...items]
+  for (let index = nextItems.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    const currentItem = nextItems[index]
+    nextItems[index] = nextItems[swapIndex]
+    nextItems[swapIndex] = currentItem
+  }
+  return nextItems
+}
+
 function speechRecognitionConstructor(): BrowserSpeechRecognitionConstructor | null {
   if (typeof window === 'undefined') return null
   const speechWindow = window as typeof window & {
@@ -1080,12 +1091,12 @@ export const MemoryMatchActivity = React.memo(({ activity, answers, setAnswers, 
   const deckKey = cards.map((card) => `${card.id}:${card.mediaUrl}`).join('|')
   const deck = React.useMemo(
     () =>
-      cards
-        .flatMap((card) => [
+      shuffledCopy(
+        cards.flatMap((card) => [
           { ...card, deckId: `${card.id}-a`, pairId: card.id },
           { ...card, deckId: `${card.id}-b`, pairId: card.id },
-        ])
-        .sort((left, right) => stableHash(`${activity.id}:${left.deckId}`) - stableHash(`${activity.id}:${right.deckId}`)),
+        ]),
+      ),
     [activity.id, deckKey],
   )
   const matchedIds = Array.isArray(answers[activity.id]) ? answers[activity.id] : []
@@ -1392,10 +1403,11 @@ export const SizeOrderActivity = React.memo(({ activity, answers, setAnswers, on
   const [draggingItemId, setDraggingItemId] = React.useState<string | null>(null)
   const availableItems = items.filter((item) => !currentOrder.includes(item.id))
   const isCorrect = currentOrder.length === correctOrder.length && currentOrder.every((itemId, index) => itemId === correctOrder[index])
+  const isFilled = currentOrder.length === correctOrder.length
 
   function updateOrder(nextOrder: string[]) {
     setAnswers((current: any) => ({ ...current, [activity.id]: nextOrder }))
-    if (nextOrder.length === correctOrder.length && nextOrder.every((itemId, index) => itemId === correctOrder[index])) {
+    if (nextOrder.length === correctOrder.length) {
       scheduleAutoAdvance(onAutoAdvance, activity.id)
     }
   }
@@ -1485,7 +1497,7 @@ export const SizeOrderActivity = React.memo(({ activity, answers, setAnswers, on
           )
         })}
       </div>
-      <p className={isCorrect ? 'feedback-note feedback-note-success' : currentOrder.length === items.length ? 'feedback-note feedback-note-warning' : 'feedback-note'}>
+      <p className={isCorrect ? 'feedback-note feedback-note-success' : isFilled ? 'feedback-note feedback-note-warning' : 'feedback-note'}>
         {isCorrect ? 'Đúng thứ tự rồi.' : currentOrder.length === items.length ? 'Thứ tự chưa đúng, chạm vào ô để xếp lại nhé.' : `Đã xếp ${currentOrder.length}/${items.length} con vật.`}
       </p>
     </div>

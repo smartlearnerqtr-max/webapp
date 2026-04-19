@@ -552,17 +552,33 @@ function isQuickTapCompleted(activity: LessonActivityItem, answers: StudentAnswe
   return textFromConfig(answers.textAnswers[activity.id]).startsWith('completed:')
 }
 
-function isSizeOrderSolved(activity: LessonActivityItem, answers: StudentAnswerState) {
+function getSizeOrderItems(activity: LessonActivityItem) {
   const config = parseActivityConfig(activity.config_json)
-  const items = configObjectArray(config?.items)
+  return configObjectArray(config?.items)
     .map((item, index) => ({
       id: textFromConfig(item.id) || `size-item-${index + 1}`,
       rank: Number(item.rank ?? index + 1) || index + 1,
     }))
     .filter((item) => item.id)
-  const correctOrder = [...items].sort((left, right) => left.rank - right.rank).map((item) => item.id)
+}
+
+function isSizeOrderCompleted(activity: LessonActivityItem, answers: StudentAnswerState) {
+  const items = getSizeOrderItems(activity)
   const currentOrder = configStringArray(answers.dragAnswers[activity.id])
-  return correctOrder.length > 0 && currentOrder.length === correctOrder.length && currentOrder.every((itemId, index) => itemId === correctOrder[index])
+  return items.length > 0 && currentOrder.length === items.length
+}
+
+function getActivityScore(activity: LessonActivityItem, answers: StudentAnswerState) {
+  if (activity.activity_type === 'size_order') {
+    const items = getSizeOrderItems(activity)
+    const correctOrder = [...items].sort((left, right) => left.rank - right.rank).map((item) => item.id)
+    const currentOrder = configStringArray(answers.dragAnswers[activity.id])
+    if (!correctOrder.length || currentOrder.length !== correctOrder.length) return 0
+    const correctPositionCount = currentOrder.filter((itemId, index) => itemId === correctOrder[index]).length
+    return Math.round((correctPositionCount / correctOrder.length) * 100)
+  }
+
+  return isActivityCompleted(activity, answers) ? 100 : 0
 }
 
 function isHabitatMatchSolved(activity: LessonActivityItem, answers: StudentAnswerState) {
@@ -585,7 +601,7 @@ function isActivityCompleted(activity: LessonActivityItem, answers: StudentAnswe
     case 'quick_tap':
       return isQuickTapCompleted(activity, answers)
     case 'size_order':
-      return isSizeOrderSolved(activity, answers)
+      return isSizeOrderCompleted(activity, answers)
     case 'habitat_match':
       return isHabitatMatchSolved(activity, answers)
     case 'matching':
@@ -866,7 +882,11 @@ export function StudentHomePage() {
   })
 
   const completeMutation = useMutation({
-    mutationFn: () => completeMyAssignment(token!, effectiveSelectedAssignmentId!),
+    mutationFn: () =>
+      completeMyAssignment(token!, effectiveSelectedAssignmentId!, {
+        completion_score: activityProgress.completionScore,
+        reward_star_count: activityProgress.completionScore >= 90 ? 3 : activityProgress.completionScore >= 60 ? 2 : 1,
+      }),
     onSuccess: async (updatedProgress) => {
       const assignmentId = updatedProgress.assignment_id ?? effectiveSelectedAssignmentId
       const title = sanitizeStudentFacingText(detail?.lesson?.title ?? detail?.assignment?.lesson?.title, 'Bài học')
@@ -1030,9 +1050,11 @@ export function StudentHomePage() {
     const activities = detail?.lesson?.activities ?? []
     const totalActivities = activities.length
     const completedActivities = activities.filter((activity) => isActivityCompleted(activity, answers)).length
+    const earnedScore = activities.reduce((totalScore, activity) => totalScore + getActivityScore(activity, answers), 0)
     const progressPercent =
       totalActivities > 0 ? Math.round((completedActivities / totalActivities) * 100) : detail?.progress_percent ?? 0
-    const completionScore = progressPercent
+    const completionScore =
+      totalActivities > 0 ? Math.round(earnedScore / totalActivities) : detail?.completion_score ?? detail?.progress_percent ?? 0
     const readyToComplete = totalActivities === 0 || completedActivities >= totalActivities
     return {
       totalActivities,
@@ -1218,7 +1240,7 @@ export function StudentHomePage() {
       progress_percent: activityProgress.progressPercent,
       completion_score: activityProgress.completionScore,
       total_learning_seconds: totalLearningSeconds,
-      reward_star_count: activityProgress.progressPercent >= 100 ? 3 : activityProgress.progressPercent >= 60 ? 2 : 1,
+      reward_star_count: activityProgress.completionScore >= 90 ? 3 : activityProgress.completionScore >= 60 ? 2 : 1,
       status: 'in_progress' as const,
     }
 
