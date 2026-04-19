@@ -32,7 +32,7 @@ const visualThemePresetMap = {
     accentStrong: '#126f60',
     accentSoft: 'rgba(31, 157, 135, 0.16)',
     glow: 'rgba(255, 205, 110, 0.28)',
-    overlay: 'linear-gradient(180deg, rgba(241, 255, 248, 0.7) 0%, rgba(240, 247, 255, 0.94) 52%, rgba(255, 248, 236, 0.98) 100%)',
+    overlay: 'linear-gradient(180deg, rgba(241, 255, 248, 0.56) 0%, rgba(240, 247, 255, 0.752) 52%, rgba(255, 248, 236, 0.784) 100%)',
   },
   ocean: {
     backgroundImageUrl: studentBackgroundImageUrl,
@@ -40,7 +40,7 @@ const visualThemePresetMap = {
     accentStrong: '#145581',
     accentSoft: 'rgba(36, 123, 183, 0.16)',
     glow: 'rgba(126, 218, 255, 0.26)',
-    overlay: 'linear-gradient(180deg, rgba(232, 249, 255, 0.68) 0%, rgba(236, 248, 255, 0.92) 46%, rgba(247, 253, 255, 0.98) 100%)',
+    overlay: 'linear-gradient(180deg, rgba(232, 249, 255, 0.544) 0%, rgba(236, 248, 255, 0.736) 46%, rgba(247, 253, 255, 0.784) 100%)',
   },
   cosmos: {
     backgroundImageUrl: studentBackgroundImageUrl,
@@ -48,7 +48,7 @@ const visualThemePresetMap = {
     accentStrong: '#3f2f9d',
     accentSoft: 'rgba(101, 80, 216, 0.16)',
     glow: 'rgba(255, 165, 208, 0.28)',
-    overlay: 'linear-gradient(180deg, rgba(238, 233, 255, 0.62) 0%, rgba(238, 241, 255, 0.88) 44%, rgba(250, 245, 255, 0.97) 100%)',
+    overlay: 'linear-gradient(180deg, rgba(238, 233, 255, 0.496) 0%, rgba(238, 241, 255, 0.704) 44%, rgba(250, 245, 255, 0.776) 100%)',
   },
 } as const
 
@@ -201,6 +201,14 @@ const studentMenuItems: Array<{ key: StudentPanelKey; label: string; icon: strin
 ]
 
 const studentArtworkPool = ['/student-ui/anh1.jpg', '/student-ui/anh2.jpg', '/student-ui/anh3.jpg', '/student-ui/anh4.jpg']
+const studentMenuIconMap: Record<StudentPanelKey, string> = {
+  home: '🏠',
+  progress: '📈',
+  info: '👤',
+  career: '💼',
+  reminders: '🔔',
+  settings: '⚙️',
+}
 
 function resolveStudentArtwork(seed = 0) {
   return studentArtworkPool[Math.abs(seed) % studentArtworkPool.length]
@@ -1557,7 +1565,7 @@ export function StudentHomePage() {
               onClick={() => setActivePanel(item.key)}
               aria-pressed={activePanel === item.key}
             >
-              <span className="student-visual-menu-icon">{item.icon}</span>
+              <span className="student-visual-menu-icon">{studentMenuIconMap[item.key]}</span>
               <span>{item.label}</span>
             </button>
           ))}

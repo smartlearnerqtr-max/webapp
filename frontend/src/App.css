@@ -1868,7 +1868,7 @@ button {
 }
 
 .student-visual-page {
-  --support-visual-overlay: linear-gradient(180deg, rgba(247, 251, 255, 0.02) 0%, rgba(244, 249, 255, 0.05) 38%, rgba(247, 250, 255, 0.08) 70%, rgba(251, 253, 255, 0.1) 100%);
+  --support-visual-overlay: linear-gradient(180deg, rgba(247, 251, 255, 0.016) 0%, rgba(244, 249, 255, 0.04) 38%, rgba(247, 250, 255, 0.064) 70%, rgba(251, 253, 255, 0.08) 100%);
   --support-visual-accent: #2fb49a;
   --support-visual-accent-strong: #1e8b75;
   --support-visual-accent-soft: rgba(47, 180, 154, 0.14);
@@ -2037,6 +2037,10 @@ button {
 }
 
 .student-visual-menu-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-grid;
+  place-items: center;
   font-size: 1.35rem;
   font-weight: 900;
 }
