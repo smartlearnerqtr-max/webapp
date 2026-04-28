@@ -1,0 +1,70 @@
+{
+  "teacher": {
+    "email": "user001@gmail.com"
+  },
+  "student": {
+    "email": "student.visual.20260410105725@example.com",
+    "password": "123456",
+    "student_profile_id": 2
+  },
+  "classroom": {
+    "id": 2,
+    "name": "Lop Truc Quan 20260410105725",
+    "join_password": "CVBWVQHV",
+    "ui_variant": "visual_support",
+    "visual_theme": "cosmos",
+    "background_image_url": "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1600&q=80"
+  },
+  "assignment": {
+    "id": 5,
+    "lesson_title": "test",
+    "student_visible_assignment_count": 1
+  },
+  "student_flow": {
+    "my_classes_count": 1,
+    "detail_ui_variant": "visual_support",
+    "detail_visual_theme": "cosmos",
+    "started_status": "in_progress",
+    "mid_progress": 50,
+    "final_progress_before_complete": 100,
+    "completed_status": "completed",
+    "completed_percent": 100
+  },
+  "teacher_progress_summary": {
+    "completed_count": 1,
+    "in_progress_count": 0,
+    "need_support_count": 0,
+    "ready_to_increase_count": 1,
+    "student_count": 1
+  },
+  "teacher_progress_first_student": {
+    "assignment_id": 5,
+    "completed_at": "2026-04-10T03:57:27.277760",
+    "completion_score": 100,
+    "help_count": 0,
+    "id": 5,
+    "progress_percent": 100,
+    "readiness_reasons": [
+      "Hoc sinh hoan thanh tot, it can tro giup va co the thu muc kho cao hon."
+    ],
+    "readiness_status": "san_sang_nang_do_kho",
+    "retry_count": 0,
+    "reward_star_count": 3,
+    "status": "completed",
+    "student": {
+      "avatar_url": null,
+      "created_by_teacher_id": null,
+      "disability_level": "trung_binh",
+      "full_name": "Hoc Sinh Truc Quan 20260410105725",
+      "id": 2,
+      "preferred_bg_color": "mint",
+      "preferred_font_size": "large",
+      "preferred_input": "touch",
+      "preferred_read_speed": null,
+      "support_note": "Tai khoan tao de test giao dien truc quan full scroll",
+      "user_id": 5
+    },
+    "student_id": 2,
+    "total_learning_seconds": 180
+  }
+}

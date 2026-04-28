@@ -1,0 +1,15 @@
+ví dụ khi bạn vào web đầu tiên các bạn sẽ thấy các mục bài học khi nhấn vào 1 bài
+ bất kì bạn sẽ thao tác trong bài đó theo hướng xuất hiện duy nhất 1 câu làm xong câu
+  này chuyển qua câu khác đến cuối sẽ tự động hệ thống nộp bài thấy tiến độ tầm 10s ko chạm màn hình nó tự động quay về menu
+
+ các thể loại bài học hiện tại , coi video ngắn chọn 4 đáp án hoặc tự mở mic nói đáp 
+ án AI tự chấm, lướt trong danh sách các hình ảnh chọn ảnh phù hợp với các ngữ cảnh của câu hỏi, 
+ kéo thả xắp xếp các mảnh ghép thành 1 tấm ảnh hoàn chỉnh, lật thẻ đoán tên
+
+nó sẽ có mỗi bài sẽ có 1 mô tả khi học sinh vào câu đó làm AI sẽ phát 1 bản ghi âm hướng dẫn bạn đó thao tác
+thay vì phải đọc chữ để hiểu câu hỏi
+
+ quan trọng mấy cái hoạt động trực quan dễ thao tác trong các bài học hơi ít em chưa nghĩ ra nhiều với cả là nên cho toàn màn hình khi làm bài khung thao tác nó rộng chữ hay ảnh này kia nó to học sinh dễ thao tác nếu chia màn hình như trước thì mình nên để trang chủ thôi
+ còn khi vào làm bài thì chỉ tập trung vào 1 khung làm bài
+
+ 

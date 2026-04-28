@@ -1,0 +1,37 @@
+{
+  "teacher_email": "user001@gmail.com",
+  "student_email": "student.feed.20260410111136@example.com",
+  "student_password": "123456",
+  "class_name": "Lop Feed Video 20260410111136",
+  "class_id": 3,
+  "assignment_id": 6,
+  "lesson_id": 5,
+  "lesson_title": "Feed video 6 buoc 20260410111136",
+  "activity_count": 6,
+  "activity_media_urls": [
+    "/demo-media/clip-1-count-five.html",
+    "/demo-media/clip-2-banana.html",
+    "/demo-media/clip-3-sun.html",
+    "/demo-media/clip-4-fish.html",
+    "/demo-media/clip-5-red-apple.html",
+    "/demo-media/cat-card.svg"
+  ],
+  "student_assignment_count": 1,
+  "ui_variant": "visual_support",
+  "visual_theme": "ocean",
+  "progress_points": [
+    20,
+    40,
+    60,
+    80,
+    100
+  ],
+  "completed_status": "completed",
+  "teacher_progress_summary": {
+    "completed_count": 1,
+    "in_progress_count": 0,
+    "need_support_count": 0,
+    "ready_to_increase_count": 1,
+    "student_count": 1
+  }
+}

@@ -11,7 +11,6 @@ import {
   fetchTeacherMessages,
   fetchTeacherParentGroups,
   fetchTeacherReports,
-  fetchTeacherSharedStudents,
   linkParentToStudent,
   markTeacherMessagesRead,
   sendDailyReports,
@@ -23,16 +22,15 @@ import { useAuthStore } from '../store/authStore'
 const quickLinks = [
   { to: '/hoc-sinh', title: 'Học sinh', icon: 'HS', description: 'Hồ sơ' },
   { to: '/lop-hoc', title: 'Lớp', icon: 'LP', description: 'Mã vào' },
-  { to: '/bai-hoc', title: 'Bài', icon: 'BH', description: 'Hoạt động' },
-  { to: '/giao-bai', title: 'Giao', icon: 'GB', description: 'Chọn lớp' },
+  { to: '/bai-hoc', title: 'Bài học', icon: 'BH', description: 'Hoạt động' },
+  { to: '/giao-bai', title: 'Giao bài', icon: 'GB', description: 'Chọn lớp' },
   { to: '/tien-do', title: 'Tiến độ', icon: '%', description: 'Theo dõi' },
-  { to: '/cai-dat-ai', title: 'AI', icon: 'AI', description: 'Kết nối' },
 ]
 
 const readinessLabelMap: Record<string, string> = {
-  can_ho_tro_them: 'Cần hỗ trợ thêm',
+  can_ho_tro_them: 'Cần hỗ trợ',
   dang_phu_hop: 'Đang phù hợp',
-  san_sang_nang_do_kho: 'Sẵn sàng nâng độ khó',
+  san_sang_nang_do_kho: 'Sẵn sàng tăng mức',
 }
 
 export function TeacherHomePage() {
@@ -75,12 +73,6 @@ export function TeacherHomePage() {
     enabled: Boolean(token),
   })
 
-  const sharedStudentsQuery = useQuery({
-    queryKey: ['teacher-shared-students', token],
-    queryFn: () => fetchTeacherSharedStudents(token!),
-    enabled: Boolean(token),
-  })
-
   const conversationsQuery = useQuery({
     queryKey: ['teacher-messages', token],
     queryFn: () => fetchTeacherMessages(token!),
@@ -96,40 +88,6 @@ export function TeacherHomePage() {
     if (!selectedStudentId) return parentsQuery.data ?? []
     return (parentsQuery.data ?? []).filter((parent) => !linkedPairKeys.has(`${selectedStudentId}-${parent.id}`))
   }, [linkedPairKeys, parentsQuery.data, selectedStudentId])
-
-  const selectedSharedStudent = useMemo(() => {
-    if (!selectedStudentId) return null
-    return (sharedStudentsQuery.data ?? []).find((item) => String(item.student.id) === selectedStudentId) ?? null
-  }, [selectedStudentId, sharedStudentsQuery.data])
-
-  const linkMutation = useMutation({
-    mutationFn: () => linkParentToStudent(token!, Number(selectedStudentId), { parent_id: Number(selectedParentId) }),
-    onSuccess: async () => {
-      setSelectedParentId('')
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['teacher-parent-groups', token] }),
-        queryClient.invalidateQueries({ queryKey: ['parents', token] }),
-        queryClient.invalidateQueries({ queryKey: ['teacher-shared-students', token] }),
-        queryClient.invalidateQueries({ queryKey: ['teacher-messages', token] }),
-      ])
-    },
-  })
-
-  const reportMutation = useMutation({
-    mutationFn: (studentId?: number) => sendDailyReports(token!, {
-      student_id: studentId,
-      title: reportTitle.trim() || undefined,
-      note: reportNote.trim() || undefined,
-    }),
-    onSuccess: async () => {
-      setReportTitle('')
-      setReportNote('')
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['teacher-reports', token] }),
-        queryClient.invalidateQueries({ queryKey: ['teacher-parent-groups', token] }),
-      ])
-    },
-  })
 
   const conversations = conversationsQuery.data ?? []
   const unreadConversationCount = conversations.reduce((count, item) => count + item.unread_count, 0)
@@ -177,6 +135,34 @@ export function TeacherHomePage() {
     }
   }, [filteredConversations, selectedConversationKey])
 
+  const linkMutation = useMutation({
+    mutationFn: () => linkParentToStudent(token!, Number(selectedStudentId), { parent_id: Number(selectedParentId) }),
+    onSuccess: async () => {
+      setSelectedParentId('')
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['teacher-parent-groups', token] }),
+        queryClient.invalidateQueries({ queryKey: ['parents', token] }),
+        queryClient.invalidateQueries({ queryKey: ['teacher-messages', token] }),
+      ])
+    },
+  })
+
+  const reportMutation = useMutation({
+    mutationFn: (studentId?: number) => sendDailyReports(token!, {
+      student_id: studentId,
+      title: reportTitle.trim() || undefined,
+      note: reportNote.trim() || undefined,
+    }),
+    onSuccess: async () => {
+      setReportTitle('')
+      setReportNote('')
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['teacher-reports', token] }),
+        queryClient.invalidateQueries({ queryKey: ['teacher-parent-groups', token] }),
+      ])
+    },
+  })
+
   const sendMessageMutation = useMutation({
     mutationFn: (conversation: ParentTeacherConversationItem) => sendTeacherMessage(token!, {
       parent_id: conversation.parent?.id ?? 0,
@@ -208,55 +194,9 @@ export function TeacherHomePage() {
   const studentCount = studentsQuery.data?.length ?? 0
   const parentGroupCount = parentGroupsQuery.data?.length ?? 0
   const reportCount = reportsQuery.data?.length ?? 0
-  const sharedStudentCount = sharedStudentsQuery.data?.length ?? 0
-
-  const teacherOverviewChartItems = [
-    { label: 'Học sinh', value: studentCount, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
-    { label: 'Liên kết phụ huynh', value: parentGroupCount, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
-    { label: 'Báo cáo đã gửi', value: reportCount, color: 'linear-gradient(180deg, #ffbe3d 0%, #f29f05 100%)' },
-    { label: 'Tin nhắn chưa đọc', value: unreadConversationCount, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
-  ]
-
-  const parentGroupProgressChartItems = useMemo(() => {
-    const summary = (parentGroupsQuery.data ?? []).reduce(
-      (accumulator, item) => {
-        accumulator.totalAssignments += item.progress_summary.total_assignments
-        accumulator.completedCount += item.progress_summary.completed_count
-        accumulator.inProgressCount += item.progress_summary.in_progress_count
-        return accumulator
-      },
-      { totalAssignments: 0, completedCount: 0, inProgressCount: 0 },
-    )
-
-    const remainingCount = Math.max(summary.totalAssignments - summary.completedCount - summary.inProgressCount, 0)
-
-    return [
-      { label: 'Tổng bài đang theo dõi', value: summary.totalAssignments, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
-      { label: 'Đã hoàn thành', value: summary.completedCount, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
-      { label: 'Đang học', value: summary.inProgressCount, color: 'linear-gradient(180deg, #ffbe3d 0%, #f29f05 100%)' },
-      { label: 'Chưa bắt đầu', value: remainingCount, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
-    ]
-  }, [parentGroupsQuery.data])
-
-  const readinessChartItems = useMemo(() => {
-    const groups = parentGroupsQuery.data ?? []
-    const readinessCounts = groups.reduce(
-      (accumulator, item) => {
-        const status = item.progress_summary.readiness_status
-        if (status === 'can_ho_tro_them') accumulator.needSupport += 1
-        if (status === 'dang_phu_hop') accumulator.onTrack += 1
-        if (status === 'san_sang_nang_do_kho') accumulator.readyUp += 1
-        return accumulator
-      },
-      { needSupport: 0, onTrack: 0, readyUp: 0 },
-    )
-
-    return [
-      { label: 'Cần hỗ trợ', value: readinessCounts.needSupport, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
-      { label: 'Đang phù hợp', value: readinessCounts.onTrack, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
-      { label: 'Sẵn sàng tăng mức', value: readinessCounts.readyUp, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
-    ]
-  }, [parentGroupsQuery.data])
+  const latestParentGroups = (parentGroupsQuery.data ?? []).slice(0, 6)
+  const latestReports = (reportsQuery.data ?? []).slice(0, 5)
+  const recentConversations = conversations.slice(0, 5)
 
   const averageLatestProgress = useMemo(() => {
     const groups = parentGroupsQuery.data ?? []
@@ -265,17 +205,30 @@ export function TeacherHomePage() {
     return Math.round(total / groups.length)
   }, [parentGroupsQuery.data])
 
+  const teacherOverviewChartItems = [
+    { label: 'Học sinh', value: studentCount, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
+    { label: 'Phụ huynh', value: parentGroupCount, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
+    { label: 'Tiến độ TB', value: averageLatestProgress, color: 'linear-gradient(180deg, #ffbe3d 0%, #f29f05 100%)' },
+    { label: 'Chat chưa đọc', value: unreadConversationCount, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
+  ]
+
+  function openConversation(conversation: ParentTeacherConversationItem) {
+    setSelectedConversationKey(conversation.conversation_key)
+    setIsChatOpen(true)
+  }
+
   return (
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack teacher-clean-page">
         <section className="roadmap-panel teacher-clean-hero">
           <div>
             <p className="eyebrow teacher-clean-title-label">Giáo viên</p>
+            <h2>Bảng điều khiển</h2>
           </div>
           <div className="teacher-clean-hero-badges">
             <span>ID {teacherId ?? '---'}</span>
+            <span>{averageLatestProgress}% tiến độ TB</span>
             <span>{unreadConversationCount} chat</span>
-            <span>{averageLatestProgress}% tiến độ</span>
           </div>
         </section>
 
@@ -284,8 +237,7 @@ export function TeacherHomePage() {
             { label: 'Học sinh', value: studentCount, tone: 'blue' },
             { label: 'Phụ huynh', value: parentGroupCount, tone: 'green' },
             { label: 'Báo cáo', value: reportCount, tone: 'gold' },
-            { label: 'Chưa đọc', value: unreadConversationCount, tone: 'coral' },
-            { label: 'Phối hợp', value: sharedStudentCount, tone: 'ink' },
+            { label: 'Chat mới', value: unreadConversationCount, tone: 'coral' },
           ].map((item) => (
             <article key={item.label} className={`mini-card teacher-clean-metric teacher-clean-metric-${item.tone}`}>
               <span>{item.label}</span>
@@ -315,7 +267,7 @@ export function TeacherHomePage() {
             </div>
             <BarChartCard
               title="Nhìn nhanh"
-              description="Theo dõi chung"
+              description="Các số chính giáo viên cần theo dõi"
               items={teacherOverviewChartItems}
             />
           </article>
@@ -323,17 +275,21 @@ export function TeacherHomePage() {
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Ưu tiên</p>
-                <h3>Readiness</h3>
+                <p className="eyebrow">Theo dõi</p>
+                <h3>Nhóm phụ huynh</h3>
               </div>
-              <span className="subject-pill muted-pill">{parentGroupCount} nhóm</span>
+              <span className="subject-pill muted-pill">{averageLatestProgress}% TB</span>
             </div>
-            <BarChartCard
-              title="Mức sẵn sàng"
-              description="Ưu tiên hỗ trợ"
-              items={readinessChartItems}
-              emptyMessage="Chưa có dữ liệu readiness."
-            />
+            <div className="student-list compact-list">
+              {latestParentGroups.map((item) => (
+                <div key={item.link_id} className="student-row">
+                  <strong>{item.student?.full_name ?? 'Học sinh'}</strong>
+                  <span>{item.parent?.full_name ?? 'Phụ huynh'}</span>
+                  <p>{item.progress_summary.last_progress_percent}% • {readinessLabelMap[item.progress_summary.readiness_status] ?? item.progress_summary.readiness_status}</p>
+                </div>
+              ))}
+              {!latestParentGroups.length && !parentGroupsQuery.isLoading ? <p>Chưa có nhóm phụ huynh.</p> : null}
+            </div>
           </article>
         </section>
 
@@ -341,7 +297,7 @@ export function TeacherHomePage() {
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Liên kết</p>
+                <p className="eyebrow">Thiết lập</p>
                 <h3>Gắn phụ huynh</h3>
               </div>
             </div>
@@ -380,14 +336,6 @@ export function TeacherHomePage() {
                 {linkMutation.isPending ? 'Đang gắn...' : 'Gắn phụ huynh'}
               </button>
 
-              {selectedSharedStudent ? (
-                <article className="teacher-clean-note-card">
-                  <strong>{selectedSharedStudent.student.full_name}</strong>
-                  <p>{selectedSharedStudent.teachers.length} giáo viên theo dõi</p>
-                  <p>{selectedSharedStudent.peer_teachers.map((teacher) => teacher.full_name).join(', ') || 'Chưa có giáo viên phối hợp'}</p>
-                </article>
-              ) : null}
-
               {linkMutation.error ? <p className="error-text">{(linkMutation.error as Error).message}</p> : null}
             </div>
           </article>
@@ -412,94 +360,25 @@ export function TeacherHomePage() {
                   ))}
                 </select>
               </label>
+              <label>
+                Tiêu đề
+                <input value={reportTitle} onChange={(event) => setReportTitle(event.target.value)} placeholder="Để trống nếu dùng mặc định" />
+              </label>
+              <label>
+                Ghi chú
+                <textarea value={reportNote} onChange={(event) => setReportNote(event.target.value)} rows={3} placeholder="Viết ngắn gọn." />
+              </label>
 
-              <details className="config-card">
-                <summary className="simple-summary">Tùy chọn thêm</summary>
-                <label>
-                  Tiêu đề
-                  <input value={reportTitle} onChange={(event) => setReportTitle(event.target.value)} placeholder="Để trống nếu dùng mặc định" />
-                </label>
-                <label>
-                  Ghi chú
-                  <textarea value={reportNote} onChange={(event) => setReportNote(event.target.value)} rows={4} placeholder="Viết ngắn gọn." />
-                </label>
-              </details>
-
-              <div className="button-row">
-                <button
-                  className="action-button"
-                  type="button"
-                  disabled={reportMutation.isPending || !parentGroupCount}
-                  onClick={() => reportMutation.mutate(reportStudentId ? Number(reportStudentId) : undefined)}
-                >
-                  {reportMutation.isPending ? 'Đang gửi...' : reportStudentId ? 'Gửi 1 học sinh' : 'Gửi tất cả'}
-                </button>
-                <button
-                  className="ghost-button"
-                  type="button"
-                  disabled={reportMutation.isPending || !parentGroupCount}
-                  onClick={() => {
-                    setReportStudentId('')
-                    reportMutation.mutate(undefined)
-                  }}
-                >
-                  Gửi toàn bộ
-                </button>
-              </div>
+              <button
+                className="action-button"
+                type="button"
+                disabled={reportMutation.isPending || !parentGroupCount}
+                onClick={() => reportMutation.mutate(reportStudentId ? Number(reportStudentId) : undefined)}
+              >
+                {reportMutation.isPending ? 'Đang gửi...' : reportStudentId ? 'Gửi cho học sinh này' : 'Gửi tất cả'}
+              </button>
 
               {reportMutation.error ? <p className="error-text">{(reportMutation.error as Error).message}</p> : null}
-            </div>
-          </article>
-        </section>
-
-        <section className="dashboard-grid">
-          <article className="roadmap-panel">
-            <div className="teacher-clean-section-head">
-              <div>
-                <p className="eyebrow">Phụ huynh</p>
-                <h3>Nhóm đang theo dõi</h3>
-              </div>
-              <span className="subject-pill muted-pill">{averageLatestProgress}% TB</span>
-            </div>
-            <BarChartCard
-              title="Tiến độ nhóm"
-              description="Tự cập nhật"
-              items={parentGroupProgressChartItems}
-              emptyMessage="Chưa có liên kết phụ huynh."
-            />
-            <div className="student-list compact-list">
-              {(parentGroupsQuery.data ?? []).slice(0, 6).map((item) => (
-                <div key={item.link_id} className="student-row">
-                  <strong>{item.student?.full_name ?? 'Học sinh'}</strong>
-                  <span>{item.parent?.full_name ?? 'Phụ huynh'}</span>
-                  <p>{item.progress_summary.last_progress_percent}% • {readinessLabelMap[item.progress_summary.readiness_status] ?? item.progress_summary.readiness_status}</p>
-                </div>
-              ))}
-              {!parentGroupsQuery.data?.length && !parentGroupsQuery.isLoading ? <p>Chưa có nhóm phụ huynh.</p> : null}
-            </div>
-          </article>
-
-          <article className="roadmap-panel">
-            <div className="teacher-clean-section-head">
-              <div>
-                <p className="eyebrow">Phối hợp</p>
-                <h3>Học sinh chung</h3>
-              </div>
-            </div>
-            <div className="student-list compact-list">
-              {(sharedStudentsQuery.data ?? []).slice(0, 8).map((item) => (
-                <button
-                  key={item.student.id}
-                  type="button"
-                  className={selectedStudentId === String(item.student.id) ? 'student-row student-row-button student-row-button-active' : 'student-row student-row-button'}
-                  onClick={() => setSelectedStudentId(String(item.student.id))}
-                >
-                  <strong>{item.student.full_name}</strong>
-                  <span>{item.parent_group_count} phụ huynh • {item.my_active_class_count} lớp</span>
-                  <p>{item.peer_teachers.map((teacher) => teacher.full_name).join(', ') || 'Chưa có phối hợp'}</p>
-                </button>
-              ))}
-              {!sharedStudentsQuery.data?.length && !sharedStudentsQuery.isLoading ? <p>Chưa có học sinh phối hợp.</p> : null}
             </div>
           </article>
         </section>
@@ -514,45 +393,42 @@ export function TeacherHomePage() {
               <span className="subject-pill muted-pill">{reportCount}</span>
             </div>
             <div className="student-list compact-list">
-              {(reportsQuery.data ?? []).slice(0, 6).map((report) => (
+              {latestReports.map((report) => (
                 <div key={report.id} className="student-row">
                   <strong>{report.student?.full_name ?? `Học sinh #${report.student_id}`}</strong>
                   <span>{report.report_date} • {report.parent?.full_name ?? `Phụ huynh #${report.parent_id}`}</span>
                   <p>{report.summary_text}</p>
                 </div>
               ))}
-              {!reportsQuery.data?.length && !reportsQuery.isLoading ? <p>Chưa có báo cáo.</p> : null}
+              {!latestReports.length && !reportsQuery.isLoading ? <p>Chưa có báo cáo.</p> : null}
             </div>
           </article>
 
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Phối hợp</p>
-                <h3>Giáo viên liên quan</h3>
+                <p className="eyebrow">Trao đổi</p>
+                <h3>Chat phụ huynh</h3>
               </div>
+              <button type="button" className="ghost-button" onClick={() => setIsChatOpen(true)}>
+                Mở chat
+              </button>
             </div>
-
-            {selectedSharedStudent ? (
-              <div className="detail-stack">
-                <article className="teacher-clean-note-card">
-                  <strong>{selectedSharedStudent.student.full_name}</strong>
-                  <p>{selectedSharedStudent.teachers.length} giáo viên cùng theo dõi</p>
-                </article>
-                {selectedSharedStudent.teachers.map((teacher) => (
-                  <div key={teacher.id} className="student-row">
-                    <strong>{teacher.full_name}</strong>
-                    <span>{teacher.is_current_teacher ? 'Hiện tại' : 'Phối hợp'}</span>
-                    <p>{teacher.school_name ?? 'Chưa cập nhật trường'} • {teacher.email ?? teacher.phone ?? 'Chưa có liên hệ'}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="teacher-clean-empty">
-                <strong>Chọn một học sinh ở khung bên trái.</strong>
-                <p>Mình sẽ hiện giáo viên phối hợp và thông tin liên hệ tại đây.</p>
-              </div>
-            )}
+            <div className="student-list compact-list">
+              {recentConversations.map((conversation) => (
+                <button
+                  key={conversation.conversation_key}
+                  type="button"
+                  className="student-row student-row-button"
+                  onClick={() => openConversation(conversation)}
+                >
+                  <strong>{conversation.student?.full_name ?? 'Học sinh'} • {conversation.parent?.full_name ?? 'Phụ huynh'}</strong>
+                  <span>{conversation.unread_count ? `${conversation.unread_count} tin mới` : 'Đã đọc'}</span>
+                  <p>{conversation.latest_message?.message ?? 'Chưa có tin nhắn.'}</p>
+                </button>
+              ))}
+              {!recentConversations.length && !conversationsQuery.isLoading ? <p>Chưa có đoạn chat nào.</p> : null}
+            </div>
           </article>
         </section>
       </div>
@@ -562,7 +438,7 @@ export function TeacherHomePage() {
         isOpen={isChatOpen}
         onToggle={() => setIsChatOpen((current) => !current)}
         title="Chat với phụ huynh"
-        subtitle="Bấm để mở hộp chat nổi"
+        subtitle="Trao đổi nhanh khi cần phối hợp"
         unreadCount={unreadConversationCount}
         conversations={filteredConversations}
         selectedConversationKey={selectedConversationKey}
@@ -572,16 +448,16 @@ export function TeacherHomePage() {
         onStudentFilterChange={setSelectedChatStudentId}
         searchTerm={conversationSearchTerm}
         onSearchTermChange={setConversationSearchTerm}
-        searchPlaceholder="Nhập tên phụ huynh, học sinh hoặc nội dung gần nhất"
+        searchPlaceholder="Tìm phụ huynh, học sinh hoặc nội dung"
         selectedConversation={selectedConversation}
         renderConversationLabel={(conversation) => `${conversation.student?.full_name ?? 'Học sinh'} • ${conversation.parent?.full_name ?? 'Phụ huynh'}`}
         renderConversationMeta={(conversation) => conversation.parent?.relationship_label ?? 'Phụ huynh đang theo dõi'}
         emptyListTitle="Chưa có đoạn chat nào"
-        emptyListDescription="Sau khi gắn phụ huynh vào học sinh, khung chat sẽ xuất hiện để giáo viên trao đổi trực tiếp."
+        emptyListDescription="Sau khi gắn phụ huynh vào học sinh, hộp chat sẽ xuất hiện tại đây."
         emptySearchTitle="Không tìm thấy đoạn chat phù hợp"
-        emptySearchDescription="Thử đổi học sinh hoặc xóa từ khóa tìm kiếm để hiện lại danh sách đầy đủ."
+        emptySearchDescription="Thử đổi học sinh hoặc xóa từ khóa tìm kiếm."
         emptyChatTitle="Chưa có tin nhắn nào"
-        emptyChatDescription="Bạn có thể mở đầu bằng một lời nhắn ngắn để phụ huynh biết cách phối hợp với bài học hiện tại."
+        emptyChatDescription="Bạn có thể mở đầu bằng một lời nhắn ngắn để phụ huynh biết cách phối hợp."
         counterpartName={(conversation) => conversation.parent?.full_name ?? 'Phụ huynh'}
         chatContextLabel={(conversation) => `Trao đổi về ${conversation.student?.full_name ?? 'học sinh'}`}
         messageDraft={messageDraft}
@@ -589,7 +465,7 @@ export function TeacherHomePage() {
         onSend={() => { if (selectedConversation) sendMessageMutation.mutate(selectedConversation) }}
         sendPending={sendMessageMutation.isPending}
         sendError={sendMessageMutation.error ? (sendMessageMutation.error as Error).message : null}
-        messagePlaceholder="Ví dụ: Hôm nay bé đã hoàn thành phần số học khá tốt, phụ huynh nhắc bé ôn lại hình học thêm 10 phút nhé."
+        messagePlaceholder="Ví dụ: Hôm nay bé làm tốt phần bài học, phụ huynh nhắc bé ôn thêm 10 phút nhé."
         messageHelperText="Nội dung ngắn, rõ việc cần phối hợp sẽ giúp phụ huynh thực hiện dễ hơn."
       />
     </RequireAuth>

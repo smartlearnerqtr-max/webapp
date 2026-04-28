@@ -30,7 +30,6 @@ const navItemsByRole: Record<string, Array<{ to: string; label: string }>> = {
     { to: '/bai-hoc', label: 'Bài' },
     { to: '/giao-bai', label: 'Giao' },
     { to: '/tien-do', label: 'Tiến độ' },
-    { to: '/cai-dat-ai', label: 'AI' },
   ],
   student: [
     { to: '/hoc-tap', label: 'Học' },
@@ -59,6 +58,7 @@ function App() {
   const isFetching = useIsFetching()
   const isMutating = useIsMutating()
   const isLoading = isFetching > 0 || isMutating > 0
+  const isTeacherRole = user?.role === 'teacher'
 
   useEffect(() => {
     hydrate()
@@ -89,10 +89,10 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${isTeacherRole ? 'app-shell-teacher' : ''}`}>
       {isLoading && <div className="global-loading-bar" />}
       <button
-        className="menu-toggle-fixed"
+        className={`menu-toggle-fixed ${isTeacherRole ? 'menu-toggle-fixed-teacher' : ''}`}
         onClick={() => setIsMenuOpen((current) => !current)}
         aria-label="Mở điều hướng"
         aria-expanded={isMenuOpen}
@@ -105,7 +105,7 @@ function App() {
 
       {isMenuOpen && <div className="backdrop" onClick={() => setIsMenuOpen(false)}></div>}
 
-      <aside className={`sidebar ${isMenuOpen ? 'sidebar-open' : ''}`}>
+      <aside className={`sidebar ${isMenuOpen ? 'sidebar-open' : ''} ${isTeacherRole ? 'sidebar-teacher' : ''}`}>
         <div className="sidebar-top">
           <div className="sidebar-brand-block">
             <h2 className="sidebar-title">Bạn học thông minh</h2>
@@ -146,7 +146,7 @@ function App() {
         </div>
       </aside>
 
-      <main className="content">
+      <main className={`content ${isTeacherRole ? 'content-teacher' : ''}`}>
         <RealtimeBridge isNotificationPanelOpen={isMenuOpen} onUnreadCountChange={setUnreadNotificationCount} />
         <Routes>
           <Route path="/" element={user ? <Navigate to={getDefaultRouteForRole(user.role)} replace /> : <HomePage />} />

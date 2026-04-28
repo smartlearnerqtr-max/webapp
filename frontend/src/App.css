@@ -560,6 +560,37 @@ button {
   margin: 0.3rem 0 0;
 }
 
+@media (min-width: 1101px) {
+  .app-shell-teacher .menu-toggle-fixed-teacher {
+    display: none;
+  }
+
+  .app-shell-teacher .backdrop {
+    display: none;
+  }
+
+  .app-shell-teacher .sidebar-teacher {
+    width: 312px;
+    max-width: none;
+    padding: 2rem 1.25rem 1.4rem;
+    transform: translateX(0);
+  }
+
+  .app-shell-teacher .content-teacher {
+    padding: 2rem 2rem 2rem calc(312px + 2rem);
+  }
+
+  .app-shell-teacher .content-teacher > * {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  .app-shell-teacher .realtime-banner {
+    width: 100%;
+  }
+}
+
 .form-stack,
 .detail-stack,
 .settings-grid {
@@ -1711,11 +1742,33 @@ button {
   padding-right: 0.2rem;
 }
 
-.lesson-manage-layout {
+.lessons-workspace {
   display: grid;
   gap: 1rem;
-  grid-template-columns: minmax(260px, 0.92fr) minmax(0, 1.28fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
+}
+
+.lessons-sidebar-stack,
+.lessons-manage-stack,
+.lessons-preview-pane {
+  display: grid;
+  gap: 1rem;
+}
+
+.lessons-editor-panel,
+.lessons-preview-panel {
+  min-width: 0;
+}
+
+.lessons-editor-panel {
+  min-height: 100%;
+}
+
+.lessons-preview-panel {
+  position: static;
+  max-height: none;
+  overflow: visible;
 }
 
 .lesson-activity-list {
@@ -3525,6 +3578,7 @@ button {
 @media (max-width: 1100px) {
   .auth-layout,
   .dashboard-grid,
+  .lessons-workspace,
   .auth-layout-home,
   .home-role-grid,
   .teacher-clean-hero,
@@ -3540,6 +3594,11 @@ button {
 
   .teacher-clean-hero-badges {
     justify-items: start;
+  }
+
+  .lessons-preview-panel {
+    position: static;
+    max-height: none;
   }
 
   .student-learning-layout,

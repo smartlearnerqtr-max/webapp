@@ -1,0 +1,145 @@
+2026-04-28 21:23:14,726 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.6:5000
+2026-04-28 21:23:14,728 INFO [33mPress CTRL+C to quit[0m
+2026-04-28 21:23:14,733 INFO  * Restarting with stat
+2026-04-28 21:23:15,990 WARNING  * Debugger is active!
+2026-04-28 21:23:15,995 INFO  * Debugger PIN: 130-886-545
+2026-04-28 21:23:26,576 INFO 127.0.0.1 - - [28/Apr/2026 21:23:26] "GET /api/v1/health HTTP/1.1" 200 -
+2026-04-28 21:24:40,438 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "OPTIONS /api/v1/health HTTP/1.1" 200 -
+2026-04-28 21:24:40,529 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "OPTIONS /api/v1/students HTTP/1.1" 200 -
+2026-04-28 21:24:40,530 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "OPTIONS /api/v1/teacher/reports HTTP/1.1" 200 -
+2026-04-28 21:24:40,531 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "OPTIONS /api/v1/teacher/parent-groups HTTP/1.1" 200 -
+2026-04-28 21:24:40,533 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "OPTIONS /api/v1/parents HTTP/1.1" 200 -
+2026-04-28 21:24:40,537 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "OPTIONS /api/v1/teacher/shared-students HTTP/1.1" 200 -
+2026-04-28 21:24:40,760 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "GET /api/v1/health HTTP/1.1" 200 -
+2026-04-28 21:24:40,854 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "[31m[1mGET /api/v1/students HTTP/1.1[0m" 401 -
+2026-04-28 21:24:40,856 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "[31m[1mGET /api/v1/teacher/reports HTTP/1.1[0m" 401 -
+2026-04-28 21:24:40,857 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "[31m[1mGET /api/v1/teacher/parent-groups HTTP/1.1[0m" 401 -
+2026-04-28 21:24:40,862 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "[31m[1mGET /api/v1/parents HTTP/1.1[0m" 401 -
+2026-04-28 21:24:40,864 INFO 127.0.0.1 - - [28/Apr/2026 21:24:40] "[31m[1mGET /api/v1/teacher/shared-students HTTP/1.1[0m" 401 -
+2026-04-28 21:24:42,177 INFO 127.0.0.1 - - [28/Apr/2026 21:24:42] "[31m[1mGET /api/v1/students HTTP/1.1[0m" 401 -
+2026-04-28 21:24:42,186 INFO 127.0.0.1 - - [28/Apr/2026 21:24:42] "[31m[1mGET /api/v1/teacher/reports HTTP/1.1[0m" 401 -
+2026-04-28 21:24:42,205 INFO 127.0.0.1 - - [28/Apr/2026 21:24:42] "[31m[1mGET /api/v1/teacher/parent-groups HTTP/1.1[0m" 401 -
+2026-04-28 21:24:42,209 INFO 127.0.0.1 - - [28/Apr/2026 21:24:42] "[31m[1mGET /api/v1/parents HTTP/1.1[0m" 401 -
+2026-04-28 21:24:42,212 INFO 127.0.0.1 - - [28/Apr/2026 21:24:42] "[31m[1mGET /api/v1/teacher/shared-students HTTP/1.1[0m" 401 -
+2026-04-28 21:24:44,199 INFO 127.0.0.1 - - [28/Apr/2026 21:24:44] "[31m[1mGET /api/v1/students HTTP/1.1[0m" 401 -
+2026-04-28 21:24:44,505 INFO 127.0.0.1 - - [28/Apr/2026 21:24:44] "[31m[1mGET /api/v1/teacher/reports HTTP/1.1[0m" 401 -
+2026-04-28 21:24:44,536 INFO 127.0.0.1 - - [28/Apr/2026 21:24:44] "[31m[1mGET /api/v1/teacher/parent-groups HTTP/1.1[0m" 401 -
+2026-04-28 21:24:44,538 INFO 127.0.0.1 - - [28/Apr/2026 21:24:44] "[31m[1mGET /api/v1/parents HTTP/1.1[0m" 401 -
+2026-04-28 21:24:44,541 INFO 127.0.0.1 - - [28/Apr/2026 21:24:44] "[31m[1mGET /api/v1/teacher/shared-students HTTP/1.1[0m" 401 -
+2026-04-28 21:24:48,828 INFO 127.0.0.1 - - [28/Apr/2026 21:24:48] "OPTIONS /api/v1/auth/login HTTP/1.1" 200 -
+2026-04-28 21:24:50,285 INFO auth | Dang nhap thanh cong | request_id=req_fce3f03a784941fd
+2026-04-28 21:24:50,300 INFO 127.0.0.1 - - [28/Apr/2026 21:24:50] "POST /api/v1/auth/login HTTP/1.1" 200 -
+2026-04-28 21:24:50,327 INFO 127.0.0.1 - - [28/Apr/2026 21:24:50] "OPTIONS /api/v1/my/assignments HTTP/1.1" 200 -
+2026-04-28 21:24:50,710 INFO 127.0.0.1 - - [28/Apr/2026 21:24:50] "OPTIONS /api/v1/my/classes HTTP/1.1" 200 -
+2026-04-28 21:24:50,718 INFO 127.0.0.1 - - [28/Apr/2026 21:24:50] "OPTIONS /api/v1/my/teachers HTTP/1.1" 200 -
+2026-04-28 21:24:50,721 INFO 127.0.0.1 - - [28/Apr/2026 21:24:50] "OPTIONS /api/v1/ai/speech HTTP/1.1" 200 -
+2026-04-28 21:24:50,731 INFO 127.0.0.1 - - [28/Apr/2026 21:24:50] "OPTIONS /api/v1/ai/speech HTTP/1.1" 200 -
+2026-04-28 21:24:50,746 INFO 127.0.0.1 - - [28/Apr/2026 21:24:50] "GET /api/v1/my/assignments HTTP/1.1" 200 -
+2026-04-28 21:24:51,033 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "OPTIONS /api/v1/ai/speech HTTP/1.1" 200 -
+2026-04-28 21:24:51,035 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "OPTIONS /api/v1/ai/speech HTTP/1.1" 200 -
+2026-04-28 21:24:51,043 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "OPTIONS /api/v1/ai/speech HTTP/1.1" 200 -
+2026-04-28 21:24:51,046 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "OPTIONS /api/v1/ai/speech HTTP/1.1" 200 -
+2026-04-28 21:24:51,056 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "OPTIONS /api/v1/ai/speech HTTP/1.1" 200 -
+2026-04-28 21:24:51,356 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "OPTIONS /api/v1/ai/speech HTTP/1.1" 200 -
+2026-04-28 21:24:51,358 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "OPTIONS /api/v1/ai/speech HTTP/1.1" 200 -
+2026-04-28 21:24:51,359 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "OPTIONS /api/v1/ai/speech HTTP/1.1" 200 -
+2026-04-28 21:24:51,413 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "GET /api/v1/my/classes HTTP/1.1" 200 -
+2026-04-28 21:24:51,450 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "GET /api/v1/my/teachers HTTP/1.1" 200 -
+2026-04-28 21:24:51,711 ERROR ai_speech | Tao audio huong dan bang Edge TTS that bai | request_id=req_a1d7cd01604c4519
+2026-04-28 21:24:51,719 ERROR ai_speech | Tao audio huong dan bang Edge TTS that bai | request_id=req_40e7c6de65274044
+2026-04-28 21:24:51,729 ERROR ai_speech | Tao audio huong dan bang Edge TTS that bai | request_id=req_b04bb40d4ad94135
+2026-04-28 21:24:51,740 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "[35m[1mPOST /api/v1/ai/speech HTTP/1.1[0m" 500 -
+2026-04-28 21:24:51,754 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "[35m[1mPOST /api/v1/ai/speech HTTP/1.1[0m" 500 -
+2026-04-28 21:24:51,775 ERROR ai_speech | Tao audio huong dan bang Edge TTS that bai | request_id=req_bb2f47a93a214f49
+2026-04-28 21:24:51,775 ERROR ai_speech | Tao audio huong dan bang Edge TTS that bai | request_id=req_2742d1c80cdb400e
+2026-04-28 21:24:51,785 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "[35m[1mPOST /api/v1/ai/speech HTTP/1.1[0m" 500 -
+2026-04-28 21:24:51,802 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "[35m[1mPOST /api/v1/ai/speech HTTP/1.1[0m" 500 -
+2026-04-28 21:24:51,820 INFO 127.0.0.1 - - [28/Apr/2026 21:24:51] "[35m[1mPOST /api/v1/ai/speech HTTP/1.1[0m" 500 -
+2026-04-28 21:24:52,071 ERROR ai_speech | Tao audio huong dan bang Edge TTS that bai | request_id=req_cf02c637e63843f8
+2026-04-28 21:24:52,073 ERROR ai_speech | Tao audio huong dan bang Edge TTS that bai | request_id=req_eefc0930ee644143
+2026-04-28 21:24:52,093 INFO 127.0.0.1 - - [28/Apr/2026 21:24:52] "[35m[1mPOST /api/v1/ai/speech HTTP/1.1[0m" 500 -
+2026-04-28 21:24:52,103 ERROR ai_speech | Tao audio huong dan bang Edge TTS that bai | request_id=req_e2848a5b5dc34a9d
+2026-04-28 21:24:52,115 INFO 127.0.0.1 - - [28/Apr/2026 21:24:52] "[35m[1mPOST /api/v1/ai/speech HTTP/1.1[0m" 500 -
+2026-04-28 21:24:52,139 INFO 127.0.0.1 - - [28/Apr/2026 21:24:52] "[35m[1mPOST /api/v1/ai/speech HTTP/1.1[0m" 500 -
+2026-04-28 21:24:52,155 ERROR ai_speech | Tao audio huong dan bang Edge TTS that bai | request_id=req_eecef04ef3f84e1a
+2026-04-28 21:24:52,158 ERROR ai_speech | Tao audio huong dan bang Edge TTS that bai | request_id=req_a7302b14f8714cdb
+2026-04-28 21:24:52,171 INFO 127.0.0.1 - - [28/Apr/2026 21:24:52] "[35m[1mPOST /api/v1/ai/speech HTTP/1.1[0m" 500 -
+2026-04-28 21:24:52,189 INFO 127.0.0.1 - - [28/Apr/2026 21:24:52] "[35m[1mPOST /api/v1/ai/speech HTTP/1.1[0m" 500 -
+2026-04-28 21:24:52,404 INFO 127.0.0.1 - - [28/Apr/2026 21:24:52] "OPTIONS /api/v1/my/assignments/2 HTTP/1.1" 200 -
+2026-04-28 21:24:52,768 INFO 127.0.0.1 - - [28/Apr/2026 21:24:52] "GET /api/v1/my/assignments/2 HTTP/1.1" 200 -
+2026-04-28 21:25:06,690 INFO 127.0.0.1 - - [28/Apr/2026 21:25:06] "GET /api/v1/realtime/stream?access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NzM4NjI5MCwianRpIjoiOTRiMzJjY2YtZDA3YS00NWU2LWI1MTQtMTY2MTY0MDZmYmNmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjYiLCJuYmYiOjE3NzczODYyOTAsImNzcmYiOiIzOTYxYzBlNS1mYmY4LTQ0ZWQtODk3ZS1mZGUwYzk4N2ZiMDEiLCJleHAiOjE3NzczODcxOTAsInJvbGUiOiJzdHVkZW50In0.-5OuHI5FYKRmtivYHsi_iIj_makV2YaxT4ZOSr9f7Ik HTTP/1.1" 200 -
+2026-04-28 21:25:15,567 INFO 127.0.0.1 - - [28/Apr/2026 21:25:15] "OPTIONS /api/v1/auth/login HTTP/1.1" 200 -
+2026-04-28 21:25:16,772 INFO auth | Dang nhap thanh cong | request_id=req_eb35eb0acd214264
+2026-04-28 21:25:16,784 INFO 127.0.0.1 - - [28/Apr/2026 21:25:16] "POST /api/v1/auth/login HTTP/1.1" 200 -
+2026-04-28 21:25:16,830 INFO 127.0.0.1 - - [28/Apr/2026 21:25:16] "OPTIONS /api/v1/students HTTP/1.1" 200 -
+2026-04-28 21:25:17,152 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "OPTIONS /api/v1/parents HTTP/1.1" 200 -
+2026-04-28 21:25:17,153 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "OPTIONS /api/v1/teacher/parent-groups HTTP/1.1" 200 -
+2026-04-28 21:25:17,154 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "OPTIONS /api/v1/teacher/reports HTTP/1.1" 200 -
+2026-04-28 21:25:17,155 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "OPTIONS /api/v1/teacher/shared-students HTTP/1.1" 200 -
+2026-04-28 21:25:17,193 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "GET /api/v1/students HTTP/1.1" 200 -
+2026-04-28 21:25:17,471 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "OPTIONS /api/v1/teacher/messages HTTP/1.1" 200 -
+2026-04-28 21:25:17,494 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "GET /api/v1/parents HTTP/1.1" 200 -
+2026-04-28 21:25:17,518 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "GET /api/v1/teacher/reports HTTP/1.1" 200 -
+2026-04-28 21:25:17,522 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "GET /api/v1/teacher/parent-groups HTTP/1.1" 200 -
+2026-04-28 21:25:17,528 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "GET /api/v1/teacher/shared-students HTTP/1.1" 200 -
+2026-04-28 21:25:17,813 INFO 127.0.0.1 - - [28/Apr/2026 21:25:17] "GET /api/v1/teacher/messages HTTP/1.1" 200 -
+2026-04-28 21:25:33,208 INFO 127.0.0.1 - - [28/Apr/2026 21:25:33] "GET /api/v1/realtime/stream?access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NzM4NjMxNiwianRpIjoiZmRlNjgwZDQtNmFjMS00ODYwLTliZTAtZTZlNjM2ZWY3OTMzIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjIiLCJuYmYiOjE3NzczODYzMTYsImNzcmYiOiIwODk5YjUwNi1lYTAwLTQ2YzYtYjZkOC1jNzRkMTJkYzU2OGIiLCJleHAiOjE3NzczODcyMTYsInJvbGUiOiJ0ZWFjaGVyIn0.jC8CLv6XsPl5ZDJ6MJswvuIPwbg2oySjmYhAbw4XRWY HTTP/1.1" 200 -
+2026-04-28 21:28:43,767 INFO 127.0.0.1 - - [28/Apr/2026 21:28:43] "OPTIONS /api/v1/lessons HTTP/1.1" 200 -
+2026-04-28 21:28:43,770 INFO 127.0.0.1 - - [28/Apr/2026 21:28:43] "OPTIONS /api/v1/subjects HTTP/1.1" 200 -
+2026-04-28 21:28:44,103 INFO 127.0.0.1 - - [28/Apr/2026 21:28:44] "GET /api/v1/subjects HTTP/1.1" 200 -
+2026-04-28 21:28:44,113 INFO 127.0.0.1 - - [28/Apr/2026 21:28:44] "GET /api/v1/lessons HTTP/1.1" 200 -
+2026-04-28 21:28:44,449 INFO 127.0.0.1 - - [28/Apr/2026 21:28:44] "OPTIONS /api/v1/lessons/2 HTTP/1.1" 200 -
+2026-04-28 21:28:44,774 INFO 127.0.0.1 - - [28/Apr/2026 21:28:44] "GET /api/v1/lessons/2 HTTP/1.1" 200 -
+2026-04-28 21:28:44,869 INFO 127.0.0.1 - - [28/Apr/2026 21:28:44] "OPTIONS /api/v1/classes HTTP/1.1" 200 -
+2026-04-28 21:28:44,873 INFO 127.0.0.1 - - [28/Apr/2026 21:28:44] "OPTIONS /api/v1/students HTTP/1.1" 200 -
+2026-04-28 21:28:44,940 INFO 127.0.0.1 - - [28/Apr/2026 21:28:44] "OPTIONS /api/v1/students/3/teachers HTTP/1.1" 200 -
+2026-04-28 21:28:45,224 INFO 127.0.0.1 - - [28/Apr/2026 21:28:45] "GET /api/v1/students HTTP/1.1" 200 -
+2026-04-28 21:28:45,237 INFO 127.0.0.1 - - [28/Apr/2026 21:28:45] "GET /api/v1/classes HTTP/1.1" 200 -
+2026-04-28 21:28:45,279 INFO 127.0.0.1 - - [28/Apr/2026 21:28:45] "GET /api/v1/students/3/teachers HTTP/1.1" 200 -
+2026-04-28 21:28:45,573 INFO 127.0.0.1 - - [28/Apr/2026 21:28:45] "OPTIONS /api/v1/classes/1/students HTTP/1.1" 200 -
+2026-04-28 21:28:45,713 INFO 127.0.0.1 - - [28/Apr/2026 21:28:45] "OPTIONS /api/v1/classes/1/subjects HTTP/1.1" 200 -
+2026-04-28 21:28:46,033 INFO 127.0.0.1 - - [28/Apr/2026 21:28:46] "GET /api/v1/classes/1/students HTTP/1.1" 200 -
+2026-04-28 21:28:46,043 INFO 127.0.0.1 - - [28/Apr/2026 21:28:46] "GET /api/v1/classes/1/subjects HTTP/1.1" 200 -
+2026-04-28 21:28:46,483 INFO 127.0.0.1 - - [28/Apr/2026 21:28:46] "OPTIONS /api/v1/parents HTTP/1.1" 200 -
+2026-04-28 21:28:46,485 INFO 127.0.0.1 - - [28/Apr/2026 21:28:46] "OPTIONS /api/v1/teacher/parent-groups HTTP/1.1" 200 -
+2026-04-28 21:28:46,487 INFO 127.0.0.1 - - [28/Apr/2026 21:28:46] "OPTIONS /api/v1/teacher/reports HTTP/1.1" 200 -
+2026-04-28 21:28:46,488 INFO 127.0.0.1 - - [28/Apr/2026 21:28:46] "OPTIONS /api/v1/teacher/shared-students HTTP/1.1" 200 -
+2026-04-28 21:28:46,844 INFO 127.0.0.1 - - [28/Apr/2026 21:28:46] "GET /api/v1/parents HTTP/1.1" 200 -
+2026-04-28 21:28:46,845 INFO 127.0.0.1 - - [28/Apr/2026 21:28:46] "GET /api/v1/teacher/parent-groups HTTP/1.1" 200 -
+2026-04-28 21:28:46,876 INFO 127.0.0.1 - - [28/Apr/2026 21:28:46] "GET /api/v1/teacher/reports HTTP/1.1" 200 -
+2026-04-28 21:28:46,939 INFO 127.0.0.1 - - [28/Apr/2026 21:28:46] "GET /api/v1/teacher/shared-students HTTP/1.1" 200 -
+2026-04-28 21:29:04,283 INFO 127.0.0.1 - - [28/Apr/2026 21:29:04] "OPTIONS /api/v1/assignments HTTP/1.1" 200 -
+2026-04-28 21:29:04,654 INFO 127.0.0.1 - - [28/Apr/2026 21:29:04] "GET /api/v1/assignments HTTP/1.1" 200 -
+2026-04-28 21:29:04,984 INFO 127.0.0.1 - - [28/Apr/2026 21:29:04] "OPTIONS /api/v1/assignments/2/progress HTTP/1.1" 200 -
+2026-04-28 21:29:05,346 INFO 127.0.0.1 - - [28/Apr/2026 21:29:05] "GET /api/v1/assignments/2/progress HTTP/1.1" 200 -
+2026-04-28 21:29:27,806 INFO 127.0.0.1 - - [28/Apr/2026 21:29:27] "OPTIONS /api/v1/lessons/1 HTTP/1.1" 200 -
+2026-04-28 21:29:28,124 INFO 127.0.0.1 - - [28/Apr/2026 21:29:28] "GET /api/v1/lessons/1 HTTP/1.1" 200 -
+2026-04-28 21:31:17,508 INFO 127.0.0.1 - - [28/Apr/2026 21:31:17] "OPTIONS /api/v1/lessons/1/activities HTTP/1.1" 200 -
+2026-04-28 21:31:17,862 INFO lessons | Tao hoat dong bai hoc | request_id=req_32120189b20e4fc1
+2026-04-28 21:31:17,876 INFO 127.0.0.1 - - [28/Apr/2026 21:31:17] "[35m[1mPOST /api/v1/lessons/1/activities HTTP/1.1[0m" 201 -
+2026-04-28 21:31:18,197 INFO 127.0.0.1 - - [28/Apr/2026 21:31:18] "OPTIONS /api/v1/lessons HTTP/1.1" 200 -
+2026-04-28 21:31:18,199 INFO 127.0.0.1 - - [28/Apr/2026 21:31:18] "OPTIONS /api/v1/lessons/1 HTTP/1.1" 200 -
+2026-04-28 21:31:18,546 INFO 127.0.0.1 - - [28/Apr/2026 21:31:18] "GET /api/v1/lessons/1 HTTP/1.1" 200 -
+2026-04-28 21:31:18,549 INFO 127.0.0.1 - - [28/Apr/2026 21:31:18] "GET /api/v1/lessons HTTP/1.1" 200 -
+2026-04-28 21:33:05,813 INFO 127.0.0.1 - - [28/Apr/2026 21:33:05] "OPTIONS /api/v1/activities/25 HTTP/1.1" 200 -
+2026-04-28 21:33:06,165 INFO 127.0.0.1 - - [28/Apr/2026 21:33:06] "DELETE /api/v1/activities/25 HTTP/1.1" 200 -
+2026-04-28 21:33:06,486 INFO 127.0.0.1 - - [28/Apr/2026 21:33:06] "OPTIONS /api/v1/lessons HTTP/1.1" 200 -
+2026-04-28 21:33:06,488 INFO 127.0.0.1 - - [28/Apr/2026 21:33:06] "OPTIONS /api/v1/lessons/1 HTTP/1.1" 200 -
+2026-04-28 21:33:06,829 INFO 127.0.0.1 - - [28/Apr/2026 21:33:06] "GET /api/v1/lessons/1 HTTP/1.1" 200 -
+2026-04-28 21:33:06,832 INFO 127.0.0.1 - - [28/Apr/2026 21:33:06] "GET /api/v1/lessons HTTP/1.1" 200 -
+2026-04-28 21:33:15,774 INFO 127.0.0.1 - - [28/Apr/2026 21:33:15] "OPTIONS /api/v1/lessons HTTP/1.1" 200 -
+2026-04-28 21:33:16,113 INFO lessons | Tao bai hoc moi | request_id=req_1007994bdbc7422a
+2026-04-28 21:33:16,127 INFO 127.0.0.1 - - [28/Apr/2026 21:33:16] "[35m[1mPOST /api/v1/lessons HTTP/1.1[0m" 201 -
+2026-04-28 21:33:16,450 INFO 127.0.0.1 - - [28/Apr/2026 21:33:16] "GET /api/v1/lessons HTTP/1.1" 200 -
+2026-04-28 21:33:16,787 INFO 127.0.0.1 - - [28/Apr/2026 21:33:16] "OPTIONS /api/v1/lessons/3 HTTP/1.1" 200 -
+2026-04-28 21:33:17,122 INFO 127.0.0.1 - - [28/Apr/2026 21:33:17] "GET /api/v1/lessons/3 HTTP/1.1" 200 -
+2026-04-28 21:33:39,229 INFO 127.0.0.1 - - [28/Apr/2026 21:33:39] "OPTIONS /api/v1/lessons/3/activities HTTP/1.1" 200 -
+2026-04-28 21:33:39,574 INFO lessons | Tao hoat dong bai hoc | request_id=req_bcd79cad185e4ee8
+2026-04-28 21:33:39,593 INFO 127.0.0.1 - - [28/Apr/2026 21:33:39] "[35m[1mPOST /api/v1/lessons/3/activities HTTP/1.1[0m" 201 -
+2026-04-28 21:33:39,917 INFO 127.0.0.1 - - [28/Apr/2026 21:33:39] "OPTIONS /api/v1/lessons/3 HTTP/1.1" 200 -
+2026-04-28 21:33:39,920 INFO 127.0.0.1 - - [28/Apr/2026 21:33:39] "OPTIONS /api/v1/lessons HTTP/1.1" 200 -
+2026-04-28 21:33:40,257 INFO 127.0.0.1 - - [28/Apr/2026 21:33:40] "GET /api/v1/lessons/3 HTTP/1.1" 200 -
+2026-04-28 21:33:40,263 INFO 127.0.0.1 - - [28/Apr/2026 21:33:40] "GET /api/v1/lessons HTTP/1.1" 200 -

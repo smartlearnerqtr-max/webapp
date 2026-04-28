@@ -49,6 +49,22 @@ type AacImageDraft = {
   file: File | null
 }
 
+type MemoryMatchCardDraft = {
+  label: string
+  file: File | null
+}
+
+type HabitatOptionDraft = {
+  id: string
+  label: string
+}
+
+type HabitatAnimalDraft = {
+  label: string
+  file: File | null
+  habitatId: string
+}
+
 const LEVEL_OPTIONS = [
   { value: 'nang', label: 'Nặng' },
   { value: 'trung_binh', label: 'Trung bình' },
@@ -97,6 +113,51 @@ function createDefaultAacImageDrafts(): AacImageDraft[] {
   return Array.from({ length: 4 }, (_, index) => ({
     label: `Đáp án ${index + 1}`,
     file: null,
+  }))
+}
+
+function createDefaultMemoryMatchCardDrafts(): MemoryMatchCardDraft[] {
+  return Array.from({ length: 5 }, (_, index) => ({
+    label: `Thẻ ${index + 1}`,
+    file: null,
+  }))
+}
+
+function createDefaultQuickTapTargetDrafts(): MemoryMatchCardDraft[] {
+  return Array.from({ length: 4 }, (_, index) => ({
+    label: `Mục tiêu ${index + 1}`,
+    file: null,
+  }))
+}
+
+function createDefaultQuickTapDistractorDrafts(): MemoryMatchCardDraft[] {
+  return Array.from({ length: 3 }, (_, index) => ({
+    label: `Nhiễu ${index + 1}`,
+    file: null,
+  }))
+}
+
+function createDefaultSizeOrderDrafts(): MemoryMatchCardDraft[] {
+  return Array.from({ length: 5 }, (_, index) => ({
+    label: `Con vật ${index + 1}`,
+    file: null,
+  }))
+}
+
+function createDefaultHabitatOptionDrafts(): HabitatOptionDraft[] {
+  return [
+    { id: 'habitat-1', label: 'Trong nhà' },
+    { id: 'habitat-2', label: 'Rừng' },
+    { id: 'habitat-3', label: 'Dưới nước' },
+    { id: 'habitat-4', label: 'Đồng cỏ' },
+  ]
+}
+
+function createDefaultHabitatAnimalDrafts(): HabitatAnimalDraft[] {
+  return Array.from({ length: 4 }, (_, index) => ({
+    label: `Con vật ${index + 1}`,
+    file: null,
+    habitatId: '',
   }))
 }
 
@@ -182,7 +243,196 @@ function compactFlexibleLines(rawValue: string) {
     .filter(Boolean)
 }
 
+function toTextValue(value: unknown, fallback = '') {
+  return typeof value === 'string' ? value : fallback
+}
+
+function toStringArrayValue(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+}
+
+function toEditablePairItems(value: unknown): PairItem[] {
+  if (!Array.isArray(value)) return createDefaultPairs()
+  const pairs = value
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      return {
+        left: toTextValue((item as { left?: unknown }).left),
+        right: toTextValue((item as { right?: unknown }).right),
+      }
+    })
+    .filter((item): item is PairItem => Boolean(item))
+
+  return pairs.length ? pairs : createDefaultPairs()
+}
+
+function toEditableMediaCards(value: unknown, minimum = 0): EditableMediaCard[] {
+  const cards = Array.isArray(value)
+    ? value
+      .map((item, index) => {
+        if (!item || typeof item !== 'object') return null
+        const rawItem = item as { id?: unknown; label?: unknown; media_url?: unknown; media_kind?: unknown }
+        return {
+          id: toTextValue(rawItem.id, `card-${index + 1}`),
+          label: toTextValue(rawItem.label, `Mục ${index + 1}`),
+          media_url: toTextValue(rawItem.media_url),
+          media_kind: toTextValue(rawItem.media_kind, 'image'),
+        }
+      })
+      .filter((item): item is EditableMediaCard => Boolean(item))
+    : []
+
+  const paddedCards = [...cards]
+  while (paddedCards.length < minimum) {
+    const index = paddedCards.length
+    paddedCards.push({
+      id: `card-${index + 1}`,
+      label: `Mục ${index + 1}`,
+      media_url: '',
+      media_kind: 'image',
+    })
+  }
+
+  return paddedCards
+}
+
+function toEditableOrderedItems(value: unknown, minimum = 0): EditableOrderedItem[] {
+  const items = Array.isArray(value)
+    ? value
+      .map((item, index) => {
+        if (!item || typeof item !== 'object') return null
+        const rawItem = item as { id?: unknown; label?: unknown; media_url?: unknown; media_kind?: unknown; rank?: unknown }
+        return {
+          id: toTextValue(rawItem.id, `ordered-${index + 1}`),
+          label: toTextValue(rawItem.label, `Mục ${index + 1}`),
+          media_url: toTextValue(rawItem.media_url),
+          media_kind: toTextValue(rawItem.media_kind, 'image'),
+          rank: Math.max(1, Number(rawItem.rank ?? index + 1) || index + 1),
+        }
+      })
+      .filter((item): item is EditableOrderedItem => Boolean(item))
+    : []
+
+  const paddedItems = [...items]
+  while (paddedItems.length < minimum) {
+    const index = paddedItems.length
+    paddedItems.push({
+      id: `ordered-${index + 1}`,
+      label: `Mục ${index + 1}`,
+      media_url: '',
+      media_kind: 'image',
+      rank: index + 1,
+    })
+  }
+
+  return paddedItems
+}
+
+function toEditableHabitatOptions(value: unknown, fallbackHabitats: unknown, minimum = 0): EditableHabitatOption[] {
+  const options = Array.isArray(value)
+    ? value
+      .map((item, index) => {
+        if (!item || typeof item !== 'object') return null
+        const rawItem = item as { id?: unknown; label?: unknown; media_url?: unknown; media_kind?: unknown }
+        return {
+          id: toTextValue(rawItem.id, `habitat-${index + 1}`),
+          label: toTextValue(rawItem.label, `Nơi sống ${index + 1}`),
+          media_url: toTextValue(rawItem.media_url),
+          media_kind: toTextValue(rawItem.media_kind, 'image'),
+        }
+      })
+      .filter((item): item is EditableHabitatOption => Boolean(item))
+    : []
+
+  const fallbackOptions = options.length
+    ? options
+    : toStringArrayValue(fallbackHabitats).map((item, index) => ({
+      id: item || `habitat-${index + 1}`,
+      label: item || `Nơi sống ${index + 1}`,
+      media_url: '',
+      media_kind: 'image',
+    }))
+
+  const paddedOptions = [...fallbackOptions]
+  while (paddedOptions.length < minimum) {
+    const index = paddedOptions.length
+    paddedOptions.push({
+      id: `habitat-${index + 1}`,
+      label: `Nơi sống ${index + 1}`,
+      media_url: '',
+      media_kind: 'image',
+    })
+  }
+
+  return paddedOptions
+}
+
+function toEditableHabitatItems(value: unknown, minimum = 0): EditableHabitatItem[] {
+  const items = Array.isArray(value)
+    ? value
+      .map((item, index) => {
+        if (!item || typeof item !== 'object') return null
+        const rawItem = item as {
+          id?: unknown
+          label?: unknown
+          media_url?: unknown
+          media_kind?: unknown
+          habitat_id?: unknown
+          habitat?: unknown
+        }
+        const habitatId = toTextValue(rawItem.habitat_id, toTextValue(rawItem.habitat))
+        return {
+          id: toTextValue(rawItem.id, `animal-${index + 1}`),
+          label: toTextValue(rawItem.label, `Con vật ${index + 1}`),
+          media_url: toTextValue(rawItem.media_url),
+          media_kind: toTextValue(rawItem.media_kind, 'image'),
+          habitat_id: habitatId,
+          habitat: toTextValue(rawItem.habitat, habitatId),
+        }
+      })
+      .filter((item): item is EditableHabitatItem => Boolean(item))
+    : []
+
+  const paddedItems = [...items]
+  while (paddedItems.length < minimum) {
+    const index = paddedItems.length
+    paddedItems.push({
+      id: `animal-${index + 1}`,
+      label: `Con vật ${index + 1}`,
+      media_url: '',
+      media_kind: 'image',
+      habitat_id: '',
+      habitat: '',
+    })
+  }
+
+  return paddedItems
+}
+
 type ActivityConfig = Record<string, unknown>
+
+type EditableMediaCard = {
+  id: string
+  label: string
+  media_url: string
+  media_kind: string
+}
+
+type EditableOrderedItem = EditableMediaCard & {
+  rank: number
+}
+
+type EditableHabitatItem = EditableMediaCard & {
+  habitat_id: string
+  habitat: string
+}
+
+type EditableHabitatOption = {
+  id: string
+  label: string
+  media_url: string
+  media_kind: string
+}
 
 const demoAnimalImageCards = [
   { id: 'dog', label: 'Con chó', media_url: '/demo-media/concho.jpg', media_kind: 'image' },
@@ -192,7 +442,7 @@ const demoAnimalImageCards = [
   { id: 'rabbit', label: 'Con thỏ', media_url: '/demo-media/contho.png', media_kind: 'image' },
 ]
 
-function buildMemoryMatchDemoConfig(): ActivityConfig {
+export function buildMemoryMatchDemoConfig(): ActivityConfig {
   return {
     kind: 'memory_match',
     prompt: 'Lật 2 thẻ giống nhau để ghi điểm.',
@@ -201,7 +451,7 @@ function buildMemoryMatchDemoConfig(): ActivityConfig {
   }
 }
 
-function buildQuickTapDemoConfig(): ActivityConfig {
+export function buildQuickTapDemoConfig(): ActivityConfig {
   return {
     kind: 'quick_tap',
     prompt: 'Chạm nhanh vào các thẻ con vật trước khi hết giờ.',
@@ -212,7 +462,7 @@ function buildQuickTapDemoConfig(): ActivityConfig {
   }
 }
 
-function buildSizeOrderDemoConfig(): ActivityConfig {
+export function buildSizeOrderDemoConfig(): ActivityConfig {
   return {
     kind: 'size_order',
     prompt: 'Sắp xếp các con vật từ bé đến lớn.',
@@ -226,7 +476,7 @@ function buildSizeOrderDemoConfig(): ActivityConfig {
   }
 }
 
-function buildHabitatMatchDemoConfig(): ActivityConfig {
+export function buildHabitatMatchDemoConfig(): ActivityConfig {
   return {
     kind: 'habitat_match',
     prompt: 'Nối con vật với nơi sống phù hợp.',
@@ -462,6 +712,8 @@ export function LessonsPage() {
   const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
   const [editActivityTitle, setEditActivityTitle] = useState('')
   const [editActivityInstruction, setEditActivityInstruction] = useState('')
+  const [editActivitySortOrder, setEditActivitySortOrder] = useState('1')
+  const [editActivityVoiceAnswerEnabled, setEditActivityVoiceAnswerEnabled] = useState(false)
   const [editActivityPrompt, setEditActivityPrompt] = useState('')
   const [editActivityMediaUrl, setEditActivityMediaUrl] = useState('')
   const [editActivityMediaSource, setEditActivityMediaSource] = useState<MediaSource>('upload')
@@ -519,6 +771,16 @@ export function LessonsPage() {
 
   const [stepList, setStepList] = useState<string[]>(createDefaultList())
   const [aacImageDrafts, setAacImageDrafts] = useState<AacImageDraft[]>(createDefaultAacImageDrafts())
+  const [memoryMatchCardDrafts, setMemoryMatchCardDrafts] = useState<MemoryMatchCardDraft[]>(createDefaultMemoryMatchCardDrafts())
+  const [quickTapTargetDrafts, setQuickTapTargetDrafts] = useState<MemoryMatchCardDraft[]>(createDefaultQuickTapTargetDrafts())
+  const [quickTapDistractorDrafts, setQuickTapDistractorDrafts] = useState<MemoryMatchCardDraft[]>(createDefaultQuickTapDistractorDrafts())
+  const [quickTapDurationSeconds, setQuickTapDurationSeconds] = useState('10')
+  const [quickTapTargetHits, setQuickTapTargetHits] = useState('6')
+  const [quickTapSimultaneousCards, setQuickTapSimultaneousCards] = useState('4')
+  const [quickTapSpawnIntervalMs, setQuickTapSpawnIntervalMs] = useState('1600')
+  const [sizeOrderDrafts, setSizeOrderDrafts] = useState<MemoryMatchCardDraft[]>(createDefaultSizeOrderDrafts())
+  const [habitatOptionDrafts, setHabitatOptionDrafts] = useState<HabitatOptionDraft[]>(createDefaultHabitatOptionDrafts())
+  const [habitatAnimalDrafts, setHabitatAnimalDrafts] = useState<HabitatAnimalDraft[]>(createDefaultHabitatAnimalDrafts())
   const [scenarioText, setScenarioText] = useState('Em vào vai nhân viên thư viện và giúp bạn nhỏ chọn đúng cuốn sách cần tìm.')
   const [successCriteriaText, setSuccessCriteriaText] = useState('Chọn đúng vai trò, trả lời lịch sự và làm đủ các bước.')
   const [aiStarterPrompt, setAiStarterPrompt] = useState('Hãy hỏi em 3 câu ngắn về bài học này.')
@@ -595,6 +857,8 @@ export function LessonsPage() {
     if (!selectedActivity) {
       setEditActivityTitle('')
       setEditActivityInstruction('')
+      setEditActivitySortOrder('1')
+      setEditActivityVoiceAnswerEnabled(false)
       setEditActivityPrompt('')
       setEditActivityMediaUrl('')
       setEditActivityMediaSource('upload')
@@ -607,6 +871,8 @@ export function LessonsPage() {
     const configText = normalizeConfigEditorText(selectedActivity.config_json)
     setEditActivityTitle(selectedActivity.title)
     setEditActivityInstruction(selectedActivity.instruction_text ?? '')
+    setEditActivitySortOrder(String(selectedActivity.sort_order ?? 1))
+    setEditActivityVoiceAnswerEnabled(selectedActivity.voice_answer_enabled ?? false)
     setEditActivityConfigJson(configText)
 
     try {
@@ -691,9 +957,9 @@ export function LessonsPage() {
         title: editActivityTitle.trim(),
         activity_type: selectedActivity?.activity_type,
         instruction_text: editActivityInstruction.trim(),
-        voice_answer_enabled: selectedActivity?.voice_answer_enabled ?? false,
+        voice_answer_enabled: editActivityVoiceAnswerEnabled,
         is_required: selectedActivity?.is_required ?? true,
-        sort_order: selectedActivity?.sort_order ?? 1,
+        sort_order: Math.max(1, Number(editActivitySortOrder) || 1),
         difficulty_stage: selectedActivity?.difficulty_stage ?? 1,
         config_json: JSON.stringify(parsedConfig),
       })
@@ -771,6 +1037,100 @@ export function LessonsPage() {
       setActivityEditorError(null)
     } catch {
       setActivityEditorError('JSON chưa hợp lệ. Sửa lại trước khi lưu.')
+    }
+  }
+
+  function handleActivityConfigJsonChange(nextValue: string) {
+    setEditActivityConfigJson(nextValue)
+    if (!selectedActivity) return
+
+    try {
+      const parsedConfig = parseConfigEditor(nextValue)
+      const activityTypeValue = selectedActivity.activity_type as ActivityType
+      setEditActivityPrompt(extractEditablePrompt(activityTypeValue, parsedConfig, editActivityInstruction))
+      const nextMediaUrl = extractEditableMediaUrl(parsedConfig)
+      setEditActivityMediaUrl(nextMediaUrl)
+      setEditActivityMediaSource(
+        activityTypeValue === 'watch_answer' && isSupportedMediaLink(nextMediaUrl) ? 'external' : 'upload',
+      )
+      setActivityEditorError(null)
+    } catch {
+      setActivityEditorError('JSON chưa hợp lệ. Sửa lại trước khi lưu.')
+    }
+  }
+
+  function handleFormatActivityConfigJson() {
+    try {
+      const parsedConfig = parseConfigEditor(editActivityConfigJson)
+      setEditActivityConfigJson(formatConfigEditor(parsedConfig))
+      setActivityEditorError(null)
+    } catch {
+      setActivityEditorError('JSON chưa hợp lệ. Không thể chuẩn hóa.')
+    }
+  }
+
+  function handleResetActivityConfigJson() {
+    if (!selectedActivity) return
+    const configText = normalizeConfigEditorText(selectedActivity.config_json)
+    setEditActivityConfigJson(configText)
+
+    try {
+      const parsedConfig = parseConfigEditor(configText)
+      const activityTypeValue = selectedActivity.activity_type as ActivityType
+      setEditActivityPrompt(extractEditablePrompt(activityTypeValue, parsedConfig, selectedActivity.instruction_text ?? ''))
+      const nextMediaUrl = extractEditableMediaUrl(parsedConfig)
+      setEditActivityMediaUrl(nextMediaUrl)
+      setEditActivityMediaSource(
+        activityTypeValue === 'watch_answer' && isSupportedMediaLink(nextMediaUrl) ? 'external' : 'upload',
+      )
+      setActivityEditorError(null)
+    } catch {
+      setActivityEditorError('JSON gốc của hoạt động này chưa hợp lệ.')
+    }
+  }
+
+  function syncActivityEditorFromConfig(activityTypeValue: ActivityType, config: ActivityConfig, instructionFallback: string) {
+    setEditActivityPrompt(extractEditablePrompt(activityTypeValue, config, instructionFallback))
+    const nextMediaUrl = extractEditableMediaUrl(config)
+    setEditActivityMediaUrl(nextMediaUrl)
+    setEditActivityMediaSource(
+      activityTypeValue === 'watch_answer' && isSupportedMediaLink(nextMediaUrl) ? 'external' : 'upload',
+    )
+  }
+
+  function updateActivityConfigState(updater: (config: ActivityConfig) => ActivityConfig) {
+    if (!selectedActivity) return
+
+    try {
+      const parsedConfig = parseConfigEditor(editActivityConfigJson)
+      const nextConfig = updater(parsedConfig)
+      setEditActivityConfigJson(formatConfigEditor(nextConfig))
+      syncActivityEditorFromConfig(selectedActivity.activity_type as ActivityType, nextConfig, editActivityInstruction)
+      setActivityEditorError(null)
+    } catch {
+      setActivityEditorError('Cấu hình hoạt động chưa hợp lệ.')
+    }
+  }
+
+  async function uploadActivityConfigMedia(
+    file: File | null,
+    onUploaded: (config: ActivityConfig, uploadedMedia: Awaited<ReturnType<typeof uploadLessonMedia>>) => ActivityConfig,
+  ) {
+    if (!file || !token || !selectedActivity) return
+
+    setEditActivityMediaUploadPending(true)
+    setActivityEditorError(null)
+
+    try {
+      const uploadedMedia = await uploadLessonMedia(token, file)
+      const parsedConfig = parseConfigEditor(editActivityConfigJson)
+      const nextConfig = onUploaded(parsedConfig, uploadedMedia)
+      setEditActivityConfigJson(formatConfigEditor(nextConfig))
+      syncActivityEditorFromConfig(selectedActivity.activity_type as ActivityType, nextConfig, editActivityInstruction)
+    } catch (error) {
+      setActivityEditorError(error instanceof Error ? error.message : 'Không thể tải media lên.')
+    } finally {
+      setEditActivityMediaUploadPending(false)
     }
   }
 
@@ -875,6 +1235,26 @@ export function LessonsPage() {
 
     if (activityType === 'aac' && aacImageDrafts.some((item) => !item.file)) {
       return 'Hay tai du 4 anh cho hoat dong the giao tiep.'
+    }
+
+    if (activityType === 'memory_match' && memoryMatchCardDrafts.filter((item) => item.file).length < 2) {
+      return 'Hãy tải lên ít nhất 2 ảnh cho hoạt động lật thẻ ghi nhớ.'
+    }
+
+    if (activityType === 'quick_tap' && quickTapTargetDrafts.filter((item) => item.file).length < 2) {
+      return 'Hãy tải lên ít nhất 2 ảnh mục tiêu cho hoạt động chạm đúng nhanh.'
+    }
+
+    if (activityType === 'size_order' && sizeOrderDrafts.filter((item) => item.file).length < 3) {
+      return 'Hãy tải lên ít nhất 3 ảnh cho hoạt động sắp xếp lớn nhỏ.'
+    }
+
+    if (activityType === 'habitat_match') {
+      const activeHabitats = habitatOptionDrafts.filter((item) => item.label.trim())
+      const activeAnimals = habitatAnimalDrafts.filter((item) => item.file)
+      if (activeHabitats.length < 2) return 'Hãy nhập ít nhất 2 nơi sống.'
+      if (activeAnimals.length < 2) return 'Hãy tải lên ít nhất 2 con vật cho hoạt động ghép nơi sống.'
+      if (activeAnimals.some((item) => !item.habitatId)) return 'Hãy chọn nơi sống đúng cho từng con vật đã tải lên.'
     }
 
     if (activityType === 'career_simulation' && !scenarioText.trim()) {
@@ -1024,19 +1404,122 @@ export function LessonsPage() {
     }
 
     if (activityType === 'memory_match') {
-      return buildMemoryMatchDemoConfig()
+      const uploadedCards = await Promise.all(
+        memoryMatchCardDrafts
+          .filter((item) => item.file)
+          .map(async (item, index) => {
+            const uploadedMedia = await uploadLessonMedia(token!, item.file!)
+            return {
+              id: `memory-card-${index + 1}`,
+              label: item.label.trim() || `Thẻ ${index + 1}`,
+              media_url: uploadedMedia.url,
+              media_kind: uploadedMedia.media_kind || 'image',
+            }
+          }),
+      )
+
+      return {
+        kind: 'memory_match',
+        prompt: instructionText.trim(),
+        pair_count: uploadedCards.length,
+        image_cards: uploadedCards,
+      }
     }
 
     if (activityType === 'quick_tap') {
-      return buildQuickTapDemoConfig()
+      const uploadedTargetCards = await Promise.all(
+        quickTapTargetDrafts
+          .filter((item) => item.file)
+          .map(async (item, index) => {
+            const uploadedMedia = await uploadLessonMedia(token!, item.file!)
+            return {
+              id: `quick-target-${index + 1}`,
+              label: item.label.trim() || `Mục tiêu ${index + 1}`,
+              media_url: uploadedMedia.url,
+              media_kind: uploadedMedia.media_kind || 'image',
+            }
+          }),
+      )
+      const uploadedDistractorCards = await Promise.all(
+        quickTapDistractorDrafts
+          .filter((item) => item.file)
+          .map(async (item, index) => {
+            const uploadedMedia = await uploadLessonMedia(token!, item.file!)
+            return {
+              id: `quick-distractor-${index + 1}`,
+              label: item.label.trim() || `Nhiễu ${index + 1}`,
+              media_url: uploadedMedia.url,
+              media_kind: uploadedMedia.media_kind || 'image',
+            }
+          }),
+      )
+
+      return {
+        kind: 'quick_tap',
+        prompt: instructionText.trim(),
+        duration_seconds: Math.max(5, Number(quickTapDurationSeconds) || 10),
+        target_hits: Math.max(1, Number(quickTapTargetHits) || 6),
+        simultaneous_cards: Math.max(1, Number(quickTapSimultaneousCards) || 4),
+        spawn_interval_ms: Math.max(1000, Number(quickTapSpawnIntervalMs) || 1600),
+        image_cards: uploadedTargetCards,
+        distractor_cards: uploadedDistractorCards,
+      }
     }
 
     if (activityType === 'size_order') {
-      return buildSizeOrderDemoConfig()
+      const uploadedItems = await Promise.all(
+        sizeOrderDrafts
+          .filter((item) => item.file)
+          .map(async (item, index) => {
+            const uploadedMedia = await uploadLessonMedia(token!, item.file!)
+            return {
+              id: `size-item-${index + 1}`,
+              label: item.label.trim() || `Con vật ${index + 1}`,
+              media_url: uploadedMedia.url,
+              media_kind: uploadedMedia.media_kind || 'image',
+              rank: index + 1,
+            }
+          }),
+      )
+
+      return {
+        kind: 'size_order',
+        prompt: instructionText.trim(),
+        items: uploadedItems,
+      }
     }
 
     if (activityType === 'habitat_match') {
-      return buildHabitatMatchDemoConfig()
+      const activeHabitats = habitatOptionDrafts.filter((item) => item.label.trim())
+      const habitatLabelById = new Map(activeHabitats.map((item) => [item.id, item.label.trim()]))
+      const uploadedAnimals = await Promise.all(
+        habitatAnimalDrafts
+          .filter((item) => item.file)
+          .map(async (item, index) => {
+            const uploadedMedia = await uploadLessonMedia(token!, item.file!)
+            const habitatId = item.habitatId
+            return {
+              id: `habitat-item-${index + 1}`,
+              label: item.label.trim() || `Con vật ${index + 1}`,
+              media_url: uploadedMedia.url,
+              media_kind: uploadedMedia.media_kind || 'image',
+              habitat_id: habitatId,
+              habitat: habitatLabelById.get(habitatId) ?? habitatId,
+            }
+          }),
+      )
+
+      return {
+        kind: 'habitat_match',
+        prompt: instructionText.trim(),
+        habitat_cards: activeHabitats.map((item) => ({
+          id: item.id,
+          label: item.label.trim(),
+          media_url: '',
+          media_kind: 'image',
+        })),
+        items: uploadedAnimals,
+      }
     }
 
     if (activityType === 'career_simulation') {
@@ -1082,6 +1565,24 @@ export function LessonsPage() {
       if (activityType === 'image_puzzle') {
         setImagePuzzleFile(null)
       }
+      if (activityType === 'memory_match') {
+        setMemoryMatchCardDrafts(createDefaultMemoryMatchCardDrafts())
+      }
+      if (activityType === 'quick_tap') {
+        setQuickTapTargetDrafts(createDefaultQuickTapTargetDrafts())
+        setQuickTapDistractorDrafts(createDefaultQuickTapDistractorDrafts())
+        setQuickTapDurationSeconds('10')
+        setQuickTapTargetHits('6')
+        setQuickTapSimultaneousCards('4')
+        setQuickTapSpawnIntervalMs('1600')
+      }
+      if (activityType === 'size_order') {
+        setSizeOrderDrafts(createDefaultSizeOrderDrafts())
+      }
+      if (activityType === 'habitat_match') {
+        setHabitatOptionDrafts(createDefaultHabitatOptionDrafts())
+        setHabitatAnimalDrafts(createDefaultHabitatAnimalDrafts())
+      }
       if (activityType === 'watch_answer') {
         setWatchAnswerFile(null)
         setWatchAnswerUrl('')
@@ -1124,6 +1625,855 @@ export function LessonsPage() {
     setActivityTitle('')
   }
 
+  function renderFriendlyActivityEditor() {
+    if (!selectedActivity) return null
+
+    let parsedConfig: ActivityConfig
+    try {
+      parsedConfig = parseConfigEditor(editActivityConfigJson)
+    } catch {
+      return <p className="error-text">Cấu hình hiện tại chưa hợp lệ, chưa thể hiển thị form sửa thân thiện.</p>
+    }
+
+    const activityTypeValue = selectedActivity.activity_type as ActivityType
+    const ensureFourChoices = (items: string[]) => {
+      const nextItems = [...items]
+      while (nextItems.length < 4) nextItems.push('')
+      return nextItems.slice(0, 4)
+    }
+
+    if (activityTypeValue === 'multiple_choice' || activityTypeValue === 'listen_choose') {
+      const options = ensureFourChoices(toStringArrayValue(parsedConfig.choices))
+      const correctAnswer = toTextValue(parsedConfig.correct)
+      const correctIndex = Math.max(0, options.findIndex((item) => item === correctAnswer))
+      const promptValue = activityTypeValue === 'listen_choose' ? toTextValue(parsedConfig.audio_text, editActivityPrompt) : editActivityPrompt
+
+      return (
+        <ChoiceBuilder
+          promptLabel={activityTypeValue === 'listen_choose' ? 'Nội dung nghe' : 'Câu hỏi chính'}
+          promptValue={promptValue}
+          promptPlaceholder={activityTypeValue === 'listen_choose' ? 'Ví dụ: Đây là con mèo.' : 'Ví dụ: Con vật nào biết bơi?'}
+          onPromptChange={(value) =>
+            updateActivityConfigState((currentConfig) => ({
+              ...writeEditablePrompt(activityTypeValue, currentConfig, value),
+              ...(activityTypeValue === 'listen_choose' ? { audio_text: value } : {}),
+            }))
+          }
+          options={options}
+          correctIndex={correctIndex}
+          onOptionChange={(index, value) =>
+            updateActivityConfigState((currentConfig) => {
+              const nextChoices = ensureFourChoices(toStringArrayValue(currentConfig.choices))
+              nextChoices[index] = value
+              const nextCorrectIndex = Math.max(0, nextChoices.findIndex((item) => item === toTextValue(currentConfig.correct)))
+              return {
+                ...currentConfig,
+                choices: nextChoices,
+                correct: nextChoices[nextCorrectIndex] ?? nextChoices[0] ?? '',
+              }
+            })
+          }
+          onCorrectChange={(index) =>
+            updateActivityConfigState((currentConfig) => {
+              const nextChoices = ensureFourChoices(toStringArrayValue(currentConfig.choices))
+              return {
+                ...currentConfig,
+                choices: nextChoices,
+                correct: nextChoices[index] ?? '',
+              }
+            })
+          }
+        />
+      )
+    }
+
+    if (activityTypeValue === 'image_choice') {
+      const options = ensureFourChoices(toStringArrayValue(parsedConfig.choices))
+      const correctAnswer = toTextValue(parsedConfig.correct)
+      const correctIndex = Math.max(0, options.findIndex((item) => item === correctAnswer))
+
+      return (
+        <div className="config-card detail-stack">
+          <label>
+            Câu hỏi cho học sinh
+            <input value={editActivityPrompt} onChange={(event) => handleActivityPromptChange(event.target.value)} placeholder="Ví dụ: Bạn nhìn thấy gì trong ảnh?" />
+          </label>
+
+          <label>
+            Chọn ảnh thay thế từ máy
+            <input
+              type="file"
+              accept="image/*"
+              disabled={editActivityMediaUploadPending}
+              onChange={(event) =>
+                void uploadActivityConfigMedia(event.target.files?.[0] ?? null, (currentConfig, uploadedMedia) => ({
+                  ...currentConfig,
+                  media_url: uploadedMedia.url,
+                  media_kind: uploadedMedia.media_kind || 'image',
+                }))
+              }
+            />
+            {editActivityMediaUrl ? <span className="helper-text">Đã có ảnh cho activity này.</span> : null}
+          </label>
+
+          <ChoiceBuilder
+            promptLabel="Đáp án"
+            promptValue={editActivityPrompt}
+            promptPlaceholder="Ví dụ: Bạn nhìn thấy gì trong ảnh?"
+            onPromptChange={handleActivityPromptChange}
+            showPrompt={false}
+            options={options}
+            correctIndex={correctIndex}
+            onOptionChange={(index, value) =>
+              updateActivityConfigState((currentConfig) => {
+                const nextChoices = ensureFourChoices(toStringArrayValue(currentConfig.choices))
+                nextChoices[index] = value
+                const nextCorrectIndex = Math.max(0, nextChoices.findIndex((item) => item === toTextValue(currentConfig.correct)))
+                return {
+                  ...currentConfig,
+                  choices: nextChoices,
+                  correct: nextChoices[nextCorrectIndex] ?? nextChoices[0] ?? '',
+                }
+              })
+            }
+            onCorrectChange={(index) =>
+              updateActivityConfigState((currentConfig) => {
+                const nextChoices = ensureFourChoices(toStringArrayValue(currentConfig.choices))
+                return {
+                  ...currentConfig,
+                  choices: nextChoices,
+                  correct: nextChoices[index] ?? '',
+                }
+              })
+            }
+          />
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'image_puzzle') {
+      return (
+        <div className="config-card detail-stack">
+          <label>
+            Hướng dẫn cho học sinh
+            <input value={editActivityPrompt} onChange={(event) => handleActivityPromptChange(event.target.value)} placeholder="Ví dụ: Hãy ghép lại thành hình con mèo." />
+          </label>
+          <label>
+            Chọn ảnh thay thế từ máy
+            <input
+              type="file"
+              accept="image/*"
+              disabled={editActivityMediaUploadPending}
+              onChange={(event) =>
+                void uploadActivityConfigMedia(event.target.files?.[0] ?? null, (currentConfig, uploadedMedia) => ({
+                  ...currentConfig,
+                  image_url: uploadedMedia.url,
+                  image_kind: uploadedMedia.media_kind || 'image',
+                }))
+              }
+            />
+          </label>
+          <div className="builder-two-columns">
+            <label>
+              Số hàng
+              <input
+                value={String(parsedConfig.rows ?? 2)}
+                onChange={(event) =>
+                  updateActivityConfigState((currentConfig) => {
+                    const rows = Math.max(1, Number(event.target.value) || 2)
+                    const cols = Math.max(2, Number(currentConfig.cols ?? 3) || 3)
+                    return { ...currentConfig, rows, cols, piece_count: rows * cols }
+                  })
+                }
+                inputMode="numeric"
+              />
+            </label>
+            <label>
+              Số cột
+              <input
+                value={String(parsedConfig.cols ?? 3)}
+                onChange={(event) =>
+                  updateActivityConfigState((currentConfig) => {
+                    const cols = Math.max(2, Number(event.target.value) || 3)
+                    const rows = Math.max(1, Number(currentConfig.rows ?? 2) || 2)
+                    return { ...currentConfig, rows, cols, piece_count: rows * cols }
+                  })
+                }
+                inputMode="numeric"
+              />
+            </label>
+          </div>
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'matching') {
+      const pairs = toEditablePairItems(parsedConfig.pairs)
+      return (
+        <PairBuilder
+          title="Các cặp cần nối"
+          helper="Sửa trực tiếp từng cặp trái - phải."
+          items={pairs}
+          onChange={(index, field, value) =>
+            updateActivityConfigState((currentConfig) => {
+              const nextPairs = toEditablePairItems(currentConfig.pairs)
+              nextPairs[index] = { ...nextPairs[index], [field]: value }
+              return { ...currentConfig, pairs: nextPairs }
+            })
+          }
+          onAdd={() =>
+            updateActivityConfigState((currentConfig) => ({
+              ...currentConfig,
+              pairs: [...toEditablePairItems(currentConfig.pairs), { left: '', right: '' }],
+            }))
+          }
+          onRemove={(index) =>
+            updateActivityConfigState((currentConfig) => ({
+              ...currentConfig,
+              pairs: toEditablePairItems(currentConfig.pairs).filter((_, itemIndex) => itemIndex !== index),
+            }))
+          }
+        />
+      )
+    }
+
+    if (activityTypeValue === 'drag_drop') {
+      const items = toStringArrayValue(parsedConfig.items)
+      const targets = toStringArrayValue(parsedConfig.targets)
+      return (
+        <div className="builder-two-columns">
+          <ListBuilder
+            title="Các mục cần kéo"
+            helper="Mỗi dòng là một mục."
+            items={items.length ? items : createDefaultList()}
+            itemPlaceholder="Mục cần kéo"
+            onChange={(index, value) =>
+              updateActivityConfigState((currentConfig) => {
+                const nextItems = toStringArrayValue(currentConfig.items)
+                while (nextItems.length <= index) nextItems.push('')
+                nextItems[index] = value
+                return { ...currentConfig, items: nextItems }
+              })
+            }
+            onAdd={() => updateActivityConfigState((currentConfig) => ({ ...currentConfig, items: [...toStringArrayValue(currentConfig.items), ''] }))}
+            onRemove={(index) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, items: toStringArrayValue(currentConfig.items).filter((_, itemIndex) => itemIndex !== index) }))}
+          />
+          <ListBuilder
+            title="Các ô đích"
+            helper="Mỗi dòng là một vị trí hoặc nhóm."
+            items={targets.length ? targets : createDefaultList()}
+            itemPlaceholder="Vị trí đích"
+            onChange={(index, value) =>
+              updateActivityConfigState((currentConfig) => {
+                const nextItems = toStringArrayValue(currentConfig.targets)
+                while (nextItems.length <= index) nextItems.push('')
+                nextItems[index] = value
+                return { ...currentConfig, targets: nextItems }
+              })
+            }
+            onAdd={() => updateActivityConfigState((currentConfig) => ({ ...currentConfig, targets: [...toStringArrayValue(currentConfig.targets), ''] }))}
+            onRemove={(index) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, targets: toStringArrayValue(currentConfig.targets).filter((_, itemIndex) => itemIndex !== index) }))}
+          />
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'watch_answer') {
+      return (
+        <div className="config-card detail-stack">
+          <label>
+            Câu hỏi sau khi xem
+            <input value={editActivityPrompt} onChange={(event) => handleActivityPromptChange(event.target.value)} placeholder="Ví dụ: Em thấy bạn nhỏ đang làm gì?" />
+          </label>
+          <label>
+            Cách học sinh trả lời
+            <select
+              value={toTextValue(parsedConfig.answer_mode, 'text')}
+              onChange={(event) =>
+                updateActivityConfigState((currentConfig) => ({
+                  ...currentConfig,
+                  answer_mode: event.target.value,
+                }))
+              }
+            >
+              <option value="text">Gõ câu trả lời ngắn</option>
+              <option value="voice_ai_grade">Bấm mic, nhận giọng nói, AI chấm</option>
+            </select>
+          </label>
+          <label>
+            Nguồn video
+            <select value={editActivityMediaSource} onChange={(event) => setEditActivityMediaSource(event.target.value as MediaSource)}>
+              <option value="external">Dán link video</option>
+              <option value="upload">Tải ảnh hoặc video từ máy</option>
+            </select>
+          </label>
+          {editActivityMediaSource === 'external' ? (
+            <label>
+              Link video
+              <input value={editActivityMediaUrl} onChange={(event) => handleActivityMediaUrlChange(event.target.value)} placeholder="YouTube / TikTok / Google Drive" />
+            </label>
+          ) : (
+            <label>
+              Chọn ảnh hoặc video từ máy
+              <input
+                type="file"
+                accept="image/*,video/*"
+                disabled={editActivityMediaUploadPending}
+                onChange={(event) => void handleActivityMediaFileChange(event.target.files?.[0] ?? null)}
+              />
+            </label>
+          )}
+          {toTextValue(parsedConfig.answer_mode) === 'voice_ai_grade' ? (
+            <>
+              <label>
+                Đáp án mẫu
+                <input
+                  value={toTextValue(parsedConfig.expected_answer)}
+                  onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, expected_answer: event.target.value }))}
+                  placeholder="Ví dụ: con mèo"
+                />
+              </label>
+              <label>
+                Đáp án chấp nhận thêm
+                <textarea
+                  value={toStringArrayValue(parsedConfig.accepted_answers).join(', ')}
+                  onChange={(event) =>
+                    updateActivityConfigState((currentConfig) => ({
+                      ...currentConfig,
+                      accepted_answers: compactFlexibleLines(event.target.value),
+                    }))
+                  }
+                  rows={3}
+                  placeholder="Ví dụ: mèo, con meo, meo"
+                />
+              </label>
+            </>
+          ) : null}
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'hidden_image_guess') {
+      return (
+        <div className="config-card detail-stack">
+          <label>
+            Câu hỏi cho học sinh
+            <input value={editActivityPrompt} onChange={(event) => handleActivityPromptChange(event.target.value)} placeholder="Ví dụ: Trong ảnh này là con gì?" />
+          </label>
+          <label>
+            Chọn ảnh thay thế từ máy
+            <input
+              type="file"
+              accept="image/*"
+              disabled={editActivityMediaUploadPending}
+              onChange={(event) =>
+                void uploadActivityConfigMedia(event.target.files?.[0] ?? null, (currentConfig, uploadedMedia) => ({
+                  ...currentConfig,
+                  image_url: uploadedMedia.url,
+                  image_kind: uploadedMedia.media_kind || 'image',
+                }))
+              }
+            />
+          </label>
+          <div className="builder-two-columns">
+            <label>
+              Số hàng ô che
+              <input
+                value={String(parsedConfig.overlay_rows ?? 3)}
+                onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, overlay_rows: Math.max(2, Number(event.target.value) || 3) }))}
+                inputMode="numeric"
+              />
+            </label>
+            <label>
+              Số cột ô che
+              <input
+                value={String(parsedConfig.overlay_cols ?? 4)}
+                onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, overlay_cols: Math.max(2, Number(event.target.value) || 4) }))}
+                inputMode="numeric"
+              />
+            </label>
+          </div>
+          <label>
+            Đáp án mẫu
+            <input
+              value={toTextValue(parsedConfig.expected_answer)}
+              onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, expected_answer: event.target.value }))}
+              placeholder="Ví dụ: con gấu"
+            />
+          </label>
+          <label>
+            Đáp án chấp nhận thêm
+            <textarea
+              value={toStringArrayValue(parsedConfig.accepted_answers).join(', ')}
+              onChange={(event) =>
+                updateActivityConfigState((currentConfig) => ({
+                  ...currentConfig,
+                  accepted_answers: compactFlexibleLines(event.target.value),
+                }))
+              }
+              rows={3}
+              placeholder="Ví dụ: gấu, con gau, gau"
+            />
+          </label>
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'step_by_step') {
+      const steps = toStringArrayValue(parsedConfig.steps)
+      return (
+        <ListBuilder
+          title="Các bước học sinh cần làm"
+          helper="Sửa trực tiếp từng bước."
+          items={steps.length ? steps : createDefaultList()}
+          itemPlaceholder="Bước"
+          onChange={(index, value) =>
+            updateActivityConfigState((currentConfig) => {
+              const nextItems = toStringArrayValue(currentConfig.steps)
+              while (nextItems.length <= index) nextItems.push('')
+              nextItems[index] = value
+              return { ...currentConfig, steps: nextItems }
+            })
+          }
+          onAdd={() => updateActivityConfigState((currentConfig) => ({ ...currentConfig, steps: [...toStringArrayValue(currentConfig.steps), ''] }))}
+          onRemove={(index) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, steps: toStringArrayValue(currentConfig.steps).filter((_, itemIndex) => itemIndex !== index) }))}
+        />
+      )
+    }
+
+    if (activityTypeValue === 'aac') {
+      const cards = toEditableMediaCards(parsedConfig.image_cards, 4)
+      return (
+        <div className="config-card detail-stack">
+          <strong>4 thẻ lựa chọn</strong>
+          <div className="builder-two-columns">
+            {cards.map((item, index) => (
+              <div key={item.id} className="config-card detail-stack">
+                <strong>Thẻ {index + 1}</strong>
+                <label>
+                  Chọn ảnh từ máy
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={editActivityMediaUploadPending}
+                    onChange={(event) =>
+                      void uploadActivityConfigMedia(event.target.files?.[0] ?? null, (currentConfig, uploadedMedia) => {
+                        const nextCards = toEditableMediaCards(currentConfig.image_cards, 4)
+                        nextCards[index] = {
+                          ...nextCards[index],
+                          media_url: uploadedMedia.url,
+                          media_kind: uploadedMedia.media_kind || 'image',
+                        }
+                        return {
+                          ...currentConfig,
+                          image_cards: nextCards,
+                          cards: nextCards.map((card) => card.label),
+                        }
+                      })
+                    }
+                  />
+                </label>
+                <label>
+                  Nhãn hiển thị
+                  <input
+                    value={item.label}
+                    onChange={(event) =>
+                      updateActivityConfigState((currentConfig) => {
+                        const nextCards = toEditableMediaCards(currentConfig.image_cards, 4)
+                        nextCards[index] = { ...nextCards[index], label: event.target.value }
+                        return {
+                          ...currentConfig,
+                          image_cards: nextCards,
+                          cards: nextCards.map((card) => card.label),
+                        }
+                      })
+                    }
+                    placeholder={`Đáp án ${index + 1}`}
+                  />
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'memory_match') {
+      const cards = toEditableMediaCards(parsedConfig.image_cards, Math.max(2, Number(parsedConfig.pair_count ?? 5) || 5))
+      return (
+        <div className="config-card detail-stack">
+          <strong>Các cặp thẻ</strong>
+          <div className="builder-two-columns">
+            {cards.map((item, index) => (
+              <div key={item.id} className="config-card detail-stack">
+                <strong>Cặp thẻ {index + 1}</strong>
+                <label>
+                  Chọn ảnh từ máy
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={editActivityMediaUploadPending}
+                    onChange={(event) =>
+                      void uploadActivityConfigMedia(event.target.files?.[0] ?? null, (currentConfig, uploadedMedia) => {
+                        const nextCards = toEditableMediaCards(currentConfig.image_cards, cards.length)
+                        nextCards[index] = {
+                          ...nextCards[index],
+                          media_url: uploadedMedia.url,
+                          media_kind: uploadedMedia.media_kind || 'image',
+                        }
+                        return { ...currentConfig, image_cards: nextCards, pair_count: nextCards.filter((card) => card.media_url).length }
+                      })
+                    }
+                  />
+                </label>
+                <label>
+                  Tên gợi nhớ
+                  <input
+                    value={item.label}
+                    onChange={(event) =>
+                      updateActivityConfigState((currentConfig) => {
+                        const nextCards = toEditableMediaCards(currentConfig.image_cards, cards.length)
+                        nextCards[index] = { ...nextCards[index], label: event.target.value }
+                        return { ...currentConfig, image_cards: nextCards }
+                      })
+                    }
+                    placeholder="Ví dụ: Con mèo"
+                  />
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'quick_tap') {
+      const targetCards = toEditableMediaCards(parsedConfig.image_cards, 4)
+      const distractorCards = toEditableMediaCards(parsedConfig.distractor_cards, 2)
+      return (
+        <div className="detail-stack">
+          <div className="config-card detail-stack">
+            <strong>Thiết lập trò chơi</strong>
+            <div className="builder-two-columns">
+              <label>
+                Thời gian chơi (giây)
+                <input value={String(parsedConfig.duration_seconds ?? 10)} onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, duration_seconds: Math.max(5, Number(event.target.value) || 10) }))} inputMode="numeric" />
+              </label>
+              <label>
+                Số lần chạm cần đạt
+                <input value={String(parsedConfig.target_hits ?? 6)} onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, target_hits: Math.max(1, Number(event.target.value) || 6) }))} inputMode="numeric" />
+              </label>
+              <label>
+                Số thẻ rơi cùng lúc
+                <input value={String(parsedConfig.simultaneous_cards ?? 4)} onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, simultaneous_cards: Math.max(1, Number(event.target.value) || 4) }))} inputMode="numeric" />
+              </label>
+              <label>
+                Nhịp xuất hiện thẻ (ms)
+                <input value={String(parsedConfig.spawn_interval_ms ?? 1600)} onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, spawn_interval_ms: Math.max(1000, Number(event.target.value) || 1600) }))} inputMode="numeric" />
+              </label>
+            </div>
+          </div>
+          <div className="config-card detail-stack">
+            <strong>Ảnh mục tiêu</strong>
+            <div className="builder-two-columns">
+              {targetCards.map((item, index) => (
+                <div key={item.id} className="config-card detail-stack">
+                  <strong>Mục tiêu {index + 1}</strong>
+                  <label>
+                    Chọn ảnh từ máy
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={editActivityMediaUploadPending}
+                      onChange={(event) =>
+                        void uploadActivityConfigMedia(event.target.files?.[0] ?? null, (currentConfig, uploadedMedia) => {
+                          const nextCards = toEditableMediaCards(currentConfig.image_cards, targetCards.length)
+                          nextCards[index] = {
+                            ...nextCards[index],
+                            media_url: uploadedMedia.url,
+                            media_kind: uploadedMedia.media_kind || 'image',
+                          }
+                          return { ...currentConfig, image_cards: nextCards }
+                        })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Nhãn
+                    <input
+                      value={item.label}
+                      onChange={(event) =>
+                        updateActivityConfigState((currentConfig) => {
+                          const nextCards = toEditableMediaCards(currentConfig.image_cards, targetCards.length)
+                          nextCards[index] = { ...nextCards[index], label: event.target.value }
+                          return { ...currentConfig, image_cards: nextCards }
+                        })
+                      }
+                    />
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="config-card detail-stack">
+            <strong>Ảnh gây nhiễu</strong>
+            <div className="builder-two-columns">
+              {distractorCards.map((item, index) => (
+                <div key={item.id} className="config-card detail-stack">
+                  <strong>Nhiễu {index + 1}</strong>
+                  <label>
+                    Chọn ảnh từ máy
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={editActivityMediaUploadPending}
+                      onChange={(event) =>
+                        void uploadActivityConfigMedia(event.target.files?.[0] ?? null, (currentConfig, uploadedMedia) => {
+                          const nextCards = toEditableMediaCards(currentConfig.distractor_cards, distractorCards.length)
+                          nextCards[index] = {
+                            ...nextCards[index],
+                            media_url: uploadedMedia.url,
+                            media_kind: uploadedMedia.media_kind || 'image',
+                          }
+                          return { ...currentConfig, distractor_cards: nextCards }
+                        })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Nhãn
+                    <input
+                      value={item.label}
+                      onChange={(event) =>
+                        updateActivityConfigState((currentConfig) => {
+                          const nextCards = toEditableMediaCards(currentConfig.distractor_cards, distractorCards.length)
+                          nextCards[index] = { ...nextCards[index], label: event.target.value }
+                          return { ...currentConfig, distractor_cards: nextCards }
+                        })
+                      }
+                    />
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'size_order') {
+      const items = toEditableOrderedItems(parsedConfig.items, 3)
+      return (
+        <div className="config-card detail-stack">
+          <strong>Các mục theo thứ tự</strong>
+          <div className="builder-stack">
+            {items.map((item, index) => (
+              <div key={item.id} className="config-card detail-stack">
+                <strong>Vị trí {index + 1}</strong>
+                <div className="builder-two-columns">
+                  <label>
+                    Chọn ảnh từ máy
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={editActivityMediaUploadPending}
+                      onChange={(event) =>
+                        void uploadActivityConfigMedia(event.target.files?.[0] ?? null, (currentConfig, uploadedMedia) => {
+                          const nextItems = toEditableOrderedItems(currentConfig.items, items.length)
+                          nextItems[index] = {
+                            ...nextItems[index],
+                            media_url: uploadedMedia.url,
+                            media_kind: uploadedMedia.media_kind || 'image',
+                          }
+                          return { ...currentConfig, items: nextItems }
+                        })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Thứ tự đúng
+                    <input
+                      value={String(item.rank)}
+                      onChange={(event) =>
+                        updateActivityConfigState((currentConfig) => {
+                          const nextItems = toEditableOrderedItems(currentConfig.items, items.length)
+                          nextItems[index] = { ...nextItems[index], rank: Math.max(1, Number(event.target.value) || index + 1) }
+                          return { ...currentConfig, items: nextItems }
+                        })
+                      }
+                      inputMode="numeric"
+                    />
+                  </label>
+                </div>
+                <label>
+                  Tên hiển thị
+                  <input
+                    value={item.label}
+                    onChange={(event) =>
+                      updateActivityConfigState((currentConfig) => {
+                        const nextItems = toEditableOrderedItems(currentConfig.items, items.length)
+                        nextItems[index] = { ...nextItems[index], label: event.target.value }
+                        return { ...currentConfig, items: nextItems }
+                      })
+                    }
+                  />
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'habitat_match') {
+      const options = toEditableHabitatOptions(parsedConfig.habitat_cards, parsedConfig.habitats, 2)
+      const items = toEditableHabitatItems(parsedConfig.items, 2)
+      return (
+        <div className="detail-stack">
+          <div className="config-card detail-stack">
+            <strong>Danh sách nơi sống</strong>
+            <div className="builder-two-columns">
+              {options.map((item, index) => (
+                <label key={item.id}>
+                  Nơi sống {index + 1}
+                  <input
+                    value={item.label}
+                    onChange={(event) =>
+                      updateActivityConfigState((currentConfig) => {
+                        const nextOptions = toEditableHabitatOptions(currentConfig.habitat_cards, currentConfig.habitats, options.length)
+                        nextOptions[index] = { ...nextOptions[index], label: event.target.value }
+                        return {
+                          ...currentConfig,
+                          habitat_cards: nextOptions,
+                          habitats: nextOptions.map((option) => option.label),
+                        }
+                      })
+                    }
+                  />
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="config-card detail-stack">
+            <strong>Các con vật cần ghép</strong>
+            <div className="builder-two-columns">
+              {items.map((item, index) => (
+                <div key={item.id} className="config-card detail-stack">
+                  <strong>Con vật {index + 1}</strong>
+                  <label>
+                    Chọn ảnh từ máy
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={editActivityMediaUploadPending}
+                      onChange={(event) =>
+                        void uploadActivityConfigMedia(event.target.files?.[0] ?? null, (currentConfig, uploadedMedia) => {
+                          const nextItems = toEditableHabitatItems(currentConfig.items, items.length)
+                          nextItems[index] = {
+                            ...nextItems[index],
+                            media_url: uploadedMedia.url,
+                            media_kind: uploadedMedia.media_kind || 'image',
+                          }
+                          return { ...currentConfig, items: nextItems }
+                        })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Tên con vật
+                    <input
+                      value={item.label}
+                      onChange={(event) =>
+                        updateActivityConfigState((currentConfig) => {
+                          const nextItems = toEditableHabitatItems(currentConfig.items, items.length)
+                          nextItems[index] = { ...nextItems[index], label: event.target.value }
+                          return { ...currentConfig, items: nextItems }
+                        })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Nơi sống đúng
+                    <select
+                      value={item.habitat_id}
+                      onChange={(event) =>
+                        updateActivityConfigState((currentConfig) => {
+                          const nextItems = toEditableHabitatItems(currentConfig.items, items.length)
+                          const nextOptions = toEditableHabitatOptions(currentConfig.habitat_cards, currentConfig.habitats, options.length)
+                          const selectedOption = nextOptions.find((option) => option.id === event.target.value)
+                          nextItems[index] = {
+                            ...nextItems[index],
+                            habitat_id: event.target.value,
+                            habitat: selectedOption?.label ?? event.target.value,
+                          }
+                          return { ...currentConfig, items: nextItems }
+                        })
+                      }
+                    >
+                      <option value="">Chọn nơi sống</option>
+                      {options.filter((option) => option.label.trim()).map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'career_simulation') {
+      return (
+        <div className="config-card detail-stack">
+          <label>
+            Bối cảnh hoạt động
+            <textarea value={toTextValue(parsedConfig.scenario)} onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, scenario: event.target.value }))} rows={4} />
+          </label>
+          <label>
+            Tiêu chí hoàn thành
+            <textarea value={toTextValue(parsedConfig.success_criteria)} onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, success_criteria: event.target.value }))} rows={3} />
+          </label>
+        </div>
+      )
+    }
+
+    if (activityTypeValue === 'ai_chat') {
+      const goals = toStringArrayValue(parsedConfig.goals)
+      return (
+        <div className="detail-stack">
+          <div className="config-card detail-stack">
+            <label>
+              Lời mở đầu cho AI
+              <textarea value={toTextValue(parsedConfig.starter_prompt)} onChange={(event) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, starter_prompt: event.target.value }))} rows={4} />
+            </label>
+          </div>
+          <ListBuilder
+            title="Mục tiêu học sinh cần đạt"
+            helper="Mỗi dòng là một mục tiêu."
+            items={goals.length ? goals : createDefaultList()}
+            itemPlaceholder="Mục tiêu"
+            onChange={(index, value) =>
+              updateActivityConfigState((currentConfig) => {
+                const nextItems = toStringArrayValue(currentConfig.goals)
+                while (nextItems.length <= index) nextItems.push('')
+                nextItems[index] = value
+                return { ...currentConfig, goals: nextItems }
+              })
+            }
+            onAdd={() => updateActivityConfigState((currentConfig) => ({ ...currentConfig, goals: [...toStringArrayValue(currentConfig.goals), ''] }))}
+            onRemove={(index) => updateActivityConfigState((currentConfig) => ({ ...currentConfig, goals: toStringArrayValue(currentConfig.goals).filter((_, itemIndex) => itemIndex !== index) }))}
+          />
+        </div>
+      )
+    }
+
+    return null
+  }
+
   return (
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack teacher-clean-page">
@@ -1163,7 +2513,8 @@ export function LessonsPage() {
           </article>
         </section>
 
-        <section className="auth-layout">
+        <section className="lessons-workspace">
+          <div className="lessons-sidebar-stack">
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
@@ -1241,10 +2592,9 @@ export function LessonsPage() {
             </div>
             {!lessonsQuery.data?.length && !lessonsQuery.isLoading ? <p>Chưa có bài học nào, hãy tạo bài học đầu tiên.</p> : null}
           </article>
-        </section>
+          </div>
 
-        <section className="dashboard-grid">
-          <article className="roadmap-panel">
+          <article className="roadmap-panel lessons-editor-panel">
             <button type="button" onClick={() => setIsActivityFormOpen((current) => !current)} className="simple-toggle-button">
               <span>Thêm hoạt động</span>
               <span>{isActivityFormOpen ? 'Ẩn bớt' : 'Mở nhanh'}</span>
@@ -1367,6 +2717,276 @@ export function LessonsPage() {
                     onOptionChange={(index, value) => updateChoiceOption(setListenOptions, index, value)}
                     onCorrectChange={setListenCorrectIndex}
                   />
+                ) : null}
+
+                {activityType === 'memory_match' ? (
+                  <div className="config-card detail-stack">
+                    <strong>3. Ảnh cho các cặp lật thẻ</strong>
+                    <p className="helper-text">
+                      Mỗi ảnh sẽ tự nhân đôi thành 1 cặp giống nhau. Có sẵn 5 ô tải ảnh và bạn cần chọn ít nhất 2 ảnh để tạo hoạt động.
+                    </p>
+
+                    <div className="builder-two-columns">
+                      {memoryMatchCardDrafts.map((item, index) => (
+                        <div key={`memory-match-${index}`} className="config-card detail-stack">
+                          <strong>Cặp thẻ {index + 1}</strong>
+                          <label>
+                            Chọn ảnh từ máy
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(event) => {
+                                const nextFile = event.target.files?.[0] ?? null
+                                setMemoryMatchCardDrafts((current) =>
+                                  current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, file: nextFile } : draft)),
+                                )
+                              }}
+                            />
+                          </label>
+                          <p className="helper-text">{item.file ? `Đã chọn: ${item.file.name}` : 'Chưa chọn ảnh cho cặp này.'}</p>
+                          <label>
+                            Tên gợi nhớ cho giáo viên
+                            <input
+                              value={item.label}
+                              onChange={(event) =>
+                                setMemoryMatchCardDrafts((current) =>
+                                  current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, label: event.target.value } : draft)),
+                                )
+                              }
+                              placeholder="Ví dụ: Con mèo"
+                            />
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className="helper-text">
+                      Sau khi bấm thêm, hoạt động sẽ xuất hiện ở khu "Bài đã tạo" bên phải. Bấm vào hoạt động đó để xem bản xem trước như học sinh.
+                    </p>
+                  </div>
+                ) : null}
+
+                {activityType === 'quick_tap' ? (
+                  <div className="config-card detail-stack">
+                    <strong>3. Thiết lập trò chạm đúng nhanh</strong>
+                    <div className="builder-two-columns">
+                      <label>
+                        Thời gian chơi (giây)
+                        <input value={quickTapDurationSeconds} onChange={(event) => setQuickTapDurationSeconds(event.target.value)} inputMode="numeric" />
+                      </label>
+                      <label>
+                        Số lần chạm cần đạt
+                        <input value={quickTapTargetHits} onChange={(event) => setQuickTapTargetHits(event.target.value)} inputMode="numeric" />
+                      </label>
+                      <label>
+                        Số thẻ rơi cùng lúc
+                        <input value={quickTapSimultaneousCards} onChange={(event) => setQuickTapSimultaneousCards(event.target.value)} inputMode="numeric" />
+                      </label>
+                      <label>
+                        Nhịp xuất hiện thẻ (ms)
+                        <input value={quickTapSpawnIntervalMs} onChange={(event) => setQuickTapSpawnIntervalMs(event.target.value)} inputMode="numeric" />
+                      </label>
+                    </div>
+
+                    <div className="detail-stack">
+                      <strong>4. Ảnh mục tiêu</strong>
+                      <p className="helper-text">Đây là các ảnh học sinh cần chạm đúng. Cần ít nhất 2 ảnh.</p>
+                      <div className="builder-two-columns">
+                        {quickTapTargetDrafts.map((item, index) => (
+                          <div key={`quick-target-${index}`} className="config-card detail-stack">
+                            <strong>Mục tiêu {index + 1}</strong>
+                            <label>
+                              Chọn ảnh từ máy
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => {
+                                  const nextFile = event.target.files?.[0] ?? null
+                                  setQuickTapTargetDrafts((current) =>
+                                    current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, file: nextFile } : draft)),
+                                  )
+                                }}
+                              />
+                            </label>
+                            <p className="helper-text">{item.file ? `Đã chọn: ${item.file.name}` : 'Chưa chọn ảnh.'}</p>
+                            <label>
+                              Tên gợi nhớ
+                              <input
+                                value={item.label}
+                                onChange={(event) =>
+                                  setQuickTapTargetDrafts((current) =>
+                                    current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, label: event.target.value } : draft)),
+                                  )
+                                }
+                                placeholder="Ví dụ: Cá"
+                              />
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="detail-stack">
+                      <strong>5. Ảnh gây nhiễu</strong>
+                      <p className="helper-text">Tùy chọn. Nếu tải lên, học sinh sẽ phải tránh chạm nhầm các ảnh này.</p>
+                      <div className="builder-two-columns">
+                        {quickTapDistractorDrafts.map((item, index) => (
+                          <div key={`quick-distractor-${index}`} className="config-card detail-stack">
+                            <strong>Ảnh nhiễu {index + 1}</strong>
+                            <label>
+                              Chọn ảnh từ máy
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => {
+                                  const nextFile = event.target.files?.[0] ?? null
+                                  setQuickTapDistractorDrafts((current) =>
+                                    current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, file: nextFile } : draft)),
+                                  )
+                                }}
+                              />
+                            </label>
+                            <p className="helper-text">{item.file ? `Đã chọn: ${item.file.name}` : 'Có thể để trống.'}</p>
+                            <label>
+                              Tên gợi nhớ
+                              <input
+                                value={item.label}
+                                onChange={(event) =>
+                                  setQuickTapDistractorDrafts((current) =>
+                                    current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, label: event.target.value } : draft)),
+                                  )
+                                }
+                                placeholder="Ví dụ: Mèo"
+                              />
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {activityType === 'size_order' ? (
+                  <div className="config-card detail-stack">
+                    <strong>3. Ảnh theo thứ tự từ bé đến lớn</strong>
+                    <p className="helper-text">Thứ tự bạn nhập từ trên xuống sẽ là đáp án đúng từ bé nhất đến lớn nhất. Cần ít nhất 3 ảnh.</p>
+
+                    <div className="builder-stack">
+                      {sizeOrderDrafts.map((item, index) => (
+                        <div key={`size-order-${index}`} className="config-card detail-stack">
+                          <strong>Vị trí {index + 1}</strong>
+                          <label>
+                            Chọn ảnh từ máy
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(event) => {
+                                const nextFile = event.target.files?.[0] ?? null
+                                setSizeOrderDrafts((current) =>
+                                  current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, file: nextFile } : draft)),
+                                )
+                              }}
+                            />
+                          </label>
+                          <p className="helper-text">{item.file ? `Đã chọn: ${item.file.name}` : 'Có thể để trống.'}</p>
+                          <label>
+                            Tên con vật / đồ vật
+                            <input
+                              value={item.label}
+                              onChange={(event) =>
+                                setSizeOrderDrafts((current) =>
+                                  current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, label: event.target.value } : draft)),
+                                )
+                              }
+                              placeholder="Ví dụ: Con mèo"
+                            />
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {activityType === 'habitat_match' ? (
+                  <div className="config-card detail-stack">
+                    <strong>3. Nơi sống và con vật</strong>
+                    <p className="helper-text">Nhập nơi sống trước, sau đó tải ảnh từng con vật và gán đúng nơi sống cho nó.</p>
+
+                    <div className="detail-stack">
+                      <strong>4. Danh sách nơi sống</strong>
+                      <div className="builder-two-columns">
+                        {habitatOptionDrafts.map((item, index) => (
+                          <label key={item.id}>
+                            Nơi sống {index + 1}
+                            <input
+                              value={item.label}
+                              onChange={(event) =>
+                                setHabitatOptionDrafts((current) =>
+                                  current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, label: event.target.value } : draft)),
+                                )
+                              }
+                              placeholder="Ví dụ: Rừng"
+                            />
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="detail-stack">
+                      <strong>5. Các con vật cần ghép</strong>
+                      <div className="builder-two-columns">
+                        {habitatAnimalDrafts.map((item, index) => (
+                          <div key={`habitat-animal-${index}`} className="config-card detail-stack">
+                            <strong>Con vật {index + 1}</strong>
+                            <label>
+                              Chọn ảnh từ máy
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => {
+                                  const nextFile = event.target.files?.[0] ?? null
+                                  setHabitatAnimalDrafts((current) =>
+                                    current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, file: nextFile } : draft)),
+                                  )
+                                }}
+                              />
+                            </label>
+                            <p className="helper-text">{item.file ? `Đã chọn: ${item.file.name}` : 'Có thể để trống.'}</p>
+                            <label>
+                              Tên con vật
+                              <input
+                                value={item.label}
+                                onChange={(event) =>
+                                  setHabitatAnimalDrafts((current) =>
+                                    current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, label: event.target.value } : draft)),
+                                  )
+                                }
+                                placeholder="Ví dụ: Cá"
+                              />
+                            </label>
+                            <label>
+                              Nơi sống đúng
+                              <select
+                                value={item.habitatId}
+                                onChange={(event) =>
+                                  setHabitatAnimalDrafts((current) =>
+                                    current.map((draft, draftIndex) => (draftIndex === index ? { ...draft, habitatId: event.target.value } : draft)),
+                                  )
+                                }
+                              >
+                                <option value="">Chọn nơi sống</option>
+                                {habitatOptionDrafts.filter((option) => option.label.trim()).map((option) => (
+                                  <option key={`${item.label}-${option.id}`} value={option.id}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 ) : null}
 
                 {activityType === 'matching' ? (
@@ -1630,7 +3250,7 @@ export function LessonsPage() {
             ) : null}
           </article>
 
-          <article className="roadmap-panel">
+          <article className="roadmap-panel lessons-preview-panel">
             <div className="teacher-clean-section-head">
               <div>
                 <p className="eyebrow">Quản lý</p>
@@ -1699,7 +3319,7 @@ export function LessonsPage() {
                 {updateLessonMutation.error ? <p className="error-text">{(updateLessonMutation.error as Error).message}</p> : null}
                 {deleteLessonMutation.error ? <p className="error-text">{(deleteLessonMutation.error as Error).message}</p> : null}
 
-                <div className="lesson-manage-layout">
+                <div className="lessons-manage-stack">
                   <div className="detail-stack">
                     <div className="student-row">
                       <strong>{selectedLesson.title}</strong>
@@ -1729,7 +3349,7 @@ export function LessonsPage() {
                     </div>
                   </div>
 
-                  <div className="detail-stack">
+                  <div className="detail-stack lessons-preview-pane">
                     {selectedActivity ? (
                       <>
                         <div className="lesson-activity-toolbar">
@@ -1770,58 +3390,56 @@ export function LessonsPage() {
                             <textarea value={editActivityInstruction} onChange={(event) => setEditActivityInstruction(event.target.value)} rows={3} placeholder="Hướng dẫn ngắn" />
                           </label>
 
-                          <label>
-                            Prompt chính
-                            <textarea value={editActivityPrompt} onChange={(event) => handleActivityPromptChange(event.target.value)} rows={3} placeholder="Câu hỏi hoặc nội dung chính" />
-                          </label>
-
-                          {isImageUploadOnlyActivity(selectedActivity.activity_type as ActivityType) ? (
-                            <label>
-                              Chọn ảnh từ máy
-                              <input
-                                type="file"
-                                accept="image/*"
-                                disabled={editActivityMediaUploadPending}
-                                onChange={(event) => void handleActivityMediaFileChange(event.target.files?.[0] ?? null)}
-                              />
-                              {editActivityMediaUrl ? <span className="helper-text">Đã có ảnh cho hoạt động này.</span> : null}
-                            </label>
-                          ) : null}
-
-                          {selectedActivity.activity_type === 'watch_answer' ? (
-                            <>
-                              <label>
-                                Nguồn video
-                                <select value={editActivityMediaSource} onChange={(event) => setEditActivityMediaSource(event.target.value as MediaSource)}>
-                                  <option value="external">Dán link video</option>
-                                  <option value="upload">Tải ảnh hoặc video từ máy</option>
-                                </select>
-                              </label>
-
-                              {editActivityMediaSource === 'external' ? (
-                                <label>
-                                  Link video
-                                  <input value={editActivityMediaUrl} onChange={(event) => handleActivityMediaUrlChange(event.target.value)} placeholder="YouTube / TikTok / Google Drive" />
-                                  <span className="helper-text">Dùng YouTube, TikTok, Google Drive hoặc file video trực tiếp.</span>
-                                </label>
-                              ) : (
-                                <label>
-                                  Chọn ảnh hoặc video từ máy
-                                  <input
-                                    type="file"
-                                    accept="image/*,video/*"
-                                    disabled={editActivityMediaUploadPending}
-                                    onChange={(event) => void handleActivityMediaFileChange(event.target.files?.[0] ?? null)}
-                                  />
-                                  {editActivityMediaUrl ? <span className="helper-text">Đã có media cho hoạt động này.</span> : null}
-                                </label>
-                              )}
-                            </>
-                          ) : null}
-
-                          {editActivityMediaUploadPending ? <p className="helper-text">Đang tải media lên...</p> : null}
-
                         </div>
+
+                        {renderFriendlyActivityEditor()}
+
+                        {editActivityMediaUploadPending ? <p className="helper-text">Đang tải media lên...</p> : null}
+
+                        <div className="builder-two-columns">
+                          <label>
+                            Thứ tự hiển thị
+                            <input value={editActivitySortOrder} onChange={(event) => setEditActivitySortOrder(event.target.value)} inputMode="numeric" />
+                          </label>
+                          <label className="checkbox-row">
+                            <input
+                              type="checkbox"
+                              checked={editActivityVoiceAnswerEnabled}
+                              onChange={(event) => setEditActivityVoiceAnswerEnabled(event.target.checked)}
+                            />
+                            Bật trả lời bằng giọng nói
+                          </label>
+                        </div>
+
+                        <details className="config-card detail-stack">
+                          <summary className="simple-summary">Chế độ nâng cao: sửa JSON</summary>
+                          <div className="teacher-clean-section-head">
+                            <div>
+                              <strong>Cấu hình đầy đủ</strong>
+                              <p className="helper-text">Dùng khi cần sửa sâu những gì form thân thiện chưa bao phủ.</p>
+                            </div>
+                            <div className="button-row">
+                              <button className="ghost-button" type="button" onClick={handleFormatActivityConfigJson}>
+                                Chuẩn hóa JSON
+                              </button>
+                              <button className="ghost-button" type="button" onClick={handleResetActivityConfigJson}>
+                                Khôi phục gốc
+                              </button>
+                            </div>
+                          </div>
+
+                          <label>
+                            JSON cấu hình activity
+                            <textarea
+                              className="config-textarea"
+                              value={editActivityConfigJson}
+                              onChange={(event) => handleActivityConfigJsonChange(event.target.value)}
+                              rows={14}
+                              spellCheck={false}
+                              placeholder="Nhập hoặc chỉnh JSON cấu hình của activity"
+                            />
+                          </label>
+                        </details>
 
                         <div className="button-row">
                           <button
