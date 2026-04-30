@@ -1,6 +1,6 @@
 import './App.css'
 import { useEffect, useMemo, useState } from 'react'
-import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useIsFetching, useIsMutating, useQueryClient } from '@tanstack/react-query'
 
 import { RealtimeBridge } from './components/RealtimeBridge'
@@ -19,7 +19,7 @@ import { useAuthStore } from './store/authStore'
 import { prefetchRouteData } from './utils/routePrefetch'
 import { getDefaultRouteForRole } from './utils/roleRoutes'
 
-const navItemsByRole: Record<string, Array<{ to: string; label: string }>> = {
+const navItemsByRole: Record<string, Array<{ to: string; label: string; matchTab?: string }>> = {
   admin: [
     { to: '/admin', label: 'Admin' },
   ],
@@ -32,7 +32,10 @@ const navItemsByRole: Record<string, Array<{ to: string; label: string }>> = {
     { to: '/tien-do', label: 'Tiến độ' },
   ],
   student: [
-    { to: '/hoc-tap', label: 'Học' },
+    { to: '/hoc-tap', label: 'Học tập', matchTab: '' },
+    { to: '/hoc-tap?tab=ai', label: 'Bạn học AI', matchTab: 'ai' },
+    { to: '/hoc-tap?tab=communication', label: 'Giao tiếp', matchTab: 'communication' },
+    { to: '/hoc-tap?tab=settings', label: 'Cài đặt', matchTab: 'settings' },
   ],
   parent: [
     { to: '/phu-huynh', label: 'Con' },
@@ -48,13 +51,16 @@ const roleLabels: Record<string, string> = {
 
 function App() {
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
   const hydrate = useAuthStore((state) => state.hydrate)
   const accessToken = useAuthStore((state) => state.accessToken)
   const user = useAuthStore((state) => state.user)
   const clearSession = useAuthStore((state) => state.clearSession)
+
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+
   const isFetching = useIsFetching()
   const isMutating = useIsMutating()
   const isLoading = isFetching > 0 || isMutating > 0
@@ -78,6 +84,13 @@ function App() {
   }, [user])
 
   function handleLogout() {
+    for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
+      const key = window.sessionStorage.key(index)
+      if (key?.startsWith('student-entry-gate:')) {
+        window.sessionStorage.removeItem(key)
+      }
+    }
+
     clearSession()
     setIsMenuOpen(false)
     navigate('/', { replace: true })
@@ -88,9 +101,18 @@ function App() {
     void prefetchRouteData(queryClient, targetRoute, accessToken)
   }
 
+  function isNavItemActive(targetRoute: string, matchTab?: string) {
+    const [pathname] = targetRoute.split('?')
+    if (location.pathname !== pathname) return false
+    if (matchTab === undefined) return true
+    const currentTab = new URLSearchParams(location.search).get('tab') ?? ''
+    return currentTab === matchTab
+  }
+
   return (
     <div className={`app-shell ${isTeacherRole ? 'app-shell-teacher' : ''}`}>
       {isLoading && <div className="global-loading-bar" />}
+
       <button
         className={`menu-toggle-fixed ${isTeacherRole ? 'menu-toggle-fixed-teacher' : ''}`}
         onClick={() => setIsMenuOpen((current) => !current)}
@@ -103,7 +125,7 @@ function App() {
         <span className="menu-toggle-line"></span>
       </button>
 
-      {isMenuOpen && <div className="backdrop" onClick={() => setIsMenuOpen(false)}></div>}
+      {isMenuOpen ? <div className="backdrop" onClick={() => setIsMenuOpen(false)}></div> : null}
 
       <aside className={`sidebar ${isMenuOpen ? 'sidebar-open' : ''} ${isTeacherRole ? 'sidebar-teacher' : ''}`}>
         <div className="sidebar-top">
@@ -111,7 +133,6 @@ function App() {
             <h2 className="sidebar-title">Bạn học thông minh</h2>
             <span className="sidebar-card-label">{user ? roleLabels[user.role] ?? user.role : 'Đăng nhập'}</span>
           </div>
-
         </div>
 
         <nav className="nav-list" aria-label="Điều hướng chính">
@@ -119,7 +140,7 @@ function App() {
             <NavLink
               key={item.to}
               to={item.to}
-              className={({ isActive }) => (isActive ? 'nav-item nav-item-active' : 'nav-item')}
+              className={isNavItemActive(item.to, item.matchTab) ? 'nav-item nav-item-active' : 'nav-item'}
               onClick={() => setIsMenuOpen(false)}
               onMouseEnter={() => handleNavPrefetch(item.to)}
               onFocus={() => handleNavPrefetch(item.to)}

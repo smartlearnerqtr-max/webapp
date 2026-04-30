@@ -47,6 +47,24 @@ def _get_teacher_activity(activity_id: int, teacher_id: int) -> LessonActivity |
     return activity
 
 
+def _ordered_lesson_activities(lesson: Lesson) -> list[LessonActivity]:
+    return sorted(lesson.activities, key=lambda item: (item.sort_order, item.id))
+
+
+def _place_activity_at_sort_order(lesson: Lesson, activity: LessonActivity, requested_sort_order: int | None) -> None:
+    ordered_activities = [item for item in _ordered_lesson_activities(lesson) if item.id != activity.id]
+    target_sort_order = len(ordered_activities) + 1 if requested_sort_order is None else int(requested_sort_order)
+    target_sort_order = max(1, min(target_sort_order, len(ordered_activities) + 1))
+    ordered_activities.insert(target_sort_order - 1, activity)
+    for index, item in enumerate(ordered_activities, start=1):
+        item.sort_order = index
+
+
+def _normalize_lesson_activity_sort_orders(lesson: Lesson) -> None:
+    for index, item in enumerate(_ordered_lesson_activities(lesson), start=1):
+        item.sort_order = index
+
+
 @api_v1.get('/lessons')
 @jwt_required()
 def list_lessons():
@@ -180,11 +198,13 @@ def create_activity(lesson_id: int):
         instruction_text=payload.get('instruction_text'),
         voice_answer_enabled=payload.get('voice_answer_enabled', False),
         is_required=payload.get('is_required', True),
-        sort_order=payload.get('sort_order') or len(lesson.activities) + 1,
+        sort_order=len(lesson.activities) + 1,
         difficulty_stage=payload.get('difficulty_stage') or 1,
         config_json=payload.get('config_json'),
     )
     db.session.add(activity)
+    db.session.flush()
+    _place_activity_at_sort_order(lesson, activity, payload.get('sort_order'))
     db.session.commit()
     log_server_event(level='info', module='lessons', message='Tao hoat dong bai hoc', action_name='create_activity', user_id=user.id, metadata={'lesson_id': lesson.id, 'activity_id': activity.id})
     return success_response(activity.to_dict(), 'Tao hoat dong thanh cong', 201)
@@ -212,11 +232,14 @@ def update_activity(activity_id: int):
     if not activity:
         return error_response('Khong tim thay hoat dong', 'ACTIVITY_NOT_FOUND', 404)
     payload = request.get_json(silent=True) or {}
-    for field in ['title', 'instruction_text', 'voice_answer_enabled', 'is_required', 'sort_order', 'difficulty_stage', 'config_json']:
+    requested_sort_order = payload.get('sort_order') if 'sort_order' in payload else None
+    for field in ['title', 'instruction_text', 'voice_answer_enabled', 'is_required', 'difficulty_stage', 'config_json']:
         if field in payload:
             setattr(activity, field, payload.get(field))
     if payload.get('activity_type') in VALID_ACTIVITY_TYPES:
         activity.activity_type = payload['activity_type']
+    if requested_sort_order is not None:
+        _place_activity_at_sort_order(activity.lesson, activity, requested_sort_order)
     db.session.commit()
     return success_response(activity.to_dict(), 'Cap nhat hoat dong thanh cong')
 
@@ -230,7 +253,11 @@ def delete_activity(activity_id: int):
     activity = _get_teacher_activity(activity_id, user.teacher_profile.id)
     if not activity:
         return error_response('Khong tim thay hoat dong', 'ACTIVITY_NOT_FOUND', 404)
+    lesson = activity.lesson
     db.session.delete(activity)
+    db.session.flush()
+    if lesson:
+        _normalize_lesson_activity_sort_orders(lesson)
     db.session.commit()
     return success_response(None, 'Da xoa hoat dong')
 
@@ -251,5 +278,6 @@ def reorder_activities(lesson_id: int):
         activity = activity_map.get(int(item['activity_id']))
         if activity:
             activity.sort_order = int(item['sort_order'])
+    _normalize_lesson_activity_sort_orders(lesson)
     db.session.commit()
     return success_response([activity.to_dict() for activity in sorted(lesson.activities, key=lambda row: row.sort_order)], 'Da sap xep lai hoat dong')

@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
 
 import { getRealtimeStreamUrl, type RealtimeEventItem } from '../services/api'
 import { useAuthStore } from '../store/authStore'
@@ -66,6 +67,13 @@ function parsePayload(payloadJson: string | null): EventPayload {
   } catch {
     return {}
   }
+}
+
+function readUnreadCount(storageKey: string | null) {
+  if (!storageKey || typeof window === 'undefined') return 0
+  const rawValue = window.sessionStorage.getItem(storageKey)
+  const parsedValue = rawValue ? Number(rawValue) : 0
+  return Number.isFinite(parsedValue) ? parsedValue : 0
 }
 
 function getUnreadStorageKey(userId: number | undefined) {
@@ -314,44 +322,49 @@ export function RealtimeBridge({ isNotificationPanelOpen, onUnreadCountChange }:
   const accessToken = useAuthStore((state) => state.accessToken)
   const user = useAuthStore((state) => state.user)
   const clearSession = useAuthStore((state) => state.clearSession)
-  const [latestEvent, setLatestEvent] = useState<RealtimeEventItem | null>(null)
-  const [unreadCount, setUnreadCount] = useState(0)
   const lastEventIdRef = useRef(0)
   const audioContextRef = useRef<AudioContext | null>(null)
   const storageKey = useMemo(() => getUnreadStorageKey(user?.id), [user?.id])
+  const authKey = accessToken && user ? `${user.id}:${accessToken}` : ''
+  const [latestEventState, setLatestEventState] = useState<{ authKey: string; event: RealtimeEventItem | null }>({
+    authKey: '',
+    event: null,
+  })
+  const [unreadState, setUnreadState] = useState<{ storageKey: string | null; count: number }>(() => ({
+    storageKey,
+    count: readUnreadCount(storageKey),
+  }))
+  const latestEvent = latestEventState.authKey === authKey ? latestEventState.event : null
+  const unreadCount = unreadState.storageKey === storageKey ? unreadState.count : readUnreadCount(storageKey)
+  const effectiveUnreadCount = isNotificationPanelOpen ? 0 : unreadCount
 
-  useEffect(() => {
-    if (!storageKey) {
-      setUnreadCount(0)
-      return
-    }
-
-    const rawValue = window.sessionStorage.getItem(storageKey)
-    const parsedValue = rawValue ? Number(rawValue) : 0
-    setUnreadCount(Number.isFinite(parsedValue) ? parsedValue : 0)
+  const setResolvedUnreadCount = useCallback((nextValue: number | ((current: number) => number)) => {
+    setUnreadState((current) => {
+      const baseCount = current.storageKey === storageKey ? current.count : readUnreadCount(storageKey)
+      return {
+        storageKey,
+        count: typeof nextValue === 'function' ? nextValue(baseCount) : nextValue,
+      }
+    })
   }, [storageKey])
 
   useEffect(() => {
-    onUnreadCountChange?.(unreadCount)
-  }, [onUnreadCountChange, unreadCount])
+    onUnreadCountChange?.(effectiveUnreadCount)
+  }, [effectiveUnreadCount, onUnreadCountChange])
 
   useEffect(() => {
     if (!storageKey) return
-    window.sessionStorage.setItem(storageKey, String(unreadCount))
-  }, [storageKey, unreadCount])
+    window.sessionStorage.setItem(storageKey, String(effectiveUnreadCount))
+  }, [effectiveUnreadCount, storageKey])
 
   useEffect(() => {
     if (!accessToken || !user) {
-      setLatestEvent(null)
-      setUnreadCount(0)
       lastEventIdRef.current = 0
       return undefined
     }
 
     if (isJwtExpired(accessToken)) {
       clearSession()
-      setLatestEvent(null)
-      setUnreadCount(0)
       lastEventIdRef.current = 0
       return undefined
     }
@@ -368,8 +381,8 @@ export function RealtimeBridge({ isNotificationPanelOpen, onUnreadCountChange }:
       eventSource.addEventListener('realtime', (event) => {
         const payload = JSON.parse((event as MessageEvent<string>).data) as RealtimeEventItem
         lastEventIdRef.current = payload.id
-        setLatestEvent(payload)
-        setUnreadCount((current) => current + 1)
+        setLatestEventState({ authKey, event: payload })
+        setResolvedUnreadCount((current) => current + 1)
 
         if (payload.event_type === 'parent_teacher_message_created') {
           playIncomingMessageTone(audioContextRef)
@@ -406,19 +419,24 @@ export function RealtimeBridge({ isNotificationPanelOpen, onUnreadCountChange }:
       }
       eventSource?.close()
     }
-  }, [accessToken, clearSession, queryClient, user])
+  }, [accessToken, authKey, clearSession, queryClient, setResolvedUnreadCount, storageKey, user])
 
   useEffect(() => {
     if (!latestEvent) return undefined
-    const timer = window.setTimeout(() => setLatestEvent(null), 7000)
+    const timer = window.setTimeout(() => {
+      setLatestEventState((current) => (current.authKey === authKey ? { ...current, event: null } : current))
+    }, 7000)
     return () => window.clearTimeout(timer)
-  }, [latestEvent])
+  }, [authKey, latestEvent])
 
   useEffect(() => {
     if (!isNotificationPanelOpen) return
-    setUnreadCount(0)
-    setLatestEvent(null)
-  }, [isNotificationPanelOpen])
+    const timer = window.setTimeout(() => {
+      setResolvedUnreadCount(0)
+      setLatestEventState((current) => (current.authKey === authKey ? { ...current, event: null } : current))
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [authKey, isNotificationPanelOpen, setResolvedUnreadCount, storageKey])
 
   const notificationCopy = useMemo(() => {
     if (!latestEvent || !user) return null
@@ -431,7 +449,14 @@ export function RealtimeBridge({ isNotificationPanelOpen, onUnreadCountChange }:
     <div className={`realtime-banner realtime-banner-${notificationCopy.tone}`} role="status" aria-live="polite">
       <div className="realtime-banner-head">
         <span className="realtime-banner-label">{notificationCopy.title}</span>
-        <button type="button" className="realtime-banner-action" onClick={() => { setLatestEvent(null); setUnreadCount(0) }}>
+        <button
+          type="button"
+          className="realtime-banner-action"
+          onClick={() => {
+            setLatestEventState((current) => (current.authKey === authKey ? { ...current, event: null } : current))
+            setResolvedUnreadCount(0)
+          }}
+        >
           Đã xem
         </button>
       </div>

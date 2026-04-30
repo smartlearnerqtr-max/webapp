@@ -34,6 +34,10 @@ services:
         fromDatabase:
           name: ban-hoc-db-v2
           property: connectionString
+      - key: SYNC_DEPLOY_SNAPSHOT
+        value: "true"
+      - key: DEPLOY_SNAPSHOT_SOURCE_URL
+        value: sqlite:///instance/dev.db
       - key: CORS_ORIGINS
         fromService:
           type: web

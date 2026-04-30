@@ -1,6 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 
 import { BarChartCard } from '../components/BarChartCard'
 import { ChatDock } from '../components/ChatDock'
@@ -19,14 +18,6 @@ import {
 import type { ParentTeacherConversationItem } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
-const quickLinks = [
-  { to: '/hoc-sinh', title: 'Học sinh', icon: 'HS', description: 'Hồ sơ' },
-  { to: '/lop-hoc', title: 'Lớp', icon: 'LP', description: 'Mã vào' },
-  { to: '/bai-hoc', title: 'Bài học', icon: 'BH', description: 'Hoạt động' },
-  { to: '/giao-bai', title: 'Giao bài', icon: 'GB', description: 'Chọn lớp' },
-  { to: '/tien-do', title: 'Tiến độ', icon: '%', description: 'Theo dõi' },
-]
-
 const readinessLabelMap: Record<string, string> = {
   can_ho_tro_them: 'Cần hỗ trợ',
   dang_phu_hop: 'Đang phù hợp',
@@ -37,8 +28,10 @@ export function TeacherHomePage() {
   const token = useAuthStore((state) => state.accessToken)
   const profile = useAuthStore((state) => state.profile)
   const queryClient = useQueryClient()
+
   const [selectedStudentId, setSelectedStudentId] = useState('')
   const [selectedParentId, setSelectedParentId] = useState('')
+  const [parentLookup, setParentLookup] = useState('')
   const [reportStudentId, setReportStudentId] = useState('')
   const [reportTitle, setReportTitle] = useState('')
   const [reportNote, setReportNote] = useState('')
@@ -47,7 +40,10 @@ export function TeacherHomePage() {
   const [messageDraft, setMessageDraft] = useState('')
   const [selectedChatStudentId, setSelectedChatStudentId] = useState('')
   const [conversationSearchTerm, setConversationSearchTerm] = useState('')
+
   const deferredSearchTerm = useDeferredValue(conversationSearchTerm)
+  const deferredParentLookup = useDeferredValue(parentLookup)
+  const hasParentLookup = deferredParentLookup.trim().length > 0
 
   const studentsQuery = useQuery({
     queryKey: ['students', token],
@@ -56,8 +52,8 @@ export function TeacherHomePage() {
   })
 
   const parentsQuery = useQuery({
-    queryKey: ['parents', token],
-    queryFn: () => fetchParents(token!),
+    queryKey: ['parents', token, deferredParentLookup.trim()],
+    queryFn: () => fetchParents(token!, deferredParentLookup),
     enabled: Boolean(token),
   })
 
@@ -85,11 +81,15 @@ export function TeacherHomePage() {
   )
 
   const availableParents = useMemo(() => {
-    if (!selectedStudentId) return parentsQuery.data ?? []
+    if (!selectedStudentId) return []
     return (parentsQuery.data ?? []).filter((parent) => !linkedPairKeys.has(`${selectedStudentId}-${parent.id}`))
   }, [linkedPairKeys, parentsQuery.data, selectedStudentId])
 
-  const conversations = conversationsQuery.data ?? []
+  useEffect(() => {
+    setSelectedParentId('')
+  }, [selectedStudentId, deferredParentLookup])
+
+  const conversations = useMemo(() => conversationsQuery.data ?? [], [conversationsQuery.data])
   const unreadConversationCount = conversations.reduce((count, item) => count + item.unread_count, 0)
 
   const conversationStudentOptions = useMemo(() => {
@@ -123,22 +123,13 @@ export function TeacherHomePage() {
     () => filteredConversations.find((item) => item.conversation_key === selectedConversationKey) ?? filteredConversations[0] ?? null,
     [filteredConversations, selectedConversationKey],
   )
-
-  useEffect(() => {
-    if (!filteredConversations.length) {
-      setSelectedConversationKey('')
-      return
-    }
-
-    if (!selectedConversationKey || !filteredConversations.some((item) => item.conversation_key === selectedConversationKey)) {
-      setSelectedConversationKey(filteredConversations[0].conversation_key)
-    }
-  }, [filteredConversations, selectedConversationKey])
+  const effectiveSelectedConversationKey = selectedConversation?.conversation_key ?? ''
 
   const linkMutation = useMutation({
     mutationFn: () => linkParentToStudent(token!, Number(selectedStudentId), { parent_id: Number(selectedParentId) }),
     onSuccess: async () => {
       setSelectedParentId('')
+      setParentLookup('')
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['teacher-parent-groups', token] }),
         queryClient.invalidateQueries({ queryKey: ['parents', token] }),
@@ -197,6 +188,7 @@ export function TeacherHomePage() {
   const latestParentGroups = (parentGroupsQuery.data ?? []).slice(0, 6)
   const latestReports = (reportsQuery.data ?? []).slice(0, 5)
   const recentConversations = conversations.slice(0, 5)
+  const showTeacherParentOnboarding = !parentGroupCount && !parentGroupsQuery.isLoading
 
   const averageLatestProgress = useMemo(() => {
     const groups = parentGroupsQuery.data ?? []
@@ -246,16 +238,6 @@ export function TeacherHomePage() {
           ))}
         </section>
 
-        <section className="teacher-clean-shortcuts">
-          {quickLinks.map((item) => (
-            <Link key={item.to} className="teacher-clean-shortcut" to={item.to}>
-              <span className="teacher-clean-shortcut-icon">{item.icon}</span>
-              <strong>{item.title}</strong>
-              <small>{item.description}</small>
-            </Link>
-          ))}
-        </section>
-
         <section className="dashboard-grid">
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
@@ -293,6 +275,17 @@ export function TeacherHomePage() {
           </article>
         </section>
 
+        {showTeacherParentOnboarding ? (
+          <section className="dashboard-grid">
+            <article className="roadmap-panel">
+              <h3>Bắt đầu gắn phụ huynh</h3>
+              <p>1. Phụ huynh tự đăng ký tài khoản.</p>
+              <p>2. Phụ huynh gửi Parent ID hoặc email cho giáo viên.</p>
+              <p>3. Giáo viên chọn học sinh, tìm đúng phụ huynh rồi bấm gắn.</p>
+            </article>
+          </section>
+        ) : null}
+
         <section className="dashboard-grid">
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
@@ -313,6 +306,16 @@ export function TeacherHomePage() {
                     </option>
                   ))}
                 </select>
+              </label>
+
+              <label>
+                Tìm phụ huynh
+                <input
+                  value={parentLookup}
+                  onChange={(event) => setParentLookup(event.target.value)}
+                  placeholder="Nhập Parent ID hoặc email"
+                  disabled={!selectedStudentId}
+                />
               </label>
 
               <label>
@@ -337,6 +340,9 @@ export function TeacherHomePage() {
               </button>
 
               {linkMutation.error ? <p className="error-text">{(linkMutation.error as Error).message}</p> : null}
+              {!selectedStudentId ? <p>Chọn học sinh trước.</p> : null}
+              {selectedStudentId && !hasParentLookup ? <p>Phụ huynh mới cần gửi Parent ID hoặc email để giáo viên tìm và gắn đúng tài khoản.</p> : null}
+              {selectedStudentId && hasParentLookup && !availableParents.length && !parentsQuery.isLoading ? <p>Không tìm thấy phụ huynh khớp với Parent ID hoặc email này.</p> : null}
             </div>
           </article>
 
@@ -360,10 +366,12 @@ export function TeacherHomePage() {
                   ))}
                 </select>
               </label>
+
               <label>
                 Tiêu đề
                 <input value={reportTitle} onChange={(event) => setReportTitle(event.target.value)} placeholder="Để trống nếu dùng mặc định" />
               </label>
+
               <label>
                 Ghi chú
                 <textarea value={reportNote} onChange={(event) => setReportNote(event.target.value)} rows={3} placeholder="Viết ngắn gọn." />
@@ -441,7 +449,7 @@ export function TeacherHomePage() {
         subtitle="Trao đổi nhanh khi cần phối hợp"
         unreadCount={unreadConversationCount}
         conversations={filteredConversations}
-        selectedConversationKey={selectedConversationKey}
+        selectedConversationKey={effectiveSelectedConversationKey}
         onSelectConversation={setSelectedConversationKey}
         studentOptions={conversationStudentOptions}
         selectedStudentId={selectedChatStudentId}

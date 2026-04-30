@@ -4,6 +4,7 @@ from datetime import date
 
 from flask import request
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
+from sqlalchemy import or_
 
 from ....extensions import db
 from ....models import ParentDailyReport, ParentProfile, ParentStudentLink, StudentLessonProgress, StudentProfile, TeacherParentStudentLink, TeacherProfile, User
@@ -125,6 +126,22 @@ def _user_ids_for_parent_links(links: list[TeacherParentStudentLink]) -> list[in
     return sorted({link.parent.user_id for link in links if link.parent and link.parent.user_id})
 
 
+def _teacher_can_view_parent(*, teacher_id: int, parent_id: int) -> bool:
+    return TeacherParentStudentLink.query.filter_by(
+        teacher_id=teacher_id,
+        parent_id=parent_id,
+        status='active',
+    ).first() is not None
+
+
+def _parent_can_view_teacher(*, parent_id: int, teacher_id: int) -> bool:
+    return TeacherParentStudentLink.query.filter_by(
+        teacher_id=teacher_id,
+        parent_id=parent_id,
+        status='active',
+    ).first() is not None
+
+
 def _build_group_item(link: TeacherParentStudentLink) -> dict[str, object]:
     latest_report = ParentDailyReport.query.filter_by(
         teacher_id=link.teacher_id,
@@ -157,18 +174,35 @@ def list_parents():
     if sync_legacy_teacher_parent_links(user.teacher_profile.id):
         db.session.commit()
 
-    query = ParentProfile.query
-    if request.args.get('q'):
-        keyword = f"%{request.args['q'].strip()}%"
-        query = query.join(User).filter(
-            (ParentProfile.full_name.ilike(keyword)) |
-            (User.email.ilike(keyword)) |
-            (User.phone.ilike(keyword))
-        )
-    parents = query.order_by(ParentProfile.full_name.asc()).limit(100).all()
+    keyword = (request.args.get('q') or '').strip()
+    linked_parent_ids = {
+        link.parent_id
+        for link in TeacherParentStudentLink.query.filter_by(teacher_id=user.teacher_profile.id, status='active').all()
+    }
+
+    query = ParentProfile.query.join(User)
+    if keyword:
+        parent_filters = []
+        if keyword.isdigit():
+            parent_filters.append(ParentProfile.id == int(keyword))
+        normalized_keyword = keyword.lower()
+        parent_filters.extend([
+            User.email.ilike(normalized_keyword),
+            User.phone.ilike(keyword),
+            ParentProfile.full_name.ilike(f"%{keyword}%"),
+        ])
+        query = query.filter(or_(*parent_filters))
+    elif linked_parent_ids:
+        query = query.filter(ParentProfile.id.in_(linked_parent_ids))
+    else:
+        return success_response([])
+
+    parents = query.order_by(ParentProfile.full_name.asc(), ParentProfile.id.asc()).limit(25).all()
 
     payload = []
     for parent in parents:
+        if not keyword and not _teacher_can_view_parent(teacher_id=user.teacher_profile.id, parent_id=parent.id):
+            continue
         parent_data = _build_parent_payload(parent)
         linked_students = []
         teacher_links = TeacherParentStudentLink.query.filter_by(teacher_id=user.teacher_profile.id, parent_id=parent.id, status='active').all()
@@ -425,6 +459,9 @@ def get_teacher_for_parent(teacher_id: int):
     user, error = _require_parent_user()
     if error:
         return error
+
+    if not _parent_can_view_teacher(parent_id=user.parent_profile.id, teacher_id=teacher_id):
+        return error_response('Khong tim thay giao vien', 'TEACHER_NOT_FOUND', 404)
 
     teacher = TeacherProfile.query.get(teacher_id)
     if not teacher:

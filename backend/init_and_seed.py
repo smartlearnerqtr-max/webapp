@@ -11,6 +11,7 @@ from sqlalchemy.exc import OperationalError
 from app import create_app
 from app.extensions import db
 from app.services.seed_service import seed_admin_user, seed_subjects, seed_visual_support_demo_bundle
+from sync_local_db import DEFAULT_SOURCE_URL, sync_databases
 
 app = create_app()
 BASE_DIR = Path(__file__).resolve().parent
@@ -56,6 +57,25 @@ def _maybe_seed_visual_support_demo() -> None:
     print(f"Class: {payload['class_name']} / join password: {payload['class_password']}")
 
 
+def _maybe_sync_deploy_snapshot() -> None:
+    if not _bool_env("SYNC_DEPLOY_SNAPSHOT", False):
+        return
+
+    source_url = os.getenv("DEPLOY_SNAPSHOT_SOURCE_URL", DEFAULT_SOURCE_URL).strip() or DEFAULT_SOURCE_URL
+    target_url = (os.getenv("DATABASE_URL") or "").strip()
+
+    if not target_url:
+        print("SYNC_DEPLOY_SNAPSHOT is enabled but DATABASE_URL is missing. Skipping snapshot sync.")
+        return
+
+    print("SYNC_DEPLOY_SNAPSHOT is enabled. Copying local snapshot into deploy database...")
+    copied_counts = sync_databases(source_url, target_url)
+    total_rows = sum(row_count for _, row_count in copied_counts)
+    print(f"Snapshot sync completed. Total rows copied: {total_rows}")
+    for table_name, row_count in copied_counts:
+        print(f"  - {table_name}: {row_count} row(s)")
+
+
 def run_init_and_seed() -> None:
     max_attempts = _int_env("DB_INIT_MAX_ATTEMPTS", 10)
     retry_delay = _int_env("DB_INIT_RETRY_DELAY_SECONDS", 3)
@@ -65,6 +85,7 @@ def run_init_and_seed() -> None:
             with app.app_context():
                 print(f"Preparing database (attempt {attempt}/{max_attempts})...")
                 db.create_all()
+                _maybe_sync_deploy_snapshot()
                 subjects_created = seed_subjects()
                 admin = seed_admin_user()
                 print("Database ready.")

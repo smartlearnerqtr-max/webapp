@@ -442,7 +442,7 @@ const demoAnimalImageCards = [
   { id: 'rabbit', label: 'Con thỏ', media_url: '/demo-media/contho.png', media_kind: 'image' },
 ]
 
-export function buildMemoryMatchDemoConfig(): ActivityConfig {
+function buildMemoryMatchDemoConfig(): ActivityConfig {
   return {
     kind: 'memory_match',
     prompt: 'Lật 2 thẻ giống nhau để ghi điểm.',
@@ -451,7 +451,7 @@ export function buildMemoryMatchDemoConfig(): ActivityConfig {
   }
 }
 
-export function buildQuickTapDemoConfig(): ActivityConfig {
+function buildQuickTapDemoConfig(): ActivityConfig {
   return {
     kind: 'quick_tap',
     prompt: 'Chạm nhanh vào các thẻ con vật trước khi hết giờ.',
@@ -462,7 +462,7 @@ export function buildQuickTapDemoConfig(): ActivityConfig {
   }
 }
 
-export function buildSizeOrderDemoConfig(): ActivityConfig {
+function buildSizeOrderDemoConfig(): ActivityConfig {
   return {
     kind: 'size_order',
     prompt: 'Sắp xếp các con vật từ bé đến lớn.',
@@ -476,7 +476,7 @@ export function buildSizeOrderDemoConfig(): ActivityConfig {
   }
 }
 
-export function buildHabitatMatchDemoConfig(): ActivityConfig {
+function buildHabitatMatchDemoConfig(): ActivityConfig {
   return {
     kind: 'habitat_match',
     prompt: 'Nối con vật với nơi sống phù hợp.',
@@ -494,6 +494,8 @@ export function buildHabitatMatchDemoConfig(): ActivityConfig {
     ],
   }
 }
+
+void [buildMemoryMatchDemoConfig, buildQuickTapDemoConfig, buildSizeOrderDemoConfig, buildHabitatMatchDemoConfig]
 
 function isImageUploadOnlyActivity(activityType: ActivityType) {
   return activityType === 'image_choice' || activityType === 'image_puzzle' || activityType === 'hidden_image_guess'
@@ -810,7 +812,7 @@ export function LessonsPage() {
     () => lessonsQuery.data?.find((lesson) => lesson.id === resolvedSelectedLessonId) ?? null,
     [lessonsQuery.data, resolvedSelectedLessonId],
   )
-  const lessonActivities = lessonDetailQuery.data?.activities ?? []
+  const lessonActivities = useMemo(() => lessonDetailQuery.data?.activities ?? [], [lessonDetailQuery.data?.activities])
   const resolvedSelectedActivityId = selectedActivityId ?? lessonActivities[0]?.id ?? null
   const selectedActivity = useMemo(
     () => lessonActivities.find((activity) => activity.id === resolvedSelectedActivityId) ?? null,

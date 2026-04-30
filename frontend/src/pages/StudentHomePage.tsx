@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { ActivityCard } from '../components/activities/ActivityRenderer'
@@ -64,6 +65,10 @@ const readinessLabelMap: Record<string, string> = {
   san_sang_nang_do_kho: 'Sẵn sàng nâng độ khó',
 }
 
+function getCurrentTimestamp() {
+  return Date.now()
+}
+
 const activityTypeVisualLabelMap: Record<string, string> = {
   memory_match: 'Lật thẻ ghi nhớ',
   quick_tap: 'Chạm đúng nhanh',
@@ -102,14 +107,51 @@ const activityIconMap: Record<string, string> = {
   ai_chat: '◎',
 }
 
-const feedToneIconMap: Record<string, string> = {
-  celebration: '✦',
-  focus: '◉',
-  support: '◎',
-  update: '•',
+
+type StudentPanelKey = 'learning' | 'ai' | 'communication' | 'settings'
+
+type StudentEntryLevelKey = 'nang' | 'trung_binh' | 'nhe' | 'adult'
+
+type StudentSubjectMeta = {
+  key: string
+  label: string
+  artworkUrl: string
+  aliases: string[]
+  comingSoon?: boolean
 }
 
-type StudentPanelKey = 'home' | 'progress' | 'info' | 'career' | 'reminders' | 'settings'
+type StudentGameMeta = {
+  key: string
+  label: string
+  description: string
+  activityType: 'memory_match' | 'quick_tap'
+  artworkUrl: string
+}
+
+type DemoGameCard = {
+  id: string
+  label: string
+  media_url: string
+  media_kind: string
+}
+
+type CareerDetailStep = {
+  title: string
+  description: string
+}
+
+type CareerDetailMeta = {
+  key: string
+  title: string
+  description: string
+  coverImageUrl: string
+  meaningTitle: string
+  meaningText: string
+  videoEmbedUrl: string
+  videoNote: string
+  steps: CareerDetailStep[]
+  skills: string[]
+}
 
 type BrowserSpeechRecognitionResultItem = {
   transcript: string
@@ -188,7 +230,7 @@ const cleanActivityIconMap: Record<string, string> = {
   habitat_match: '🏡',
   image_puzzle: '[]',
   hidden_image_guess: '<>',
-  multiple_choice: '()',
+  multiple_choice: 'A?',
   image_choice: '[=]',
   matching: '~~',
   drag_drop: '<>',
@@ -207,27 +249,198 @@ const cleanFeedToneIconMap: Record<string, string> = {
   update: '.',
 }
 
-const studentMenuItems: Array<{ key: StudentPanelKey; label: string; icon: string }> = [
-  { key: 'home', label: 'Trang chủ', icon: '[]' },
-  { key: 'progress', label: 'Tiến độ', icon: 'o' },
-  { key: 'info', label: 'Thông tin', icon: 'i' },
-  { key: 'career', label: 'Nghề', icon: '@' },
-  { key: 'reminders', label: 'Nhắc', icon: '*' },
-  { key: 'settings', label: 'Cài đặt', icon: '=' },
-]
 
-const studentArtworkPool = ['/student-ui/anh1.jpg', '/student-ui/anh2.jpg', '/student-ui/anh3.jpg', '/student-ui/anh4.jpg']
-const studentMenuIconMap: Record<StudentPanelKey, string> = {
-  home: '🏠',
-  progress: '📈',
-  info: '👤',
-  career: '💼',
-  reminders: '🔔',
-  settings: '⚙️',
+const studentTabCopyMap: Record<StudentPanelKey, { title: string; description: string }> = {
+  learning: {
+    title: 'Chọn môn học và bài phù hợp hôm nay',
+    description: '',
+  },
+  ai: {
+    title: 'Bạn học AI luôn nghe và trả lời ngắn gọn',
+    description: 'Dùng micro hoặc câu hỏi mẫu để xin gợi ý, luyện nói, và nhận hỗ trợ từng bước.',
+  },
+  communication: {
+    title: 'Thẻ giao tiếp hằng ngày',
+    description: 'Chạm vào thẻ để phát âm nhanh nhu cầu, cảm xúc, hoặc lời chào cơ bản.',
+  },
+  settings: {
+    title: 'Cài đặt và kết nối lớp học',
+    description: 'Xem nhanh tiến độ, nhắc việc, giáo viên đồng hành, và thêm lớp mới tại đây.',
+  },
 }
 
-function resolveStudentArtwork(seed = 0) {
-  return studentArtworkPool[Math.abs(seed) % studentArtworkPool.length]
+const studentSubjectCatalog: StudentSubjectMeta[] = [
+  { key: 'toan-hoc', label: 'Toán học', artworkUrl: '/ichan/subjects/toan-hoc.png', aliases: ['toan hoc', 'so hoc', 'toan'] },
+  { key: 'ngu-van', label: 'Ngữ văn', artworkUrl: '/ichan/subjects/ngu-van.png', aliases: ['ngu van', 'van hoc', 'van'] },
+  { key: 'tieng-anh', label: 'Tiếng Anh', artworkUrl: '/ichan/subjects/tieng-anh.png', aliases: ['tieng anh', 'english', 'anh van'] },
+  {
+    key: 'khoa-hoc-tu-nhien',
+    label: 'Khoa học tự nhiên',
+    artworkUrl: '/ichan/subjects/khoa-hoc-tu-nhien.png',
+    aliases: ['khoa hoc tu nhien', 'khtn', 'dong vat', 'thuc vat'],
+  },
+  { key: 'cong-nghe', label: 'Công nghệ', artworkUrl: '/ichan/subjects/cong-nghe.png', aliases: ['cong nghe', 'ky thuat'] },
+  { key: 'tin-hoc', label: 'Tin học', artworkUrl: '/ichan/subjects/tin-hoc.png', aliases: ['tin hoc', 'may tinh'], comingSoon: true },
+  {
+    key: 'lich-su-dia-ly',
+    label: 'Lịch sử - Địa lý',
+    artworkUrl: '/ichan/subjects/lich-su-dia-ly.png',
+    aliases: ['lich su dia ly', 'lich su', 'dia ly', 'viet nam'],
+  },
+  {
+    key: 'giao-duc-cong-dan',
+    label: 'Giáo dục công dân',
+    artworkUrl: '/ichan/subjects/giao-duc-cong-dan.png',
+    aliases: ['giao duc cong dan', 'gdcd', 'cong dan'],
+  },
+  {
+    key: 'giao-duc-dia-phuong',
+    label: 'Giáo dục địa phương',
+    artworkUrl: '/ichan/subjects/giao-duc-dia-phuong.png',
+    aliases: ['giao duc dia phuong', 'dia phuong'],
+    comingSoon: true,
+  },
+  {
+    key: 'hoat-dong-trai-nghiem',
+    label: 'Hoạt động trải nghiệm',
+    artworkUrl: '/ichan/subjects/hoat-dong-trai-nghiem.png',
+    aliases: ['hoat dong trai nghiem', 'trai nghiem'],
+    comingSoon: true,
+  },
+  { key: 'ky-nang-song', label: 'Kỹ năng sống', artworkUrl: '/ichan/subjects/ky-nang-song.png', aliases: ['ky nang song', 'tu phuc vu', 'giao tiep lich su'] },
+  { key: 'my-thuat', label: 'Mỹ thuật', artworkUrl: '/ichan/subjects/my-thuat.png', aliases: ['my thuat', 've', 've tranh'] },
+  { key: 'am-nhac', label: 'Âm nhạc', artworkUrl: '/ichan/subjects/am-nhac.png', aliases: ['am nhac', 'hat'], comingSoon: true },
+]
+
+const studentGameCatalog: StudentGameMeta[] = [
+  {
+    key: 'memory-match',
+    label: 'Lật thẻ ghi nhớ',
+    description: 'Lật đúng 2 thẻ giống nhau để ghi điểm.',
+    activityType: 'memory_match',
+    artworkUrl: '/ichan/games/cat-card.svg',
+  },
+  {
+    key: 'quick-tap',
+    label: 'Chạm đúng nhanh',
+    description: 'Chạm thật nhanh vào thẻ mục tiêu trước khi hết giờ.',
+    activityType: 'quick_tap',
+    artworkUrl: '/ichan/games/swipe-dog-card.svg',
+  },
+]
+
+const demoGameCards: DemoGameCard[] = [
+  { id: 'dog', label: 'Con chó', media_url: '/demo-media/concho.jpg', media_kind: 'image' },
+  { id: 'cat', label: 'Con mèo', media_url: '/demo-media/conmeo.jpg', media_kind: 'image' },
+  { id: 'fish', label: 'Con cá', media_url: '/demo-media/conca.jpg', media_kind: 'image' },
+  { id: 'tiger', label: 'Con hổ', media_url: '/demo-media/conho.webp', media_kind: 'image' },
+  { id: 'rabbit', label: 'Con thỏ', media_url: '/demo-media/contho.png', media_kind: 'image' },
+]
+
+const communicationCards = [
+  { label: 'Đói', phrase: 'Con đói', tone: 'warm', icon: '🍽️', imageUrl: '/ichan/communication/doi.jpg' },
+  { label: 'Khát', phrase: 'Con khát', tone: 'sky', icon: '🥤', imageUrl: '/ichan/communication/khat_nuoc.jpg' },
+  { label: 'Đi vệ sinh', phrase: 'Con muốn đi vệ sinh', tone: 'mint', icon: '🚻', imageUrl: '/ichan/communication/di_ve_sinh.png' },
+  { label: 'Vui', phrase: 'Con đang vui', tone: 'gold', icon: '😊', imageUrl: '/ichan/communication/vui.jpg' },
+  { label: 'Buồn', phrase: 'Con đang buồn', tone: 'rose', icon: '😢', imageUrl: '/ichan/communication/buon.jpg' },
+  { label: 'Mệt', phrase: 'Con thấy mệt', tone: 'peach', icon: '😴', imageUrl: '/ichan/communication/met.jpg' },
+  { label: 'Chào', phrase: 'Con chào cô', tone: 'indigo', icon: '👋', imageUrl: '/ichan/communication/chao.jpg' },
+  { label: 'Cảm ơn', phrase: 'Con cảm ơn', tone: 'green', icon: '🙏', imageUrl: '/ichan/communication/cam_on.jpg' },
+] as const
+
+const aiPromptCards = [
+  'Con muốn hỏi bài này làm thế nào?',
+  'Con thích vẽ thì có nghề gì phù hợp?',
+  'Cô ơi, nhắc con từng bước thật ngắn nhé.',
+  'Con muốn luyện nói câu chào lễ phép.',
+]
+
+const careerPreviewCards: CareerDetailMeta[] = [
+  {
+    key: 'lam-vuon',
+    title: 'Làm vườn',
+    description: 'Chia việc thành từng bước ngắn, rõ ràng, dễ bắt chước.',
+    coverImageUrl: '/demo-media/rừng.jpg',
+    meaningTitle: 'Ý nghĩa công việc',
+    meaningText:
+      'Làm vườn giúp em có đôi tay khéo léo và cơ thể khỏe mạnh hơn mỗi ngày. Khi em chăm sóc cây, em đang mang lại màu xanh xinh đẹp và niềm vui cho mọi người xung quanh.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/km_3E1HaOSs?rel=0&playsinline=1',
+    videoNote: 'Video này giúp bạn hiểu tại sao công việc này lại quan trọng và mang lại niềm vui cho mọi người!',
+    steps: [
+      { title: 'Chuẩn bị bình tưới', description: 'Lấy nước đầy bình.' },
+      { title: 'Tưới gốc cây', description: 'Tưới nhẹ nhàng vào gốc.' },
+      { title: 'Cất bình', description: 'Để bình lại chỗ cũ.' },
+    ],
+    skills: ['Tưới nước', 'Nhận biết cây', 'Giữ nề nếp', 'Quan sát'],
+  },
+  {
+    key: 'sap-xep-do-dung',
+    title: 'Sắp xếp đồ dùng',
+    description: 'Rèn quan sát, phân loại, và hoàn thành theo trình tự.',
+    coverImageUrl: '/demo-media/nha.webp',
+    meaningTitle: 'Ý nghĩa công việc',
+    meaningText:
+      'Sắp xếp đồ dùng giúp em biết giữ mọi thứ gọn gàng và dễ tìm hơn. Khi em phân loại đúng chỗ, em đang rèn tính cẩn thận và giúp không gian xung quanh ngăn nắp hơn.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/km_3E1HaOSs?rel=0&playsinline=1',
+    videoNote: 'Video minh họa cách làm việc theo thứ tự từng bước, dễ quan sát và dễ bắt chước.',
+    steps: [
+      { title: 'Nhìn các đồ vật', description: 'Xem có những món nào cần cất.' },
+      { title: 'Phân loại', description: 'Đặt các món giống nhau vào cùng một nhóm.' },
+      { title: 'Để đúng chỗ', description: 'Cất từng nhóm vào vị trí phù hợp.' },
+    ],
+    skills: ['Phân loại', 'Ngăn nắp', 'Quan sát', 'Ghi nhớ vị trí'],
+  },
+  {
+    key: 'cham-soc-cay',
+    title: 'Chăm sóc cây',
+    description: 'Kết hợp vận động nhẹ, ghi nhớ, và nề nếp hằng ngày.',
+    coverImageUrl: '/demo-media/dongco.jpg',
+    meaningTitle: 'Ý nghĩa công việc',
+    meaningText:
+      'Chăm sóc cây giúp em học cách kiên nhẫn và biết quan tâm đến những điều nhỏ bé. Mỗi lần em tưới cây hay lau lá, em đang luyện thói quen chăm sóc và giữ môi trường xanh sạch hơn.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/km_3E1HaOSs?rel=0&playsinline=1',
+    videoNote: 'Video cho em thấy công việc chăm sóc cây có thể nhẹ nhàng, vui và rất gần gũi mỗi ngày.',
+    steps: [
+      { title: 'Kiểm tra cây', description: 'Nhìn lá và đất để biết cây cần gì.' },
+      { title: 'Tưới hoặc lau lá', description: 'Chăm nhẹ nhàng để cây sạch và đủ nước.' },
+      { title: 'Dọn khu vực quanh chậu', description: 'Giữ chỗ để cây luôn sạch sẽ.' },
+    ],
+    skills: ['Kiên nhẫn', 'Chăm sóc cây', 'Giữ sạch sẽ', 'Quan sát thay đổi'],
+  },
+]
+
+const studentEntryOptions: Array<{ key: StudentEntryLevelKey; title: string; subtitle: string }> = [
+  { key: 'nang', title: 'MỨC ĐỘ NẶNG', subtitle: 'Hình ảnh & Âm thanh' },
+  { key: 'trung_binh', title: 'MỨC ĐỘ VỪA', subtitle: 'Sơ đồ tư duy' },
+  { key: 'nhe', title: 'MỨC ĐỘ NHẸ', subtitle: 'Lộ trình chuẩn' },
+]
+
+function normalizeLookupText(value: string | null | undefined) {
+  return (value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'd')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+function matchStudentSubject(subjectName: string | null | undefined, lessonTitle: string | null | undefined) {
+  const haystack = `${normalizeLookupText(subjectName)} ${normalizeLookupText(lessonTitle)}`.trim()
+  if (!haystack) return null
+  return studentSubjectCatalog.find((item) => item.aliases.some((alias) => haystack.includes(alias))) ?? null
+}
+
+function resolveAssignmentSubjectMeta(assignment: MyAssignmentItem | null | undefined) {
+  return matchStudentSubject(
+    assignment?.assignment?.lesson?.subject?.name ?? assignment?.assignment?.subject?.name ?? assignment?.lesson?.subject?.name ?? null,
+    assignment?.assignment?.lesson?.title ?? assignment?.lesson?.title ?? null,
+  )
+}
+
+function renderStudentSubjectArtwork(subjectMeta: StudentSubjectMeta | null | undefined, fallbackSrc: string) {
+  return <img src={subjectMeta?.artworkUrl ?? fallbackSrc} alt="" />
 }
 
 type StudentAnswerState = {
@@ -523,6 +736,60 @@ function sanitizeStudentFacingText(value: string | null | undefined, fallback: s
   return cleaned || fallback
 }
 
+function resolveStudentDisplayName(fullName: string | null | undefined, email: string | null | undefined) {
+  const resolvedFullName = sanitizeStudentFacingText(fullName, '').trim()
+  if (resolvedFullName) return resolvedFullName
+
+  const localPart = typeof email === 'string' ? email.trim().split('@')[0] ?? '' : ''
+  const readableName = localPart
+    .replace(/[._-]+/g, ' ')
+    .replace(/\d+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+
+  if (!readableName) return 'Bạn'
+
+  const titleCased = readableName
+    .split(' ')
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ')
+
+  return sanitizeStudentFacingText(titleCased, 'Bạn')
+}
+
+function buildStandaloneGameActivity(activityType: StudentGameMeta['activityType']): LessonActivityItem {
+  const config =
+    activityType === 'memory_match'
+      ? {
+          kind: 'memory_match',
+          prompt: 'Lật 2 thẻ giống nhau để ghi điểm.',
+          pair_count: 5,
+          image_cards: demoGameCards,
+        }
+      : {
+          kind: 'quick_tap',
+          prompt: 'Chạm nhanh vào các thẻ con vật trước khi hết giờ.',
+          duration_seconds: 10,
+          target_hits: 6,
+          simultaneous_cards: 4,
+          image_cards: demoGameCards,
+        }
+
+  return {
+    id: activityType === 'memory_match' ? -101 : -102,
+    lesson_id: 0,
+    title: activityType === 'memory_match' ? 'Lật thẻ ghi nhớ' : 'Chạm đúng nhanh',
+    activity_type: activityType,
+    instruction_text: config.prompt,
+    voice_answer_enabled: false,
+    is_required: true,
+    sort_order: 1,
+    difficulty_stage: 1,
+    config_json: JSON.stringify(config),
+  }
+}
+
 function isPuzzleSolved(activity: LessonActivityItem, answers: StudentAnswerState) {
   const config = parseActivityConfig(activity.config_json)
   const pieceCount = resolvedPuzzlePieceCount(config)
@@ -764,12 +1031,15 @@ function buildStudentFeedItems({
 }
 
 export function StudentHomePage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const token = useAuthStore((state) => state.accessToken)
   const user = useAuthStore((state) => state.user)
   const profile = useAuthStore((state) => state.profile)
   const queryClient = useQueryClient()
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null)
-  const [activePanel, setActivePanel] = useState<StudentPanelKey>('home')
+  const [selectedSubjectKey, setSelectedSubjectKey] = useState<string | null>(null)
+  const [selectedCareerKey, setSelectedCareerKey] = useState<string | null>(null)
+  const [activePanel, setActivePanel] = useState<StudentPanelKey>('learning')
   const [joinClassId, setJoinClassId] = useState('')
   const [joinClassPassword, setJoinClassPassword] = useState('')
   const [completedLessonTitle, setCompletedLessonTitle] = useState('')
@@ -783,6 +1053,7 @@ export function StudentHomePage() {
   const [textAnswers, setTextAnswers] = useState<Record<number, string>>({})
   const [aacSelections, setAacSelections] = useState<Record<number, string>>({})
   const [studentFeedItems, setStudentFeedItems] = useState<StudentFeedItem[]>([])
+  const [activeStandaloneGameType, setActiveStandaloneGameType] = useState<StudentGameMeta['activityType'] | null>(null)
   const learningBaseSecondsRef = useRef(0)
   const learningSessionStartedAtRef = useRef<number | null>(null)
   const lastAutoSyncKeyRef = useRef('')
@@ -794,12 +1065,40 @@ export function StudentHomePage() {
   const careerRecognitionRef = useRef<BrowserSpeechRecognition | null>(null)
   const careerTranscriptRef = useRef('')
   const careerAudioCacheRef = useRef<Record<string, string>>({})
+  const careerMeaningAudioCacheRef = useRef<Record<string, string>>({})
   const careerAudioPlayerRef = useRef<HTMLAudioElement | null>(null)
   const [careerTurns, setCareerTurns] = useState<CareerVoiceTurn[]>([])
   const [careerTranscript, setCareerTranscript] = useState('')
   const [careerAudioUrl, setCareerAudioUrl] = useState('')
   const [isCareerListening, setIsCareerListening] = useState(false)
   const [careerVoiceError, setCareerVoiceError] = useState<string | null>(null)
+  const [isCareerMeaningSpeaking, setIsCareerMeaningSpeaking] = useState(false)
+  const [activeCareerMeaningKey, setActiveCareerMeaningKey] = useState<string | null>(null)
+  const [careerMeaningError, setCareerMeaningError] = useState<string | null>(null)
+  const [lastCommunicationPhrase, setLastCommunicationPhrase] = useState('')
+  const [communicationError, setCommunicationError] = useState<string | null>(null)
+  const [hasCompletedEntryGate, setHasCompletedEntryGate] = useState(false)
+  const entryGateStorageKey = user ? `student-entry-gate:${user.id}` : null
+
+  useEffect(() => {
+    if (!entryGateStorageKey) {
+      setHasCompletedEntryGate(false)
+      return
+    }
+
+    setHasCompletedEntryGate(Boolean(window.sessionStorage.getItem(entryGateStorageKey)))
+  }, [entryGateStorageKey])
+
+  useEffect(() => {
+    if (user?.role !== 'student' || hasCompletedEntryGate) return
+
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [hasCompletedEntryGate, user?.role])
 
   const assignmentsQuery = useQuery({
     queryKey: ['my-assignments', token],
@@ -856,10 +1155,59 @@ export function StudentHomePage() {
   const closeLessonView = () => {
     stopStudentGuidance()
     setSelectedAssignmentId(null)
-    setActivePanel('home')
+    handleStudentPanelChange('learning')
     resetActivityAnswers()
     learningSessionStartedAtRef.current = null
     lastAutoSyncKeyRef.current = ''
+  }
+
+  const handleSelectSubject = (subjectKey: string) => {
+    stopStudentGuidance()
+    setSelectedSubjectKey(subjectKey)
+    setSelectedAssignmentId(null)
+    setCompletedLessonTitle('')
+    setCompletionSummary(null)
+    setActiveActivityIndex(0)
+    resetActivityAnswers()
+    learningSessionStartedAtRef.current = null
+    lastAutoSyncKeyRef.current = ''
+  }
+
+  const handleBackToSubjects = () => {
+    stopStudentGuidance()
+    setSelectedSubjectKey(null)
+    setSelectedAssignmentId(null)
+    setCompletedLessonTitle('')
+    setCompletionSummary(null)
+    setActiveActivityIndex(0)
+    resetActivityAnswers()
+    learningSessionStartedAtRef.current = null
+    lastAutoSyncKeyRef.current = ''
+  }
+
+  const closeStandaloneGame = () => {
+    stopStudentGuidance()
+    setActiveStandaloneGameType(null)
+    setCompletionSummary(null)
+    setActiveActivityIndex(0)
+    resetActivityAnswers()
+  }
+
+  const openCareerDetail = (careerKey: string) => {
+    stopCareerAudio()
+    stopStudentGuidance()
+    setActiveCareerMeaningKey(null)
+    setCareerMeaningError(null)
+    setSelectedCareerKey(careerKey)
+  }
+
+  const closeCareerDetail = () => {
+    stopCareerAudio()
+    stopStudentGuidance()
+    setIsCareerMeaningSpeaking(false)
+    setActiveCareerMeaningKey(null)
+    setCareerMeaningError(null)
+    setSelectedCareerKey(null)
   }
 
   const startMutation = useMutation({
@@ -868,7 +1216,7 @@ export function StudentHomePage() {
       resetActivityAnswers()
       setCompletedLessonTitle('')
       setCompletionSummary(null)
-      learningSessionStartedAtRef.current = Date.now()
+      learningSessionStartedAtRef.current = getCurrentTimestamp()
       lastAutoSyncKeyRef.current = ''
       queryClient.setQueryData<MyAssignmentItem[] | undefined>(['my-assignments', token], (current) =>
         updateAssignmentListCache(current, assignmentId, updatedProgress),
@@ -897,9 +1245,9 @@ export function StudentHomePage() {
         completionScore: updatedProgress.completion_score ?? 100,
         completedActivities: activityProgress.totalActivities || activityProgress.completedActivities,
         totalActivities: activityProgress.totalActivities,
-        completedAt: Date.now(),
+        completedAt: getCurrentTimestamp(),
       })
-      setCompletionLastInteractionAt(Date.now())
+      setCompletionLastInteractionAt(getCurrentTimestamp())
       lastAutoSyncKeyRef.current = ''
       if (assignmentId) {
         queryClient.setQueryData<MyAssignmentItem[] | undefined>(['my-assignments', token], (current) =>
@@ -929,6 +1277,11 @@ export function StudentHomePage() {
         queryClient.invalidateQueries({ queryKey: ['my-assignments', token] }),
         queryClient.invalidateQueries({ queryKey: ['my-teachers', token] }),
       ])
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete('setup')
+      nextParams.delete('tab')
+      setSearchParams(nextParams, { replace: true })
+      setActivePanel('learning')
     },
   })
 
@@ -948,7 +1301,7 @@ export function StudentHomePage() {
       const aiText = data.text
       setCareerTurns((current) => [
         {
-          id: `${Date.now()}`,
+          id: `${getCurrentTimestamp()}`,
           studentText: message,
           aiText,
         },
@@ -982,11 +1335,10 @@ export function StudentHomePage() {
 
   useEffect(() => {
     learningBaseSecondsRef.current = detail?.total_learning_seconds ?? 0
-    learningSessionStartedAtRef.current = detail?.status === 'in_progress' ? Date.now() : null
+    learningSessionStartedAtRef.current = detail?.status === 'in_progress' ? getCurrentTimestamp() : null
     lastAutoSyncKeyRef.current = ''
   }, [detail?.id, detail?.status, effectiveSelectedAssignmentId])
 
-  const totalAssignments = assignmentsQuery.data?.length ?? 0
   const selectedAssignment =
     assignmentsQuery.data?.find((item) => item.assignment_id === effectiveSelectedAssignmentId) ?? null
   const visualAssignments = useMemo(
@@ -1000,24 +1352,36 @@ export function StudentHomePage() {
       : 'garden'
   const resolvedVisualTheme = visualThemePresetMap[visualThemeKey]
   const visualSupportStyle = {
-    ['--support-visual-bg-image' as string]: `url("${studentBackgroundImageUrl}")`,
+    ['--support-visual-bg-image' as string]: 'none',
     ['--support-visual-overlay' as string]: resolvedVisualTheme.overlay,
     ['--support-visual-accent' as string]: resolvedVisualTheme.accent,
     ['--support-visual-accent-strong' as string]: resolvedVisualTheme.accentStrong,
     ['--support-visual-accent-soft' as string]: resolvedVisualTheme.accentSoft,
     ['--support-visual-glow' as string]: resolvedVisualTheme.glow,
   }
-  const studentName =
-    typeof profile?.full_name === 'string' && profile.full_name.trim()
-      ? sanitizeStudentFacingText(profile.full_name, 'Học sinh')
-      : user?.email ?? 'Học sinh'
+  const studentName = resolveStudentDisplayName(typeof profile?.full_name === 'string' ? profile.full_name : undefined, user?.email)
   const allAssignments = visualAssignments.length ? visualAssignments : assignmentsQuery.data ?? []
   const heroLessonTitle = sanitizeStudentFacingText(detail?.lesson?.title ?? completedLessonTitle, 'Hôm nay học gì?')
+  const requestedPanel = searchParams.get('tab')
+  const setupIntent = searchParams.get('setup') === '1'
+  const resolvedPanel: StudentPanelKey =
+    requestedPanel === 'ai' || requestedPanel === 'communication' || requestedPanel === 'settings' || requestedPanel === 'learning'
+      ? requestedPanel
+      : 'learning'
+  const isStudentSetupPending =
+    !assignmentsQuery.isLoading &&
+    !myClassesQuery.isLoading &&
+    !myTeachersQuery.isLoading &&
+    !allAssignments.length &&
+    !(myClassesQuery.data?.length ?? 0) &&
+    !(myTeachersQuery.data?.length ?? 0)
 
   const chooseAssignment = (assignmentId: number) => {
     const assignment = assignmentsQuery.data?.find((item) => item.assignment_id === assignmentId)
+    const subjectMeta = resolveAssignmentSubjectMeta(assignment)
     setSelectedAssignmentId(assignmentId)
-    setActivePanel('home')
+    setSelectedSubjectKey(subjectMeta?.key ?? null)
+    handleStudentPanelChange('learning')
     setCompletedLessonTitle('')
     setCompletionSummary(null)
     resetActivityAnswers()
@@ -1027,6 +1391,39 @@ export function StudentHomePage() {
       startMutation.mutate(assignmentId)
     }
   }
+
+  const handleStudentPanelChange = (panel: StudentPanelKey) => {
+    setActivePanel(panel)
+    const nextParams = new URLSearchParams(searchParams)
+    if (panel === 'learning') {
+      nextParams.delete('tab')
+    } else {
+      nextParams.set('tab', panel)
+    }
+    setSearchParams(nextParams, { replace: true })
+  }
+
+  const handleStudentEntrySelect = (level: StudentEntryLevelKey) => {
+    if (entryGateStorageKey) {
+      window.sessionStorage.setItem(entryGateStorageKey, JSON.stringify({ level, selectedAt: Date.now() }))
+    }
+
+    setHasCompletedEntryGate(true)
+    handleStudentPanelChange('learning')
+  }
+
+  useEffect(() => {
+    if (activePanel !== resolvedPanel) {
+      setActivePanel(resolvedPanel)
+    }
+  }, [activePanel, resolvedPanel])
+
+  useEffect(() => {
+    if (!hasCompletedEntryGate || !isStudentSetupPending) return
+    if (!setupIntent && requestedPanel) return
+    if (activePanel === 'settings') return
+    handleStudentPanelChange('settings')
+  }, [activePanel, hasCompletedEntryGate, isStudentSetupPending, requestedPanel, setupIntent])
 
   const answers = useMemo<StudentAnswerState>(() => ({
     choiceAnswers,
@@ -1046,7 +1443,7 @@ export function StudentHomePage() {
     setAacSelections,
   }
 
-  const activityProgress = useMemo<ActivityProgressSummary>(() => {
+  const activityProgress: ActivityProgressSummary = (() => {
     const activities = detail?.lesson?.activities ?? []
     const totalActivities = activities.length
     const completedActivities = activities.filter((activity) => isActivityCompleted(activity, answers)).length
@@ -1064,7 +1461,7 @@ export function StudentHomePage() {
       readyToComplete,
       hasActivityInteraction: completedActivities > 0,
     }
-  }, [detail?.lesson?.activities, detail?.progress_percent, answers])
+  })()
 
   const liveProgressPercent = activityProgress.hasActivityInteraction
     ? Math.max(detail?.progress_percent ?? 0, activityProgress.progressPercent)
@@ -1097,10 +1494,82 @@ export function StudentHomePage() {
     [allAssignments, completionSummary, detail, effectiveSelectedAssignmentId, liveCompletionScore, liveProgressPercent],
   )
   const displayCompletedCount = displayAssignments.filter((item) => item.status === 'completed').length
+  const totalRewardStars = displayAssignments.reduce((sum, item) => sum + item.reward_star_count, 0)
+  const totalInProgressCount = displayAssignments.filter((item) => item.status === 'in_progress').length
+  const activeTabCopy = studentTabCopyMap[activePanel] ?? studentTabCopyMap.learning
+  const heroSupportCopy =
+    activePanel === 'learning'
+      ? 'Hôm nay chúng mình cùng khám phá những điều thú vị nhé!'
+      : activeTabCopy.title
+  const heroBadges = [
+    `⭐ ${displayCompletedCount} bài học hoàn thành`,
+    `🏆 ${totalRewardStars} điểm thưởng`,
+    `🏫 ${myClassesQuery.data?.length ?? 0} lớp`,
+    `👩‍🏫 ${myTeachersQuery.data?.length ?? 0} giáo viên`,
+  ]
+
+  const subjectCards = useMemo(
+    () =>
+      studentSubjectCatalog.map((subject) => {
+        const matchingAssignments = displayAssignments.filter((item) => resolveAssignmentSubjectMeta(item)?.key === subject.key)
+        const primaryAssignment = matchingAssignments[0] ?? null
+        return {
+          ...subject,
+          assignmentCount: matchingAssignments.length,
+          primaryAssignment,
+          matchingAssignments,
+        }
+      }),
+    [displayAssignments],
+  )
+
+  const selectedSubjectCard = subjectCards.find((item) => item.key === selectedSubjectKey) ?? null
+
+  const selectedSubjectAssignments = selectedSubjectCard?.matchingAssignments ?? []
+
+  const teacherBadges = useMemo(
+    () =>
+      (myTeachersQuery.data ?? [])
+        .map((item) => ({
+          id: item.link_id,
+          name: sanitizeStudentFacingText(item.teacher.full_name, 'Giáo viên'),
+          schoolName: item.teacher.school_name ? sanitizeStudentFacingText(item.teacher.school_name, 'Lớp học') : '',
+        }))
+        .slice(0, 4),
+    [myTeachersQuery.data],
+  )
+
+  const pendingAssignments = useMemo(
+    () =>
+      displayAssignments
+        .filter((item) => item.status !== 'completed')
+        .slice(0, 5),
+    [displayAssignments],
+  )
+  const selectedCareerCard = useMemo(
+    () => careerPreviewCards.find((item) => item.key === selectedCareerKey) ?? null,
+    [selectedCareerKey],
+  )
+  const standaloneGameActivity = useMemo(
+    () => (activeStandaloneGameType ? buildStandaloneGameActivity(activeStandaloneGameType) : null),
+    [activeStandaloneGameType],
+  )
 
   const lessonActivities = useMemo(() => detail?.lesson?.activities ?? [], [detail?.lesson?.activities])
-  const currentActivity = lessonActivities[activeActivityIndex] ?? null
+  const boundedActiveActivityIndex = lessonActivities.length ? Math.min(activeActivityIndex, lessonActivities.length - 1) : 0
+  const currentActivity = lessonActivities[boundedActiveActivityIndex] ?? null
   const currentActivityCompleted = currentActivity ? isActivityCompleted(currentActivity, answers) : false
+  const currentActivitySupportText =
+    currentActivity?.instruction_text && normalizeLookupText(currentActivity.instruction_text) !== normalizeLookupText(currentActivity.title)
+      ? sanitizeStudentFacingText(currentActivity.instruction_text, '')
+      : ''
+  const currentActivityCaption =
+    currentActivitySupportText ||
+    (currentActivity
+      ? cleanActivityTypeVisualLabelMap[currentActivity.activity_type] ?? activityTypeVisualLabelMap[currentActivity.activity_type] ?? 'Hoạt động'
+      : '')
+  const isStudentLessonFocus =
+    activePanel === 'learning' && Boolean(detail) && !selectedCareerCard && !activeStandaloneGameType && !completionSummary
   const currentActivityGuidanceAudioUrl = currentActivity ? resolveActivityGuidanceAudioUrl(currentActivity) : ''
   const playActivityGuidance = async (activity: LessonActivityItem | null) => {
     if (!activity) return false
@@ -1123,12 +1592,6 @@ export function StudentHomePage() {
   }
 
   useEffect(() => {
-    if (activeActivityIndex >= lessonActivities.length && lessonActivities.length > 0) {
-      setActiveActivityIndex(lessonActivities.length - 1)
-    }
-  }, [activeActivityIndex, lessonActivities.length])
-
-  useEffect(() => {
     if (!detail || completionSummary) return
     const frameId = window.requestAnimationFrame(() => {
       activeQuestionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -1137,7 +1600,7 @@ export function StudentHomePage() {
   }, [completionSummary, detail?.id])
 
   useEffect(() => {
-    if (!currentActivity || activePanel !== 'home' || completionSummary) return
+    if (!currentActivity || activePanel !== 'learning' || completionSummary) return
     if (spokenActivityIdsRef.current.has(currentActivity.id)) return
 
     spokenActivityIdsRef.current.add(currentActivity.id)
@@ -1227,13 +1690,13 @@ export function StudentHomePage() {
     if (!activityProgress.hasActivityInteraction) return
 
     if (!learningSessionStartedAtRef.current) {
-      learningSessionStartedAtRef.current = Date.now()
+      learningSessionStartedAtRef.current = getCurrentTimestamp()
     }
 
     const totalLearningSeconds = Math.max(
       detail.total_learning_seconds ?? 0,
       learningBaseSecondsRef.current +
-        Math.max(1, Math.floor((Date.now() - learningSessionStartedAtRef.current) / 1000)),
+        Math.max(1, Math.floor((getCurrentTimestamp() - learningSessionStartedAtRef.current) / 1000)),
     )
 
     const nextPayload = {
@@ -1269,7 +1732,7 @@ export function StudentHomePage() {
       try {
         const updatedProgress = await updateMyAssignmentProgress(token, effectiveSelectedAssignmentId, nextPayload)
         learningBaseSecondsRef.current = updatedProgress.total_learning_seconds ?? nextPayload.total_learning_seconds
-        learningSessionStartedAtRef.current = Date.now()
+        learningSessionStartedAtRef.current = getCurrentTimestamp()
         queryClient.setQueryData<MyAssignmentItem[] | undefined>(['my-assignments', token], (current) =>
           updateAssignmentListCache(current, effectiveSelectedAssignmentId, updatedProgress),
         )
@@ -1381,7 +1844,7 @@ export function StudentHomePage() {
     resetActivityAnswers()
     setCompletedLessonTitle('')
     setCompletionSummary(null)
-    learningSessionStartedAtRef.current = Date.now()
+    learningSessionStartedAtRef.current = getCurrentTimestamp()
     lastAutoSyncKeyRef.current = ''
     queryClient.setQueryData<MyAssignmentDetail | undefined>(
       ['my-assignment-detail', token, effectiveSelectedAssignmentId],
@@ -1501,6 +1964,39 @@ export function StudentHomePage() {
     }
   }
 
+  const handlePlayCareerMeaning = async (career: CareerDetailMeta) => {
+    if (!token) {
+      setCareerMeaningError('Chưa sẵn sàng audio để phát phần này.')
+      return
+    }
+
+    stopStudentGuidance()
+    setCareerMeaningError(null)
+    setActiveCareerMeaningKey(career.key)
+    setIsCareerMeaningSpeaking(true)
+
+    try {
+      const cachedAudioUrl = careerMeaningAudioCacheRef.current[career.key]
+      const played = cachedAudioUrl
+        ? await playStudentGuidanceAudio(cachedAudioUrl)
+        : await (async () => {
+            const audioBlob = await synthesizeAISpeech(token, { text: career.meaningText })
+            const audioUrl = window.URL.createObjectURL(audioBlob)
+            careerMeaningAudioCacheRef.current[career.key] = audioUrl
+            return await playStudentGuidanceAudio(audioUrl)
+          })()
+
+      if (!played) {
+        setCareerMeaningError('Đã tạo audio nhưng chưa phát được trên thiết bị này.')
+      }
+    } catch (error) {
+      setCareerMeaningError(error instanceof Error ? error.message : 'Chưa phát được phần mô tả công việc.')
+    } finally {
+      setIsCareerMeaningSpeaking(false)
+      setActiveCareerMeaningKey(null)
+    }
+  }
+
   useEffect(() => () => {
     careerRecognitionRef.current?.stop()
     stopCareerAudio()
@@ -1512,509 +2008,871 @@ export function StudentHomePage() {
     careerAudioCacheRef.current = {}
   }, [])
 
-  const renderStudentFeed = () => (
-    <section className="student-feed-panel student-feed-panel-visual" aria-labelledby="student-feed-heading">
-      <div className="student-feed-head">
+  const openIchanGame = (activityType: StudentGameMeta['activityType']) => {
+    handleStudentPanelChange('learning')
+    setSelectedAssignmentId(null)
+    setCompletionSummary(null)
+    setActiveActivityIndex(0)
+    resetActivityAnswers()
+    setActiveStandaloneGameType(activityType)
+  }
+
+  const handleCommunicationSpeak = async (phrase: string) => {
+    setLastCommunicationPhrase(phrase)
+    setCommunicationError(null)
+    if (!token) {
+      setCommunicationError('Chưa sẵn sàng audio để phát câu này.')
+      return
+    }
+
+    try {
+      const audioBlob = await synthesizeAISpeech(token, { text: phrase })
+      const audioUrl = window.URL.createObjectURL(audioBlob)
+      const played = await playStudentGuidanceAudio(audioUrl, { revokeOnEnd: true })
+      if (!played) {
+        setCommunicationError('Đã tạo audio nhưng chưa phát được trên thiết bị này.')
+      }
+    } catch (error) {
+      setCommunicationError(error instanceof Error ? error.message : 'Chưa phát được thẻ giao tiếp.')
+    }
+  }
+
+  const renderIchanJoinCard = (title: string, eyebrow: string) => (
+    <article className="student-visual-panel ichan-section">
+      <div className="student-visual-section-head">
         <div>
-          <h3 id="student-feed-heading">Nhắc</h3>
+          <p className="eyebrow">{eyebrow}</p>
+          <h3>{title}</h3>
         </div>
-        <span className="subject-pill muted-pill">{studentFeedItems.length}</span>
       </div>
-      <div className="student-feed-list" aria-live="polite">
-        {studentFeedItems.map((item) => (
-          <article key={item.id} className={`student-feed-item student-feed-item-${item.tone}`}>
+
+      <div className="form-stack student-progress-form">
+        {isStudentSetupPending ? <p className="helper-text">Tài khoản mới cần vào lớp trước để hiện giáo viên và bài học.</p> : null}
+        <label>
+          ID lớp
+          <input value={joinClassId} onChange={(event) => setJoinClassId(event.target.value)} inputMode="numeric" placeholder="12" />
+        </label>
+        <label>
+          Mã lớp
+          <input
+            value={joinClassPassword}
+            onChange={(event) => setJoinClassPassword(event.target.value.toUpperCase())}
+            placeholder="AB12CD34"
+          />
+        </label>
+        <button
+          className="action-button"
+          type="button"
+          disabled={!joinClassId || !joinClassPassword || joinClassMutation.isPending}
+          onClick={() => joinClassMutation.mutate()}
+        >
+          {joinClassMutation.isPending ? 'Đang vào...' : 'Vào lớp'}
+        </button>
+        {joinClassMutation.error ? <p className="error-text">{(joinClassMutation.error as Error).message}</p> : null}
+      </div>
+    </article>
+  )
+
+  const renderIchanLessonStage = () => {
+    if (completionSummary || activePanel !== 'learning') return null
+
+    if (!detail) {
+      return (
+        <section className="student-visual-empty-panel">
+          <strong>{isStudentSetupPending ? 'Vào lớp để bắt đầu.' : 'Chọn một bài để bắt đầu.'}</strong>
+          {isStudentSetupPending ? <p className="helper-text">Mở mục Cài đặt rồi nhập ID lớp và mã lớp giáo viên đã cấp.</p> : null}
+        </section>
+      )
+    }
+
+    return (
+      <>
+        <section ref={activeQuestionRef} tabIndex={-1} className="student-visual-panel student-visual-question-panel">
+          <div className="student-visual-section-head student-visual-lesson-progress-head">
             <div>
-              <span>{feedToneIconMap[item.tone] ?? '•'} {item.category}</span>
-              <strong>{item.title}</strong>
+              <p className="student-visual-progress-label">TIẾN ĐỘ BÀI HỌC</p>
+              <h3>{lessonActivities.length ? `Câu ${boundedActiveActivityIndex + 1} / ${lessonActivities.length}` : 'Câu 0 / 0'}</h3>
+              {detail?.lesson?.title ? <p className="student-visual-progress-copy">{sanitizeStudentFacingText(detail.lesson.title, 'Bài học')}</p> : null}
             </div>
-            <b>{item.badge}</b>
-          </article>
-        ))}
-        {!studentFeedItems.length ? <p>Chưa có nhắc mới.</p> : null}
-      </div>
-    </section>
-  )
-
-  void renderStudentFeed
-
-  const renderProgressPanel = () => (
-    <section className="student-visual-panel student-visual-subpanel" aria-labelledby="student-progress-heading">
-      <div className="student-visual-section-head">
-        <div>
-          <p className="eyebrow">Theo dõi</p>
-          <h3 id="student-progress-heading">Tiến độ</h3>
-        </div>
-        <span className="subject-pill muted-pill">{displayCompletedCount}/{displayAssignments.length || totalAssignments || 0}</span>
-      </div>
-
-      <div className="student-visual-overview-grid student-visual-overview-grid-compact">
-        <article className="student-visual-glass-card">
-          <span>Bai</span>
-          <strong>{displayAssignments.length || totalAssignments}</strong>
-          <p>Sẵn sàng</p>
-        </article>
-        <article className="student-visual-glass-card">
-          <span>Xong</span>
-          <strong>{displayCompletedCount}</strong>
-          <p>Da hoan thanh</p>
-        </article>
-        <article className="student-visual-glass-card">
-          <span>Hiện tại</span>
-          <strong>{detail ? `${liveProgressPercent}%` : '--'}</strong>
-          <p>{detail ? heroLessonTitle : 'Chua mo bai'}</p>
-        </article>
-      </div>
-
-      <div className="student-visual-progress-list">
-        {displayAssignments.map((item) => (
-          <article key={item.id} className="student-visual-mini-card">
-            <div className="student-visual-mini-card-head">
-              <strong>{sanitizeStudentFacingText(item.assignment?.lesson?.title, `Bài ${item.assignment_id}`)}</strong>
-              <span>{cleanStatusLabelMap[item.status] ?? item.status}</span>
-            </div>
-            <div className="student-auto-progress-track" style={{ ['--progress' as string]: `${item.progress_percent}%` }}>
-              <span />
-            </div>
-          </article>
-        ))}
-        {!allAssignments.length && !assignmentsQuery.isLoading ? <p className="helper-text">Chưa có bài học.</p> : null}
-      </div>
-    </section>
-  )
-
-  const renderInfoPanel = () => (
-    <section className="student-visual-panel student-visual-subpanel" aria-labelledby="student-info-heading">
-      <div className="student-visual-section-head">
-        <div>
-          <p className="eyebrow">Thông tin</p>
-          <h3 id="student-info-heading">Lớp và giáo viên</h3>
-        </div>
-      </div>
-
-      <div className="student-visual-info-grid">
-        <article className="student-visual-mini-card">
-          <div className="student-visual-mini-card-head">
-            <strong>Học sinh</strong>
-            <span>{studentName}</span>
+            <span className="subject-pill student-visual-progress-pill">{`${activityProgress.completedActivities}/${activityProgress.totalActivities || 0} hoàn thành`}</span>
           </div>
-          <p>{myClassesQuery.data?.length ?? 0} lop</p>
-        </article>
-        <article className="student-visual-mini-card">
-          <div className="student-visual-mini-card-head">
-            <strong>Giáo viên</strong>
-            <span>{myTeachersQuery.data?.length ?? 0}</span>
+
+          <div className="student-visual-step-dots" aria-label="Tiến độ câu hỏi">
+            {lessonActivities.map((activity, index) => {
+              const isCompleted = isActivityCompleted(activity, answers)
+              const isActive = index === boundedActiveActivityIndex
+              return (
+                <span
+                  key={activity.id}
+                  className={
+                    isCompleted
+                      ? 'student-visual-step-dot student-visual-step-dot-complete'
+                      : isActive
+                        ? 'student-visual-step-dot student-visual-step-dot-active'
+                        : 'student-visual-step-dot'
+                  }
+                  aria-hidden="true"
+                />
+              )
+            })}
           </div>
-          <div className="tag-wrap">
-            {(myTeachersQuery.data ?? []).map((item) => (
-              <span key={item.link_id} className="subject-pill">{item.teacher.full_name}</span>
-            ))}
-            {!myTeachersQuery.data?.length && !myTeachersQuery.isLoading ? <span className="subject-pill muted-pill">Chưa có</span> : null}
-          </div>
-        </article>
-      </div>
 
-      <div className="tag-wrap">
-        {(myClassesQuery.data ?? []).map((classroom) => (
-          <span key={classroom.id} className="subject-pill">
-            {sanitizeStudentFacingText(classroom.name, 'Lớp học')}
-          </span>
-        ))}
-        {!myClassesQuery.data?.length && !myClassesQuery.isLoading ? <span className="subject-pill muted-pill">Chưa vào lớp</span> : null}
-      </div>
-    </section>
-  )
+          {currentActivity ? (
+            <article className={currentActivityCompleted ? 'student-visual-step-card student-visual-step-card-complete' : 'student-visual-step-card'}>
+              <div className="student-visual-step-head">
+                <span className="student-visual-step-badge">#{boundedActiveActivityIndex + 1}</span>
+                <div className="student-visual-step-head-actions">
+                  <button
+                    type="button"
+                    className="student-visual-audio-button"
+                    onClick={handleReplayGuidance}
+                    aria-label="Phát lại hướng dẫn"
+                    disabled={!currentActivity}
+                  >
+                    <span aria-hidden="true">🔊</span>
+                  </button>
+                  <span className={currentActivityCompleted ? 'student-visual-step-state student-visual-step-state-complete' : 'student-visual-step-state'}>
+                    {currentActivityCompleted ? 'Xong' : 'Đang làm'}
+                  </span>
+                </div>
+              </div>
 
-  const renderRemindersPanel = () => (
-    <section className="student-visual-panel student-visual-subpanel" aria-labelledby="student-reminders-heading">
-      <div className="student-visual-section-head">
-        <div>
-          <p className="eyebrow">Nhớ</p>
-          <h3 id="student-reminders-heading">Nhắc việc</h3>
-        </div>
-        <span className="subject-pill muted-pill">{studentFeedItems.length}</span>
-      </div>
+              <div className="student-visual-step-intro">
+                <span className="student-visual-step-icon">{cleanActivityIconMap[currentActivity.activity_type] ?? activityIconMap[currentActivity.activity_type] ?? '.'}</span>
+                <div>
+                  <h4>{currentActivity.title}</h4>
+                  {currentActivityCaption ? <p>{currentActivityCaption}</p> : null}
+                </div>
+              </div>
 
-      <div className="student-visual-feed-stack" aria-live="polite">
-        {studentFeedItems.map((item) => (
-          <article key={item.id} className={`student-visual-feed-card student-visual-feed-card-${item.tone}`}>
-            <div className="student-visual-feed-top">
-              <span>{cleanFeedToneIconMap[item.tone] ?? '.'} {item.category}</span>
-              <b>{item.badge}</b>
-            </div>
-            <strong>{item.title}</strong>
-          </article>
-        ))}
-        {!studentFeedItems.length ? <p className="helper-text">Chưa có nhắc mới.</p> : null}
-      </div>
-    </section>
-  )
+              <ActivityCard
+                key={currentActivity.id}
+                activity={currentActivity}
+                answers={answers}
+                setAnswers={setAnswersMap}
+                presentationMode="immersive_square"
+                onAutoAdvance={handleAutoAdvance}
+              />
+            </article>
+          ) : (
+            <p className="helper-text">Chưa có hoạt động.</p>
+          )}
+        </section>
 
-  const renderCareerPanel = () => (
-    <section className="student-visual-panel student-visual-subpanel career-voice-panel" aria-labelledby="student-career-heading">
-      <div className="student-visual-section-head">
-        <div>
-          <p className="eyebrow">AI</p>
-          <h3 id="student-career-heading">Hướng nghiệp</h3>
-        </div>
-        <span className={isCareerListening ? 'subject-pill career-voice-live' : 'subject-pill muted-pill'}>
-          {isCareerListening ? 'Đang nghe' : careerChatMutation.isPending ? 'AI nghĩ' : 'Voice'}
-        </span>
-      </div>
-
-      <div className="career-voice-stage">
-        <button
-          type="button"
-          className={isCareerListening ? 'career-voice-orb career-voice-orb-live' : 'career-voice-orb'}
-          onClick={handleCareerVoiceToggle}
-          disabled={careerChatMutation.isPending}
-          aria-label={isCareerListening ? 'Dừng nói' : 'Bắt đầu nói với AI hướng nghiệp'}
-        >
-          <span aria-hidden="true">{isCareerListening ? '■' : '🎙️'}</span>
-        </button>
-
-        <div className="career-voice-copy">
-          <strong>{isCareerListening ? 'Em cứ nói nhé' : careerChatMutation.isPending ? 'AI đang trả lời' : 'Bấm mic rồi nói'}</strong>
-          <p>Ví dụ: “Con thích vẽ thì sau này làm nghề gì?”</p>
-        </div>
-
-        <button
-          type="button"
-          className="ghost-button career-voice-replay"
-          onClick={handleReplayCareerAnswer}
-          disabled={!careerTurns.length || isCareerListening}
-        >
-          Nghe lại
-        </button>
-      </div>
-
-      {careerAudioUrl ? (
-        <audio
-          ref={careerAudioPlayerRef}
-          className="career-voice-audio"
-          src={careerAudioUrl}
-          controls
-          preload="auto"
-          aria-label="Audio trả lời hướng nghiệp"
-        />
-      ) : null}
-
-      {careerTranscript ? (
-        <article className="student-visual-mini-card career-voice-current">
-          <span>Em vừa nói</span>
-          <strong>{careerTranscript}</strong>
-        </article>
-      ) : null}
-
-      {careerVoiceError ? <p className="error-text">{careerVoiceError}</p> : null}
-
-      <div className="career-voice-turns" aria-live="polite">
-        {careerTurns.map((turn) => (
-          <article key={turn.id} className="student-visual-mini-card career-voice-turn">
-            <span>Em</span>
-            <p>{turn.studentText}</p>
-            <span>AI</span>
-            <strong>{turn.aiText}</strong>
-          </article>
-        ))}
-        {!careerTurns.length ? (
-          <article className="student-visual-mini-card student-visual-mini-card-soft">
-            <strong>AI sẽ hỏi ngắn, trả lời ngắn và gợi ý nghề phù hợp với sở thích của em.</strong>
-          </article>
-        ) : null}
-      </div>
-    </section>
-  )
-
-  const renderSettingsPanel = () => (
-    <section className="student-visual-panel student-visual-subpanel" aria-labelledby="student-settings-heading">
-      <div className="student-visual-section-head">
-        <div>
-          <p className="eyebrow">Cài đặt</p>
-          <h3 id="student-settings-heading">Vào lớp</h3>
-        </div>
-      </div>
-
-      <div className="student-visual-settings-layout">
-        <div className="form-stack student-progress-form">
-          <label>
-            ID
-            <input value={joinClassId} onChange={(event) => setJoinClassId(event.target.value)} inputMode="numeric" placeholder="12" />
-          </label>
-          <label>
-            Mã
-            <input
-              value={joinClassPassword}
-              onChange={(event) => setJoinClassPassword(event.target.value.toUpperCase())}
-              placeholder="AB12CD34"
-            />
-          </label>
+        <section className="student-visual-action-bar" aria-label="Thao tác bài học">
+          <button className="ghost-button" type="button" onClick={closeLessonView}>
+            Quay lại
+          </button>
           <button
             className="action-button"
             type="button"
-            disabled={!joinClassId || !joinClassPassword || joinClassMutation.isPending}
-            onClick={() => joinClassMutation.mutate()}
+            disabled={!effectiveSelectedAssignmentId || startMutation.isPending}
+            onClick={handleRestartAssignment}
           >
-            {joinClassMutation.isPending ? 'Đang vào...' : 'Vào lớp'}
+            {startMutation.isPending ? 'Đang mở...' : 'Làm lại'}
           </button>
-          {joinClassMutation.error ? <p className="error-text">{(joinClassMutation.error as Error).message}</p> : null}
-        </div>
+        </section>
+      </>
+    )
+  }
 
-        <article className="student-visual-mini-card student-visual-mini-card-soft">
-          <div className="student-visual-mini-card-head">
-            <strong>Không gian</strong>
-            <span>{myClassesQuery.data?.length ?? 0} lop</span>
+  const renderIchanLearningHub = () => (
+    <section className="ichan-layout">
+      <article className="student-visual-panel ichan-section ichan-subject-section">
+          <div className="student-visual-section-head ichan-subject-section-head">
+            <div>
+              <h3 className="ichan-section-title ichan-section-title-accent">CHỌN MÔN HỌC</h3>
+            </div>
+            <div className="ichan-subject-tools">
+              <span className="subject-pill muted-pill">{subjectCards.length}</span>
+              <button
+                type="button"
+                className="ichan-voice-button"
+                onClick={activePanel === 'learning' && currentActivity ? handleReplayGuidance : () => handleStudentPanelChange('ai')}
+              >
+                Điều hướng giọng nói
+              </button>
+            </div>
           </div>
-          <p>Menu này giữ các phần phụ để trang chủ gọn hơn.</p>
-        </article>
-      </div>
+
+          <div className="ichan-subject-grid">
+            {subjectCards.map((subject) => {
+              const isActive = selectedSubjectCard?.key === subject.key
+              const hasAssignment = Boolean(subject.primaryAssignment)
+              const badgeText = hasAssignment ? `${subject.assignmentCount} bài` : 'Chưa mở'
+              return (
+                <button
+                  key={subject.key}
+                  type="button"
+                  className={
+                    isActive
+                      ? 'ichan-subject-card ichan-subject-card-active'
+                      : hasAssignment
+                        ? 'ichan-subject-card'
+                        : 'ichan-subject-card ichan-subject-card-muted'
+                  }
+                  onClick={() => {
+                    handleSelectSubject(subject.key)
+                  }}
+                  disabled={!hasAssignment}
+                  aria-pressed={isActive}
+                >
+                  <div className="ichan-subject-media">
+                    {renderStudentSubjectArtwork(subject, subject.artworkUrl)}
+                  </div>
+                  <div className="ichan-subject-body">
+                    <div className="ichan-inline-pills">
+                      <span className={hasAssignment ? 'subject-pill' : 'subject-pill muted-pill'}>{badgeText}</span>
+                    </div>
+                    <strong>{subject.label}</strong>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+      </article>
+
+      <article className="student-visual-panel ichan-section">
+          <div className="student-visual-section-head">
+            <div>
+              <h3 className="ichan-section-title ichan-section-title-accent">TRÒ CHƠI</h3>
+            </div>
+            <span className="subject-pill muted-pill">2 mục</span>
+          </div>
+
+          <div className="ichan-game-grid">
+            {studentGameCatalog.map((game) => {
+              const isAvailableInLesson = lessonActivities.some((activity) => activity.activity_type === game.activityType)
+              return (
+                <article key={game.key} className="ichan-game-card">
+                  <div className="ichan-game-copy">
+                    {isAvailableInLesson ? <span className="subject-pill">Có trong bài đang mở</span> : null}
+                    <strong>{game.label}</strong>
+                    <button className="ghost-button" type="button" onClick={() => openIchanGame(game.activityType)}>
+                      Mở trò chơi
+                    </button>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+      </article>
+
+      <article className="student-visual-panel ichan-section">
+          <div className="student-visual-section-head">
+            <div>
+              <h3 className="ichan-section-title ichan-section-title-accent">NGHỀ NGHIỆP</h3>
+            </div>
+          </div>
+
+          <div className="ichan-career-grid">
+            {careerPreviewCards.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                className="student-visual-mini-card student-visual-mini-card-soft ichan-career-button"
+                onClick={() => openCareerDetail(item.key)}
+              >
+                <strong>{item.title}</strong>
+                <p>{item.description}</p>
+              </button>
+            ))}
+          </div>
+      </article>
     </section>
   )
 
-  const renderSecondaryPanel = () => {
-    switch (activePanel) {
-      case 'progress':
-        return renderProgressPanel()
-      case 'info':
-        return renderInfoPanel()
-      case 'career':
-        return renderCareerPanel()
-      case 'reminders':
-        return renderRemindersPanel()
-      case 'settings':
-        return renderSettingsPanel()
-      default:
-        return null
-    }
+  const renderIchanSubjectAssignmentsPage = () => {
+    if (!selectedSubjectCard) return null
+
+    return (
+      <section className="ichan-layout">
+        <article className="student-visual-panel ichan-section">
+          <div className="student-visual-section-head">
+            <div>
+              <button className="ghost-button" type="button" onClick={handleBackToSubjects}>
+                Quay lại
+              </button>
+              <p className="ichan-section-note" style={{ marginTop: '0.9rem' }}>Chọn bài em muốn học rồi bắt đầu ngay.</p>
+            </div>
+            <span className="subject-pill muted-pill">{`${selectedSubjectAssignments.length} bài`}</span>
+          </div>
+
+          <div className="student-visual-assignment-list ichan-assignment-list">
+            {selectedSubjectAssignments.map((item) => {
+              const isActive = effectiveSelectedAssignmentId === item.assignment_id
+              const subjectMeta = resolveAssignmentSubjectMeta(item)
+              const totalActivities = item.assignment?.lesson?.activity_count ?? item.lesson?.activity_count ?? 0
+              const completedActivities = totalActivities > 0 ? Math.min(totalActivities, Math.round((item.progress_percent / 100) * totalActivities)) : 0
+              const progressContextLabel = totalActivities > 0 ? `${completedActivities}/${totalActivities} hoạt động` : 'Chưa có hoạt động'
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={isActive ? 'student-visual-assignment-card student-visual-assignment-card-active ichan-assignment-card-no-art' : 'student-visual-assignment-card ichan-assignment-card-no-art'}
+                  onClick={() => chooseAssignment(item.assignment_id)}
+                  aria-pressed={isActive}
+                >
+                  <div className="student-visual-assignment-top">
+                    <span className="student-visual-assignment-chip">{cleanStatusLabelMap[item.status] ?? item.status}</span>
+                    <span className="student-visual-assignment-score">{item.progress_percent}%</span>
+                  </div>
+                  <strong>{sanitizeStudentFacingText(item.assignment?.lesson?.title, `Bài ${item.assignment_id}`)}</strong>
+                  <p>{subjectMeta?.label ?? item.assignment?.lesson?.subject?.name ?? 'Bài học'}</p>
+                  <div className="ichan-assignment-progress-meta">
+                    <span>{progressContextLabel}</span>
+                    <span>{`${item.progress_percent}% hoàn thành`}</span>
+                  </div>
+                  <div className="student-auto-progress-track" style={{ ['--progress' as string]: `${item.progress_percent}%` }}>
+                    <span />
+                  </div>
+                </button>
+              )
+            })}
+            {!selectedSubjectAssignments.length && !assignmentsQuery.isLoading ? <p className="helper-text">Môn này chưa có bài để mở.</p> : null}
+          </div>
+        </article>
+      </section>
+    )
   }
+
+  const renderIchanStandaloneGamePage = () => {
+    if (!standaloneGameActivity) return null
+
+  const currentGameMeta = studentGameCatalog.find((item) => item.activityType === activeStandaloneGameType) ?? null
+    const isStandaloneGameCompleted = isActivityCompleted(standaloneGameActivity, answers)
+
+    return (
+      <>
+        <section ref={activeQuestionRef} tabIndex={-1} className="student-visual-panel student-visual-question-panel">
+          <div className="student-visual-section-head">
+            <div>
+              <button className="ghost-button" type="button" onClick={closeStandaloneGame}>
+                Quay lại
+              </button>
+              <p className="eyebrow" style={{ marginTop: '0.9rem' }}>Trò chơi</p>
+              <h3 className="ichan-section-title">{currentGameMeta?.label ?? standaloneGameActivity.title}</h3>
+              <p className="ichan-section-note">{currentGameMeta?.description ?? 'Mở trò chơi và bắt đầu ngay.'}</p>
+            </div>
+            <span className={isStandaloneGameCompleted ? 'subject-pill' : 'subject-pill muted-pill'}>
+              {isStandaloneGameCompleted ? 'Xong' : 'Đang chơi'}
+            </span>
+          </div>
+
+          <article className={isStandaloneGameCompleted ? 'student-visual-step-card student-visual-step-card-complete' : 'student-visual-step-card'}>
+            <div className="student-visual-step-head">
+              <span className="student-visual-step-badge">#1</span>
+              <div className="student-visual-step-head-actions">
+              <span className={isStandaloneGameCompleted ? 'student-visual-step-state student-visual-step-state-complete' : 'student-visual-step-state'}>
+                  {isStandaloneGameCompleted ? 'Xong' : 'Đang chơi'}
+                </span>
+              </div>
+            </div>
+
+            <div className="student-visual-step-intro">
+              <span className="student-visual-step-icon">{cleanActivityIconMap[standaloneGameActivity.activity_type] ?? '.'}</span>
+              <div>
+                <h4>{standaloneGameActivity.title}</h4>
+                <p>{standaloneGameActivity.instruction_text ?? 'Chơi độc lập, không phụ thuộc môn học.'}</p>
+              </div>
+            </div>
+
+            <ActivityCard
+              key={standaloneGameActivity.id}
+              activity={standaloneGameActivity}
+              answers={answers}
+              setAnswers={setAnswersMap}
+              presentationMode="immersive_square"
+              onAutoAdvance={() => undefined}
+            />
+          </article>
+        </section>
+
+        <section className="student-visual-action-bar" aria-label="Thao tác trò chơi">
+          <button className="ghost-button" type="button" onClick={closeStandaloneGame}>
+            Quay lại
+          </button>
+          <button className="action-button" type="button" onClick={openIchanGame.bind(null, standaloneGameActivity.activity_type as StudentGameMeta['activityType'])}>
+            Chơi lại
+          </button>
+        </section>
+      </>
+    )
+  }
+
+  const renderIchanCareerDetailPage = () => {
+    if (!selectedCareerCard) return null
+
+    return (
+      <section className="ichan-layout">
+        <article className="student-visual-panel ichan-section ichan-career-detail-page">
+          <button className="ghost-button" type="button" onClick={closeCareerDetail}>
+            Quay lại thư viện
+          </button>
+
+          <div className="ichan-career-hero">
+            <img src={selectedCareerCard.coverImageUrl} alt={selectedCareerCard.title} />
+            <div className="ichan-career-hero-overlay">
+              <h3>{selectedCareerCard.title}</h3>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="ichan-career-meaning-card"
+            onClick={() => void handlePlayCareerMeaning(selectedCareerCard)}
+            disabled={isCareerMeaningSpeaking}
+          >
+            <div className="ichan-career-meaning-head">
+              <strong>{selectedCareerCard.meaningTitle}</strong>
+              <span>{isCareerMeaningSpeaking ? 'Đang đọc' : 'Bấm để nghe'}</span>
+            </div>
+            {activeCareerMeaningKey === selectedCareerCard.key ? <p>{selectedCareerCard.meaningText}</p> : null}
+          </button>
+
+          {careerMeaningError ? <p className="error-text">{careerMeaningError}</p> : null}
+
+          <div className="ichan-career-video-shell">
+            <iframe
+              src={selectedCareerCard.videoEmbedUrl}
+              title={`Video nghề nghiệp ${selectedCareerCard.title}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+
+          <div className="ichan-career-video-note">
+            <span>✦</span>
+            <p>{selectedCareerCard.videoNote}</p>
+          </div>
+
+          <section className="ichan-career-steps-section">
+            <div className="ichan-career-block-title">
+              <span>⦿</span>
+              <h4>Các bước thực hiện</h4>
+            </div>
+
+            <div className="ichan-career-steps-list">
+              {selectedCareerCard.steps.map((step, index) => (
+                <article key={step.title} className="ichan-career-step-card">
+                  <span className="ichan-career-step-index">{index + 1}</span>
+                  <div>
+                    <strong>{step.title}</strong>
+                    <p>{step.description}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="ichan-career-skills-section">
+            <div className="ichan-career-block-title">
+              <h4>Kỹ năng bạn sẽ học được:</h4>
+            </div>
+
+            <div className="ichan-career-skills-list">
+              {selectedCareerCard.skills.map((skill) => (
+                <span key={skill} className="ichan-career-skill-pill">{skill}</span>
+              ))}
+            </div>
+          </section>
+        </article>
+      </section>
+    )
+  }
+
+  const renderIchanAiPanel = () => (
+    <section className="ichan-layout">
+      <section className="student-visual-panel ichan-section career-voice-panel" aria-labelledby="student-ai-heading">
+          <div className="student-visual-section-head">
+            <div>
+              <p className="eyebrow">Bạn học AI</p>
+            </div>
+            <span className={isCareerListening ? 'subject-pill career-voice-live' : 'subject-pill muted-pill'}>
+              {isCareerListening ? 'Đang nghe' : careerChatMutation.isPending ? 'Đang trả lời' : 'Sẵn sàng'}
+            </span>
+          </div>
+
+          <div className="career-voice-stage">
+            <button
+              type="button"
+              className={isCareerListening ? 'career-voice-orb career-voice-orb-live' : 'career-voice-orb'}
+              onClick={handleCareerVoiceToggle}
+              disabled={careerChatMutation.isPending}
+              aria-label={isCareerListening ? 'Dừng nói' : 'Bắt đầu nói với AI'}
+            >
+              <span aria-hidden="true">{isCareerListening ? '■' : '🎙️'}</span>
+            </button>
+
+            <div className="career-voice-copy">
+              <strong>{isCareerListening ? 'Em cứ nói nhé' : careerChatMutation.isPending ? 'AI đang trả lời' : 'Bấm mic rồi nói'}</strong>
+              <p>Ví dụ: “Con thích vẽ thì sau này làm nghề gì?” hoặc “Nhắc con làm bài từng bước.”</p>
+            </div>
+
+            <button
+              type="button"
+              className="ghost-button career-voice-replay"
+              onClick={handleReplayCareerAnswer}
+              disabled={!careerTurns.length || isCareerListening}
+            >
+              Nghe lại
+            </button>
+          </div>
+
+          <div className="ichan-prompt-grid">
+            {aiPromptCards.map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                className="ichan-prompt-button"
+                disabled={careerChatMutation.isPending || isCareerListening}
+                onClick={() => submitCareerTranscript(prompt)}
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+
+          {careerAudioUrl ? (
+            <audio
+              ref={careerAudioPlayerRef}
+              className="career-voice-audio"
+              src={careerAudioUrl}
+              controls
+              preload="auto"
+              aria-label="Audio trả lời của AI"
+            />
+          ) : null}
+
+          {careerTranscript ? (
+            <article className="student-visual-mini-card career-voice-current">
+              <span>Em vừa nói</span>
+              <strong>{careerTranscript}</strong>
+            </article>
+          ) : null}
+
+          {careerVoiceError ? <p className="error-text">{careerVoiceError}</p> : null}
+
+          <div className="career-voice-turns" aria-live="polite">
+            {careerTurns.map((turn) => (
+              <article key={turn.id} className="student-visual-mini-card career-voice-turn">
+                <span>Em</span>
+                <p>{turn.studentText}</p>
+                <span>AI</span>
+                <strong>{turn.aiText}</strong>
+              </article>
+            ))}
+            {!careerTurns.length ? (
+              <article className="student-visual-mini-card student-visual-mini-card-soft">
+                <strong>AI có thể hỗ trợ học bài, luyện nói lịch sự, và gợi ý nghề nghiệp bằng câu ngắn.</strong>
+              </article>
+            ) : null}
+          </div>
+      </section>
+
+      <article className="student-visual-panel ichan-section">
+          <div className="student-visual-section-head">
+            <div>
+              <p className="eyebrow">Gợi ý</p>
+              <h3 className="ichan-section-title">GỢI Ý NGHỀ NGHIỆP</h3>
+            </div>
+          </div>
+
+          <div className="ichan-career-grid">
+            {careerPreviewCards.map((item) => (
+              <article key={item.title} className="student-visual-mini-card student-visual-mini-card-soft">
+                <strong>{item.title}</strong>
+                <p>{item.description}</p>
+              </article>
+            ))}
+          </div>
+      </article>
+
+      <article className="student-visual-panel ichan-section">
+          <div className="student-visual-section-head">
+            <div>
+              <p className="eyebrow">Sắp làm</p>
+              <h3 className="ichan-section-title">BÀI ĐANG CHỜ</h3>
+            </div>
+            <span className="subject-pill muted-pill">{pendingAssignments.length}</span>
+          </div>
+
+          <div className="student-visual-feed-stack">
+            {pendingAssignments.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className="student-visual-mini-card ichan-plain-button"
+                onClick={() => chooseAssignment(item.assignment_id)}
+              >
+                <span>{cleanStatusLabelMap[item.status] ?? item.status}</span>
+                <strong>{sanitizeStudentFacingText(item.assignment?.lesson?.title, `Bài ${item.assignment_id}`)}</strong>
+              </button>
+            ))}
+            {!pendingAssignments.length ? <p className="helper-text">Mọi bài hiện tại đã hoàn thành.</p> : null}
+          </div>
+      </article>
+    </section>
+  )
+
+  const renderIchanCommunicationPanel = () => (
+    <section className="ichan-layout">
+      <article className="student-visual-panel ichan-section">
+          <div className="student-visual-section-head">
+            <div>
+              <p className="eyebrow">Giao tiếp</p>
+              <h3 className="ichan-section-title">CHẠM ĐỂ PHÁT ÂM</h3>
+              <p className="ichan-section-note">Thẻ nhu cầu và cảm xúc cơ bản để em diễn đạt nhanh.</p>
+            </div>
+            <span className="subject-pill muted-pill">{communicationCards.length} thẻ</span>
+          </div>
+
+          <div className="ichan-communication-grid">
+            {communicationCards.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                className={`ichan-communication-card ichan-communication-card-${item.tone}`}
+                onClick={() => void handleCommunicationSpeak(item.phrase)}
+              >
+                <div className="ichan-communication-media" aria-hidden="true">
+                  <img src={item.imageUrl} alt="" />
+                </div>
+                <div className="ichan-communication-copy">
+                  <strong>{item.label}</strong>
+                  <span>{item.phrase}</span>
+                </div>
+                <b className="ichan-communication-sound">🔊</b>
+              </button>
+            ))}
+          </div>
+      </article>
+
+      <article className="student-visual-panel ichan-section">
+          <div className="student-visual-section-head">
+            <div>
+              <p className="eyebrow">Đang nói</p>
+              <h3 className="ichan-section-title">CÂU GẦN NHẤT</h3>
+            </div>
+          </div>
+
+          <div className="ichan-preview-bubble">
+            <strong>{lastCommunicationPhrase || 'Chưa chọn thẻ giao tiếp nào.'}</strong>
+            <p>Tab này hỗ trợ diễn đạt nhanh, còn luồng tiến độ và báo cáo cho phụ huynh, giáo viên vẫn giữ như hiện tại.</p>
+          </div>
+          {communicationError ? <p className="error-text">{communicationError}</p> : null}
+      </article>
+    </section>
+  )
+
+  const renderIchanSettingsPanel = () => (
+    <section className="ichan-layout">
+      <section className="ichan-summary-grid" aria-label="Tổng quan học sinh">
+        <article className="student-visual-glass-card">
+          <span>Tiến độ</span>
+          <strong>{liveProgressPercent}%</strong>
+          <p>Bài hiện tại hoặc tiến độ gần nhất.</p>
+        </article>
+        <article className="student-visual-glass-card">
+          <span>Đang học</span>
+          <strong>{totalInProgressCount}</strong>
+          <p>Số bài đang ở trạng thái tiếp tục.</p>
+        </article>
+        <article className="student-visual-glass-card">
+          <span>Môn có bài</span>
+          <strong>{subjectCards.filter((item) => item.assignmentCount > 0).length}</strong>
+          <p>Giữ theo logic bài giao hiện tại.</p>
+        </article>
+        <article className="student-visual-glass-card">
+          <span>Hoạt động</span>
+          <strong>{activityProgress.totalActivities || 0}</strong>
+          <p>Số bước trong bài đang mở.</p>
+        </article>
+      </section>
+
+      <article className="student-visual-panel ichan-section">
+          <div className="student-visual-section-head">
+            <div>
+              <p className="eyebrow">Nhắc việc</p>
+              <h3 className="ichan-section-title">HÔM NAY</h3>
+            </div>
+            <span className="subject-pill muted-pill">{studentFeedItems.length}</span>
+          </div>
+
+          <div className="student-visual-feed-stack" aria-live="polite">
+            {studentFeedItems.slice(0, 4).map((item) => (
+              <article key={item.id} className={`student-visual-feed-card student-visual-feed-card-${item.tone}`}>
+                <div className="student-visual-feed-top">
+                  <span>{cleanFeedToneIconMap[item.tone] ?? '.'} {item.category}</span>
+                  <b>{item.badge}</b>
+                </div>
+                <strong>{item.title}</strong>
+              </article>
+            ))}
+            {!studentFeedItems.length ? <p className="helper-text">Chưa có nhắc mới.</p> : null}
+          </div>
+      </article>
+
+      {renderIchanJoinCard('Vào lớp', 'Kết nối')}
+
+      <article className="student-visual-panel ichan-section">
+          <div className="student-visual-section-head">
+            <div>
+              <p className="eyebrow">Đồng hành</p>
+              <h3 className="ichan-section-title">GIÁO VIÊN</h3>
+            </div>
+            <span className="subject-pill muted-pill">{teacherBadges.length}</span>
+          </div>
+
+          <div className="ichan-teacher-list">
+            {teacherBadges.map((item) => (
+              <article key={item.id} className="student-visual-mini-card">
+                <span>{item.schoolName || 'Lớp học trực quan'}</span>
+                <strong>{item.name}</strong>
+              </article>
+            ))}
+            {!teacherBadges.length ? <p className="helper-text">Chưa có giáo viên liên kết.</p> : null}
+          </div>
+      </article>
+    </section>
+  )
+
+  const renderStudentEntryGate = () => (
+    <section className="student-entry-gate" aria-label="Chọn mức độ hỗ trợ">
+      <div className="student-entry-gate-shell">
+        <div className="student-entry-gate-brand">
+          <span className="student-entry-gate-brand-mark">Bạn học thông minh</span>
+          <h1>Bạn học thông minh</h1>
+        </div>
+
+        <div className="student-entry-gate-panel">
+          <div className="student-entry-gate-copy">
+            <p className="student-entry-gate-kicker">CHÀO MỪNG BẠN</p>
+            <h2>{studentName}</h2>
+            <p>Hãy chọn mức độ hỗ trợ để bắt đầu.</p>
+          </div>
+
+          <div className="student-entry-gate-options">
+            {studentEntryOptions.map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                className={`student-entry-gate-option student-entry-gate-option-${option.key}`}
+                onClick={() => handleStudentEntrySelect(option.key)}
+              >
+                <strong>{option.title}</strong>
+                <span>{option.subtitle}</span>
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="student-entry-gate-adult"
+            onClick={() => handleStudentEntrySelect('adult')}
+          >
+            DÀNH CHO NGƯỜI LỚN
+          </button>
+        </div>
+      </div>
+    </section>
+  )
 
   return (
     <RequireAuth allowedRoles={['student']}>
       <div
-        className="student-visual-page"
+        className={
+          hasCompletedEntryGate
+            ? isStudentLessonFocus
+              ? 'student-visual-page student-visual-page-lesson-focus'
+              : 'student-visual-page'
+            : 'student-visual-page student-visual-page-gated'
+        }
         style={visualSupportStyle}
-        onPointerDownCapture={completionSummary ? () => setCompletionLastInteractionAt(Date.now()) : undefined}
-        onKeyDownCapture={completionSummary ? () => setCompletionLastInteractionAt(Date.now()) : undefined}
+        onPointerDownCapture={completionSummary ? () => setCompletionLastInteractionAt(getCurrentTimestamp()) : undefined}
+        onKeyDownCapture={completionSummary ? () => setCompletionLastInteractionAt(getCurrentTimestamp()) : undefined}
       >
-        <section className="student-visual-hero">
-          <div className="student-visual-hero-copy">
-            <p className="student-visual-kicker">Student</p>
-            <h2>{studentName}</h2>
-            <p>{activePanel === 'home' ? heroLessonTitle : studentMenuItems.find((item) => item.key === activePanel)?.label ?? 'Trang chủ'}</p>
-
-            <div className="student-visual-badges">
-              <span className="student-visual-badge">Bài {allAssignments.length || totalAssignments}</span>
-              <span className="student-visual-badge">Xong {displayCompletedCount}</span>
-              <span className="student-visual-badge">GV {myTeachersQuery.data?.length ?? 0}</span>
+        {!hasCompletedEntryGate ? renderStudentEntryGate() : null}
+        <section className="student-visual-hero ichan-hero">
+          <div className="ichan-hero-banner">
+            <div className="ichan-hero-avatar" aria-hidden="true">
+              <span>🙂</span>
             </div>
 
-            {detail && activePanel === 'home' ? (
-              <div className="student-visual-hero-progress">
-                <div className="student-visual-hero-progress-head">
-                  <strong>{cleanStatusLabelMap[detail.status] ?? detail.status}</strong>
-                  <span>{liveProgressPercent}%</span>
-                </div>
-                <div className="student-auto-progress-track" style={{ ['--progress' as string]: `${liveProgressPercent}%` }}>
-                  <span />
-                </div>
+            <div className="student-visual-hero-copy">
+              <h2>{`Chào mừng bạn, ${studentName}!`}</h2>
+              <p className="ichan-hero-support-copy">{heroSupportCopy}</p>
+              {activePanel === 'learning' && detail ? <p className="ichan-hero-note">{`Bài đang mở: ${heroLessonTitle}`}</p> : activePanel !== 'learning' && activeTabCopy.description ? <p className="ichan-hero-note">{activeTabCopy.description}</p> : null}
+
+              <div className="student-visual-badges">
+                {heroBadges.map((item) => (
+                  <span key={item} className="student-visual-badge">{item}</span>
+                ))}
               </div>
-            ) : null}
+
+              {detail && activePanel === 'learning' ? (
+                <div className="student-visual-hero-progress">
+                  <div className="student-visual-hero-progress-head">
+                    <strong>{cleanStatusLabelMap[detail!.status] ?? detail!.status}</strong>
+                    <span>{liveProgressPercent}%</span>
+                  </div>
+                  <div className="student-auto-progress-track" style={{ ['--progress' as string]: `${liveProgressPercent}%` }}>
+                    <span />
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="ichan-hero-spark" aria-hidden="true">
+              <span>✦</span>
+            </div>
           </div>
         </section>
 
-        <nav className="student-visual-menu" aria-label="Menu học sinh">
-          {studentMenuItems.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              className={activePanel === item.key ? 'student-visual-menu-button student-visual-menu-button-active' : 'student-visual-menu-button'}
-              onClick={() => setActivePanel(item.key)}
-              aria-pressed={activePanel === item.key}
-            >
-              <span className="student-visual-menu-icon">{studentMenuIconMap[item.key]}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-          {completionSummary ? (
-            <section className="student-visual-celebration student-visual-result-card" aria-live="assertive">
-              <div>
-                <p className="student-visual-kicker">Xong</p>
-                <h3>{completionSummary.title}</h3>
-                <div className="student-visual-result-metrics">
-                  <span>{completionSummary.progressPercent}%</span>
-                  <span>{completionSummary.completionScore} d</span>
-                  <span>{completionSummary.completedActivities}/{completionSummary.totalActivities || 0}</span>
-                </div>
+        {completionSummary ? (
+          <section className="student-visual-celebration student-visual-result-card" aria-live="assertive">
+            <div>
+              <p className="student-visual-kicker">Hoàn thành</p>
+              <h3>{completionSummary.title}</h3>
+              <div className="student-visual-result-metrics">
+                <span>{completionSummary.progressPercent}%</span>
+                <span>{completionSummary.completionScore} điểm</span>
+                <span>{completionSummary.completedActivities}/{completionSummary.totalActivities || 0}</span>
               </div>
-              <div className="student-visual-celebration-actions">
-                <span className="student-visual-celebration-star" aria-hidden="true" />
-                <button type="button" className="student-home-icon" onClick={handleGoHome} aria-label="Về trang chủ">
-                  []
-                </button>
-              </div>
-            </section>
-          ) : null}
-
-          {activePanel === 'home' ? (
-          <section className="student-visual-home-grid">
-            <article className="student-visual-panel">
-              <div className="student-visual-section-head">
-                <div>
-                  <p className="eyebrow">Học</p>
-                  <h3>Chọn bài</h3>
-                </div>
-                <span className="subject-pill muted-pill">{displayAssignments.length || totalAssignments}</span>
-              </div>
-
-              <div className="student-visual-assignment-list">
-                {displayAssignments.map((item) => {
-                  const isActive = effectiveSelectedAssignmentId === item.assignment_id
-                  const art = resolveStudentArtwork(item.assignment_id)
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className={isActive ? 'student-visual-assignment-card student-visual-assignment-card-active' : 'student-visual-assignment-card'}
-                      onClick={() => chooseAssignment(item.assignment_id)}
-                      aria-pressed={isActive}
-                    >
-                      <div className="student-visual-assignment-art">
-                        <img src={art} alt="" />
-                      </div>
-                      <div className="student-visual-assignment-top">
-                        <span className="student-visual-assignment-chip">{cleanStatusLabelMap[item.status] ?? item.status}</span>
-                        <span className="student-visual-assignment-score">{item.progress_percent}%</span>
-                      </div>
-                      <strong>{sanitizeStudentFacingText(item.assignment?.lesson?.title, `Bài ${item.assignment_id}`)}</strong>
-                      <p>{item.assignment?.lesson?.subject?.name ?? 'Bài học'}</p>
-                      <div className="student-auto-progress-track" style={{ ['--progress' as string]: `${item.progress_percent}%` }}>
-                        <span />
-                      </div>
-                    </button>
-                  )
-                })}
-                {!allAssignments.length && !assignmentsQuery.isLoading ? <p className="helper-text">Chưa có bài.</p> : null}
-              </div>
-            </article>
-
-            <article className="student-visual-panel student-visual-side-story">
-              <div className="student-visual-section-head">
-                <div>
-                  <p className="eyebrow">Góc nhỏ</p>
-                  <h3>Sẵn sàng học</h3>
-                </div>
-              </div>
-              <div className="student-visual-side-story-art">
-                <img src="/student-ui/canhcut.jpg" alt="" />
-              </div>
-              <div className="student-visual-side-story-copy">
-                <strong>{sanitizeStudentFacingText(detail?.lesson?.title, 'Chọn bài học em muốn làm')}</strong>
-                <p>{detail ? `${activityProgress.completedActivities}/${activityProgress.totalActivities || 0} câu` : 'Mỗi bài sẽ hiện từng câu một.'}</p>
-              </div>
-            </article>
+            </div>
+            <div className="student-visual-celebration-actions">
+              <span className="student-visual-celebration-star" aria-hidden="true" />
+              <button type="button" className="student-home-icon" onClick={handleGoHome} aria-label="Về trang chủ">
+                HT
+              </button>
+            </div>
           </section>
-          ) : renderSecondaryPanel()}
+        ) : null}
 
-          {activePanel === 'home' && detail && !completionSummary ? (
-            <>
-              <section ref={activeQuestionRef} tabIndex={-1} className="student-visual-panel student-visual-question-panel">
-                <div className="student-visual-section-head">
-                  <div>
-                    <p className="eyebrow">Câu hỏi</p>
-                    <h3>{lessonActivities.length ? `${activeActivityIndex + 1}/${lessonActivities.length}` : '0/0'}</h3>
-                  </div>
-                  <span className="subject-pill">{activityProgress.completedActivities}/{activityProgress.totalActivities || 0}</span>
-                </div>
+        {activePanel === 'learning'
+          ? selectedCareerCard
+            ? null
+            : activeStandaloneGameType
+            ? null
+            : detail
+            ? null
+            : selectedSubjectCard
+              ? renderIchanSubjectAssignmentsPage()
+              : renderIchanLearningHub()
+          : null}
+        {activePanel === 'ai' ? renderIchanAiPanel() : null}
+        {activePanel === 'communication' ? renderIchanCommunicationPanel() : null}
+        {activePanel === 'settings' ? renderIchanSettingsPanel() : null}
+        {activePanel === 'learning' && selectedCareerCard ? renderIchanCareerDetailPage() : null}
+        {activePanel === 'learning' && activeStandaloneGameType ? renderIchanStandaloneGamePage() : null}
+        {activePanel === 'learning' && !selectedCareerCard && !activeStandaloneGameType ? renderIchanLessonStage() : null}
 
-                <div className="student-visual-step-dots" aria-label="Tiến độ câu hỏi">
-                  {lessonActivities.map((activity, index) => {
-                    const isCompleted = isActivityCompleted(activity, answers)
-                    const isActive = index === activeActivityIndex
-                    return (
-                      <span
-                        key={activity.id}
-                        className={
-                          isCompleted
-                            ? 'student-visual-step-dot student-visual-step-dot-complete'
-                            : isActive
-                              ? 'student-visual-step-dot student-visual-step-dot-active'
-                              : 'student-visual-step-dot'
-                        }
-                        aria-hidden="true"
-                      />
-                    )
-                  })}
-                </div>
-
-                {currentActivity ? (
-                  <article className={currentActivityCompleted ? 'student-visual-step-card student-visual-step-card-complete' : 'student-visual-step-card'}>
-                    <div className="student-visual-step-head">
-                      <span className="student-visual-step-badge">#{activeActivityIndex + 1}</span>
-                      <div className="student-visual-step-head-actions">
-                        <button
-                          type="button"
-                          className="student-visual-audio-button"
-                          onClick={handleReplayGuidance}
-                          aria-label="Phát lại hướng dẫn"
-                          disabled={!currentActivity}
-                        >
-                          <span aria-hidden="true">🔊</span>
-                        </button>
-                        <span className={currentActivityCompleted ? 'student-visual-step-state student-visual-step-state-complete' : 'student-visual-step-state'}>
-                          {currentActivityCompleted ? 'ok' : '...'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="student-visual-step-intro">
-                      <span className="student-visual-step-icon">{cleanActivityIconMap[currentActivity.activity_type] ?? activityIconMap[currentActivity.activity_type] ?? '.'}</span>
-                      <div>
-                        <h4>{currentActivity.title}</h4>
-                        <p>{cleanActivityTypeVisualLabelMap[currentActivity.activity_type] ?? activityTypeVisualLabelMap[currentActivity.activity_type] ?? 'Hoạt động'}</p>
-                      </div>
-                    </div>
-
-                    <ActivityCard
-                      key={currentActivity.id}
-                      activity={currentActivity}
-                      answers={answers}
-                      setAnswers={setAnswersMap}
-                      presentationMode="immersive_square"
-                      onAutoAdvance={handleAutoAdvance}
-                    />
-                  </article>
-                ) : (
-                  <p className="helper-text">Chưa có hoạt động.</p>
-                )}
-              </section>
-
-                <section className="student-visual-action-bar" aria-label="Thao tác bài học">
-                <button className="ghost-button" type="button" onClick={closeLessonView}>
-                  Đổi bài
-                </button>
-                <button
-                  className="action-button"
-                  type="button"
-                  disabled={!effectiveSelectedAssignmentId || startMutation.isPending}
-                  onClick={handleRestartAssignment}
-                >
-                  {startMutation.isPending ? 'Đang mở...' : 'Làm lại'}
-                </button>
-              </section>
-            </>
-          ) : activePanel === 'home' && !completionSummary ? (
-            <section className="student-visual-empty-panel">
-              <strong>Chọn một bài để bắt đầu.</strong>
-            </section>
-          ) : null}
-
-          {(startMutation.error || completeMutation.error) ? (
-            <p className="error-text student-visual-floating-error">
-              {(startMutation.error as Error)?.message ?? (completeMutation.error as Error)?.message}
-            </p>
-          ) : null}
-
+        {(startMutation.error || completeMutation.error) ? (
+          <p className="error-text student-visual-floating-error">
+            {(startMutation.error as Error)?.message ?? (completeMutation.error as Error)?.message}
+          </p>
+        ) : null}
       </div>
     </RequireAuth>
   )

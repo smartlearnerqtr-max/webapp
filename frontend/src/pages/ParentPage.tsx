@@ -8,7 +8,6 @@ import {
   fetchParentChildren,
   fetchParentMessages,
   fetchParentReports,
-  fetchTeacherByIdForParent,
   markParentMessagesRead,
   sendParentMessage,
 } from '../services/api'
@@ -25,7 +24,7 @@ export function ParentPage() {
   const token = useAuthStore((state) => state.accessToken)
   const profile = useAuthStore((state) => state.profile)
   const queryClient = useQueryClient()
-  const [teacherIdInput, setTeacherIdInput] = useState('')
+
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [selectedConversationKey, setSelectedConversationKey] = useState('')
   const [messageDraft, setMessageDraft] = useState('')
@@ -49,10 +48,6 @@ export function ParentPage() {
     queryKey: ['parent-messages', token],
     queryFn: () => fetchParentMessages(token!),
     enabled: Boolean(token),
-  })
-
-  const teacherLookupMutation = useMutation({
-    mutationFn: () => fetchTeacherByIdForParent(token!, Number(teacherIdInput)),
   })
 
   const sendMessageMutation = useMutation({
@@ -107,7 +102,7 @@ export function ParentPage() {
     ]
   }, [childrenQuery.data])
 
-  const conversations = conversationsQuery.data ?? []
+  const conversations = useMemo(() => conversationsQuery.data ?? [], [conversationsQuery.data])
   const unreadConversationCount = conversations.reduce((count, item) => count + item.unread_count, 0)
 
   const conversationStudentOptions = useMemo(() => {
@@ -141,17 +136,7 @@ export function ParentPage() {
     () => filteredConversations.find((item) => item.conversation_key === selectedConversationKey) ?? filteredConversations[0] ?? null,
     [filteredConversations, selectedConversationKey],
   )
-
-  useEffect(() => {
-    if (!filteredConversations.length) {
-      setSelectedConversationKey('')
-      return
-    }
-
-    if (!selectedConversationKey || !filteredConversations.some((item) => item.conversation_key === selectedConversationKey)) {
-      setSelectedConversationKey(filteredConversations[0].conversation_key)
-    }
-  }, [filteredConversations, selectedConversationKey])
+  const effectiveSelectedConversationKey = selectedConversation?.conversation_key ?? ''
 
   useEffect(() => {
     if (!isChatOpen || !selectedConversation || selectedConversation.unread_count <= 0 || markReadMutation.isPending) return
@@ -160,6 +145,7 @@ export function ParentPage() {
 
   const parentId = typeof profile?.id === 'number' ? profile.id : null
   const parentName = typeof profile?.full_name === 'string' ? String(profile.full_name) : 'Phụ huynh'
+  const isParentSetupPending = !childrenQuery.isLoading && !(childrenQuery.data?.length ?? 0)
 
   return (
     <RequireAuth allowedRoles={['parent']}>
@@ -197,33 +183,19 @@ export function ParentPage() {
               items={familyProgressChartItems}
               emptyMessage="Chưa có dữ liệu học sinh để hiển thị."
             />
-            <p>Gửi parent ID này cho giáo viên nếu cần liên kết đúng phụ huynh vào hồ sơ học sinh.</p>
-          </article>
-
-          <article className="roadmap-panel">
-            <h3>Tra cứu giáo viên bằng teacher ID</h3>
-            <div className="form-stack">
-              <label>
-                Teacher ID
-                <input value={teacherIdInput} onChange={(event) => setTeacherIdInput(event.target.value)} inputMode="numeric" placeholder="Ví dụ: 3" />
-              </label>
-              <button className="action-button" type="button" disabled={!teacherIdInput || teacherLookupMutation.isPending} onClick={() => teacherLookupMutation.mutate()}>
-                {teacherLookupMutation.isPending ? 'Đang tìm...' : 'Tìm giáo viên'}
-              </button>
-              {teacherLookupMutation.error ? <p className="error-text">{(teacherLookupMutation.error as Error).message}</p> : null}
-            </div>
-
-            {teacherLookupMutation.data ? (
-              <div className="student-row">
-                <strong>{teacherLookupMutation.data.full_name}</strong>
-                <span>Teacher ID {teacherLookupMutation.data.id}</span>
-                <p>Trường: {teacherLookupMutation.data.school_name ?? 'Chưa cập nhật'}</p>
-                <p>Email: {teacherLookupMutation.data.email ?? 'Chưa cập nhật'} | Số điện thoại: {teacherLookupMutation.data.phone ?? 'Chưa cập nhật'}</p>
-                <p>Ghi chú: {teacherLookupMutation.data.note ?? 'Chưa có ghi chú thêm.'}</p>
-              </div>
-            ) : null}
+            <p>Gửi Parent ID này cho giáo viên nếu cần liên kết đúng phụ huynh vào hồ sơ học sinh.</p>
           </article>
         </section>
+
+        {isParentSetupPending ? (
+          <section className="dashboard-grid">
+            <article className="roadmap-panel">
+              <h3>Bắt đầu kết nối</h3>
+              <p>Tài khoản phụ huynh đã tạo xong. Bước tiếp theo là gửi Parent ID hoặc email này cho giáo viên để họ gắn đúng vào hồ sơ học sinh.</p>
+              <p>Sau khi giáo viên liên kết xong, trang này sẽ hiện con, báo cáo học tập và khung chat.</p>
+            </article>
+          </section>
+        ) : null}
 
         <section className="dashboard-grid">
           {(childrenQuery.data ?? []).map((item) => {
@@ -246,6 +218,7 @@ export function ParentPage() {
                   <strong>{item.student.full_name}</strong>
                   <span>{item.student.disability_level} / {item.student.preferred_input}</span>
                 </div>
+
                 <div className="metrics-grid">
                   <div className="mini-card">
                     <span>Tổng bài tập</span>
@@ -264,25 +237,30 @@ export function ParentPage() {
                     <strong>{item.progress_summary.last_progress_percent}%</strong>
                   </div>
                 </div>
+
                 <BarChartCard
                   title="Biểu đồ tiến độ của con"
                   description="Nhìn nhanh phần đã xong, đang học và phần còn lại."
                   items={childProgressChartItems}
                 />
+
                 <p className="helper-text">Bài học gần nhất: {item.progress_summary.last_assignment_title ?? 'Chưa có bài tập nào'}.</p>
                 <p>Mức độ sẵn sàng: {readinessLabelMap[item.progress_summary.readiness_status] ?? item.progress_summary.readiness_status}</p>
+
                 <div className="tag-wrap">
                   {item.classes.map((classroom) => (
                     <span key={classroom.id} className="subject-pill">{classroom.name}</span>
                   ))}
                   {!item.classes.length ? <p>Chưa được gắn lớp học nào.</p> : null}
                 </div>
+
                 <div className="tag-wrap">
                   {item.teachers.map((teacher) => (
                     <span key={teacher.id} className="subject-pill">GV {teacher.full_name} / ID {teacher.id}</span>
                   ))}
                   {!item.teachers.length ? <p>Chưa có giáo viên nào được gắn cho học sinh này.</p> : null}
                 </div>
+
                 <div className="student-list compact-list">
                   {studentReports.slice(0, 3).map((report) => (
                     <div key={report.id} className="student-row">
@@ -331,7 +309,7 @@ export function ParentPage() {
         subtitle="Bấm để mở khung trao đổi nhanh"
         unreadCount={unreadConversationCount}
         conversations={filteredConversations}
-        selectedConversationKey={selectedConversationKey}
+        selectedConversationKey={effectiveSelectedConversationKey}
         onSelectConversation={setSelectedConversationKey}
         studentOptions={conversationStudentOptions}
         selectedStudentId={selectedChatStudentId}

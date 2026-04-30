@@ -684,8 +684,10 @@ export async function updateStudent(token: string, studentId: number, payload: {
   })
 }
 
-export async function fetchParents(token: string): Promise<ParentAccountItem[]> {
-  return request<ParentAccountItem[]>('/api/v1/parents', { token })
+export async function fetchParents(token: string, search?: string): Promise<ParentAccountItem[]> {
+  const trimmedSearch = search?.trim()
+  const queryString = trimmedSearch ? `?q=${encodeURIComponent(trimmedSearch)}` : ''
+  return request<ParentAccountItem[]>(`/api/v1/parents${queryString}`, { token })
 }
 
 export async function linkParentToStudent(token: string, studentId: number, payload: { parent_id: number }) {

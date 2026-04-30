@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clip 5</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.34), transparent 24%),
+        linear-gradient(180deg, #ffe2e5 0%, #ffc6d0 100%);
+    }
+
+    .card {
+      width: min(84vw, 360px);
+      aspect-ratio: 1;
+      border-radius: 36px;
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: 0 26px 42px rgba(150, 51, 64, 0.16);
+      padding: 2rem;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      text-align: center;
+      color: #6f2430;
+    }
+
+    .apple {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      border-radius: 38% 38% 45% 45%;
+      background: linear-gradient(180deg, #ff6b76 0%, #dc2f44 100%);
+      animation: bob 1.7s infinite ease-in-out;
+    }
+
+    .apple::before {
+      content: '';
+      position: absolute;
+      left: 56px;
+      top: -26px;
+      width: 10px;
+      height: 36px;
+      border-radius: 999px;
+      background: #5f3b16;
+      transform: rotate(-12deg);
+    }
+
+    .apple::after {
+      content: '';
+      position: absolute;
+      left: 70px;
+      top: -18px;
+      width: 42px;
+      height: 22px;
+      border-radius: 0 20px 20px 20px;
+      background: linear-gradient(180deg, #7acb64 0%, #45a249 100%);
+      transform: rotate(14deg);
+    }
+
+    h1 {
+      margin: 1rem 0 0.4rem;
+      font-size: 2rem;
+    }
+
+    p {
+      margin: 0;
+      font-weight: 700;
+      color: #8b3140;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="apple"></div>
+    <h1>Qua tao</h1>
+    <p>Qua nay co mau do hay mau tim?</p>
+  </main>
+</body>
+</html>

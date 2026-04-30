@@ -18,20 +18,10 @@ const homeStats = [
 
 const learningTags = ['Toán dễ hiểu', 'Ngôn ngữ', 'Kỹ năng sống', 'Theo dõi tiến độ']
 
-const roleGuides = [
-  {
-    title: 'Học sinh / phụ huynh',
-    description: 'Tự tạo tài khoản và bắt đầu học ngay từ điện thoại hoặc máy tính bảng.',
-  },
-  {
-    title: 'Giáo viên',
-    description: 'Đăng nhập bằng tài khoản được cấp để quản lý lớp, bài học và báo cáo.',
-  },
-  {
-    title: 'Quản trị viên',
-    description: 'Thiết lập tài khoản giáo viên và giữ luồng vận hành gọn, dễ kiểm soát.',
-  },
-]
+function resolvePostRegisterRoute(role: RegisterRole) {
+  if (role === 'student') return '/hoc-tap?tab=settings&setup=1'
+  return '/phu-huynh?setup=1'
+}
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -101,7 +91,7 @@ export function HomePage() {
         user: payload.user,
         profile: payload.profile,
       })
-      navigate(getDefaultRouteForRole(payload.user.role), { replace: true })
+      navigate(resolvePostRegisterRoute(registerRole), { replace: true })
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : 'Đăng ký thất bại')
     } finally {
@@ -114,8 +104,7 @@ export function HomePage() {
       <section className="auth-layout auth-layout-home">
         <article className="roadmap-panel auth-hero">
           <div className="hero-copy">
-            <p className="eyebrow hero-eyebrow">Bạn học thông minh</p>
-            <h1 className="hero-title">Ứng dụng hỗ trợ học tập cho học sinh, phụ huynh và giáo viên.</h1>
+            <h1 className="hero-title hero-title-green">Bạn học thông minh, xin chào!</h1>
           </div>
 
           <div className="home-stats">
@@ -170,7 +159,6 @@ export function HomePage() {
         <article className="roadmap-panel auth-card">
           <div className="form-card-header">
             <p className="eyebrow form-eyebrow">Bắt đầu</p>
-            <h3>Đăng nhập và đăng ký</h3>
           </div>
 
           <div className="mode-switch" role="tablist" aria-label="Chọn chế độ tài khoản">
@@ -253,20 +241,6 @@ export function HomePage() {
           <PWAInstallButton />
           {error ? <p className="error-text">{error}</p> : null}
         </article>
-      </section>
-
-      <section className="roadmap-panel role-guide-panel">
-        <p className="eyebrow form-eyebrow">Luồng sử dụng</p>
-        <h3>Thiết kế cho đúng người, đúng việc</h3>
-        <div className="home-role-grid">
-          {roleGuides.map((item) => (
-            <div key={item.title} className="role-card">
-              <span className="role-card-label">Vai trò</span>
-              <strong>{item.title}</strong>
-              <p>{item.description}</p>
-            </div>
-          ))}
-        </div>
       </section>
     </div>
   )

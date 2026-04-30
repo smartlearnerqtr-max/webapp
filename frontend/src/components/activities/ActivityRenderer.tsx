@@ -97,6 +97,27 @@ type BrowserSpeechRecognition = {
 type BrowserSpeechRecognitionConstructor = new () => BrowserSpeechRecognition
 
 type ActivityPresentationMode = 'standard' | 'immersive_square'
+type ActivityAnswerMap = Record<number, unknown>
+type StringAnswerMap = Record<number, string>
+type StringArrayAnswerMap = Record<number, string[]>
+type BooleanArrayAnswerMap = Record<number, boolean[]>
+type AnswerSetter<TAnswers extends ActivityAnswerMap> = React.Dispatch<React.SetStateAction<TAnswers>>
+type ActivityAnswerBucket = {
+  choiceAnswers: StringAnswerMap
+  matchingAnswers: StringArrayAnswerMap
+  dragAnswers: StringArrayAnswerMap
+  stepAnswers: BooleanArrayAnswerMap
+  textAnswers: StringAnswerMap
+  aacSelections: StringAnswerMap
+}
+type ActivityAnswerSetterBucket = {
+  setChoiceAnswers: AnswerSetter<StringAnswerMap>
+  setMatchingAnswers: AnswerSetter<StringArrayAnswerMap>
+  setDragAnswers: AnswerSetter<StringArrayAnswerMap>
+  setStepAnswers: AnswerSetter<BooleanArrayAnswerMap>
+  setTextAnswers: AnswerSetter<StringAnswerMap>
+  setAacSelections: AnswerSetter<StringAnswerMap>
+}
 
 const activityTypeLabelMap: Record<string, string> = {
   memory_match: 'Lật thẻ ghi nhớ',
@@ -404,10 +425,10 @@ function renderEmbeddedMedia(mediaUrl: string, mediaKind: string | null, present
   )
 }
 
-interface ActivityComponentProps {
+interface ActivityComponentProps<TAnswers extends ActivityAnswerMap = ActivityAnswerMap> {
   activity: LessonActivityItem
-  answers: any
-  setAnswers: (fn: (prev: any) => any) => void
+  answers: TAnswers
+  setAnswers: AnswerSetter<TAnswers>
   presentationMode?: ActivityPresentationMode
   onAutoAdvance?: (activityId: number) => void
 }
@@ -432,7 +453,7 @@ function CarouselImageChoiceActivity({
   cards: ImageChoiceCard[]
   correct: string
   selectedChoice: string
-  setAnswers: (fn: (prev: any) => any) => void
+  setAnswers: AnswerSetter<StringAnswerMap>
   presentationMode?: ActivityPresentationMode
   onAutoAdvance?: (activityId: number) => void
 }) {
@@ -482,7 +503,7 @@ function CarouselImageChoiceActivity({
                 className={selectedChoice === card.id ? 'interactive-option interactive-option-active image-carousel-select' : 'interactive-option image-carousel-select'}
                 aria-pressed={selectedChoice === card.id}
                 onClick={() => {
-                  setAnswers((current: any) => ({ ...current, [activity.id]: card.id }))
+                  setAnswers((current) => ({ ...current, [activity.id]: card.id }))
                   scheduleAutoAdvance(onAutoAdvance, activity.id)
                 }}
               >
@@ -536,8 +557,8 @@ function VoiceAiAnswerBox({
   mediaUrl: string
   expectedAnswer: string
   acceptedAnswers: string[]
-  answers: any
-  setAnswers: (fn: (prev: any) => any) => void
+  answers: StringAnswerMap
+  setAnswers: AnswerSetter<StringAnswerMap>
 }) {
   const token = useAuthStore((state) => state.accessToken)
   const answer = answers[activity.id] ?? ''
@@ -560,7 +581,7 @@ function VoiceAiAnswerBox({
 
   function handleAnswerChange(nextValue: string) {
     transcriptRef.current = nextValue
-    setAnswers((current: any) => ({ ...current, [activity.id]: nextValue }))
+    setAnswers((current) => ({ ...current, [activity.id]: nextValue }))
     setVoiceError(null)
     setGradeResult(null)
   }
@@ -734,9 +755,9 @@ function renderPuzzlePiece({
   )
 }
 
-function ImagePuzzleActivity({ activity, answers, setAnswers }: ActivityComponentProps) {
-  const config = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
-  if (!config) return null
+function ImagePuzzleActivity({ activity, answers, setAnswers }: ActivityComponentProps<StringArrayAnswerMap>) {
+  const parsedConfig = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
+  const config = parsedConfig ?? {}
   const imageUrl = toText(config.image_url)
   const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy ghép lại thành bức tranh hoàn chỉnh.'
   const rows = Math.max(1, Number(config.rows ?? 2) || 2)
@@ -748,7 +769,7 @@ function ImagePuzzleActivity({ activity, answers, setAnswers }: ActivityComponen
   const isSolved = currentSlots.every((pieceId: string, index: number) => pieceId === `piece-${index}`)
 
   React.useEffect(() => {
-    setAnswers((current: any) => {
+    setAnswers((current) => {
       const existingSlots = current[activity.id]
       if (Array.isArray(existingSlots) && existingSlots.length === pieceCount) {
         return current
@@ -762,8 +783,10 @@ function ImagePuzzleActivity({ activity, answers, setAnswers }: ActivityComponen
     if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= currentSlots.length || sourceIndex === targetIndex) return
     const nextSlots = [...currentSlots]
     ;[nextSlots[sourceIndex], nextSlots[targetIndex]] = [nextSlots[targetIndex], nextSlots[sourceIndex]]
-    setAnswers((current: any) => ({ ...current, [activity.id]: nextSlots }))
+    setAnswers((current) => ({ ...current, [activity.id]: nextSlots }))
   }
+
+  if (!parsedConfig) return null
 
   if (!imageUrl) {
     return <p className="helper-text">Hoạt động ghép ảnh chưa có ảnh nguồn.</p>
@@ -812,9 +835,9 @@ function ImagePuzzleActivity({ activity, answers, setAnswers }: ActivityComponen
   )
 }
 
-function HiddenImageGuessActivity({ activity, answers, setAnswers }: ActivityComponentProps) {
-  const config = parseActivityConfig(activity.config_json)
-  if (!config) return null
+function HiddenImageGuessActivity({ activity, answers, setAnswers }: ActivityComponentProps<StringAnswerMap>) {
+  const parsedConfig = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
+  const config = parsedConfig ?? {}
   const imageUrl = toText(config.image_url)
   const prompt = toText(config.prompt) || activity.instruction_text || 'Trong ảnh này có gì?'
   const overlayRows = Math.max(2, Number(config.overlay_rows ?? 3) || 3)
@@ -833,6 +856,8 @@ function HiddenImageGuessActivity({ activity, answers, setAnswers }: ActivityCom
   }
 
   const openedCount = revealedCells.filter(Boolean).length
+
+  if (!parsedConfig) return null
 
   if (!imageUrl) {
     return <p className="helper-text">Hoạt động mở ô đoán hình chưa có ảnh nguồn.</p>
@@ -875,7 +900,7 @@ export const MultipleChoiceActivity = React.memo(({
   setAnswers,
   presentationMode = 'standard',
   onAutoAdvance,
-}: ActivityComponentProps) => {
+}: ActivityComponentProps<StringAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const prompt = toText(config.prompt) || toText(config.audio_text) || activity.instruction_text || 'Hãy chọn đáp án đúng.'
@@ -919,7 +944,7 @@ export const MultipleChoiceActivity = React.memo(({
             className={selectedChoice === choice ? 'interactive-option interactive-option-active' : 'interactive-option'}
             aria-pressed={selectedChoice === choice}
             onClick={() => {
-              setAnswers((current: any) => ({ ...current, [activity.id]: choice }))
+              setAnswers((current) => ({ ...current, [activity.id]: choice }))
               scheduleAutoAdvance(onAutoAdvance, activity.id)
             }}
           >
@@ -936,7 +961,7 @@ export const MultipleChoiceActivity = React.memo(({
   )
 })
 
-export const MatchingActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps) => {
+export const MatchingActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps<StringArrayAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy nối các cặp phù hợp.'
@@ -957,7 +982,7 @@ export const MatchingActivity = React.memo(({ activity, answers, setAnswers }: A
               onChange={(event) => {
                 const nextAnswers = [...currentAnswers]
                 nextAnswers[index] = event.target.value
-                setAnswers((current: any) => ({ ...current, [activity.id]: nextAnswers }))
+                setAnswers((current) => ({ ...current, [activity.id]: nextAnswers }))
               }}
             >
               <option value="">Chọn cặp đúng</option>
@@ -973,7 +998,7 @@ export const MatchingActivity = React.memo(({ activity, answers, setAnswers }: A
   )
 })
 
-export const DragDropActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps) => {
+export const DragDropActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps<StringArrayAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy kéo từng mục vào đúng vị trí.'
@@ -994,7 +1019,7 @@ export const DragDropActivity = React.memo(({ activity, answers, setAnswers }: A
               onChange={(event) => {
                 const nextAnswers = [...currentAnswers]
                 nextAnswers[index] = event.target.value
-                setAnswers((current: any) => ({ ...current, [activity.id]: nextAnswers }))
+                setAnswers((current) => ({ ...current, [activity.id]: nextAnswers }))
               }}
             >
               <option value="">Chọn vị trí đích</option>
@@ -1010,7 +1035,7 @@ export const DragDropActivity = React.memo(({ activity, answers, setAnswers }: A
   )
 })
 
-export const WatchAnswerActivity = React.memo(({ activity, answers, setAnswers, presentationMode = 'standard' }: ActivityComponentProps) => {
+export const WatchAnswerActivity = React.memo(({ activity, answers, setAnswers, presentationMode = 'standard' }: ActivityComponentProps<StringAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const mediaUrl = toText(config.media_url)
@@ -1041,7 +1066,7 @@ export const WatchAnswerActivity = React.memo(({ activity, answers, setAnswers, 
       {answerMode !== 'voice_ai_grade' ? (
         <textarea
           value={answer}
-          onChange={(event) => setAnswers((current: any) => ({ ...current, [activity.id]: event.target.value }))}
+          onChange={(event) => setAnswers((current) => ({ ...current, [activity.id]: event.target.value }))}
           rows={4}
           placeholder="Em trả lời ở đây"
         />
@@ -1050,7 +1075,7 @@ export const WatchAnswerActivity = React.memo(({ activity, answers, setAnswers, 
   )
 })
 
-export const StepByStepActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps) => {
+export const StepByStepActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps<BooleanArrayAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy làm theo từng bước.'
@@ -1070,7 +1095,7 @@ export const StepByStepActivity = React.memo(({ activity, answers, setAnswers }:
               onChange={(event) => {
                 const nextAnswers = [...currentAnswers]
                 nextAnswers[index] = event.target.checked
-                setAnswers((current: any) => ({ ...current, [activity.id]: nextAnswers }))
+                setAnswers((current) => ({ ...current, [activity.id]: nextAnswers }))
               }}
             />
             <span>{step}</span>
@@ -1082,13 +1107,12 @@ export const StepByStepActivity = React.memo(({ activity, answers, setAnswers }:
   )
 })
 
-export const MemoryMatchActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
-  const config = parseActivityConfig(activity.config_json)
-  if (!config) return null
+export const MemoryMatchActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps<StringArrayAnswerMap>) => {
+  const parsedConfig = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
+  const config = parsedConfig ?? {}
   const prompt = toText(config.prompt) || activity.instruction_text || 'Lật 2 thẻ giống nhau để ghi điểm.'
   const requestedPairCount = Math.max(1, Number(config.pair_count ?? 5) || 5)
-  const cards = toImageChoiceCardArray(config.image_cards).slice(0, requestedPairCount)
-  const deckKey = cards.map((card) => `${card.id}:${card.mediaUrl}`).join('|')
+  const cards = React.useMemo(() => toImageChoiceCardArray(config.image_cards).slice(0, requestedPairCount), [config.image_cards, requestedPairCount])
   const deck = React.useMemo(
     () =>
       shuffledCopy(
@@ -1097,7 +1121,7 @@ export const MemoryMatchActivity = React.memo(({ activity, answers, setAnswers, 
           { ...card, deckId: `${card.id}-b`, pairId: card.id },
         ]),
       ),
-    [activity.id, deckKey],
+    [cards],
   )
   const matchedIds = Array.isArray(answers[activity.id]) ? answers[activity.id] : []
   const [openDeckIds, setOpenDeckIds] = React.useState<string[]>([])
@@ -1120,7 +1144,7 @@ export const MemoryMatchActivity = React.memo(({ activity, answers, setAnswers, 
 
     if (firstDeckCard.pairId === deckCard.pairId) {
       const nextMatchedIds = matchedIds.includes(deckCard.pairId) ? matchedIds : [...matchedIds, deckCard.pairId]
-      setAnswers((current: any) => ({ ...current, [activity.id]: nextMatchedIds }))
+      setAnswers((current) => ({ ...current, [activity.id]: nextMatchedIds }))
       window.setTimeout(() => setOpenDeckIds([]), 250)
       if (nextMatchedIds.length >= cards.length) {
         scheduleAutoAdvance(onAutoAdvance, activity.id)
@@ -1134,6 +1158,8 @@ export const MemoryMatchActivity = React.memo(({ activity, answers, setAnswers, 
       setIsChecking(false)
     }, 850)
   }
+
+  if (!parsedConfig) return null
 
   if (!cards.length) {
     return <p className="helper-text">Hoạt động lật thẻ chưa có ảnh.</p>
@@ -1172,12 +1198,12 @@ export const MemoryMatchActivity = React.memo(({ activity, answers, setAnswers, 
   )
 })
 
-export const QuickTapActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
-  const config = parseActivityConfig(activity.config_json)
-  if (!config) return null
+export const QuickTapActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps<StringAnswerMap>) => {
+  const parsedConfig = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
+  const config = parsedConfig ?? {}
   const prompt = toText(config.prompt) || activity.instruction_text || 'Chạm nhanh vào các thẻ con vật trước khi hết giờ.'
-  const cards = toImageChoiceCardArray(config.image_cards)
-  const distractorCards = toImageChoiceCardArray(config.distractor_cards)
+  const cards = React.useMemo(() => toImageChoiceCardArray(config.image_cards), [config.image_cards])
+  const distractorCards = React.useMemo(() => toImageChoiceCardArray(config.distractor_cards), [config.distractor_cards])
   const durationSeconds = Math.max(5, Number(config.duration_seconds ?? 10) || 10)
   const targetHits = Math.max(1, Number(config.target_hits ?? 6) || 6)
   const simultaneousCards = Math.max(1, Number(config.simultaneous_cards ?? 4) || 4)
@@ -1266,7 +1292,7 @@ export const QuickTapActivity = React.memo(({ activity, answers, setAnswers, onA
           window.clearInterval(intervalId)
           setIsRunning(false)
           clearFallingCards()
-          setAnswers((current: any) => ({ ...current, [activity.id]: `completed:${hitsRef.current}` }))
+          setAnswers((current) => ({ ...current, [activity.id]: `completed:${hitsRef.current}` }))
           scheduleAutoAdvance(onAutoAdvance, activity.id)
           return 0
         }
@@ -1296,7 +1322,7 @@ export const QuickTapActivity = React.memo(({ activity, answers, setAnswers, onA
     spawnSeedRef.current = 0
     setIsRunning(true)
     spawnWave()
-    setAnswers((current: any) => {
+    setAnswers((current) => {
       const nextAnswers = { ...current }
       delete nextAnswers[activity.id]
       return nextAnswers
@@ -1306,7 +1332,7 @@ export const QuickTapActivity = React.memo(({ activity, answers, setAnswers, onA
   function finishRound(nextHits: number) {
     setIsRunning(false)
     clearFallingCards()
-    setAnswers((current: any) => ({ ...current, [activity.id]: `completed:${nextHits}` }))
+    setAnswers((current) => ({ ...current, [activity.id]: `completed:${nextHits}` }))
     scheduleAutoAdvance(onAutoAdvance, activity.id)
   }
 
@@ -1332,7 +1358,7 @@ export const QuickTapActivity = React.memo(({ activity, answers, setAnswers, onA
       spawnSeedRef.current = 0
       setIsRunning(true)
       spawnWave()
-      setAnswers((current: any) => {
+      setAnswers((current) => {
         const nextAnswers = { ...current }
         delete nextAnswers[activity.id]
         return nextAnswers
@@ -1350,6 +1376,8 @@ export const QuickTapActivity = React.memo(({ activity, answers, setAnswers, onA
       finishRound(nextHits)
     }
   }
+
+  if (!parsedConfig) return null
 
   if (!cards.length) {
     return <p className="helper-text">Hoạt động chạm nhanh chưa có ảnh.</p>
@@ -1393,11 +1421,11 @@ export const QuickTapActivity = React.memo(({ activity, answers, setAnswers, onA
   )
 })
 
-export const SizeOrderActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
-  const config = parseActivityConfig(activity.config_json)
-  if (!config) return null
+export const SizeOrderActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps<StringArrayAnswerMap>) => {
+  const parsedConfig = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
+  const config = parsedConfig ?? {}
   const prompt = toText(config.prompt) || activity.instruction_text || 'Sắp xếp các con vật từ bé đến lớn.'
-  const items = toOrderedImageItemArray(config.items)
+  const items = React.useMemo(() => toOrderedImageItemArray(config.items), [config.items])
   const correctOrder: string[] = [...items].sort((left, right) => left.rank - right.rank).map((item) => item.id)
   const currentOrder: string[] = Array.isArray(answers[activity.id]) ? answers[activity.id].filter((item: unknown): item is string => typeof item === 'string') : []
   const [draggingItemId, setDraggingItemId] = React.useState<string | null>(null)
@@ -1406,7 +1434,7 @@ export const SizeOrderActivity = React.memo(({ activity, answers, setAnswers, on
   const isFilled = currentOrder.length === correctOrder.length
 
   function updateOrder(nextOrder: string[]) {
-    setAnswers((current: any) => ({ ...current, [activity.id]: nextOrder }))
+    setAnswers((current) => ({ ...current, [activity.id]: nextOrder }))
     if (nextOrder.length === correctOrder.length) {
       scheduleAutoAdvance(onAutoAdvance, activity.id)
     }
@@ -1427,6 +1455,8 @@ export const SizeOrderActivity = React.memo(({ activity, answers, setAnswers, on
     }
     updateOrder(compactOrder.slice(0, items.length))
   }
+
+  if (!parsedConfig) return null
 
   if (!items.length) {
     return <p className="helper-text">Hoạt động sắp xếp chưa có ảnh.</p>
@@ -1504,36 +1534,26 @@ export const SizeOrderActivity = React.memo(({ activity, answers, setAnswers, on
   )
 })
 
-export const HabitatMatchActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
-  const config = parseActivityConfig(activity.config_json)
-  if (!config) return null
+export const HabitatMatchActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps<StringArrayAnswerMap>) => {
+  const parsedConfig = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
+  const config = parsedConfig ?? {}
   const prompt = toText(config.prompt) || activity.instruction_text || 'Nối con vật với nơi sống phù hợp.'
-  const items = React.useMemo(() => toHabitatMatchItemArray(config.items), [config])
-  const habitatOptions = React.useMemo(() => toHabitatOptionArray(config.habitat_cards, config.habitats), [config])
+  const items = React.useMemo(() => toHabitatMatchItemArray(config.items), [config.items])
+  const habitatOptions = React.useMemo(() => toHabitatOptionArray(config.habitat_cards, config.habitats), [config.habitat_cards, config.habitats])
   const storedAnswers = Array.isArray(answers[activity.id]) ? answers[activity.id] : []
   const currentAnswers = items.map((__, index) => toText(storedAnswers[index]))
-  const [activeItemIndex, setActiveItemIndex] = React.useState<number | null>(null)
-  const [draggingItemIndex, setDraggingItemIndex] = React.useState<number | null>(null)
   const correctCount = currentAnswers.filter((answer: string, index: number) => answer === items[index]?.habitatId).length
   const isComplete = items.length > 0 && correctCount === items.length
   function updateMatch(index: number, habitatId: string) {
     const nextAnswers = [...currentAnswers]
     nextAnswers[index] = habitatId
-    setAnswers((current: any) => ({ ...current, [activity.id]: nextAnswers }))
+    setAnswers((current) => ({ ...current, [activity.id]: nextAnswers }))
     if (nextAnswers.length >= items.length && nextAnswers.every((answer, answerIndex) => answer === items[answerIndex]?.habitatId)) {
       scheduleAutoAdvance(onAutoAdvance, activity.id)
     }
   }
 
-  function connectActiveItem(habitatId: string) {
-    if (activeItemIndex === null) return
-    updateMatch(activeItemIndex, habitatId)
-    setActiveItemIndex(null)
-  }
-
-  void draggingItemIndex
-  void setDraggingItemIndex
-  void connectActiveItem
+  if (!parsedConfig) return null
 
   if (!items.length) {
     return <p className="helper-text">Hoạt động ghép nơi sống chưa có ảnh.</p>
@@ -1565,12 +1585,12 @@ export const HabitatMatchActivity = React.memo(({ activity, answers, setAnswers,
   )
 })
 
-export const HabitatConnectActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
-  const config = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
-  if (!config) return null
-  const prompt = toText(config.prompt) || activity.instruction_text || 'Ná»‘i con váº­t vá»›i nÆ¡i sá»‘ng phÃ¹ há»£p.'
-  const items = React.useMemo(() => toHabitatMatchItemArray(config.items), [config])
-  const habitatOptions = React.useMemo(() => toHabitatOptionArray(config.habitat_cards, config.habitats), [config])
+export const HabitatConnectActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps<StringArrayAnswerMap>) => {
+  const parsedConfig = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
+  const config = parsedConfig ?? {}
+  const prompt = toText(config.prompt) || activity.instruction_text || 'Nối con vật với nơi sống phù hợp.'
+  const items = React.useMemo(() => toHabitatMatchItemArray(config.items), [config.items])
+  const habitatOptions = React.useMemo(() => toHabitatOptionArray(config.habitat_cards, config.habitats), [config.habitat_cards, config.habitats])
   const storedAnswers = Array.isArray(answers[activity.id]) ? answers[activity.id] : []
   const currentAnswers = items.map((__, index) => toText(storedAnswers[index]))
   const [activeItemIndex, setActiveItemIndex] = React.useState<number | null>(null)
@@ -1580,7 +1600,6 @@ export const HabitatConnectActivity = React.memo(({ activity, answers, setAnswer
   const boardRef = React.useRef<HTMLDivElement | null>(null)
   const animalRefs = React.useRef<Array<HTMLButtonElement | null>>([])
   const habitatRefs = React.useRef<Record<string, HTMLButtonElement | null>>({})
-  const answerKey = currentAnswers.join('|')
   const [connectorLines, setConnectorLines] = React.useState<Array<{
     key: string
     x1: number
@@ -1643,12 +1662,12 @@ export const HabitatConnectActivity = React.memo(({ activity, answers, setAnswer
       resizeObserver?.disconnect()
       window.removeEventListener('resize', refreshLines)
     }
-  }, [answerKey, habitatOptions.length, items])
+  }, [currentAnswers, habitatOptions.length, items])
 
   function updateMatch(index: number, habitatId: string) {
     const nextAnswers = [...currentAnswers]
     nextAnswers[index] = habitatId
-    setAnswers((current: any) => ({ ...current, [activity.id]: nextAnswers }))
+    setAnswers((current) => ({ ...current, [activity.id]: nextAnswers }))
     if (nextAnswers.length >= items.length && nextAnswers.every((answer, answerIndex) => answer === items[answerIndex]?.habitatId)) {
       scheduleAutoAdvance(onAutoAdvance, activity.id)
     }
@@ -1660,8 +1679,10 @@ export const HabitatConnectActivity = React.memo(({ activity, answers, setAnswer
     setActiveItemIndex(null)
   }
 
+  if (!parsedConfig) return null
+
   if (!items.length) {
-    return <p className="helper-text">Hoáº¡t Ä‘á»™ng ghÃ©p nÆ¡i sá»‘ng chÆ°a cÃ³ áº£nh.</p>
+    return <p className="helper-text">Hoạt động ghép nơi sống chưa có ảnh.</p>
   }
 
   return (
@@ -1763,13 +1784,13 @@ export const HabitatConnectActivity = React.memo(({ activity, answers, setAnswer
         </div>
       </div>
       <p className={isComplete ? 'feedback-note feedback-note-success' : 'feedback-note'}>
-        ÄÃºng {correctCount}/{items.length} con váº­t.
+        Đúng {correctCount}/{items.length} con vật.
       </p>
     </div>
   )
 })
 
-export const AACActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps) => {
+export const AACActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps<StringAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy chọn thẻ phù hợp.'
@@ -1791,7 +1812,7 @@ export const AACActivity = React.memo(({ activity, answers, setAnswers, onAutoAd
               aria-pressed={selectedCard === card.id}
               aria-label={card.label}
               onClick={() => {
-                setAnswers((current: any) => ({ ...current, [activity.id]: card.id }))
+                setAnswers((current) => ({ ...current, [activity.id]: card.id }))
                 scheduleAutoAdvance(onAutoAdvance, activity.id)
               }}
             >
@@ -1817,7 +1838,7 @@ export const AACActivity = React.memo(({ activity, answers, setAnswers, onAutoAd
             className={selectedCard === card ? 'interactive-option interactive-option-active' : 'interactive-option'}
             aria-pressed={selectedCard === card}
             onClick={() => {
-              setAnswers((current: any) => ({ ...current, [activity.id]: card }))
+              setAnswers((current) => ({ ...current, [activity.id]: card }))
               scheduleAutoAdvance(onAutoAdvance, activity.id)
             }}
           >
@@ -1830,7 +1851,7 @@ export const AACActivity = React.memo(({ activity, answers, setAnswers, onAutoAd
   )
 })
 
-export const CareerSimulationActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps) => {
+export const CareerSimulationActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps<StringAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const scenario = toText(config.scenario) || 'Chưa có tình huống mô phỏng.'
@@ -1843,7 +1864,7 @@ export const CareerSimulationActivity = React.memo(({ activity, answers, setAnsw
       {successCriteria ? <p className="helper-text">Tiêu chí hoàn thành: {successCriteria}</p> : null}
       <textarea
         value={answer}
-        onChange={(event) => setAnswers((current: any) => ({ ...current, [activity.id]: event.target.value }))}
+        onChange={(event) => setAnswers((current) => ({ ...current, [activity.id]: event.target.value }))}
         rows={4}
         placeholder="Em sẽ làm gì trong tình huống này?"
       />
@@ -1851,7 +1872,7 @@ export const CareerSimulationActivity = React.memo(({ activity, answers, setAnsw
   )
 })
 
-export const AIChatActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps) => {
+export const AIChatActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps<StringAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const starterPrompt = toText(config.starter_prompt) || 'Hãy bắt đầu trao đổi ngắn với trợ lý.'
@@ -1870,7 +1891,7 @@ export const AIChatActivity = React.memo(({ activity, answers, setAnswers }: Act
       ) : null}
       <textarea
         value={answer}
-        onChange={(event) => setAnswers((current: any) => ({ ...current, [activity.id]: event.target.value }))}
+        onChange={(event) => setAnswers((current) => ({ ...current, [activity.id]: event.target.value }))}
         rows={4}
         placeholder="Em nhập câu trả lời thử ở đây"
       />
@@ -1886,8 +1907,8 @@ export const ActivityCard = React.memo(({
   onAutoAdvance,
 }: {
   activity: LessonActivityItem
-  answers: any
-  setAnswers: any
+  answers: ActivityAnswerBucket
+  setAnswers: ActivityAnswerSetterBucket
   presentationMode?: ActivityPresentationMode
   onAutoAdvance?: (activityId: number) => void
 }) => {
