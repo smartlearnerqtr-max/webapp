@@ -50,38 +50,38 @@ def build_learning_prompt(message: str, context: dict[str, Any] | None = None) -
     context = context or {}
     target_role = context.get('target_role') or 'student'
     disability_level = context.get('disability_level') or 'trung_binh'
-    lesson_title = context.get('lesson_title') or 'khong ro bai hoc'
-    subject_name = context.get('subject_name') or 'khong ro mon hoc'
-    activity_type = context.get('activity_type') or 'tuong tac tu do'
+    lesson_title = context.get('lesson_title') or 'không rõ bài học'
+    subject_name = context.get('subject_name') or 'không rõ môn học'
+    activity_type = context.get('activity_type') or 'tương tác tự do'
 
     system_prompt = (
-        'Ban la tro ly hoc tap cho webapp Ban hoc thong minh. '
-        'Hay tra loi ngan gon, de hieu, than thien, uu tien cau ngan va tu ngữ don gian. '
-        'Neu nguoi dung la hoc sinh khuyet tat, hay chia nho huong dan thanh tung buoc ngan, '
-        'khong dung cau qua dai va khong dua nhieu lua chon phuc tap cung luc.'
+        'Bạn là trợ lý học tập cho webapp Bạn học thông minh. '
+        'Hãy trả lời ngắn gọn, dễ hiểu, thân thiện, ưu tiên câu ngắn và từ ngữ đơn giản. '
+        'Nếu người dùng là học sinh khuyết tật, hãy chia nhỏ hướng dẫn thành từng bước ngắn, '
+        'không dùng câu quá dài và không đưa nhiều lựa chọn phức tạp cùng lúc.'
     )
 
     if activity_type == 'career_guidance_voice':
         system_prompt += (
-            ' Rieng voi huong nghiep bang giong noi: chi tra loi nhu dang noi chuyen, '
-            'moi lan toi da 2 cau rat ngan, tong do dai uu tien duoi 24 tu. '
-            'Cau dau dua ra 1 goi y ro rang. Cau sau chi hoi tiep 1 y ngan de hieu so thich cua hoc sinh. '
-            'Goi y nghe nghiep an toan, gan voi so thich va kha nang, khong dua ket luan tuyet doi. '
-            'Tuyet doi chi dung tieng Viet tu nhien, khong chen tieng Anh, khong viet song ngu, '
-            'khong dung ky hieu dac biet va khong dung markdown. '
-            'Neu can nhac ten nghe, phai dung ten tieng Viet: nha thiet ke thay cho designer, '
-            'lap trinh vien thay cho developer, nguoi sang tao noi dung thay cho content creator.'
+            ' Riêng với hướng nghiệp bằng giọng nói: chỉ trả lời như đang nói chuyện, '
+            'mỗi lần tối đa 2 câu rất ngắn, tổng độ dài ưu tiên dưới 24 từ. '
+            'Câu đầu đưa ra 1 gợi ý rõ ràng. Câu sau chỉ hỏi tiếp 1 ý ngắn để hiểu sở thích của học sinh. '
+            'Gợi ý nghề nghiệp an toàn, gần với sở thích và khả năng, không đưa kết luận tuyệt đối. '
+            'Tuyệt đối chỉ dùng tiếng Việt tự nhiên, không chèn tiếng Anh, không viết song ngữ, '
+            'không dùng ký hiệu đặc biệt và không dùng markdown. '
+            'Nếu cần nhắc tên nghề, phải dùng tên tiếng Việt: nhà thiết kế thay cho designer, '
+            'lập trình viên thay cho developer, người sáng tạo nội dung thay cho content creator.'
         )
 
     user_prompt = (
-        f'Vai tro nguoi nhan ho tro: {target_role}.\n'
-        f'Muc do ho tro chinh: {disability_level}.\n'
-        f'Mon hoc: {subject_name}.\n'
-        f'Bai hoc: {lesson_title}.\n'
-        f'Loai hoat dong: {activity_type}.\n'
-        'Yeu cau: neu la giai thich bai hoc thi can ro rang, co vi du ngan; '
-        'neu la nhac nho hoc sinh thi giu giong dong vien.\n\n'
-        f'Tin nhan nguoi dung: {message.strip()}'
+        f'Vai trò người nhận hỗ trợ: {target_role}.\n'
+        f'Mức độ hỗ trợ chính: {disability_level}.\n'
+        f'Môn học: {subject_name}.\n'
+        f'Bài học: {lesson_title}.\n'
+        f'Loại hoạt động: {activity_type}.\n'
+        'Yêu cầu: nếu là giải thích bài học thì cần rõ ràng, có ví dụ ngắn; '
+        'nếu là nhắc nhở học sinh thì giữ giọng động viên.\n\n'
+        f'Tin nhắn người dùng: {message.strip()}'
     )
     return system_prompt, user_prompt
 
@@ -95,7 +95,7 @@ def _extract_text(response_payload: dict[str, Any]) -> str:
         combined = '\n'.join(part for part in text_parts if part)
         if combined:
             return combined
-    raise GeminiServiceError('Gemini khong tra ve noi dung text hop le', 'GEMINI_EMPTY_RESPONSE', 502, response_payload)
+    raise GeminiServiceError('Gemini không trả về nội dung text hợp lệ', 'GEMINI_EMPTY_RESPONSE', 502, response_payload)
 
 
 def _extract_audio_inline_data(response_payload: dict[str, Any]) -> tuple[bytes, str]:
@@ -112,12 +112,12 @@ def _extract_audio_inline_data(response_payload: dict[str, Any]) -> tuple[bytes,
                     return base64.b64decode(encoded_audio), mime_type
                 except (ValueError, TypeError) as exc:
                     raise GeminiServiceError(
-                        'Khong giai ma duoc audio tu Gemini',
+                        'Không giải mã được audio từ Gemini',
                         'GEMINI_AUDIO_DECODE_ERROR',
                         502,
                         {'mime_type': mime_type},
                     ) from exc
-    raise GeminiServiceError('Gemini khong tra ve audio hop le', 'GEMINI_EMPTY_AUDIO', 502, response_payload)
+    raise GeminiServiceError('Gemini không trả về audio hợp lệ', 'GEMINI_EMPTY_AUDIO', 502, response_payload)
 
 
 def _pcm_rate_from_mime_type(mime_type: str) -> int:
@@ -219,7 +219,7 @@ def _build_payload(*, system_prompt: str, user_prompt: str, temperature: float =
 
 def _request_payload_once(*, api_key: str, model_name: str, payload: dict[str, Any], timeout: int = DEFAULT_TIMEOUT_SECONDS) -> dict[str, Any]:
     if not api_key.strip():
-        raise GeminiServiceError('Gemini API key khong hop le', 'GEMINI_KEY_INVALID', 422)
+        raise GeminiServiceError('Gemini API key không hợp lệ', 'GEMINI_KEY_INVALID', 422)
 
     req = request.Request(
         url=f'{GEMINI_API_BASE_URL}/models/{model_name}:generateContent',
@@ -238,7 +238,7 @@ def _request_payload_once(*, api_key: str, model_name: str, payload: dict[str, A
     except error.HTTPError as exc:
         raw_body = exc.read().decode('utf-8', errors='ignore') if hasattr(exc, 'read') else ''
         details: dict[str, Any] = {'status': exc.code, 'body': raw_body[:1000]}
-        message_text = 'Gemini tra ve loi khong xac dinh'
+        message_text = 'Gemini trả về lỗi không xác định'
         try:
             parsed = json.loads(raw_body) if raw_body else {}
             api_error = parsed.get('error') or {}
@@ -256,9 +256,9 @@ def _request_payload_once(*, api_key: str, model_name: str, payload: dict[str, A
             error_code = 'GEMINI_API_ERROR'
         raise GeminiServiceError(message_text, error_code, exc.code, details) from exc
     except TimeoutError as exc:
-        raise GeminiServiceError('Ket noi Gemini API bi qua thoi gian cho', 'GEMINI_NETWORK_ERROR', 504, {'reason': str(exc)}) from exc
+        raise GeminiServiceError('Kết nối Gemini API bị quá thời gian chờ', 'GEMINI_NETWORK_ERROR', 504, {'reason': str(exc)}) from exc
     except error.URLError as exc:
-        raise GeminiServiceError('Khong the ket noi Gemini API', 'GEMINI_NETWORK_ERROR', 502, {'reason': str(exc.reason)}) from exc
+        raise GeminiServiceError('Không thể kết nối Gemini API', 'GEMINI_NETWORK_ERROR', 502, {'reason': str(exc.reason)}) from exc
 
     return response_payload
 
@@ -290,7 +290,7 @@ def _generate_payload(
 ) -> GeminiResult:
     resolved_api_keys = _normalize_api_keys(api_key, api_keys)
     if not resolved_api_keys:
-        raise GeminiServiceError('Gemini API key khong hop le', 'GEMINI_KEY_INVALID', 422)
+        raise GeminiServiceError('Gemini API key không hợp lệ', 'GEMINI_KEY_INVALID', 422)
 
     last_error: GeminiServiceError | None = None
     retry_delays = (0.75, 1.75)
@@ -322,7 +322,7 @@ def _generate_payload(
     if last_error is not None:
         raise last_error
 
-    raise GeminiServiceError('Khong the tao phan hoi tu Gemini', 'GEMINI_API_ERROR', 502)
+    raise GeminiServiceError('Không thể tạo phản hồi từ Gemini', 'GEMINI_API_ERROR', 502)
 
 
 def generate_text(
@@ -335,7 +335,7 @@ def generate_text(
     timeout: int = DEFAULT_TTS_TIMEOUT_SECONDS,
 ) -> GeminiResult:
     if not message.strip():
-        raise GeminiServiceError('Noi dung gui Gemini khong duoc de trong', 'VALIDATION_ERROR', 422)
+        raise GeminiServiceError('Nội dung gửi Gemini không được để trống', 'VALIDATION_ERROR', 422)
 
     system_prompt, user_prompt = build_learning_prompt(message, context)
     payload = _build_payload(system_prompt=system_prompt, user_prompt=user_prompt)
@@ -360,7 +360,7 @@ def generate_text_with_prompts(
     max_output_tokens: int = 512,
 ) -> GeminiResult:
     if not system_prompt.strip() or not user_prompt.strip():
-        raise GeminiServiceError('Prompt gui Gemini khong hop le', 'VALIDATION_ERROR', 422)
+        raise GeminiServiceError('Prompt gửi Gemini không hợp lệ', 'VALIDATION_ERROR', 422)
 
     payload = _build_payload(
         system_prompt=system_prompt,
@@ -388,7 +388,7 @@ def generate_speech_wav(
 ) -> GeminiAudioResult:
     clean_text = text.strip()
     if not clean_text:
-        raise GeminiServiceError('Noi dung doc khong duoc de trong', 'VALIDATION_ERROR', 422)
+        raise GeminiServiceError('Nội dung đọc không được để trống', 'VALIDATION_ERROR', 422)
 
     clean_voice_name = voice_name.strip() or 'Kore'
     payload = {
@@ -419,7 +419,7 @@ def generate_speech_wav(
 
     resolved_api_keys = _normalize_api_keys(api_key, api_keys)
     if not resolved_api_keys:
-        raise GeminiServiceError('Gemini API key khong hop le', 'GEMINI_KEY_INVALID', 422)
+        raise GeminiServiceError('Gemini API key không hợp lệ', 'GEMINI_KEY_INVALID', 422)
 
     last_error: GeminiServiceError | None = None
     key_entries = list(enumerate(resolved_api_keys))
@@ -455,4 +455,4 @@ def generate_speech_wav(
     if last_error is not None:
         raise last_error
 
-    raise GeminiServiceError('Khong the tao audio tu Gemini', 'GEMINI_API_ERROR', 502)
+    raise GeminiServiceError('Không thể tạo audio từ Gemini', 'GEMINI_API_ERROR', 502)

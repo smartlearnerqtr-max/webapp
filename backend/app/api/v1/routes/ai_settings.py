@@ -99,11 +99,11 @@ def _build_ai_settings_payload() -> dict[str, object]:
     key_count = len(api_keys)
 
     if not api_keys:
-        api_key_masked = 'Chua cau hinh trong .env'
+        api_key_masked = 'Chưa cấu hình trong .env'
     elif key_count == 1:
         api_key_masked = _mask_key(api_keys[0])
     else:
-        api_key_masked = f'{key_count} API key dang duoc quan ly trong .env'
+        api_key_masked = f'{key_count} API key đang được quản lý trong .env'
 
     return {
         'provider': 'gemini',
@@ -123,7 +123,7 @@ def _build_ai_settings_payload() -> dict[str, object]:
 def get_ai_settings():
     user = _current_user()
     if not user:
-        return error_response('Khong tim thay nguoi dung', 'USER_NOT_FOUND', 404)
+        return error_response('Không tìm thấy người dùng', 'USER_NOT_FOUND', 404)
     return success_response(_build_ai_settings_payload())
 
 
@@ -132,8 +132,8 @@ def get_ai_settings():
 def save_ai_settings():
     user = _current_user()
     if not user:
-        return error_response('Khong tim thay nguoi dung', 'USER_NOT_FOUND', 404)
-    return error_response('API key duoc quan ly tai server .env, khong cho phep sua tu giao dien', 'AI_SETTINGS_READ_ONLY', 405)
+        return error_response('Không tìm thấy người dùng', 'USER_NOT_FOUND', 404)
+    return error_response('API key được quản lý tại server .env, không cho phép sửa từ giao diện', 'AI_SETTINGS_READ_ONLY', 405)
 
 
 @api_v1.post('/ai/settings/test')
@@ -141,11 +141,11 @@ def save_ai_settings():
 def test_ai_settings():
     user = _current_user()
     if not user:
-        return error_response('Khong tim thay nguoi dung', 'USER_NOT_FOUND', 404)
+        return error_response('Không tìm thấy người dùng', 'USER_NOT_FOUND', 404)
 
     api_keys = _configured_api_keys()
     if not api_keys:
-        return error_response('Chua cau hinh Gemini API key trong .env', 'GEMINI_KEY_MISSING', 404)
+        return error_response('Chưa cấu hình Gemini API key trong .env', 'GEMINI_KEY_MISSING', 404)
 
     model_name = _configured_model_name()
 
@@ -153,14 +153,14 @@ def test_ai_settings():
         result = generate_text(
             api_keys=api_keys,
             model_name=model_name,
-            message='Hay tra loi chinh xac mot tu: OK',
+            message='Hãy trả lời chính xác một từ: OK',
             context={'target_role': user.role},
         )
     except GeminiServiceError as exc:
         log_server_event(
             level='error',
             module='ai_settings',
-            message='Test Gemini settings that bai',
+            message='Test Gemini settings thất bại',
             error_code=exc.error_code,
             action_name='test_ai_settings_failed',
             user_id=user.id,
@@ -171,7 +171,7 @@ def test_ai_settings():
     log_server_event(
         level='info',
         module='ai_settings',
-        message='Test Gemini settings thanh cong',
+        message='Test Gemini settings thành công',
         action_name='test_ai_settings',
         user_id=user.id,
         metadata={'model_name': result.model_name, 'key_count': len(api_keys), 'rotation_enabled': len(api_keys) > 1},
@@ -186,7 +186,7 @@ def test_ai_settings():
             'key_count': len(api_keys),
             'rotation_enabled': len(api_keys) > 1,
         },
-        'Da kiem tra cau hinh Gemini',
+        'Đã kiểm tra cấu hình Gemini',
     )
 
 
@@ -195,16 +195,16 @@ def test_ai_settings():
 def chat_with_ai():
     user = _current_user()
     if not user:
-        return error_response('Khong tim thay nguoi dung', 'USER_NOT_FOUND', 404)
+        return error_response('Không tìm thấy người dùng', 'USER_NOT_FOUND', 404)
 
     api_keys = _configured_api_keys()
     if not api_keys:
-        return error_response('Chua cau hinh Gemini API key trong .env', 'GEMINI_KEY_MISSING', 404)
+        return error_response('Chưa cấu hình Gemini API key trong .env', 'GEMINI_KEY_MISSING', 404)
 
     payload = request.get_json(silent=True) or {}
     message = (payload.get('message') or '').strip()
     if not message:
-        return error_response('Noi dung cau hoi khong duoc de trong', 'VALIDATION_ERROR', 422)
+        return error_response('Nội dung câu hỏi không được để trống', 'VALIDATION_ERROR', 422)
 
     context = payload.get('context') or {}
     context.setdefault('target_role', user.role)
@@ -220,7 +220,7 @@ def chat_with_ai():
         log_server_event(
             level='error',
             module='ai_chat',
-            message='Goi Gemini that bai',
+            message='Gọi Gemini thất bại',
             error_code=exc.error_code,
             action_name='ai_chat_failed',
             user_id=user.id,
@@ -231,7 +231,7 @@ def chat_with_ai():
     log_server_event(
         level='info',
         module='ai_chat',
-        message='Goi Gemini thanh cong',
+        message='Gọi Gemini thành công',
         action_name='ai_chat_success',
         user_id=user.id,
         metadata={'model_name': result.model_name, 'key_count': len(api_keys), 'rotation_enabled': len(api_keys) > 1},
@@ -243,7 +243,7 @@ def chat_with_ai():
             'usage_metadata': result.usage_metadata,
             'prompt_feedback': result.prompt_feedback,
         },
-        'Lay phan hoi AI thanh cong',
+        'Lấy phản hồi AI thành công',
     )
 
 
@@ -252,12 +252,12 @@ def chat_with_ai():
 def synthesize_ai_speech():
     user = _current_user()
     if not user:
-        return error_response('Khong tim thay nguoi dung', 'USER_NOT_FOUND', 404)
+        return error_response('Không tìm thấy người dùng', 'USER_NOT_FOUND', 404)
 
     payload = request.get_json(silent=True) or {}
     text = str(payload.get('text') or '').strip()
     if not text:
-        return error_response('Noi dung can doc khong duoc de trong', 'VALIDATION_ERROR', 422)
+        return error_response('Nội dung cần đọc không được để trống', 'VALIDATION_ERROR', 422)
 
     try:
         audio_bytes = synthesize_vietnamese_mp3(
@@ -270,7 +270,7 @@ def synthesize_ai_speech():
         log_server_event(
             level='error',
             module='ai_speech',
-            message='Tao audio huong dan bang Edge TTS that bai',
+            message='Tạo audio hướng dẫn bằng Edge TTS thất bại',
             error_code='EDGE_TTS_FAILED',
             action_name='ai_speech_failed',
             user_id=user.id,
@@ -281,7 +281,7 @@ def synthesize_ai_speech():
     log_server_event(
         level='info',
         module='ai_speech',
-        message='Tao audio huong dan bang Edge TTS thanh cong',
+        message='Tạo audio hướng dẫn bằng Edge TTS thành công',
         action_name='ai_speech_success',
         user_id=user.id,
         metadata={'voice_name': current_app.config.get('EDGE_TTS_VOICE_NAME'), 'text_length': len(text)},
@@ -301,7 +301,7 @@ def synthesize_ai_speech():
 def grade_ai_answer():
     user = _current_user()
     if not user:
-        return error_response('Khong tim thay nguoi dung', 'USER_NOT_FOUND', 404)
+        return error_response('Không tìm thấy người dùng', 'USER_NOT_FOUND', 404)
 
     payload = request.get_json(silent=True) or {}
     transcript = str(payload.get('transcript') or '').strip()
@@ -313,9 +313,9 @@ def grade_ai_answer():
     media_url = str(payload.get('media_url') or '').strip()
 
     if not transcript:
-        return error_response('Noi dung nhan dien giong noi dang trong', 'VALIDATION_ERROR', 422)
+        return error_response('Nội dung nhận diện giọng nói đang trống', 'VALIDATION_ERROR', 422)
     if not expected_answer:
-        return error_response('Thieu dap an mau de cham', 'VALIDATION_ERROR', 422)
+        return error_response('Thiếu đáp án mẫu để chấm', 'VALIDATION_ERROR', 422)
 
     all_expected_answers = [expected_answer, *accepted_answers]
     normalized_transcript = _normalize_answer_text(transcript)
@@ -327,9 +327,9 @@ def grade_ai_answer():
 
     rule_grade, rule_is_correct, rule_match = _rule_grade_answer(normalized_transcript, normalized_expected_answers)
     fallback_feedback = (
-        'Cau tra loi cua em trung voi dap an mong doi.'
+        'Câu trả lời của em trùng với đáp án mong đợi.'
         if rule_is_correct
-        else 'AI chua tu tin day la dap an dung. Em thu noi lai ngan gon hon nhe.'
+        else 'AI chưa tự tin đây là đáp án đúng. Em thử nói lại ngắn gọn hơn nhé.'
     )
 
     api_keys = _configured_api_keys()
@@ -347,7 +347,7 @@ def grade_ai_answer():
                 'source': 'fallback',
                 'model_name': None,
             },
-            'Da cham cau tra loi bang quy tac du phong',
+            'Đã chấm câu trả lời bằng quy tắc dự phòng',
         )
 
     system_prompt = (
@@ -359,10 +359,10 @@ def grade_ai_answer():
         'Treat minor filler words as acceptable when meaning still matches the expected answer.'
     )
     user_prompt = (
-        f'Question: {question or "Khong co cau hoi bo sung"}\n'
-        f'Lesson title: {lesson_title or "Khong ro bai hoc"}\n'
+        f'Question: {question or "Không có câu hỏi bổ sung"}\n'
+        f'Lesson title: {lesson_title or "Không rõ bài học"}\n'
         f'Activity type: {activity_type}\n'
-        f'Media URL: {media_url or "Khong co"}\n'
+        f'Media URL: {media_url or "Không có"}\n'
         f'Student transcript: {transcript}\n'
         f'Expected answer: {expected_answer}\n'
         f'Accepted answers: {json.dumps(all_expected_answers, ensure_ascii=False)}\n'
@@ -391,12 +391,12 @@ def grade_ai_answer():
         if is_correct and grade == 'incorrect':
             grade = 'correct'
         if rule_is_correct and not feedback:
-            feedback = 'Cau tra loi cua em dung roi.'
+            feedback = 'Câu trả lời của em đúng rồi.'
 
         log_server_event(
             level='info',
             module='ai_grade_answer',
-            message='Cham cau tra loi bang Gemini thanh cong',
+            message='Chấm câu trả lời bằng Gemini thành công',
             action_name='ai_grade_answer_success',
             user_id=user.id,
             metadata={
@@ -417,14 +417,14 @@ def grade_ai_answer():
                 'source': 'gemini',
                 'model_name': result.model_name,
             },
-            'Da cham cau tra loi bang AI',
+            'Đã chấm câu trả lời bằng AI',
         )
     except (GeminiServiceError, ValueError, json.JSONDecodeError) as exc:
         error_message = exc.message if isinstance(exc, GeminiServiceError) else str(exc)
         log_server_event(
             level='warning',
             module='ai_grade_answer',
-            message='Cham cau tra loi bang Gemini that bai, chuyen sang quy tac du phong',
+            message='Chấm câu trả lời bằng Gemini thất bại, chuyển sang quy tắc dự phòng',
             error_code=exc.error_code if isinstance(exc, GeminiServiceError) else 'AI_GRADE_PARSE_ERROR',
             action_name='ai_grade_answer_fallback',
             user_id=user.id,
@@ -446,7 +446,7 @@ def grade_ai_answer():
                 'source': 'fallback',
                 'model_name': model_name,
             },
-            'Da cham cau tra loi bang quy tac du phong',
+            'Đã chấm câu trả lời bằng quy tắc dự phòng',
         )
 
 
@@ -455,5 +455,5 @@ def grade_ai_answer():
 def delete_ai_settings():
     user = _current_user()
     if not user:
-        return error_response('Khong tim thay nguoi dung', 'USER_NOT_FOUND', 404)
-    return error_response('API key duoc quan ly tai server .env, khong cho phep xoa tu giao dien', 'AI_SETTINGS_READ_ONLY', 405)
+        return error_response('Không tìm thấy người dùng', 'USER_NOT_FOUND', 404)
+    return error_response('API key được quản lý tại server .env, không cho phép xóa từ giao diện', 'AI_SETTINGS_READ_ONLY', 405)

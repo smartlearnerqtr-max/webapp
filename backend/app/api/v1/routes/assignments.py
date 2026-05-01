@@ -32,19 +32,19 @@ def _current_user():
 
 def _require_teacher_user():
     if get_jwt().get("role") != "teacher":
-        return None, error_response("Khong co quyen truy cap", "AUTH_FORBIDDEN", 403)
+        return None, error_response("Không có quyền truy cập", "AUTH_FORBIDDEN", 403)
     user = _current_user()
     if not user or not user.teacher_profile:
-        return None, error_response("Khong tim thay giao vien", "TEACHER_NOT_FOUND", 404)
+        return None, error_response("Không tìm thấy giáo viên", "TEACHER_NOT_FOUND", 404)
     return user, None
 
 
 def _require_student_user():
     if get_jwt().get("role") != "student":
-        return None, error_response("Khong co quyen truy cap", "AUTH_FORBIDDEN", 403)
+        return None, error_response("Không có quyền truy cập", "AUTH_FORBIDDEN", 403)
     user = _current_user()
     if not user or not user.student_profile:
-        return None, error_response("Khong tim thay hoc sinh", "STUDENT_NOT_FOUND", 404)
+        return None, error_response("Không tìm thấy học sinh", "STUDENT_NOT_FOUND", 404)
     return user, None
 
 
@@ -57,6 +57,15 @@ def _get_teacher_assignment(assignment_id: int, teacher_id: int) -> LessonAssign
 
 def _get_active_class_student_ids(classroom: Classroom) -> list[int]:
     return [link.student_id for link in classroom.students if link.status == 'active']
+
+
+def _get_active_class_students(classroom: Classroom) -> list[StudentProfile]:
+    students: list[StudentProfile] = []
+    for link in classroom.students:
+        if link.status != 'active' or not link.student:
+            continue
+        students.append(link.student)
+    return students
 
 
 def _get_student_user_ids(student_ids: list[int]) -> list[int]:
@@ -103,7 +112,7 @@ def _publish_assignment_progress_event(progress: StudentLessonProgress, event_ty
     publish_realtime_event(
         event_type,
         message,
-        title='Cap nhat tien do',
+        title='Cập nhật tiến độ',
         recipient_user_ids=sorted(recipient_ids),
         payload={
             'assignment_id': progress.assignment_id,
@@ -121,19 +130,19 @@ def _calculate_readiness(progress: StudentLessonProgress) -> dict[str, object]:
 
     if progress.status != 'completed' and progress.help_count >= 3:
         status = 'can_ho_tro_them'
-        reasons.append('Hoc sinh can tro giup nhieu trong khi bai hoc chua hoan thanh.')
+        reasons.append('Học sinh cần trợ giúp nhiều trong khi bài học chưa hoàn thành.')
     elif progress.completion_score >= 80 and progress.retry_count <= 1 and progress.help_count <= 1 and progress.progress_percent >= 100:
         status = 'san_sang_nang_do_kho'
-        reasons.append('Hoc sinh hoan thanh tot, it can tro giup va co the thu muc kho cao hon.')
+        reasons.append('Học sinh hoàn thành tốt, ít cần trợ giúp và có thể thử mức khó cao hơn.')
     else:
-        reasons.append('Hoc sinh dang hoc on dinh o muc hien tai, nen tiep tuc theo doi them.')
+        reasons.append('Học sinh đang học ổn định ở mức hiện tại, nên tiếp tục theo dõi thêm.')
 
     if progress.retry_count >= 3:
         status = 'can_ho_tro_them'
-        reasons.append('So lan hoc lai cao, can them huong dan truoc khi nang do kho.')
+        reasons.append('Số lần học lại cao, cần thêm hướng dẫn trước khi nâng độ khó.')
     if progress.completion_score < 50 and progress.progress_percent >= 50:
         status = 'can_ho_tro_them'
-        reasons.append('Diem hoan thanh thap so voi tien do hien tai.')
+        reasons.append('Điểm hoàn thành thấp so với tiến độ hiện tại.')
 
     return {'readiness_status': status, 'readiness_reasons': reasons}
 
@@ -167,31 +176,53 @@ def create_assignment():
     target_type = payload.get('target_type') or 'class'
 
     if not lesson or lesson.created_by_teacher_id != user.teacher_profile.id:
-        return error_response('Khong tim thay bai hoc', 'LESSON_NOT_FOUND', 404)
+        return error_response('Không tìm thấy bài học', 'LESSON_NOT_FOUND', 404)
     if not classroom or classroom.teacher_id != user.teacher_profile.id:
-        return error_response('Khong tim thay lop', 'CLASS_NOT_FOUND', 404)
+        return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
     if target_type not in VALID_TARGET_TYPES:
-        return error_response('Loai giao bai khong hop le', 'VALIDATION_ERROR', 422)
+        return error_response('Loại giao bài không hợp lệ', 'VALIDATION_ERROR', 422)
 
     subject_id = int(payload.get('subject_id') or lesson.subject_id)
     subject = Subject.query.get(subject_id)
     if not subject:
-        return error_response('Khong tim thay mon hoc', 'SUBJECT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy môn học', 'SUBJECT_NOT_FOUND', 404)
     if subject_id != lesson.subject_id:
-        return error_response('Mon hoc giao bai phai trung voi mon cua bai hoc', 'ASSIGNMENT_SUBJECT_MISMATCH', 422)
+        return error_response('Môn học giao bài phải trùng với môn của bài học', 'ASSIGNMENT_SUBJECT_MISMATCH', 422)
 
     class_student_ids = _get_active_class_student_ids(classroom)
+    active_students = _get_active_class_students(classroom)
+    lesson_level = (lesson.primary_level or '').strip()
     requested_student_ids = [int(item) for item in (payload.get('student_ids') or []) if item]
     if target_type == 'class' and not requested_student_ids:
-        final_student_ids = class_student_ids
+        if lesson_level:
+            final_student_ids = [student.id for student in active_students if student.disability_level == lesson_level]
+        else:
+            final_student_ids = class_student_ids
     else:
         invalid_student_ids = [student_id for student_id in requested_student_ids if student_id not in class_student_ids]
         if invalid_student_ids:
             return error_response('Chi duoc giao cho hoc sinh dang thuoc lop muc tieu', 'ASSIGNMENT_STUDENT_NOT_IN_CLASS', 422, {'student_ids': invalid_student_ids})
+        if lesson_level:
+            student_level_map = {student.id: student.disability_level for student in active_students}
+            mismatched_student_ids = [student_id for student_id in requested_student_ids if student_level_map.get(student_id) != lesson_level]
+            if mismatched_student_ids:
+                return error_response(
+                    'Bài học chỉ được giao cho học sinh cùng mức độ với bài học',
+                    'ASSIGNMENT_LEVEL_MISMATCH',
+                    422,
+                    {'student_ids': mismatched_student_ids, 'lesson_level': lesson_level},
+                )
         final_student_ids = list(dict.fromkeys(requested_student_ids))
 
     if not final_student_ids:
-        return error_response('Can co it nhat mot hoc sinh de giao bai', 'VALIDATION_ERROR', 422)
+        if lesson_level:
+            return error_response(
+                'Lop nay chua co hoc sinh phu hop voi muc do cua bai hoc',
+                'ASSIGNMENT_NO_MATCHING_LEVEL_STUDENTS',
+                422,
+                {'lesson_level': lesson_level},
+            )
+        return error_response('Cần có ít nhất một học sinh để giao bài', 'VALIDATION_ERROR', 422)
 
     assignment = LessonAssignment(
         lesson_id=lesson.id,
@@ -221,24 +252,24 @@ def create_assignment():
     parent_user_ids = _get_parent_user_ids(final_student_ids)
     publish_realtime_event(
         'assignment_created',
-        f'Da giao bai {lesson.title} cho lop {classroom.name}.',
-        title='Bai tap moi',
+        f'Đã giao bài {lesson.title} cho lớp {classroom.name}.',
+        title='Bài tập mới',
         recipient_user_ids=[user.id],
         payload={'assignment_id': assignment.id, 'class_id': classroom.id, 'class_name': classroom.name, 'lesson_id': lesson.id, 'lesson_title': lesson.title, 'student_count': len(final_student_ids), 'source': 'manual'},
     )
     if student_user_ids:
         publish_realtime_event(
             'assignment_created',
-            f'Ban vua nhan bai moi: {lesson.title}.',
-            title='Bai tap moi',
+            f'Bạn vừa nhận bài mới: {lesson.title}.',
+            title='Bài tập mới',
             recipient_user_ids=student_user_ids,
             payload={'assignment_id': assignment.id, 'class_id': classroom.id, 'class_name': classroom.name, 'lesson_id': lesson.id, 'lesson_title': lesson.title, 'student_count': len(final_student_ids), 'source': 'manual'},
         )
     if parent_user_ids:
         publish_realtime_event(
             'assignment_created',
-            f'Co bai tap moi duoc giao cho hoc sinh trong lop {classroom.name}.',
-            title='Cap nhat hoc tap',
+            f'Có bài tập mới được giao cho học sinh trong lớp {classroom.name}.',
+            title='Cập nhật học tập',
             recipient_user_ids=parent_user_ids,
             payload={'assignment_id': assignment.id, 'class_id': classroom.id, 'class_name': classroom.name, 'lesson_id': lesson.id, 'lesson_title': lesson.title, 'student_count': len(final_student_ids), 'source': 'manual'},
         )
@@ -252,7 +283,7 @@ def create_assignment():
         user_id=user.id,
         metadata={'assignment_id': assignment.id, 'class_id': classroom.id, 'student_count': len(final_student_ids)},
     )
-    return success_response(assignment.to_dict(), 'Giao bai hoc thanh cong', 201)
+    return success_response(assignment.to_dict(), 'Giao bài học thành công', 201)
 
 
 @api_v1.get('/assignments/<int:assignment_id>')
@@ -263,7 +294,7 @@ def get_assignment(assignment_id: int):
         return error
     assignment = _get_teacher_assignment(assignment_id, user.teacher_profile.id)
     if not assignment:
-        return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy assignment', 'ASSIGNMENT_NOT_FOUND', 404)
     return success_response(assignment.to_dict())
 
 
@@ -275,7 +306,7 @@ def update_assignment(assignment_id: int):
         return error
     assignment = _get_teacher_assignment(assignment_id, user.teacher_profile.id)
     if not assignment:
-        return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy assignment', 'ASSIGNMENT_NOT_FOUND', 404)
     payload = request.get_json(silent=True) or {}
     for field in ['due_at', 'required_completion_percent', 'status']:
         if field in payload:
@@ -285,13 +316,13 @@ def update_assignment(assignment_id: int):
             setattr(assignment, field, val)
     publish_realtime_event(
         'assignment_updated',
-        f'Assignment {assignment.id} vua duoc cap nhat.',
-        title='Cap nhat assignment',
+        f'Assignment {assignment.id} vừa được cập nhật.',
+        title='Cập nhật assignment',
         recipient_user_ids=_get_assignment_recipient_user_ids(assignment),
         payload={'assignment_id': assignment.id, 'status': assignment.status},
     )
     db.session.commit()
-    return success_response(assignment.to_dict(), 'Cap nhat assignment thanh cong')
+    return success_response(assignment.to_dict(), 'Cập nhật assignment thành công')
 
 
 @api_v1.post('/assignments/<int:assignment_id>/close')
@@ -302,17 +333,17 @@ def close_assignment(assignment_id: int):
         return error
     assignment = _get_teacher_assignment(assignment_id, user.teacher_profile.id)
     if not assignment:
-        return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy assignment', 'ASSIGNMENT_NOT_FOUND', 404)
     assignment.status = 'closed'
     publish_realtime_event(
         'assignment_closed',
-        f'Assignment {assignment.id} da dong.',
-        title='Dong assignment',
+        f'Assignment {assignment.id} đã đóng.',
+        title='Đóng assignment',
         recipient_user_ids=_get_assignment_recipient_user_ids(assignment),
         payload={'assignment_id': assignment.id, 'status': assignment.status},
     )
     db.session.commit()
-    return success_response(assignment.to_dict(), 'Da dong assignment')
+    return success_response(assignment.to_dict(), 'Đã đóng assignment')
 
 
 @api_v1.get('/assignments/<int:assignment_id>/progress')
@@ -327,7 +358,7 @@ def get_assignment_progress(assignment_id: int):
     ).get(assignment_id)
 
     if not assignment or assignment.assigned_by_teacher_id != user.teacher_profile.id:
-        return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy assignment', 'ASSIGNMENT_NOT_FOUND', 404)
 
     progresses = []
     for progress in sorted(assignment.progresses, key=lambda item: item.created_at or datetime.now(UTC), reverse=True):
@@ -373,7 +404,7 @@ def get_my_assignment(assignment_id: int):
         return error
     progress = StudentLessonProgress.query.filter_by(assignment_id=assignment_id, student_id=user.student_profile.id).first()
     if not progress:
-        return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy assignment', 'ASSIGNMENT_NOT_FOUND', 404)
     assignment = progress.assignment
     payload = progress.to_dict()
     payload['assignment'] = assignment.to_dict() if assignment else None
@@ -390,7 +421,7 @@ def start_my_assignment(assignment_id: int):
         return error
     progress = StudentLessonProgress.query.filter_by(assignment_id=assignment_id, student_id=user.student_profile.id).first()
     if not progress:
-        return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy assignment', 'ASSIGNMENT_NOT_FOUND', 404)
     if progress.status == 'completed':
         progress.retry_count += 1
         progress.progress_percent = 0
@@ -401,10 +432,10 @@ def start_my_assignment(assignment_id: int):
     _publish_assignment_progress_event(
         progress,
         'assignment_progress_updated',
-        f'Tien do bai hoc {assignment_id} vua {"duoc lam lai tu dau" if progress.retry_count > 0 else "bat dau"}.',
+        f'Tiến độ bài học {assignment_id} vừa {"được làm lại từ đầu" if progress.retry_count > 0 else "bắt đầu"}.',
     )
     db.session.commit()
-    return success_response(progress.to_dict(), 'Bat dau bai hoc thanh cong')
+    return success_response(progress.to_dict(), 'Bắt đầu bài học thành công')
 
 
 @api_v1.post('/my/assignments/<int:assignment_id>/progress')
@@ -415,7 +446,7 @@ def update_my_assignment_progress(assignment_id: int):
         return error
     progress = StudentLessonProgress.query.filter_by(assignment_id=assignment_id, student_id=user.student_profile.id).first()
     if not progress:
-        return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy assignment', 'ASSIGNMENT_NOT_FOUND', 404)
 
     payload = request.get_json(silent=True) or {}
     for field in ['progress_percent', 'total_learning_seconds', 'retry_count', 'help_count', 'reward_star_count', 'completion_score']:
@@ -423,9 +454,9 @@ def update_my_assignment_progress(assignment_id: int):
             setattr(progress, field, int(payload.get(field)))
     if payload.get('status') in {'not_started', 'in_progress', 'completed'}:
         progress.status = payload['status']
-    _publish_assignment_progress_event(progress, 'assignment_progress_updated', f'Tien do bai hoc {assignment_id} vua duoc cap nhat.')
+    _publish_assignment_progress_event(progress, 'assignment_progress_updated', f'Tiến độ bài học {assignment_id} vừa được cập nhật.')
     db.session.commit()
-    return success_response(progress.to_dict(), 'Cap nhat tien do thanh cong')
+    return success_response(progress.to_dict(), 'Cập nhật tiến độ thành công')
 
 
 @api_v1.post('/my/assignments/<int:assignment_id>/complete')
@@ -436,7 +467,7 @@ def complete_my_assignment(assignment_id: int):
         return error
     progress = StudentLessonProgress.query.filter_by(assignment_id=assignment_id, student_id=user.student_profile.id).first()
     if not progress:
-        return error_response('Khong tim thay assignment', 'ASSIGNMENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy assignment', 'ASSIGNMENT_NOT_FOUND', 404)
     payload = request.get_json(silent=True) or {}
     requested_completion_score = payload.get('completion_score')
     requested_reward_star_count = payload.get('reward_star_count')
@@ -454,7 +485,7 @@ def complete_my_assignment(assignment_id: int):
     else:
         progress.reward_star_count = max(progress.reward_star_count, 3)
     progress.completed_at = datetime.now(UTC)
-    _publish_assignment_progress_event(progress, 'assignment_completed', f'Bai hoc {assignment_id} da hoan thanh.')
+    _publish_assignment_progress_event(progress, 'assignment_completed', f'Bài học {assignment_id} đã hoàn thành.')
     db.session.commit()
-    return success_response(progress.to_dict(), 'Da hoan thanh bai hoc')
+    return success_response(progress.to_dict(), 'Đã hoàn thành bài học')
 

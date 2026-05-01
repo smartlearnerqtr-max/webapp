@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="32" fill="#f7fbff"/>
+  <path d="M54 118h132c0 38-28 66-66 66s-66-28-66-66z" fill="#ffffff" stroke="#17324d" stroke-width="6"/>
+  <path d="M70 118c8 16 92 16 100 0" fill="none" stroke="#9ec6ff" stroke-width="6" stroke-linecap="round"/>
+  <text x="120" y="214" text-anchor="middle" font-size="24" font-family="Segoe UI, Arial" font-weight="700" fill="#17324d">Chén</text>
+</svg>

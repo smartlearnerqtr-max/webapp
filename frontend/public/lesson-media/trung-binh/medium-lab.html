@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medium Lesson Media Lab</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f4ee;
+      --panel: #ffffff;
+      --line: #d9d2c0;
+      --ink: #17324d;
+      --muted: #5f7286;
+      --accent: #2f79c4;
+      --accent-soft: #e8f2ff;
+      --accent-green: #1c8f7a;
+      --gold: #e4a33e;
+      --warn: #d65b52;
+      --shadow: 0 14px 34px rgba(23, 50, 77, 0.12);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; overflow-x: hidden; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #fffdf8, var(--bg));
+      color: var(--ink);
+    }
+    .shell { padding: 16px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .eyebrow {
+      margin: 0 0 4px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 22px; line-height: 1.2; }
+    .sub { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .grid, .board, .pool, .slots, .tool-row, .coin-row, .jar-row, .bag-row, .bag-slots {
+      display: grid;
+      gap: 12px;
+    }
+    .pool, .bag-row { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+    .slots, .jar-row, .bag-slots { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    .choice, .slot, .tool, .coin-button, .bag-button {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      padding: 12px;
+      font: inherit;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .choice:hover, .slot:hover, .tool:hover, .coin-button:hover, .bag-button:hover { transform: translateY(-1px); }
+    .choice-active, .slot-active, .tool-active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(47, 121, 196, 0.12);
+    }
+    .slot {
+      min-height: 96px;
+      display: grid;
+      align-content: start;
+      gap: 6px;
+      text-align: left;
+      background: linear-gradient(180deg, #fff, #fbfaf6);
+    }
+    .slot-label { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+    .slot-value { font-weight: 700; color: var(--ink); }
+    .hint { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .success, .warn {
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-weight: 700;
+    }
+    .success { background: #edf8f4; color: #176a58; }
+    .warn { background: #fff5f1; color: var(--warn); }
+    .scene {
+      min-height: 280px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      position: relative;
+      background: linear-gradient(180deg, #f2fbff, #fff);
+    }
+    .scene-fill {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.98;
+    }
+    .scene-overlay {
+      position: relative;
+      z-index: 1;
+      min-height: 280px;
+      display: grid;
+      align-content: end;
+      gap: 8px;
+      padding: 18px;
+      background: linear-gradient(180deg, rgba(12, 32, 52, 0.08), rgba(12, 32, 52, 0.62));
+      color: #fff;
+    }
+    .center-panel {
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+      text-align: center;
+      padding: 16px;
+    }
+    .emoji { font-size: 70px; line-height: 1; display: block; }
+    .globe {
+      width: 240px;
+      height: 240px;
+      margin: 0 auto;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #70d7ff, #13619a);
+      border: 6px solid #d7eefb;
+      position: relative;
+      overflow: hidden;
+    }
+    .continent {
+      position: absolute;
+      border-radius: 999px;
+      background: #53b36e;
+      border: 2px solid rgba(255,255,255,0.45);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .continent-active {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 6px rgba(255,255,255,0.22);
+      background: #ffd86f;
+    }
+    .route-board {
+      min-height: 280px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 20% 26%, rgba(83,179,110,0.18) 0 12%, transparent 13%),
+        radial-gradient(circle at 75% 58%, rgba(83,179,110,0.18) 0 14%, transparent 15%),
+        linear-gradient(180deg, #eef8ff, #fffaf0);
+      position: relative;
+      overflow: hidden;
+      padding: 18px;
+    }
+    .route-dot {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #2f79c4;
+      border: 4px solid #fff;
+      box-shadow: 0 4px 12px rgba(47,121,196,0.22);
+    }
+    .route-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+    .route-line {
+      stroke: #f3a63f;
+      stroke-width: 6;
+      stroke-linecap: round;
+      fill: none;
+    }
+    .jar {
+      min-height: 190px;
+      border-radius: 24px 24px 20px 20px;
+      border: 2px solid var(--line);
+      background: linear-gradient(180deg, #fbfdff, #eef5ff);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+    .jar-mouth {
+      height: 18px;
+      border-radius: 999px;
+      background: #d5e0ef;
+    }
+    .coin {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ffd873, #efb642);
+      border: 2px solid #d18e1f;
+      display: inline-grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #7c5310;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .coin-bank {
+      min-height: 54px;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+    }
+    .message-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+      background: linear-gradient(180deg, #fff, #f8fbff);
+      display: grid;
+      gap: 10px;
+    }
+    .message-bubble {
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: #fff4e2;
+      color: #8a5616;
+      font-weight: 700;
+    }
+    .bubble-stage, .drum-stage {
+      min-height: 280px;
+      border-radius: 22px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #f2fbff, #fff9ef);
+    }
+    .bubble {
+      position: absolute;
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      border: 5px solid #38b7ff;
+      background: rgba(255,255,255,0.64);
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .note {
+      position: absolute;
+      width: 72px;
+      height: 72px;
+      left: calc(50% - 36px);
+      top: 20px;
+      display: grid;
+      place-items: center;
+      font-size: 42px;
+      transition: top 0.18s linear;
+    }
+    .drum {
+      position: absolute;
+      left: calc(50% - 72px);
+      bottom: 18px;
+      width: 144px;
+      height: 88px;
+      border-radius: 999px 999px 24px 24px;
+      border: 4px solid #6a3b10;
+      background: linear-gradient(180deg, #ffd086, #d7812f);
+      cursor: pointer;
+      font-size: 34px;
+    }
+    .orange-svg { width: min(280px, 100%); display: block; margin: 0 auto; }
+    .petal { transition: fill 0.2s ease; }
+    .palette { display: flex; flex-wrap: wrap; gap: 10px; }
+    .palette button {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 1px var(--line);
+      cursor: pointer;
+    }
+    .pottery-shell {
+      min-height: 280px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #f5faff, #fff5ea);
+      display: grid;
+      gap: 16px;
+      place-items: center;
+      padding: 20px;
+    }
+    .pottery-piece {
+      width: 150px;
+      height: 190px;
+      background: linear-gradient(180deg, #d98f54, #a35d2a);
+      clip-path: path("M75 8 C115 8 121 32 114 58 C106 90 126 122 126 164 C126 182 105 192 75 192 C45 192 24 182 24 164 C24 122 44 90 36 58 C29 32 35 8 75 8 Z");
+      transition: transform 0.2s ease;
+      box-shadow: 0 18px 30px rgba(121, 67, 28, 0.2);
+    }
+    .pottery-piece-wide { transform: scaleX(1.08); }
+    .pottery-piece-tall { transform: scaleY(1.08); }
+    .bag-shell {
+      min-height: 240px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #eef8ff, #fffaf0);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+    .bag-slot-card {
+      border: 1px dashed #aac3dc;
+      border-radius: 18px;
+      min-height: 84px;
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+      align-content: start;
+      background: rgba(255,255,255,0.72);
+    }
+    .bag-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #edf8f4;
+      color: #176a58;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    @media (max-width: 720px) {
+      .hero { display: grid; }
+      .route-board, .scene, .bubble-stage, .drum-stage { min-height: 240px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div id="app" class="card"></div>
+  </div>
+  <script>
+    const app = document.getElementById('app');
+    const params = new URLSearchParams(window.location.search);
+    const activity = params.get('activity') || 'ngu-van-mindmap';
+
+    function reportHeight() {
+      const root = document.documentElement;
+      const body = document.body;
+      const height = Math.ceil(Math.max(
+        root ? root.scrollHeight : 0,
+        root ? root.offsetHeight : 0,
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0
+      ));
+      try {
+        window.parent.postMessage({ type: 'lesson-media-height', height }, '*');
+      } catch {}
+    }
+
+    function setHTML(html) {
+      app.innerHTML = html;
+      requestAnimationFrame(reportHeight);
+      window.setTimeout(reportHeight, 140);
+    }
+
+    function shell(title, subtitle, body, badge = 'Mức trung bình') {
+      return `
+        <div class="hero">
+          <div>
+            <p class="eyebrow">Bám theo bosung.md</p>
+            <h1>${title}</h1>
+            <p class="sub">${subtitle}</p>
+          </div>
+          <span class="pill">${badge}</span>
+        </div>
+        ${body}
+      `;
+    }
+
+    function renderSceneCard(options) {
+      const body = options.photo
+        ? `<div class="scene"><div class="scene-fill" style="background-image:url('${options.photo}')"></div><div class="scene-overlay"><h2>${options.title}</h2><p>${options.copy}</p></div></div>`
+        : `<div class="scene"><div class="center-panel"><div><span class="emoji">${options.emoji}</span><h2>${options.title}</h2><p class="sub">${options.copy}</p></div></div></div>`;
+      setHTML(shell(options.heading || options.title, options.subtitle, body, options.badge || 'Thẻ trực quan'));
+    }
+
+    function mountPickerBoard(options) {
+      let selected = null;
+      const state = {};
+      const cards = [...options.cards];
+
+      function redraw() {
+        const pool = cards
+          .filter((card) => !Object.values(state).includes(card.id))
+          .map((card) => `
+            <button class="choice ${selected === card.id ? 'choice-active' : ''}" data-card="${card.id}">
+              <strong>${card.label}</strong>
+              <div class="hint">${card.hint || ''}</div>
+            </button>
+          `)
+          .join('');
+
+        const slots = options.slots
+          .map((slot) => {
+            const card = cards.find((item) => item.id === state[slot.id]);
+            return `
+              <button class="slot ${selected && !card ? 'slot-active' : ''}" data-slot="${slot.id}">
+                <span class="slot-label">${slot.label}</span>
+                ${card ? `<span class="slot-value">${card.label}</span><span class="hint">Bấm để bỏ ra.</span>` : `<span class="hint">${slot.placeholder}</span>`}
+              </button>
+            `;
+          })
+          .join('');
+
+        const correctCount = options.slots.filter((slot) => state[slot.id] === slot.answer).length;
+        const done = options.slots.every((slot) => state[slot.id]);
+
+        setHTML(
+          shell(
+            options.title,
+            options.subtitle,
+            `
+              <div class="board">
+                <div class="pool">${pool}</div>
+                <div class="slots">${slots}</div>
+                <p class="${done && correctCount === options.slots.length ? 'success' : 'hint'}">
+                  ${done && correctCount === options.slots.length ? options.success : `Đã xếp đúng ${correctCount}/${options.slots.length}. Chạm thẻ rồi chạm ô trống.`}
+                </p>
+              </div>
+            `,
+            options.badge || 'Kéo thả mô phỏng'
+          )
+        );
+
+        app.querySelectorAll('[data-card]').forEach((node) => {
+          node.addEventListener('click', () => {
+            selected = node.getAttribute('data-card');
+            redraw();
+          });
+        });
+
+        app.querySelectorAll('[data-slot]').forEach((node) => {
+          node.addEventListener('click', () => {
+            const slotId = node.getAttribute('data-slot');
+            if (state[slotId]) {
+              delete state[slotId];
+            } else if (selected) {
+              state[slotId] = selected;
+              selected = null;
+            }
+            redraw();
+          });
+        });
+      }
+
+      redraw();
+    }
+
+    function renderMindmap() {
+      mountPickerBoard({
+        title: 'Sơ đồ tư duy điền khuyết',
+        subtitle: 'Kéo thả ảnh hoặc từ khóa sự việc vào đúng ô trống theo thứ tự của cốt truyện.',
+        success: 'Sơ đồ đã hoàn chỉnh. Em vừa nối được nhân vật, diễn biến và bài học của truyện.',
+        slots: [
+          { id: 'nhan-vat', label: 'Nhân vật', placeholder: 'Ô này chờ từ khóa.', answer: 'ech-rua' },
+          { id: 'bat-dau', label: 'Mở đầu', placeholder: 'Ô này chờ từ khóa.', answer: 'ech-day-gieng' },
+          { id: 'dien-bien', label: 'Diễn biến', placeholder: 'Ô này chờ từ khóa.', answer: 'ech-len-bo' },
+          { id: 'bai-hoc', label: 'Bài học', placeholder: 'Ô này chờ từ khóa.', answer: 'khong-chu-quan' }
+        ],
+        cards: [
+          { id: 'ech-rua', label: 'Ếch và các con vật quanh giếng', hint: 'Nhóm nhân vật chính' },
+          { id: 'ech-day-gieng', label: 'Ếch sống lâu ở đáy giếng', hint: 'Sự việc mở đầu' },
+          { id: 'ech-len-bo', label: 'Ếch lên bờ nên gặp nguy hiểm', hint: 'Sự việc tiếp theo' },
+          { id: 'khong-chu-quan', label: 'Không nên chủ quan', hint: 'Bài học rút ra' }
+        ]
+      });
+    }
+
+    function renderShapeSort() {
+      mountPickerBoard({
+        title: 'Phân loại hình khối',
+        subtitle: 'Kéo từng đồ vật vào đúng nhóm hình chóp hoặc lăng trụ đứng.',
+        success: 'Các vật đã được xếp đúng nhóm hình học rồi.',
+        slots: [
+          { id: 'chop-1', label: 'Nhóm hình chóp', placeholder: 'Đặt vật giống hình chóp vào đây.', answer: 'leu' },
+          { id: 'chop-2', label: 'Nhóm hình chóp', placeholder: 'Đặt vật giống hình chóp vào đây.', answer: 'mai-nha' },
+          { id: 'lang-tru-1', label: 'Nhóm lăng trụ', placeholder: 'Đặt vật giống lăng trụ vào đây.', answer: 'tu-lanh' },
+          { id: 'lang-tru-2', label: 'Nhóm lăng trụ', placeholder: 'Đặt vật giống lăng trụ vào đây.', answer: 'hop-sua' }
+        ],
+        cards: [
+          { id: 'leu', label: 'Cái lều', hint: 'Mái nhọn, đáy rộng.' },
+          { id: 'tu-lanh', label: 'Tủ lạnh', hint: 'Thân dài, mặt bên phẳng.' },
+          { id: 'hop-sua', label: 'Hộp sữa', hint: 'Dáng hộp đứng quen thuộc.' },
+          { id: 'mai-nha', label: 'Mái nhà', hint: 'Có đỉnh nhọn như hình chóp.' }
+        ]
+      });
+    }
+
+    function renderCoinTask() {
+      let coinsLeft = 4;
+      let cashbox = 0;
+
+      function redraw() {
+        const coinButtons = Array.from({ length: coinsLeft }, (_, index) => `<button class="coin-button" data-coin="${index}">+ 1 xu</button>`).join('');
+        const coinBank = Array.from({ length: cashbox }, () => `<span class="coin">1</span>`).join('');
+        const done = cashbox === 4;
+        setHTML(shell('Mô phỏng mua bán', 'Một cái kẹo giá 2 xu. Hãy đưa 4 xu vào máy tính tiền cho 2 cái kẹo.', `
+          <div class="grid">
+            <div class="jar-row">
+              <div class="jar">
+                <div class="jar-mouth"></div>
+                <strong>Máy tính tiền</strong>
+                <div class="coin-bank">${coinBank || '<span class="hint">Chạm từng đồng xu để đưa vào đây.</span>'}</div>
+              </div>
+              <div class="jar">
+                <div class="jar-mouth"></div>
+                <strong>Đồng xu còn lại</strong>
+                <div class="coin-row">${coinButtons || '<span class="hint">Đã dùng hết số xu cần thiết.</span>'}</div>
+              </div>
+            </div>
+            <p class="${done ? 'success' : 'hint'}">${done ? 'Đúng rồi. Hai cái kẹo có giá 4 xu.' : `Em đã đưa vào ${cashbox}/4 xu.`}</p>
+          </div>
+        `, 'Tỉ lệ thuận'));
+
+        app.querySelectorAll('[data-coin]').forEach((node) => {
+          node.addEventListener('click', () => {
+            if (coinsLeft <= 0) return;
+            coinsLeft -= 1;
+            cashbox += 1;
+            redraw();
+          });
+        });
+      }
+
+      redraw();
+    }
+
+    function renderMagnet() {
+      let mode = 'idle';
+      function redraw() {
+        setHTML(shell('Thí nghiệm ảo nam châm', 'Kéo nam châm lại gần đinh sắt để quan sát vật bị hút vào.', `
+          <div class="grid">
+            <div class="scene">
+              <div class="center-panel">
+                <div>
+                  <div style="display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;">
+                    <div style="width:92px;height:140px;border-radius:22px;background:linear-gradient(180deg,#ff6f61,#2f79c4);display:grid;place-items:center;color:#fff;font-weight:800;font-size:28px;">N S</div>
+                    <div style="display:grid;gap:10px;justify-items:center;">
+                      <div style="width:${mode === 'active' ? 84 : 54}px;height:12px;border-radius:999px;background:#7f93aa;transition:all .2s ease;"></div>
+                      <div style="width:${mode === 'active' ? 64 : 46}px;height:12px;border-radius:999px;background:#c6d1dd;transition:all .2s ease;"></div>
+                    </div>
+                  </div>
+                  <p class="sub" style="margin-top:14px;">${mode === 'active' ? 'Đinh sắt và ghim giấy đã bị hút vào nam châm.' : 'Đinh sắt đang đứng yên. Hãy bấm nút để đưa nam châm lại gần.'}</p>
+                </div>
+              </div>
+            </div>
+            <div class="tool-row">
+              <button class="tool ${mode === 'active' ? 'tool-active' : ''}" id="bat-thi-nghiem">${mode === 'active' ? 'Đưa nam châm ra xa' : 'Kéo nam châm lại gần'}</button>
+            </div>
+            <p class="${mode === 'active' ? 'success' : 'hint'}">${mode === 'active' ? 'Nam châm hút được vật bằng sắt như đinh và ghim giấy.' : 'Em hãy thử cho nam châm tiến lại gần để xem điều gì xảy ra.'}</p>
+          </div>
+        `, 'Khoa học ảo'));
+        app.querySelector('#bat-thi-nghiem').addEventListener('click', () => {
+          mode = mode === 'active' ? 'idle' : 'active';
+          redraw();
+        });
+      }
+      redraw();
+    }
+
+    function renderGlobe() {
+      let selected = '';
+      function redraw() {
+        setHTML(shell('Chỉ điểm bản đồ', 'Chạm vào vùng đất sáng để tìm Châu Mỹ trên quả địa cầu 3D mô phỏng.', `
+          <div class="grid">
+            <div class="globe">
+              <button class="continent ${selected === 'chau-my' ? 'continent-active' : ''}" data-continent="chau-my" style="left:34px;top:56px;width:82px;height:118px;"></button>
+              <button class="continent ${selected === 'chau-au' ? 'continent-active' : ''}" data-continent="chau-au" style="right:62px;top:56px;width:46px;height:44px;"></button>
+              <button class="continent ${selected === 'chau-a' ? 'continent-active' : ''}" data-continent="chau-a" style="right:28px;top:84px;width:86px;height:86px;"></button>
+            </div>
+            <p class="${selected === 'chau-my' ? 'success' : selected ? 'warn' : 'hint'}">${selected === 'chau-my' ? 'Đúng rồi. Em đã chạm vào Châu Mỹ.' : selected ? 'Vùng em chạm chưa phải Châu Mỹ. Thử lại ở phía bên trái quả địa cầu nhé.' : 'Âm thanh hỏi “Châu Mỹ ở đâu?”. Em hãy chạm vào vùng đất sáng phù hợp.'}</p>
+          </div>
+        `, 'Địa lí không gian'));
+        app.querySelectorAll('[data-continent]').forEach((node) => {
+          node.addEventListener('click', () => {
+            selected = node.getAttribute('data-continent');
+            redraw();
+          });
+        });
+      }
+      redraw();
+    }
+
+    function renderRoute() {
+      let started = false;
+      function redraw() {
+        setHTML(shell('Dấu chân thám hiểm', 'Bấm để nối đường đi từ châu Âu sang châu Á cho con thuyền chạy qua.', `
+          <div class="grid">
+            <div class="route-board">
+              <svg class="route-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                ${started ? '<path class="route-line" d="M24 34 C42 30 58 48 74 58"></path>' : ''}
+              </svg>
+              <div class="route-dot" style="left:22%;top:30%;"></div>
+              <div class="route-dot" style="left:72%;top:56%;"></div>
+              <div style="position:absolute;left:18%;top:16%;font-weight:800;">Châu Âu</div>
+              <div style="position:absolute;left:68%;top:72%;font-weight:800;">Châu Á</div>
+              <div style="position:absolute;left:${started ? '62%' : '22%'};top:${started ? '48%' : '28%'};font-size:34px;transition:all .6s ease;">⛵</div>
+            </div>
+            <div class="tool-row"><button class="tool ${started ? 'tool-active' : ''}" id="draw-route">${started ? 'Vẽ lại từ đầu' : 'Nối đường cho thuyền chạy'}</button></div>
+            <p class="${started ? 'success' : 'hint'}">${started ? 'Con thuyền đã đi từ châu Âu sang châu Á. Em vừa hoàn thành lộ trình thám hiểm.' : 'Em hãy bấm nút để tạo đường đi của con thuyền.'}</p>
+          </div>
+        `, 'Phát kiến địa lí'));
+        app.querySelector('#draw-route').addEventListener('click', () => {
+          started = !started;
+          redraw();
+        });
+      }
+      redraw();
+    }
+
+    function renderGrowProcess() {
+      mountPickerBoard({
+        title: 'Quy trình trồng cây',
+        subtitle: 'Kéo ba bước vào đúng thứ tự: đào đất, gieo hạt, rồi tưới nước.',
+        success: 'Đúng rồi. Em đã xếp đúng quy trình trồng cây cơ bản.',
+        slots: [
+          { id: 'buoc-1', label: 'Bước 1', placeholder: 'Bắt đầu từ đâu?', answer: 'dao-dat' },
+          { id: 'buoc-2', label: 'Bước 2', placeholder: 'Tiếp theo làm gì?', answer: 'gieo-hat' },
+          { id: 'buoc-3', label: 'Bước 3', placeholder: 'Bước cuối là gì?', answer: 'tuoi-nuoc' }
+        ],
+        cards: [
+          { id: 'tuoi-nuoc', label: 'Tưới nước', hint: 'Giúp cây có độ ẩm.' },
+          { id: 'dao-dat', label: 'Đào đất', hint: 'Làm đất trước khi gieo.' },
+          { id: 'gieo-hat', label: 'Gieo hạt', hint: 'Đặt hạt vào đất đã xốp.' }
+        ]
+      });
+    }
+
+    function renderBreathing() {
+      let step = 0;
+      const steps = ['Hít sâu bằng mũi', 'Giữ hơi 2 giây', 'Thở chậm bằng miệng', 'Thả lỏng vai'];
+      function redraw() {
+        const done = step >= steps.length;
+        setHTML(shell('Góc bình tĩnh', 'Khi tức giận, em có thể dừng bài và làm theo từng bước hít thở đều.', `
+          <div class="grid">
+            <div class="scene"><div class="center-panel"><div><span class="emoji">${done ? '🌼' : '🫧'}</span><h2>${done ? 'Bình tĩnh lại rồi' : steps[step]}</h2><p class="sub">${done ? 'Em đã hoàn thành một vòng bình tĩnh ngắn.' : 'Bấm nút bên dưới để chuyển sang bước tiếp theo.'}</p></div></div></div>
+            <div class="tool-row"><button class="tool" id="next-breath">${done ? 'Làm lại từ đầu' : 'Sang bước tiếp theo'}</button></div>
+            <p class="${done ? 'success' : 'hint'}">${done ? 'App đã khóa bài trong lúc em hít thở. Giờ em có thể quay lại làm tiếp.' : `Bước ${step + 1}/4: ${steps[step]}.`}</p>
+          </div>
+        `, 'Quản lý cảm xúc'));
+        app.querySelector('#next-breath').addEventListener('click', () => {
+          step = done ? 0 : step + 1;
+          redraw();
+        });
+      }
+      redraw();
+    }
+
+    function renderSafetyChat() {
+      let choice = '';
+      function redraw() {
+        setHTML(shell('Đóng vai an toàn mạng', 'Có người nhắn “Cho chú mật khẩu nhé”. Em hãy chọn phản hồi an toàn.', `
+          <div class="message-card">
+            <div class="message-bubble">Cho chú mật khẩu nhé.</div>
+            <div class="tool-row">
+              <button class="tool ${choice === 'refuse' ? 'tool-active' : ''}" id="refuse">Khóa / Từ chối</button>
+              <button class="tool ${choice === 'share' ? 'tool-active' : ''}" id="share">Cho ngay</button>
+            </div>
+            <p class="${choice === 'refuse' ? 'success' : choice === 'share' ? 'warn' : 'hint'}">${choice === 'refuse' ? 'Đúng rồi. Không chia sẻ mật khẩu cho người khác.' : choice === 'share' ? 'Lựa chọn này không an toàn. Em cần từ chối và báo người lớn.' : 'Hãy chọn cách xử lí an toàn cho tin nhắn này.'}</p>
+          </div>
+        `, 'An toàn mạng'));
+        app.querySelector('#refuse').addEventListener('click', () => { choice = 'refuse'; redraw(); });
+        app.querySelector('#share').addEventListener('click', () => { choice = 'share'; redraw(); });
+      }
+      redraw();
+    }
+
+    function renderBubbleStage() {
+      let score = 0;
+      let bubbleId = 0;
+      const bubbles = [
+        { id: ++bubbleId, left: '16%', top: '22%', icon: '⭕' },
+        { id: ++bubbleId, left: '42%', top: '34%', icon: '⭕' },
+        { id: ++bubbleId, left: '68%', top: '26%', icon: '⭕' },
+        { id: ++bubbleId, left: '54%', top: '58%', icon: '⭕' },
+      ];
+      function redraw() {
+        setHTML(shell('AR tập theo nhạc', 'Mô phỏng vòng tròn ảo. Em chạm lần lượt vào từng vòng như đang vung tay theo nhạc đếm 1 2 3 4.', `
+          <div class="grid">
+            <div class="bubble-stage">
+              ${bubbles.map((bubble) => `<button class="bubble" data-bubble="${bubble.id}" style="left:${bubble.left};top:${bubble.top};">${bubble.icon}</button>`).join('')}
+            </div>
+            <p class="${score === 4 ? 'success' : 'hint'}">${score === 4 ? 'Em đã chạm đủ 4 vòng tròn theo nhịp rồi.' : `Đã chạm ${score}/4 vòng.`}</p>
+          </div>
+        `, 'Vận động theo nhạc'));
+        app.querySelectorAll('[data-bubble]').forEach((node) => {
+          node.addEventListener('click', () => {
+            const id = Number(node.getAttribute('data-bubble'));
+            const index = bubbles.findIndex((item) => item.id === id);
+            if (index >= 0) {
+              bubbles.splice(index, 1);
+              score += 1;
+              redraw();
+            }
+          });
+        });
+      }
+      redraw();
+    }
+
+    function renderDrumStage() {
+      let noteTop = 20;
+      let status = 'Bấm bắt đầu rồi chạm vào trống khi nốt nhạc xuống gần đích.';
+      let active = false;
+      let timer = null;
+
+      function stopTimer() {
+        if (timer) {
+          window.clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      function startTimer() {
+        stopTimer();
+        active = true;
+        noteTop = 20;
+        status = 'Nốt nhạc đang đi xuống. Canh đúng lúc để chạm trống.';
+        timer = window.setInterval(() => {
+          noteTop += 18;
+          if (noteTop >= 180) {
+            stopTimer();
+            active = false;
+            status = 'Nốt nhạc đã tới vạch đích. Em hãy chạm trống hoặc bấm bắt đầu lại.';
+          }
+          redraw();
+        }, 180);
+      }
+
+      function hitDrum() {
+        if (noteTop >= 154 && noteTop <= 194) {
+          stopTimer();
+          active = false;
+          status = 'Đúng nhịp rồi. Em đã gõ trống ảo rất chuẩn.';
+          redraw();
+          return;
+        }
+        status = 'Nhịp này chưa khớp. Em bấm bắt đầu lại và canh trống kỹ hơn nhé.';
+        redraw();
+      }
+
+      function redraw() {
+        setHTML(shell('Trống ảo theo nhịp', 'Các nốt nhạc chạy xuống vạch đích. Em chạm vào mặt trống khi nốt xuống gần cuối.', `
+          <div class="grid">
+            <div class="drum-stage">
+              <div class="note" style="top:${noteTop}px;">🎵</div>
+              <button class="drum" id="hit-drum">🥁</button>
+            </div>
+            <div class="tool-row">
+              <button class="tool ${active ? 'tool-active' : ''}" id="start-drum">${active ? 'Đang chạy' : 'Bắt đầu nhịp mới'}</button>
+            </div>
+            <p class="${status.includes('Đúng nhịp') ? 'success' : status.includes('chưa khớp') ? 'warn' : 'hint'}">${status}</p>
+          </div>
+        `, 'Cảm thụ âm nhạc'));
+        app.querySelector('#start-drum').addEventListener('click', () => {
+          if (!active) startTimer();
+        });
+        app.querySelector('#hit-drum').addEventListener('click', hitDrum);
+      }
+
+      redraw();
+    }
+
+    function renderOrangeFill() {
+      let fill = '#f7f2ea';
+      function redraw() {
+        setHTML(shell('Đổ màu hình khối', 'Chọn màu rồi chạm vào quả cam để tô kín vùng màu như trong bài mỹ thuật.', `
+          <div class="grid">
+            <svg class="orange-svg" viewBox="0 0 220 220" aria-hidden="true">
+              <circle cx="110" cy="118" r="62" fill="${fill}" stroke="#17324d" stroke-width="8"></circle>
+              <path d="M112 42c18-18 42-8 48 12-18 8-34 8-48 4z" fill="#5ba35b" stroke="#17324d" stroke-width="5"></path>
+              <path d="M110 58c-8-18 10-34 28-34" fill="none" stroke="#17324d" stroke-width="5" stroke-linecap="round"></path>
+            </svg>
+            <div class="palette">
+              <button data-color="#f5a623" style="background:#f5a623;"></button>
+              <button data-color="#ffe066" style="background:#ffe066;"></button>
+              <button data-color="#86c5ff" style="background:#86c5ff;"></button>
+              <button data-color="#ef7ab2" style="background:#ef7ab2;"></button>
+            </div>
+            <p class="${fill === '#f5a623' ? 'success' : 'hint'}">${fill === '#f5a623' ? 'Quả cam đã được tô đúng màu nổi bật rồi.' : 'Em thử chọn màu cam để bức tranh gần với quả thật hơn.'}</p>
+          </div>
+        `, 'Màu sắc'));
+        app.querySelectorAll('[data-color]').forEach((node) => {
+          node.addEventListener('click', () => {
+            fill = node.getAttribute('data-color');
+            redraw();
+          });
+        });
+      }
+      redraw();
+    }
+
+    function renderPottery() {
+      let shape = '';
+      function redraw() {
+        setHTML(shell('Tạo hình gốm ảo', 'Vuốt tay được mô phỏng bằng các nút chỉnh dáng để nắn khối đất thành chiếc bình.', `
+          <div class="pottery-shell">
+            <div class="pottery-piece ${shape === 'wide' ? 'pottery-piece-wide' : shape === 'tall' ? 'pottery-piece-tall' : ''}"></div>
+            <div class="tool-row">
+              <button class="tool ${shape === 'wide' ? 'tool-active' : ''}" id="wide">Mở thân bình</button>
+              <button class="tool ${shape === 'tall' ? 'tool-active' : ''}" id="tall">Kéo cao cổ bình</button>
+              <button class="tool ${shape === '' ? 'tool-active' : ''}" id="reset">Đưa về dáng gốc</button>
+            </div>
+            <p class="${shape ? 'success' : 'hint'}">${shape ? 'Chiếc bình đã đổi dáng. Em vừa hoàn thành một bước tạo hình gốm ảo.' : 'Em hãy chọn một thao tác để nắn khối đất sét.'}</p>
+          </div>
+        `, 'Sáng tạo mỹ thuật'));
+        app.querySelector('#wide').addEventListener('click', () => { shape = 'wide'; redraw(); });
+        app.querySelector('#tall').addEventListener('click', () => { shape = 'tall'; redraw(); });
+        app.querySelector('#reset').addEventListener('click', () => { shape = ''; redraw(); });
+      }
+      redraw();
+    }
+
+    function renderBagPack() {
+      let selected = null;
+      const state = {};
+      const books = [
+        { id: 'sach-toan', label: 'Sách Toán', hint: 'Mang theo cho tiết Toán.' },
+        { id: 'sach-van', label: 'Sách Văn', hint: 'Mang theo cho tiết Văn.' },
+        { id: 'vo-ghi', label: 'Vở ghi', hint: 'Dùng chung để ghi bài.' }
+      ];
+      const slots = [
+        { id: 'mon-toan', label: 'Tiết Toán', answer: 'sach-toan', placeholder: 'Bỏ sách đúng vào đây.' },
+        { id: 'mon-van', label: 'Tiết Văn', answer: 'sach-van', placeholder: 'Bỏ sách đúng vào đây.' },
+        { id: 'mon-chung', label: 'Đồ dùng chung', answer: 'vo-ghi', placeholder: 'Đặt vở ghi vào đây.' }
+      ];
+
+      function redraw() {
+        const pool = books
+          .filter((book) => !Object.values(state).includes(book.id))
+          .map((book) => `<button class="bag-button ${selected === book.id ? 'choice-active' : ''}" data-book="${book.id}"><strong>${book.label}</strong><div class="hint">${book.hint}</div></button>`)
+          .join('');
+        const bagSlots = slots
+          .map((slot) => {
+            const book = books.find((item) => item.id === state[slot.id]);
+            return `
+              <button class="bag-slot-card ${selected && !book ? 'slot-active' : ''}" data-slot="${slot.id}">
+                <span class="slot-label">${slot.label}</span>
+                ${book ? `<span class="bag-chip">${book.label}</span><span class="hint">Bấm để bỏ ra.</span>` : `<span class="hint">${slot.placeholder}</span>`}
+              </button>
+            `;
+          })
+          .join('');
+        const correctCount = slots.filter((slot) => state[slot.id] === slot.answer).length;
+        const done = slots.every((slot) => state[slot.id]);
+        setHTML(shell('Soạn cặp sách', 'Chạm sách rồi chạm ô trong balo ảo để soạn đúng theo thời khóa biểu.', `
+          <div class="bag-shell">
+            <div class="bag-row">${pool}</div>
+            <div class="bag-slots">${bagSlots}</div>
+            <p class="${done && correctCount === slots.length ? 'success' : 'hint'}">${done && correctCount === slots.length ? 'Balo đã được soạn đúng đủ 3 món cần mang.' : `Đã xếp đúng ${correctCount}/${slots.length} món.`}</p>
+          </div>
+        `, 'Tự phục vụ'));
+        app.querySelectorAll('[data-book]').forEach((node) => {
+          node.addEventListener('click', () => {
+            selected = node.getAttribute('data-book');
+            redraw();
+          });
+        });
+        app.querySelectorAll('[data-slot]').forEach((node) => {
+          node.addEventListener('click', () => {
+            const slotId = node.getAttribute('data-slot');
+            if (state[slotId]) {
+              delete state[slotId];
+            } else if (selected) {
+              state[slotId] = selected;
+              selected = null;
+            }
+            redraw();
+          });
+        });
+      }
+
+      redraw();
+    }
+
+    function renderSavings() {
+      let coinsLeft = 20;
+      let piggy = 0;
+      let candy = 0;
+      function redraw() {
+        setHTML(shell('Chi tiêu cá nhân ảo', 'Em có 20 xu. Hãy chia một phần vào heo đất và một phần vào mua kẹo.', `
+          <div class="grid">
+            <div class="jar-row">
+              <div class="jar">
+                <div class="jar-mouth"></div>
+                <strong>Heo đất tiết kiệm</strong>
+                <div class="coin-bank">${Array.from({ length: piggy }, () => '<span class="coin">1</span>').join('') || '<span class="hint">Chưa có xu nào.</span>'}</div>
+                <button class="tool" id="save-coin" ${coinsLeft <= 0 ? 'disabled' : ''}>+ Bỏ vào heo đất</button>
+              </div>
+              <div class="jar">
+                <div class="jar-mouth"></div>
+                <strong>Mua kẹo</strong>
+                <div class="coin-bank">${Array.from({ length: candy }, () => '<span class="coin">1</span>').join('') || '<span class="hint">Chưa dùng xu nào.</span>'}</div>
+                <button class="tool" id="buy-candy" ${coinsLeft <= 0 ? 'disabled' : ''}>+ Dùng để mua kẹo</button>
+              </div>
+            </div>
+            <p class="${coinsLeft === 0 && piggy > 0 && candy > 0 ? 'success' : 'hint'}">${coinsLeft === 0 ? `Đã chia xong 20 xu: tiết kiệm ${piggy} xu, mua kẹo ${candy} xu.` : `Còn lại ${coinsLeft} xu để phân chia.`}</p>
+          </div>
+        `, 'Quản lý tài chính'));
+        const saveButton = app.querySelector('#save-coin');
+        const buyButton = app.querySelector('#buy-candy');
+        if (saveButton) {
+          saveButton.addEventListener('click', () => {
+            if (coinsLeft <= 0) return;
+            coinsLeft -= 1;
+            piggy += 1;
+            redraw();
+          });
+        }
+        if (buyButton) {
+          buyButton.addEventListener('click', () => {
+            if (coinsLeft <= 0) return;
+            coinsLeft -= 1;
+            candy += 1;
+            redraw();
+          });
+        }
+      }
+      redraw();
+    }
+
+    const renderers = {
+      'ngu-van-mindmap': renderMindmap,
+      'toan-shape-sort': renderShapeSort,
+      'toan-coins': renderCoinTask,
+      'khtn-magnet': renderMagnet,
+      'lsdl-globe': renderGlobe,
+      'lsdl-route': renderRoute,
+      'congnghe-grow': renderGrowProcess,
+      'gdcd-calm': renderBreathing,
+      'tinhoc-safe': renderSafetyChat,
+      'gdtc-ar': renderBubbleStage,
+      'amnhac-drum': renderDrumStage,
+      'mythuat-fill': renderOrangeFill,
+      'mythuat-pottery': renderPottery,
+      'hdtn-bag': renderBagPack,
+      'hdtn-budget': renderSavings,
+      'tieng-anh-festival': () => renderSceneCard({
+        heading: 'Flashcard lật mở',
+        title: 'Festival',
+        subtitle: 'Chạm vào thẻ để em nhớ từ “Festival” gắn với lễ hội đông vui.',
+        photo: '../nhe/photos/festival-viet-nam.jpg',
+        copy: 'Lễ hội có cờ, sân khấu và rất nhiều người cùng tham gia.'
+      })
+    };
+
+    (renderers[activity] || renderMindmap)();
+    window.addEventListener('resize', reportHeight);
+  </script>
+</body>
+</html>

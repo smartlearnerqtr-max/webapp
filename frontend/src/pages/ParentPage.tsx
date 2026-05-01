@@ -11,13 +11,85 @@ import {
   markParentMessagesRead,
   sendParentMessage,
 } from '../services/api'
-import type { ParentReportItem, ParentTeacherConversationItem } from '../services/api'
+import type { ParentChildAssignmentItem, ParentChildDashboardItem, ParentReportItem, ParentTeacherConversationItem } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
-const readinessLabelMap: Record<string, string> = {
+const LEVEL_LABELS: Record<string, string> = {
+  nhe: 'Nhẹ',
+  trung_binh: 'Trung bình',
+  nang: 'Nặng',
+}
+
+const INPUT_LABELS: Record<string, string> = {
+  touch: 'Chạm',
+  keyboard: 'Bàn phím',
+  voice: 'Giọng nói',
+}
+
+const READINESS_LABELS: Record<string, string> = {
   can_ho_tro_them: 'Cần hỗ trợ thêm',
   dang_phu_hop: 'Đang phù hợp',
-  san_sang_nang_do_kho: 'Sẵn sàng nâng độ khó',
+  san_sang_nang_do_kho: 'Sẵn sàng tăng độ khó',
+}
+
+const ASSIGNMENT_STATUS_LABELS: Record<string, string> = {
+  not_started: 'Chưa bắt đầu',
+  in_progress: 'Đang học',
+  completed: 'Đã hoàn thành',
+}
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return 'Chưa có'
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return value
+  return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short' }).format(parsed)
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return 'Chưa đặt'
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return value
+  return new Intl.DateTimeFormat('vi-VN', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(parsed)
+}
+
+function levelLabel(value: string | null | undefined) {
+  if (!value) return 'Chưa rõ mức'
+  return LEVEL_LABELS[value] ?? value
+}
+
+function inputLabel(value: string | null | undefined) {
+  if (!value) return 'Chưa chọn cách nhập'
+  return INPUT_LABELS[value] ?? value
+}
+
+function assignmentStatusLabel(value: string | null | undefined) {
+  if (!value) return 'Chưa rõ'
+  return ASSIGNMENT_STATUS_LABELS[value] ?? value
+}
+
+function readinessLabel(value: string | null | undefined) {
+  if (!value) return 'Đang theo dõi'
+  return READINESS_LABELS[value] ?? value
+}
+
+function summarizeChildAssignments(child: ParentChildDashboardItem) {
+  const assignments = child.assignments ?? []
+  const matchingCount = assignments.filter((item) => item.level_match).length
+  const mismatchedCount = assignments.length - matchingCount
+  const activeCount = assignments.filter((item) => item.status !== 'completed').length
+  return { matchingCount, mismatchedCount, activeCount }
+}
+
+function renderAssignmentMeta(item: ParentChildAssignmentItem) {
+  const lesson = item.assignment?.lesson
+  const classroom = item.assignment?.classroom
+  const teacherName = item.teacher?.full_name ?? 'Giáo viên đang theo dõi'
+  const subjectName = lesson?.subject?.name ?? item.assignment?.subject?.name ?? 'Chưa có môn'
+  const className = classroom?.name ?? 'Chưa có lớp'
+  return `${subjectName} / ${className} / ${teacherName}`
 }
 
 export function ParentPage() {
@@ -51,11 +123,12 @@ export function ParentPage() {
   })
 
   const sendMessageMutation = useMutation({
-    mutationFn: (conversation: ParentTeacherConversationItem) => sendParentMessage(token!, {
-      teacher_id: conversation.teacher?.id ?? 0,
-      student_id: conversation.student?.id ?? 0,
-      message: messageDraft.trim(),
-    }),
+    mutationFn: (conversation: ParentTeacherConversationItem) =>
+      sendParentMessage(token!, {
+        teacher_id: conversation.teacher?.id ?? 0,
+        student_id: conversation.student?.id ?? 0,
+        message: messageDraft.trim(),
+      }),
     onSuccess: async () => {
       setMessageDraft('')
       await queryClient.invalidateQueries({ queryKey: ['parent-messages', token] })
@@ -63,14 +136,17 @@ export function ParentPage() {
   })
 
   const markReadMutation = useMutation({
-    mutationFn: (conversation: ParentTeacherConversationItem) => markParentMessagesRead(token!, {
-      teacher_id: conversation.teacher?.id ?? 0,
-      student_id: conversation.student?.id ?? 0,
-    }),
+    mutationFn: (conversation: ParentTeacherConversationItem) =>
+      markParentMessagesRead(token!, {
+        teacher_id: conversation.teacher?.id ?? 0,
+        student_id: conversation.student?.id ?? 0,
+      }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['parent-messages', token] })
     },
   })
+
+  const children = useMemo(() => childrenQuery.data ?? [], [childrenQuery.data])
 
   const reportsByStudent = useMemo(() => {
     const grouped = new Map<number, ParentReportItem[]>()
@@ -82,7 +158,7 @@ export function ParentPage() {
   }, [reportsQuery.data])
 
   const familyProgressChartItems = useMemo(() => {
-    const summary = (childrenQuery.data ?? []).reduce(
+    const summary = children.reduce(
       (accumulator, item) => {
         accumulator.totalAssignments += item.progress_summary.total_assignments
         accumulator.completedCount += item.progress_summary.completed_count
@@ -95,12 +171,28 @@ export function ParentPage() {
     const remainingCount = Math.max(summary.totalAssignments - summary.completedCount - summary.inProgressCount, 0)
 
     return [
-      { label: 'Số con theo dõi', value: childrenQuery.data?.length ?? 0, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
-      { label: 'Tổng bài tập', value: summary.totalAssignments, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
+      { label: 'Số con theo dõi', value: children.length, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
+      { label: 'Tổng bài được giao', value: summary.totalAssignments, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
       { label: 'Đã hoàn thành', value: summary.completedCount, color: 'linear-gradient(180deg, #ffbe3d 0%, #f29f05 100%)' },
       { label: 'Chưa bắt đầu', value: remainingCount, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
     ]
-  }, [childrenQuery.data])
+  }, [children])
+
+  const familyLevelBreakdown = useMemo(() => {
+    const counts = { nhe: 0, trung_binh: 0, nang: 0 }
+    for (const child of children) {
+      const level = child.student.disability_level
+      if (level === 'nhe' || level === 'trung_binh' || level === 'nang') {
+        counts[level] += 1
+      }
+    }
+    return counts
+  }, [children])
+
+  const familyAssignmentMismatchCount = useMemo(
+    () => children.reduce((sum, child) => sum + summarizeChildAssignments(child).mismatchedCount, 0),
+    [children],
+  )
 
   const conversations = useMemo(() => conversationsQuery.data ?? [], [conversationsQuery.data])
   const unreadConversationCount = conversations.reduce((count, item) => count + item.unread_count, 0)
@@ -126,7 +218,9 @@ export function ParentPage() {
         conversation.teacher?.school_name,
         conversation.student?.full_name,
         conversation.latest_message?.message,
-      ].join(' ').toLowerCase()
+      ]
+        .join(' ')
+        .toLowerCase()
 
       return haystack.includes(keyword)
     })
@@ -145,20 +239,30 @@ export function ParentPage() {
 
   const parentId = typeof profile?.id === 'number' ? profile.id : null
   const parentName = typeof profile?.full_name === 'string' ? String(profile.full_name) : 'Phụ huynh'
-  const isParentSetupPending = !childrenQuery.isLoading && !(childrenQuery.data?.length ?? 0)
+  const isParentSetupPending = !childrenQuery.isLoading && !children.length
 
   return (
     <RequireAuth allowedRoles={['parent']}>
       <div className="page-stack">
         <section className="roadmap-panel">
           <p className="eyebrow">Phụ huynh</p>
-          <h2>Theo dõi việc học của con thật gọn và dễ hiểu</h2>
-          <p>Xem tiến độ, nhận báo cáo và nhắn giáo viên bằng một nút chat nổi thay vì nhét khung chat vào giữa trang.</p>
+          <h2>Theo dõi đúng mức học của con</h2>
+          <p>
+            Lớp học có thể có đủ ba mức nhẹ, trung bình và nặng. Phụ huynh cần thấy rõ con đang thuộc mức nào, giáo viên nào
+            đang theo dõi, và các bài được giao có đúng mức của con hay không.
+          </p>
         </section>
 
         <section className="dashboard-grid">
           <article className="roadmap-panel">
-            <h3>Thông tin tài khoản</h3>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Tài khoản</p>
+                <h3>Tổng quan gia đình</h3>
+              </div>
+              <span className="subject-pill muted-pill">{children.length} con</span>
+            </div>
+
             <div className="metrics-grid">
               <div className="mini-card">
                 <span>Parent ID</span>
@@ -169,21 +273,43 @@ export function ParentPage() {
                 <strong>{parentName}</strong>
               </div>
               <div className="mini-card">
-                <span>Số con đang theo dõi</span>
-                <strong>{childrenQuery.data?.length ?? 0}</strong>
-              </div>
-              <div className="mini-card">
                 <span>Tin nhắn chưa đọc</span>
                 <strong>{unreadConversationCount}</strong>
               </div>
+              <div className="mini-card">
+                <span>Bài lệch mức</span>
+                <strong>{familyAssignmentMismatchCount}</strong>
+              </div>
             </div>
+
             <BarChartCard
-              title="Biểu đồ tổng quan gia đình"
-              description="Nhìn nhanh khối lượng bài học của cả gia đình trên ứng dụng."
+              title="Biểu đồ tổng quan"
+              description="Nhìn nhanh khối lượng bài học của các con trên ứng dụng."
               items={familyProgressChartItems}
               emptyMessage="Chưa có dữ liệu học sinh để hiển thị."
             />
-            <p>Gửi Parent ID này cho giáo viên nếu cần liên kết đúng phụ huynh vào hồ sơ học sinh.</p>
+
+            <div className="teacher-flow-summary">
+              <article className="teacher-step-card teacher-step-card-active">
+                <span>Mức nhẹ</span>
+                <strong>{familyLevelBreakdown.nhe}</strong>
+                <p>Số con đang ở mức nhẹ.</p>
+              </article>
+              <article className="teacher-step-card teacher-step-card-active">
+                <span>Trung bình</span>
+                <strong>{familyLevelBreakdown.trung_binh}</strong>
+                <p>Số con đang ở mức trung bình.</p>
+              </article>
+              <article className="teacher-step-card teacher-step-card-active">
+                <span>Mức nặng</span>
+                <strong>{familyLevelBreakdown.nang}</strong>
+                <p>Số con đang ở mức nặng.</p>
+              </article>
+            </div>
+
+            <div className="teacher-inline-note">
+              Gửi Parent ID này cho giáo viên khi cần liên kết đúng tài khoản phụ huynh với hồ sơ học sinh.
+            </div>
           </article>
         </section>
 
@@ -191,19 +317,23 @@ export function ParentPage() {
           <section className="dashboard-grid">
             <article className="roadmap-panel">
               <h3>Bắt đầu kết nối</h3>
-              <p>Tài khoản phụ huynh đã tạo xong. Bước tiếp theo là gửi Parent ID hoặc email này cho giáo viên để họ gắn đúng vào hồ sơ học sinh.</p>
-              <p>Sau khi giáo viên liên kết xong, trang này sẽ hiện con, báo cáo học tập và khung chat.</p>
+              <p>
+                Tài khoản phụ huynh đã tạo xong. Bước tiếp theo là gửi Parent ID hoặc email này cho giáo viên để họ gắn đúng
+                vào hồ sơ học sinh.
+              </p>
+              <p>Sau khi liên kết xong, trang này sẽ hiện con, bài học, báo cáo và khung chat với giáo viên.</p>
             </article>
           </section>
         ) : null}
 
         <section className="dashboard-grid">
-          {(childrenQuery.data ?? []).map((item) => {
+          {children.map((item) => {
             const studentReports = reportsByStudent.get(item.student.id) ?? []
             const remainingAssignments = Math.max(
               item.progress_summary.total_assignments - item.progress_summary.completed_count - item.progress_summary.in_progress_count,
               0,
             )
+            const assignmentSummary = summarizeChildAssignments(item)
 
             const childProgressChartItems = [
               { label: 'Tổng bài', value: item.progress_summary.total_assignments, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
@@ -214,9 +344,15 @@ export function ParentPage() {
 
             return (
               <article key={item.student.id} className="roadmap-panel">
-                <div className="student-row">
-                  <strong>{item.student.full_name}</strong>
-                  <span>{item.student.disability_level} / {item.student.preferred_input}</span>
+                <div className="teacher-clean-section-head">
+                  <div>
+                    <p className="eyebrow">Học sinh</p>
+                    <h3>{item.student.full_name}</h3>
+                    <p className="helper-text">
+                      {`Mức ${levelLabel(item.student.disability_level)} / ${inputLabel(item.student.preferred_input)}`}
+                    </p>
+                  </div>
+                  <span className="subject-pill">{levelLabel(item.student.disability_level)}</span>
                 </div>
 
                 <div className="metrics-grid">
@@ -225,12 +361,12 @@ export function ParentPage() {
                     <strong>{item.progress_summary.total_assignments}</strong>
                   </div>
                   <div className="mini-card">
-                    <span>Đã xong</span>
-                    <strong>{item.progress_summary.completed_count}</strong>
+                    <span>Khớp mức</span>
+                    <strong>{assignmentSummary.matchingCount}</strong>
                   </div>
                   <div className="mini-card">
-                    <span>Đang học</span>
-                    <strong>{item.progress_summary.in_progress_count}</strong>
+                    <span>Lệch mức</span>
+                    <strong>{assignmentSummary.mismatchedCount}</strong>
                   </div>
                   <div className="mini-card">
                     <span>Tiến độ gần nhất</span>
@@ -244,56 +380,119 @@ export function ParentPage() {
                   items={childProgressChartItems}
                 />
 
-                <p className="helper-text">Bài học gần nhất: {item.progress_summary.last_assignment_title ?? 'Chưa có bài tập nào'}.</p>
-                <p>Mức độ sẵn sàng: {readinessLabelMap[item.progress_summary.readiness_status] ?? item.progress_summary.readiness_status}</p>
+                <p className="helper-text">
+                  Bài học gần nhất: {item.progress_summary.last_assignment_title ?? 'Chưa có bài tập nào'}.
+                </p>
+                <p>Mức độ sẵn sàng: {readinessLabel(item.progress_summary.readiness_status)}</p>
 
-                <div className="tag-wrap">
-                  {item.classes.map((classroom) => (
-                    <span key={classroom.id} className="subject-pill">{classroom.name}</span>
-                  ))}
-                  {!item.classes.length ? <p>Chưa được gắn lớp học nào.</p> : null}
+                <div className="teacher-inline-note">
+                  {`Con hiện ở mức ${levelLabel(item.student.disability_level)}. Dù trong cùng một lớp có nhiều mức khác nhau, bài giao cho con vẫn phải bám theo đúng mức này.`}
                 </div>
 
-                <div className="tag-wrap">
-                  {item.teachers.map((teacher) => (
-                    <span key={teacher.id} className="subject-pill">GV {teacher.full_name} / ID {teacher.id}</span>
-                  ))}
-                  {!item.teachers.length ? <p>Chưa có giáo viên nào được gắn cho học sinh này.</p> : null}
+                {assignmentSummary.mismatchedCount > 0 ? (
+                  <p className="error-text">
+                    {`Có ${assignmentSummary.mismatchedCount} bài không khớp mức hiện tại của con. Phụ huynh nên trao đổi lại với giáo viên.`}
+                  </p>
+                ) : null}
+
+                <div className="detail-stack">
+                  <strong>Lớp đang tham gia</strong>
+                  <div className="tag-wrap">
+                    {item.classes.map((classroom) => (
+                      <span key={classroom.id} className="subject-pill">
+                        {classroom.name}
+                      </span>
+                    ))}
+                    {!item.classes.length ? <p>Chưa được gắn lớp học nào.</p> : null}
+                  </div>
                 </div>
 
-                <div className="student-list compact-list">
-                  {studentReports.slice(0, 3).map((report) => (
-                    <div key={report.id} className="student-row">
-                      <strong>{report.title}</strong>
-                      <span>{report.report_date}</span>
-                      <p>{report.summary_text}</p>
-                      {report.teacher_note ? <p>Ghi chú giáo viên: {report.teacher_note}</p> : null}
-                    </div>
-                  ))}
-                  {!studentReports.length ? <p>Chưa có báo cáo nào cho học sinh này.</p> : null}
+                <div className="detail-stack">
+                  <strong>Giáo viên đang theo dõi</strong>
+                  <div className="tag-wrap">
+                    {item.teachers.map((teacher) => (
+                      <span key={teacher.id} className="subject-pill">
+                        {`${teacher.full_name} / ID ${teacher.id}`}
+                      </span>
+                    ))}
+                    {!item.teachers.length ? <p>Chưa có giáo viên nào được gắn cho học sinh này.</p> : null}
+                  </div>
+                </div>
+
+                <div className="detail-stack">
+                  <strong>Bài giáo viên đã giao</strong>
+                  <div className="student-list compact-list">
+                    {item.assignments.map((assignmentItem) => {
+                      const lesson = assignmentItem.assignment?.lesson
+                      const lessonLevel = lesson?.primary_level ?? ''
+                      return (
+                        <div
+                          key={assignmentItem.progress_id}
+                          className={assignmentItem.level_match ? 'student-row' : 'student-row parent-assignment-row-warning'}
+                        >
+                          <strong>{lesson?.title ?? `Bài học #${assignmentItem.assignment?.lesson_id ?? assignmentItem.progress_id}`}</strong>
+                          <span>{renderAssignmentMeta(assignmentItem)}</span>
+                          <p>
+                            {`Mức bài: ${levelLabel(lessonLevel)} / Trạng thái: ${assignmentStatusLabel(assignmentItem.status)} / Tiến độ: ${assignmentItem.progress_percent}%`}
+                          </p>
+                          <p>
+                            {`Mức cần đạt: ${assignmentItem.assignment?.required_completion_percent ?? 0}% / Hạn nộp: ${formatDateTime(assignmentItem.assignment?.due_at)}`}
+                          </p>
+                          <p>{`Đánh giá hiện tại: ${readinessLabel(assignmentItem.readiness_status)}`}</p>
+                          {!assignmentItem.level_match ? (
+                            <p className="helper-text">
+                              {`Bài này đang ở mức ${levelLabel(lessonLevel)} trong khi con hiện ở mức ${levelLabel(item.student.disability_level)}.`}
+                            </p>
+                          ) : null}
+                        </div>
+                      )
+                    })}
+                    {!item.assignments.length ? <p>Chưa có bài nào được giao cho học sinh này.</p> : null}
+                  </div>
+                </div>
+
+                <div className="detail-stack">
+                  <strong>Báo cáo gần đây</strong>
+                  <div className="student-list compact-list">
+                    {studentReports.slice(0, 3).map((report) => (
+                      <div key={report.id} className="student-row">
+                        <strong>{report.title}</strong>
+                        <span>{formatDate(report.report_date)}</span>
+                        <p>{report.summary_text}</p>
+                        {report.teacher_note ? <p>Ghi chú giáo viên: {report.teacher_note}</p> : null}
+                      </div>
+                    ))}
+                    {!studentReports.length ? <p>Chưa có báo cáo nào cho học sinh này.</p> : null}
+                  </div>
                 </div>
               </article>
             )
           })}
 
-          {!childrenQuery.data?.length && !childrenQuery.isLoading ? (
+          {!children.length && !childrenQuery.isLoading ? (
             <article className="roadmap-panel">
               <h3>Chưa có liên kết nào</h3>
-              <p>Giáo viên cần liên kết phụ huynh với học sinh trước khi dashboard có dữ liệu theo dõi.</p>
+              <p>Giáo viên cần liên kết phụ huynh với học sinh trước khi bảng theo dõi có dữ liệu.</p>
             </article>
           ) : null}
         </section>
 
         <section className="roadmap-panel">
-          <h3>Tất cả báo cáo đã nhận</h3>
+          <div className="teacher-clean-section-head">
+            <div>
+              <p className="eyebrow">Báo cáo</p>
+              <h3>Tất cả báo cáo đã nhận</h3>
+            </div>
+            <span className="subject-pill muted-pill">{reportsQuery.data?.length ?? 0}</span>
+          </div>
           <div className="student-list compact-list">
             {(reportsQuery.data ?? []).map((report) => (
               <div key={report.id} className="student-row">
                 <strong>{report.student?.full_name ?? `Học sinh #${report.student_id}`}</strong>
-                <span>{report.title} / {report.report_date}</span>
+                <span>{`${report.title} / ${formatDate(report.report_date)}`}</span>
                 <p>{report.summary_text}</p>
                 <p>Khuyến nghị: {report.recommendation ?? 'Chưa có'}</p>
-                {report.teacher ? <p>Gửi bởi: {report.teacher.full_name} (Teacher ID {report.teacher.id})</p> : null}
+                {report.teacher ? <p>{`Gửi bởi: ${report.teacher.full_name} (Teacher ID ${report.teacher.id})`}</p> : null}
               </div>
             ))}
             {!reportsQuery.data?.length && !reportsQuery.isLoading ? <p>Chưa có báo cáo nào được gửi tới tài khoản này.</p> : null}
@@ -330,7 +529,9 @@ export function ParentPage() {
         chatContextLabel={(conversation) => `Trao đổi về ${conversation.student?.full_name ?? 'học sinh'}`}
         messageDraft={messageDraft}
         onMessageDraftChange={setMessageDraft}
-        onSend={() => { if (selectedConversation) sendMessageMutation.mutate(selectedConversation) }}
+        onSend={() => {
+          if (selectedConversation) sendMessageMutation.mutate(selectedConversation)
+        }}
         sendPending={sendMessageMutation.isPending}
         sendError={sendMessageMutation.error ? (sendMessageMutation.error as Error).message : null}
         messagePlaceholder="Ví dụ: Hôm nay bé làm bài ở nhà khá ổn, cô xem giúp em phần hình học nhé."

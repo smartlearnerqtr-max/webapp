@@ -30,19 +30,19 @@ ALLOWED_VISUAL_THEMES = {
 
 def _require_teacher_user():
     if get_jwt().get('role') != 'teacher':
-        return None, error_response('Khong co quyen truy cap', 'AUTH_FORBIDDEN', 403)
+        return None, error_response('Không có quyền truy cập', 'AUTH_FORBIDDEN', 403)
     user = User.query.get(get_jwt_identity())
     if not user or not user.teacher_profile:
-        return None, error_response('Khong tim thay giao vien', 'TEACHER_NOT_FOUND', 404)
+        return None, error_response('Không tìm thấy giáo viên', 'TEACHER_NOT_FOUND', 404)
     return user, None
 
 
 def _require_student_user():
     if get_jwt().get('role') != 'student':
-        return None, error_response('Khong co quyen truy cap', 'AUTH_FORBIDDEN', 403)
+        return None, error_response('Không có quyền truy cập', 'AUTH_FORBIDDEN', 403)
     user = User.query.get(get_jwt_identity())
     if not user or not user.student_profile:
-        return None, error_response('Khong tim thay hoc sinh', 'STUDENT_NOT_FOUND', 404)
+        return None, error_response('Không tìm thấy học sinh', 'STUDENT_NOT_FOUND', 404)
     return user, None
 
 
@@ -133,8 +133,8 @@ def _publish_auto_assignment_events(
 
     publish_realtime_event(
         'assignment_created',
-        f'Hoc sinh {student.full_name} da duoc nhan tu dong {assignment_count} bai dang mo cua lop {classroom.name}.',
-        title='Tu dong bo sung bai tap',
+        f'Học sinh {student.full_name} đã được nhận tự động {assignment_count} bài đang mở của lớp {classroom.name}.',
+        title='Tự động bổ sung bài tập',
         recipient_user_ids=[teacher_user_id],
         payload=payload,
     )
@@ -142,8 +142,8 @@ def _publish_auto_assignment_events(
     if recipient_user_ids:
         publish_realtime_event(
             'assignment_created',
-            f'Ban vua nhan {assignment_count} bai dang hoat dong cua lop {classroom.name}.',
-            title='Bai tap moi da san sang',
+            f'Bạn vừa nhận {assignment_count} bài đang hoạt động của lớp {classroom.name}.',
+            title='Bài tập mới đã sẵn sàng',
             recipient_user_ids=recipient_user_ids,
             payload=payload,
         )
@@ -175,7 +175,7 @@ def create_class():
     payload = request.get_json(silent=True) or {}
     name = (payload.get('name') or '').strip()
     if not name:
-        return error_response('Ten lop khong duoc de trong', 'VALIDATION_ERROR', 422)
+        return error_response('Tên lớp không được để trống', 'VALIDATION_ERROR', 422)
     classroom = Classroom(
         teacher_id=user.teacher_profile.id,
         name=name,
@@ -191,8 +191,8 @@ def create_class():
     db.session.flush()
     _ensure_join_credential(classroom)
     db.session.commit()
-    log_server_event(level='info', module='classes', message='Tao lop hoc moi', action_name='create_class', user_id=user.id, metadata={'class_id': classroom.id})
-    return success_response(_serialize_teacher_classroom(classroom), 'Tao lop thanh cong', 201)
+    log_server_event(level='info', module='classes', message='Tạo lớp học mới', action_name='create_class', user_id=user.id, metadata={'class_id': classroom.id})
+    return success_response(_serialize_teacher_classroom(classroom), 'Tạo lớp thành công', 201)
 
 
 @api_v1.get('/classes/<int:class_id>')
@@ -203,7 +203,7 @@ def get_class(class_id: int):
         return error
     classroom = Classroom.query.get(class_id)
     if not classroom or classroom.teacher_id != user.teacher_profile.id:
-        return error_response('Khong tim thay lop', 'CLASS_NOT_FOUND', 404)
+        return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
     _ensure_join_credential(classroom)
     db.session.commit()
     return success_response(_serialize_teacher_classroom(classroom))
@@ -217,7 +217,7 @@ def update_class(class_id: int):
         return error
     classroom = Classroom.query.get(class_id)
     if not classroom or classroom.teacher_id != user.teacher_profile.id:
-        return error_response('Khong tim thay lop', 'CLASS_NOT_FOUND', 404)
+        return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
     payload = request.get_json(silent=True) or {}
     for field in ['name', 'grade_label', 'description', 'default_disability_level', 'status']:
         if field in payload:
@@ -230,7 +230,7 @@ def update_class(class_id: int):
         classroom.background_image_url = _resolve_background_image_url(payload.get('background_image_url'))
     _ensure_join_credential(classroom)
     db.session.commit()
-    return success_response(_serialize_teacher_classroom(classroom), 'Cap nhat lop thanh cong')
+    return success_response(_serialize_teacher_classroom(classroom), 'Cập nhật lớp thành công')
 
 
 @api_v1.delete('/classes/<int:class_id>')
@@ -241,11 +241,11 @@ def archive_class(class_id: int):
         return error
     classroom = Classroom.query.get(class_id)
     if not classroom or classroom.teacher_id != user.teacher_profile.id:
-        return error_response('Khong tim thay lop', 'CLASS_NOT_FOUND', 404)
+        return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
     classroom.status = 'archived'
     _ensure_join_credential(classroom)
     db.session.commit()
-    return success_response(_serialize_teacher_classroom(classroom), 'Da luu tru lop')
+    return success_response(_serialize_teacher_classroom(classroom), 'Đã lưu trữ lớp')
 
 
 @api_v1.get('/classes/<int:class_id>/students')
@@ -256,7 +256,7 @@ def list_class_students(class_id: int):
         return error
     classroom = Classroom.query.get(class_id)
     if not classroom or classroom.teacher_id != user.teacher_profile.id:
-        return error_response('Khong tim thay lop', 'CLASS_NOT_FOUND', 404)
+        return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
     return success_response([link.to_dict() for link in classroom.students if link.status == 'active'])
 
 
@@ -268,7 +268,7 @@ def add_students_to_class(class_id: int):
         return error
     classroom = Classroom.query.get(class_id)
     if not classroom or classroom.teacher_id != user.teacher_profile.id:
-        return error_response('Khong tim thay lop', 'CLASS_NOT_FOUND', 404)
+        return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
 
     if sync_legacy_teacher_student_links(user.teacher_profile.id):
         db.session.flush()
@@ -324,15 +324,15 @@ def add_students_to_class(class_id: int):
     student_user_ids = _get_student_user_ids(unique_student_ids)
     publish_realtime_event(
         'class_membership_updated',
-        f'Lop {classroom.name} vua duoc cap nhat hoc sinh.',
-        title='Cap nhat lop hoc',
+        f'Lớp {classroom.name} vừa được cập nhật học sinh.',
+        title='Cập nhật lớp học',
         recipient_user_ids=[user.id, *student_user_ids],
         payload={'class_id': class_id, 'class_name': classroom.name, 'student_ids': unique_student_ids, 'auto_assignment_count': auto_assignment_count},
     )
 
     db.session.commit()
     log_server_event(level='info', module='classes', message='Them hoc sinh vao lop', action_name='add_students_to_class', user_id=user.id, metadata={'class_id': class_id, 'student_ids': unique_student_ids})
-    return success_response([link.to_dict() for link in links], 'Them hoc sinh vao lop thanh cong', 201)
+    return success_response([link.to_dict() for link in links], 'Thêm học sinh vào lớp thành công', 201)
 
 
 @api_v1.delete('/classes/<int:class_id>/students/<int:student_id>')
@@ -343,13 +343,13 @@ def remove_student_from_class(class_id: int, student_id: int):
         return error
     classroom = Classroom.query.get(class_id)
     if not classroom or classroom.teacher_id != user.teacher_profile.id:
-        return error_response('Khong tim thay lop', 'CLASS_NOT_FOUND', 404)
+        return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
     link = ClassStudent.query.filter_by(class_id=class_id, student_id=student_id).first()
     if not link:
-        return error_response('Hoc sinh khong nam trong lop', 'CLASS_STUDENT_NOT_FOUND', 404)
+        return error_response('Học sinh không nằm trong lớp', 'CLASS_STUDENT_NOT_FOUND', 404)
     link.status = 'inactive'
     db.session.commit()
-    return success_response(None, 'Da xoa hoc sinh khoi lop')
+    return success_response(None, 'Đã xóa học sinh khỏi lớp')
 
 
 @api_v1.get('/my/classes')
@@ -382,19 +382,19 @@ def join_class_by_credentials():
     class_id = payload.get('class_id')
     class_password = (payload.get('class_password') or '').strip().upper()
     if not class_id or not class_password:
-        return error_response('Can nhap class_id va class_password', 'VALIDATION_ERROR', 422)
+        return error_response('Cần nhập class_id và class_password', 'VALIDATION_ERROR', 422)
 
     try:
         class_id = int(class_id)
     except (TypeError, ValueError):
-        return error_response('class_id khong hop le', 'VALIDATION_ERROR', 422)
+        return error_response('class_id không hợp lệ', 'VALIDATION_ERROR', 422)
 
     classroom = Classroom.query.get(class_id)
     if not classroom or classroom.status != 'active':
-        return error_response('Khong tim thay lop hoc', 'CLASS_NOT_FOUND', 404)
+        return error_response('Không tìm thấy lớp học', 'CLASS_NOT_FOUND', 404)
     _ensure_join_credential(classroom)
     if not classroom.join_credential or classroom.join_credential.join_password != class_password:
-        return error_response('Mat khau vao lop khong dung', 'CLASS_JOIN_FAILED', 422)
+        return error_response('Mật khẩu vào lớp không đúng', 'CLASS_JOIN_FAILED', 422)
 
     student = user.student_profile
     link = ClassStudent.query.filter_by(class_id=classroom.id, student_id=student.id).first()
@@ -414,8 +414,8 @@ def join_class_by_credentials():
 
     publish_realtime_event(
         'class_membership_updated',
-        f'Hoc sinh {student.full_name} vua vao lop {classroom.name}.',
-        title='Hoc sinh vao lop',
+        f'Học sinh {student.full_name} vừa vào lớp {classroom.name}.',
+        title='Học sinh vào lớp',
         recipient_user_ids=[uid for uid in [user.id, teacher_user_id] if uid],
         payload={
             'class_id': classroom.id,
@@ -437,7 +437,7 @@ def join_class_by_credentials():
     log_server_event(
         level='info',
         module='classes',
-        message='Hoc sinh tu tham gia lop hoc',
+        message='Học sinh tự tham gia lớp học',
         action_name='student_join_class',
         user_id=user.id,
         metadata={'class_id': classroom.id, 'student_id': student.id},
@@ -448,6 +448,6 @@ def join_class_by_credentials():
             'student': student.to_dict(),
             'class_join_status': 'created' if created else 'reactivated',
         },
-        'Tham gia lop hoc thanh cong',
+        'Tham gia lớp học thành công',
         201 if created else 200,
     )

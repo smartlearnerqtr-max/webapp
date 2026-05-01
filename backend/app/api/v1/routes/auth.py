@@ -16,13 +16,13 @@ def login():
     identity = (payload.get('identity') or '').strip()
     password = payload.get('password') or ''
     if not identity or not password:
-        return error_response('Vui long nhap identity va password', 'VALIDATION_ERROR', 422)
+        return error_response('Vui lòng nhập identity và password', 'VALIDATION_ERROR', 422)
     login_payload = login_user(identity, password)
     if not login_payload:
-        log_server_event(level='warning', module='auth', message='Dang nhap that bai', error_code='AUTH_INVALID_CREDENTIALS', action_name='login_failed')
-        return error_response('Thong tin dang nhap khong dung', 'AUTH_INVALID_CREDENTIALS', 401)
-    log_server_event(level='info', module='auth', message='Dang nhap thanh cong', action_name='login_success', user_id=login_payload['user']['id'])
-    return success_response(login_payload, 'Dang nhap thanh cong')
+        log_server_event(level='warning', module='auth', message='Đăng nhập thất bại', error_code='AUTH_INVALID_CREDENTIALS', action_name='login_failed')
+        return error_response('Thông tin đăng nhập không đúng', 'AUTH_INVALID_CREDENTIALS', 401)
+    log_server_event(level='info', module='auth', message='Đăng nhập thành công', action_name='login_success', user_id=login_payload['user']['id'])
+    return success_response(login_payload, 'Đăng nhập thành công')
 
 
 @api_v1.post('/auth/register')
@@ -30,10 +30,10 @@ def register():
     payload = request.get_json(silent=True) or {}
     register_payload, error_message, error_code = register_self_service_user(payload)
     if error_message or not register_payload:
-        log_server_event(level='warning', module='auth', message='Dang ky that bai', error_code=error_code, action_name='register_failed')
-        return error_response(error_message or 'Dang ky that bai', error_code or 'VALIDATION_ERROR', 422 if error_code == 'VALIDATION_ERROR' else 409)
-    log_server_event(level='info', module='auth', message='Dang ky thanh cong', action_name='register_success', user_id=register_payload['user']['id'])
-    return success_response(register_payload, 'Dang ky thanh cong', 201)
+        log_server_event(level='warning', module='auth', message='Đăng ký thất bại', error_code=error_code, action_name='register_failed')
+        return error_response(error_message or 'Đăng ký thất bại', error_code or 'VALIDATION_ERROR', 422 if error_code == 'VALIDATION_ERROR' else 409)
+    log_server_event(level='info', module='auth', message='Đăng ký thành công', action_name='register_success', user_id=register_payload['user']['id'])
+    return success_response(register_payload, 'Đăng ký thành công', 201)
 
 
 @api_v1.post('/auth/refresh')
@@ -41,15 +41,15 @@ def register():
 def refresh_access_token():
     user = User.query.get(get_jwt_identity())
     if not user:
-        return error_response('Khong tim thay nguoi dung', 'USER_NOT_FOUND', 404)
+        return error_response('Không tìm thấy người dùng', 'USER_NOT_FOUND', 404)
     token = create_access_token(identity=str(user.id), additional_claims={'role': user.role})
-    return success_response({'access_token': token}, 'Lam moi token thanh cong')
+    return success_response({'access_token': token}, 'Làm mới token thành công')
 
 
 @api_v1.post('/auth/logout')
 @jwt_required()
 def logout():
-    return success_response(None, 'Dang xuat thanh cong')
+    return success_response(None, 'Đăng xuất thành công')
 
 
 @api_v1.get('/auth/me')
@@ -57,5 +57,5 @@ def logout():
 def current_user():
     user = User.query.get(get_jwt_identity())
     if not user:
-        return error_response('Khong tim thay nguoi dung', 'USER_NOT_FOUND', 404)
-    return success_response(build_user_payload(user), 'Lay thong tin thanh cong')
+        return error_response('Không tìm thấy người dùng', 'USER_NOT_FOUND', 404)
+    return success_response(build_user_payload(user), 'Lấy thông tin thành công')

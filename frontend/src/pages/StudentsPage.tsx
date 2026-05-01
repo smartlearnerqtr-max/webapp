@@ -59,6 +59,7 @@ export function StudentsPage() {
           <div>
             <p className="eyebrow">Học sinh</p>
             <h2>Phân nhóm học sinh</h2>
+            <p>Học sinh chọn mức ở cổng vào, giáo viên vẫn có thể nhìn và điều chỉnh lại để quản lý bài học theo 3 mức độc lập.</p>
           </div>
           <div className="teacher-clean-hero-badges">
             <span>{studentsQuery.data?.length ?? 0} học sinh</span>

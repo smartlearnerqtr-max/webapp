@@ -336,6 +336,20 @@ export type ParentProgressSummary = {
   completion_score: number
 }
 
+export type ParentChildAssignmentItem = {
+  progress_id: number
+  status: string
+  progress_percent: number
+  completed_at: string | null
+  readiness_status: string
+  help_count: number
+  retry_count: number
+  completion_score: number
+  level_match: boolean
+  assignment: AssignmentItem | null
+  teacher: TeacherContactItem | null
+}
+
 export type ParentAccountItem = {
   id: number
   user_id: number
@@ -400,6 +414,7 @@ export type ParentChildDashboardItem = {
   classes: ClassItem[]
   teachers: TeacherContactItem[]
   progress_summary: ParentProgressSummary
+  assignments: ParentChildAssignmentItem[]
 }
 
 export type ParentTeacherMessageItem = {
@@ -678,6 +693,14 @@ export async function updateStudent(token: string, studentId: number, payload: {
   avatar_url?: string | null
 }) {
   return request<StudentItem>(`/api/v1/students/${studentId}`, {
+    method: 'PUT',
+    token,
+    body: payload,
+  })
+}
+
+export async function updateMyStudentLevel(token: string, payload: { disability_level: 'nang' | 'trung_binh' | 'nhe' }) {
+  return request<StudentItem>('/api/v1/students/me/level', {
     method: 'PUT',
     token,
     body: payload,
@@ -981,7 +1004,7 @@ export async function synthesizeAISpeech(token: string, payload: { text: string 
   }, token)
 
   if (!response.ok) {
-    let message = 'Khong the tao audio'
+    let message = 'Không thể tạo audio'
     try {
       const json = await response.json()
       message = json.message ?? message

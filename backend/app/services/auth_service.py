@@ -70,9 +70,9 @@ def register_self_service_user(payload: dict[str, object]) -> tuple[dict[str, ob
     if role not in VALID_SELF_REGISTER_ROLES:
         return None, 'Chi cho phep dang ky vai tro hoc sinh hoac phu huynh', 'VALIDATION_ERROR'
     if not full_name or not password or (not email and not phone):
-        return None, 'Can full_name, password va it nhat mot trong email hoac phone', 'VALIDATION_ERROR'
+        return None, 'Cần full_name, password và ít nhất một trong email hoặc phone', 'VALIDATION_ERROR'
     if role == 'student' and disability_level not in VALID_STUDENT_LEVELS:
-        return None, 'Muc do khuyet tat khong hop le', 'VALIDATION_ERROR'
+        return None, 'Mức độ khuyết tật không hợp lệ', 'VALIDATION_ERROR'
     if find_existing_user(email, phone):
         return None, 'Email hoac so dien thoai da ton tai', 'USER_EXISTS'
 
@@ -120,7 +120,7 @@ def create_teacher_user(payload: dict[str, object]) -> tuple[dict[str, object] |
     email, phone = normalize_identity(payload.get('email'), payload.get('phone'))
 
     if not full_name or not password or (not email and not phone):
-        return None, 'Can full_name, password va it nhat mot trong email hoac phone', 'VALIDATION_ERROR'
+        return None, 'Cần full_name, password và ít nhất một trong email hoặc phone', 'VALIDATION_ERROR'
     if find_existing_user(email, phone):
         return None, 'Email hoac so dien thoai da ton tai', 'USER_EXISTS'
 

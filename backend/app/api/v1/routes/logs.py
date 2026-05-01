@@ -12,7 +12,7 @@ from .. import api_v1
 @jwt_required()
 def list_logs():
     if get_jwt().get('role') != 'teacher':
-        return error_response('Khong co quyen xem log', 'AUTH_FORBIDDEN', 403)
+        return error_response('Không có quyền xem log', 'AUTH_FORBIDDEN', 403)
     query = ServerLog.query
     if request.args.get('level'):
         query = query.filter_by(level=request.args['level'])

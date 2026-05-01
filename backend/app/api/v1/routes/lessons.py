@@ -26,10 +26,10 @@ VALID_ACTIVITY_TYPES = {
 
 def _require_teacher_user():
     if get_jwt().get("role") != "teacher":
-        return None, error_response("Khong co quyen truy cap", "AUTH_FORBIDDEN", 403)
+        return None, error_response("Không có quyền truy cập", "AUTH_FORBIDDEN", 403)
     user = User.query.get(get_jwt_identity())
     if not user or not user.teacher_profile:
-        return None, error_response("Khong tim thay giao vien", "TEACHER_NOT_FOUND", 404)
+        return None, error_response("Không tìm thấy giáo viên", "TEACHER_NOT_FOUND", 404)
     return user, None
 
 
@@ -91,11 +91,11 @@ def create_lesson():
     primary_level = (payload.get('primary_level') or '').strip()
     subject_id = payload.get('subject_id')
     if not title or primary_level not in VALID_LEVELS or not subject_id:
-        return error_response('Du lieu bai hoc khong hop le', 'VALIDATION_ERROR', 422)
+        return error_response('Dữ liệu bài học không hợp lệ', 'VALIDATION_ERROR', 422)
 
     subject = Subject.query.get(int(subject_id))
     if not subject:
-        return error_response('Khong tim thay mon hoc', 'SUBJECT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy môn học', 'SUBJECT_NOT_FOUND', 404)
 
     lesson = Lesson(
         created_by_teacher_id=user.teacher_profile.id,
@@ -110,8 +110,8 @@ def create_lesson():
     )
     db.session.add(lesson)
     db.session.commit()
-    log_server_event(level='info', module='lessons', message='Tao bai hoc moi', action_name='create_lesson', user_id=user.id, metadata={'lesson_id': lesson.id})
-    return success_response(lesson.to_dict(), 'Tao bai hoc thanh cong', 201)
+    log_server_event(level='info', module='lessons', message='Tạo bài học mới', action_name='create_lesson', user_id=user.id, metadata={'lesson_id': lesson.id})
+    return success_response(lesson.to_dict(), 'Tạo bài học thành công', 201)
 
 
 @api_v1.get('/lessons/<int:lesson_id>')
@@ -122,7 +122,7 @@ def get_lesson(lesson_id: int):
         return error
     lesson = _get_teacher_lesson(lesson_id, user.teacher_profile.id)
     if not lesson:
-        return error_response('Khong tim thay bai hoc', 'LESSON_NOT_FOUND', 404)
+        return error_response('Không tìm thấy bài học', 'LESSON_NOT_FOUND', 404)
     return success_response(lesson.to_dict(include_activities=True))
 
 
@@ -134,7 +134,7 @@ def update_lesson(lesson_id: int):
         return error
     lesson = _get_teacher_lesson(lesson_id, user.teacher_profile.id)
     if not lesson:
-        return error_response('Khong tim thay bai hoc', 'LESSON_NOT_FOUND', 404)
+        return error_response('Không tìm thấy bài học', 'LESSON_NOT_FOUND', 404)
 
     payload = request.get_json(silent=True) or {}
     for field in ['title', 'description', 'estimated_minutes', 'difficulty_stage', 'is_published', 'is_archived']:
@@ -145,10 +145,10 @@ def update_lesson(lesson_id: int):
     if 'subject_id' in payload:
         subject = Subject.query.get(payload.get('subject_id'))
         if not subject:
-            return error_response('Khong tim thay mon hoc', 'SUBJECT_NOT_FOUND', 404)
+            return error_response('Không tìm thấy môn học', 'SUBJECT_NOT_FOUND', 404)
         lesson.subject_id = subject.id
     db.session.commit()
-    return success_response(lesson.to_dict(), 'Cap nhat bai hoc thanh cong')
+    return success_response(lesson.to_dict(), 'Cập nhật bài học thành công')
 
 
 @api_v1.delete('/lessons/<int:lesson_id>')
@@ -159,10 +159,10 @@ def archive_lesson(lesson_id: int):
         return error
     lesson = _get_teacher_lesson(lesson_id, user.teacher_profile.id)
     if not lesson:
-        return error_response('Khong tim thay bai hoc', 'LESSON_NOT_FOUND', 404)
+        return error_response('Không tìm thấy bài học', 'LESSON_NOT_FOUND', 404)
     lesson.is_archived = True
     db.session.commit()
-    return success_response(lesson.to_dict(), 'Da luu tru bai hoc')
+    return success_response(lesson.to_dict(), 'Đã lưu trữ bài học')
 
 
 @api_v1.get('/lessons/<int:lesson_id>/activities')
@@ -173,7 +173,7 @@ def list_activities(lesson_id: int):
         return error
     lesson = _get_teacher_lesson(lesson_id, user.teacher_profile.id)
     if not lesson:
-        return error_response('Khong tim thay bai hoc', 'LESSON_NOT_FOUND', 404)
+        return error_response('Không tìm thấy bài học', 'LESSON_NOT_FOUND', 404)
     return success_response([activity.to_dict() for activity in sorted(lesson.activities, key=lambda item: item.sort_order)])
 
 
@@ -185,12 +185,12 @@ def create_activity(lesson_id: int):
         return error
     lesson = _get_teacher_lesson(lesson_id, user.teacher_profile.id)
     if not lesson:
-        return error_response('Khong tim thay bai hoc', 'LESSON_NOT_FOUND', 404)
+        return error_response('Không tìm thấy bài học', 'LESSON_NOT_FOUND', 404)
     payload = request.get_json(silent=True) or {}
     title = (payload.get('title') or '').strip()
     activity_type = (payload.get('activity_type') or '').strip()
     if not title or activity_type not in VALID_ACTIVITY_TYPES:
-        return error_response('Du lieu hoat dong khong hop le', 'VALIDATION_ERROR', 422)
+        return error_response('Dữ liệu hoạt động không hợp lệ', 'VALIDATION_ERROR', 422)
     activity = LessonActivity(
         lesson_id=lesson.id,
         title=title,
@@ -207,7 +207,7 @@ def create_activity(lesson_id: int):
     _place_activity_at_sort_order(lesson, activity, payload.get('sort_order'))
     db.session.commit()
     log_server_event(level='info', module='lessons', message='Tao hoat dong bai hoc', action_name='create_activity', user_id=user.id, metadata={'lesson_id': lesson.id, 'activity_id': activity.id})
-    return success_response(activity.to_dict(), 'Tao hoat dong thanh cong', 201)
+    return success_response(activity.to_dict(), 'Tạo hoạt động thành công', 201)
 
 
 @api_v1.get('/activities/<int:activity_id>')
@@ -218,7 +218,7 @@ def get_activity(activity_id: int):
         return error
     activity = _get_teacher_activity(activity_id, user.teacher_profile.id)
     if not activity:
-        return error_response('Khong tim thay hoat dong', 'ACTIVITY_NOT_FOUND', 404)
+        return error_response('Không tìm thấy hoạt động', 'ACTIVITY_NOT_FOUND', 404)
     return success_response(activity.to_dict())
 
 
@@ -230,7 +230,7 @@ def update_activity(activity_id: int):
         return error
     activity = _get_teacher_activity(activity_id, user.teacher_profile.id)
     if not activity:
-        return error_response('Khong tim thay hoat dong', 'ACTIVITY_NOT_FOUND', 404)
+        return error_response('Không tìm thấy hoạt động', 'ACTIVITY_NOT_FOUND', 404)
     payload = request.get_json(silent=True) or {}
     requested_sort_order = payload.get('sort_order') if 'sort_order' in payload else None
     for field in ['title', 'instruction_text', 'voice_answer_enabled', 'is_required', 'difficulty_stage', 'config_json']:
@@ -241,7 +241,7 @@ def update_activity(activity_id: int):
     if requested_sort_order is not None:
         _place_activity_at_sort_order(activity.lesson, activity, requested_sort_order)
     db.session.commit()
-    return success_response(activity.to_dict(), 'Cap nhat hoat dong thanh cong')
+    return success_response(activity.to_dict(), 'Cập nhật hoạt động thành công')
 
 
 @api_v1.delete('/activities/<int:activity_id>')
@@ -252,14 +252,14 @@ def delete_activity(activity_id: int):
         return error
     activity = _get_teacher_activity(activity_id, user.teacher_profile.id)
     if not activity:
-        return error_response('Khong tim thay hoat dong', 'ACTIVITY_NOT_FOUND', 404)
+        return error_response('Không tìm thấy hoạt động', 'ACTIVITY_NOT_FOUND', 404)
     lesson = activity.lesson
     db.session.delete(activity)
     db.session.flush()
     if lesson:
         _normalize_lesson_activity_sort_orders(lesson)
     db.session.commit()
-    return success_response(None, 'Da xoa hoat dong')
+    return success_response(None, 'Đã xóa hoạt động')
 
 
 @api_v1.post('/lessons/<int:lesson_id>/activities/reorder')
@@ -272,7 +272,7 @@ def reorder_activities(lesson_id: int):
     activity_orders = payload.get('activity_orders') or []
     lesson = _get_teacher_lesson(lesson_id, user.teacher_profile.id)
     if not lesson:
-        return error_response('Khong tim thay bai hoc', 'LESSON_NOT_FOUND', 404)
+        return error_response('Không tìm thấy bài học', 'LESSON_NOT_FOUND', 404)
     activity_map = {activity.id: activity for activity in lesson.activities}
     for item in activity_orders:
         activity = activity_map.get(int(item['activity_id']))

@@ -20,19 +20,19 @@ def _current_user() -> User | None:
 
 def _require_teacher_user():
     if get_jwt().get("role") != "teacher":
-        return None, error_response("Khong co quyen truy cap", "AUTH_FORBIDDEN", 403)
+        return None, error_response("Không có quyền truy cập", "AUTH_FORBIDDEN", 403)
     user = _current_user()
     if not user or not user.teacher_profile:
-        return None, error_response("Khong tim thay giao vien", "TEACHER_NOT_FOUND", 404)
+        return None, error_response("Không tìm thấy giáo viên", "TEACHER_NOT_FOUND", 404)
     return user, None
 
 
 def _require_parent_user():
     if get_jwt().get("role") != "parent":
-        return None, error_response("Khong co quyen truy cap", "AUTH_FORBIDDEN", 403)
+        return None, error_response("Không có quyền truy cập", "AUTH_FORBIDDEN", 403)
     user = _current_user()
     if not user or not user.parent_profile:
-        return None, error_response("Khong tim thay phu huynh", "PARENT_NOT_FOUND", 404)
+        return None, error_response("Không tìm thấy phụ huynh", "PARENT_NOT_FOUND", 404)
     return user, None
 
 
@@ -220,13 +220,13 @@ def send_teacher_message():
     message_text = _normalize_message_text(payload.get("message"))
 
     if not parent_id or not student_id:
-        return error_response("Can parent_id va student_id de gui tin nhan", "VALIDATION_ERROR", 422)
+        return error_response("Cần parent_id và student_id để gửi tin nhắn", "VALIDATION_ERROR", 422)
     if not message_text:
-        return error_response("Noi dung tin nhan khong duoc de trong", "VALIDATION_ERROR", 422)
+        return error_response("Nội dung tin nhắn không được để trống", "VALIDATION_ERROR", 422)
 
     link = _find_active_link(teacher_id=user.teacher_profile.id, parent_id=parent_id, student_id=student_id)
     if not link:
-        return error_response("Khong tim thay nhom trao doi hop le", "CHAT_THREAD_NOT_FOUND", 404)
+        return error_response("Không tìm thấy nhóm trao đổi hợp lệ", "CHAT_THREAD_NOT_FOUND", 404)
 
     message = _create_message(
         teacher_id=link.teacher_id,
@@ -266,7 +266,7 @@ def send_teacher_message():
         user_id=user.id,
         metadata={"teacher_id": link.teacher_id, "parent_id": link.parent_id, "student_id": link.student_id, "message_id": message.id},
     )
-    return success_response(message.to_dict(), "Gui tin nhan thanh cong", 201)
+    return success_response(message.to_dict(), "Gửi tin nhắn thành công", 201)
 
 
 @api_v1.post("/teacher/messages/read")
@@ -280,11 +280,11 @@ def mark_teacher_messages_read():
     parent_id = int(payload.get("parent_id") or 0)
     student_id = int(payload.get("student_id") or 0)
     if not parent_id or not student_id:
-        return error_response("Can parent_id va student_id de danh dau da doc", "VALIDATION_ERROR", 422)
+        return error_response("Cần parent_id và student_id để đánh dấu đã đọc", "VALIDATION_ERROR", 422)
 
     link = _find_active_link(teacher_id=user.teacher_profile.id, parent_id=parent_id, student_id=student_id)
     if not link:
-        return error_response("Khong tim thay nhom trao doi hop le", "CHAT_THREAD_NOT_FOUND", 404)
+        return error_response("Không tìm thấy nhóm trao đổi hợp lệ", "CHAT_THREAD_NOT_FOUND", 404)
 
     updated_count = _mark_thread_read(
         teacher_id=link.teacher_id,
@@ -342,13 +342,13 @@ def send_parent_message():
     message_text = _normalize_message_text(payload.get("message"))
 
     if not teacher_id or not student_id:
-        return error_response("Can teacher_id va student_id de gui tin nhan", "VALIDATION_ERROR", 422)
+        return error_response("Cần teacher_id và student_id để gửi tin nhắn", "VALIDATION_ERROR", 422)
     if not message_text:
-        return error_response("Noi dung tin nhan khong duoc de trong", "VALIDATION_ERROR", 422)
+        return error_response("Nội dung tin nhắn không được để trống", "VALIDATION_ERROR", 422)
 
     link = _find_active_link(teacher_id=teacher_id, parent_id=user.parent_profile.id, student_id=student_id)
     if not link:
-        return error_response("Khong tim thay nhom trao doi hop le", "CHAT_THREAD_NOT_FOUND", 404)
+        return error_response("Không tìm thấy nhóm trao đổi hợp lệ", "CHAT_THREAD_NOT_FOUND", 404)
 
     message = _create_message(
         teacher_id=link.teacher_id,
@@ -388,7 +388,7 @@ def send_parent_message():
         user_id=user.id,
         metadata={"teacher_id": link.teacher_id, "parent_id": link.parent_id, "student_id": link.student_id, "message_id": message.id},
     )
-    return success_response(message.to_dict(), "Gui tin nhan thanh cong", 201)
+    return success_response(message.to_dict(), "Gửi tin nhắn thành công", 201)
 
 
 @api_v1.post("/parent/messages/read")
@@ -402,11 +402,11 @@ def mark_parent_messages_read():
     teacher_id = int(payload.get("teacher_id") or 0)
     student_id = int(payload.get("student_id") or 0)
     if not teacher_id or not student_id:
-        return error_response("Can teacher_id va student_id de danh dau da doc", "VALIDATION_ERROR", 422)
+        return error_response("Cần teacher_id và student_id để đánh dấu đã đọc", "VALIDATION_ERROR", 422)
 
     link = _find_active_link(teacher_id=teacher_id, parent_id=user.parent_profile.id, student_id=student_id)
     if not link:
-        return error_response("Khong tim thay nhom trao doi hop le", "CHAT_THREAD_NOT_FOUND", 404)
+        return error_response("Không tìm thấy nhóm trao đổi hợp lệ", "CHAT_THREAD_NOT_FOUND", 404)
 
     updated_count = _mark_thread_read(
         teacher_id=link.teacher_id,

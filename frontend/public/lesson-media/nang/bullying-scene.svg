@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Tình huống bạn bị bắt nạt</title>
+  <desc id="desc">Hình minh họa một bạn nhỏ buồn đứng giữa sân trường và hai bạn khác đang trêu chọc từ hai bên.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#dff3ff" />
+      <stop offset="100%" stop-color="#fef6e5" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" rx="32" fill="url(#sky)" />
+  <rect y="232" width="640" height="128" fill="#f0d8b0" />
+  <rect x="46" y="74" width="148" height="168" rx="18" fill="#f7efe1" stroke="#cbb896" stroke-width="4" />
+  <rect x="222" y="52" width="196" height="190" rx="20" fill="#fffaf1" stroke="#cbb896" stroke-width="4" />
+  <rect x="446" y="84" width="148" height="158" rx="18" fill="#f7efe1" stroke="#cbb896" stroke-width="4" />
+  <g transform="translate(170 130)">
+    <circle cx="0" cy="0" r="28" fill="#ffd89b" stroke="#17324d" stroke-width="5" />
+    <path d="M-16 42h32" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+    <path d="M0 24v92" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+    <path d="M-12 64l-38 14" stroke="#17324d" stroke-width="11" stroke-linecap="round" />
+    <path d="M12 64l36 2" stroke="#17324d" stroke-width="11" stroke-linecap="round" />
+    <path d="M0 114l-22 46" stroke="#17324d" stroke-width="12" stroke-linecap="round" />
+    <path d="M0 114l22 46" stroke="#17324d" stroke-width="12" stroke-linecap="round" />
+  </g>
+  <g transform="translate(320 142)">
+    <circle cx="0" cy="0" r="30" fill="#ffd89b" stroke="#17324d" stroke-width="5" />
+    <path d="M-18 0q18 18 36 0" fill="none" stroke="#17324d" stroke-width="5" stroke-linecap="round" />
+    <path d="M-14 20q14 12 28 0" fill="none" stroke="#d65b52" stroke-width="5" stroke-linecap="round" />
+    <path d="M-18 48h36" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+    <path d="M0 30v96" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+    <path d="M-18 74l-34 20" stroke="#17324d" stroke-width="11" stroke-linecap="round" />
+    <path d="M18 74l34 20" stroke="#17324d" stroke-width="11" stroke-linecap="round" />
+    <path d="M0 126l-20 46" stroke="#17324d" stroke-width="12" stroke-linecap="round" />
+    <path d="M0 126l20 46" stroke="#17324d" stroke-width="12" stroke-linecap="round" />
+  </g>
+  <g transform="translate(470 130)">
+    <circle cx="0" cy="0" r="28" fill="#ffd89b" stroke="#17324d" stroke-width="5" />
+    <path d="M-16 42h32" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+    <path d="M0 24v92" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+    <path d="M-12 64l-36 2" stroke="#17324d" stroke-width="11" stroke-linecap="round" />
+    <path d="M12 64l38 14" stroke="#17324d" stroke-width="11" stroke-linecap="round" />
+    <path d="M0 114l-22 46" stroke="#17324d" stroke-width="12" stroke-linecap="round" />
+    <path d="M0 114l22 46" stroke="#17324d" stroke-width="12" stroke-linecap="round" />
+  </g>
+  <path d="M238 138q20-20 52-10" fill="none" stroke="#d65b52" stroke-width="7" stroke-linecap="round" stroke-dasharray="10 14" />
+  <path d="M402 128q30-12 50 12" fill="none" stroke="#d65b52" stroke-width="7" stroke-linecap="round" stroke-dasharray="10 14" />
+  <text x="38" y="50" fill="#d65b52" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Clip tình huống</text>
+  <text x="38" y="84" fill="#17324d" font-family="Segoe UI, Arial, sans-serif" font-size="22">Một bạn đang bị bắt nạt ở sân trường.</text>
+</svg>

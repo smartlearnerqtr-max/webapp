@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="32" fill="#eef6ff"/>
+  <rect x="44" y="56" width="152" height="98" rx="16" fill="#17324d"/>
+  <rect x="56" y="68" width="128" height="74" rx="10" fill="#b6e3ff"/>
+  <rect x="102" y="158" width="36" height="18" rx="8" fill="#17324d"/>
+  <rect x="84" y="176" width="72" height="14" rx="7" fill="#7f93aa"/>
+  <text x="120" y="214" text-anchor="middle" font-size="25" font-family="Segoe UI, Arial" font-weight="700" fill="#17324d">Màn hình</text>
+</svg>

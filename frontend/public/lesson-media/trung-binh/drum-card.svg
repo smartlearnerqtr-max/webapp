@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="32" fill="#fff8ee"/>
+  <ellipse cx="120" cy="94" rx="58" ry="22" fill="#ffd086" stroke="#6a3b10" stroke-width="6"/>
+  <path d="M62 94v54c0 12 26 22 58 22s58-10 58-22V94" fill="#d7812f" stroke="#6a3b10" stroke-width="6"/>
+  <path d="M76 124h88M84 146h72" stroke="#f5d7a2" stroke-width="6" stroke-linecap="round"/>
+  <path d="M54 64l34 28M186 64l-34 28" stroke="#8b5a2b" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="54" cy="64" r="6" fill="#8b5a2b"/>
+  <circle cx="186" cy="64" r="6" fill="#8b5a2b"/>
+  <text x="120" y="214" text-anchor="middle" font-size="26" font-family="Segoe UI, Arial" font-weight="700" fill="#17324d">Trống</text>
+</svg>

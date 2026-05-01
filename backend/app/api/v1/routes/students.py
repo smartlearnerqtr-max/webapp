@@ -90,19 +90,19 @@ def _serialize_shared_students_for_teacher(teacher_id: int) -> list[dict[str, ob
 
 def _require_teacher():
     if get_jwt().get("role") != "teacher":
-        return None, error_response("Khong co quyen truy cap", "AUTH_FORBIDDEN", 403)
+        return None, error_response("Không có quyền truy cập", "AUTH_FORBIDDEN", 403)
     user = User.query.get(get_jwt_identity())
     if not user or not user.teacher_profile:
-        return None, error_response("Khong tim thay giao vien", "TEACHER_NOT_FOUND", 404)
+        return None, error_response("Không tìm thấy giáo viên", "TEACHER_NOT_FOUND", 404)
     return user, None
 
 
 def _require_student():
     if get_jwt().get('role') != 'student':
-        return None, error_response('Khong co quyen truy cap', 'AUTH_FORBIDDEN', 403)
+        return None, error_response('Không có quyền truy cập', 'AUTH_FORBIDDEN', 403)
     user = User.query.get(get_jwt_identity())
     if not user or not user.student_profile:
-        return None, error_response('Khong tim thay hoc sinh', 'STUDENT_NOT_FOUND', 404)
+        return None, error_response('Không tìm thấy học sinh', 'STUDENT_NOT_FOUND', 404)
     return user, None
 
 
@@ -135,7 +135,7 @@ def create_student():
     full_name = (payload.get("full_name") or "").strip()
     disability_level = (payload.get("disability_level") or "").strip()
     if not full_name or disability_level not in {"nang", "trung_binh", "nhe"}:
-        return error_response("Du lieu hoc sinh khong hop le", "VALIDATION_ERROR", 422)
+        return error_response("Dữ liệu học sinh không hợp lệ", "VALIDATION_ERROR", 422)
     student = StudentProfile(
         full_name=full_name,
         disability_level=disability_level,
@@ -151,7 +151,7 @@ def create_student():
     ensure_teacher_student_link(user.teacher_profile.id, student.id, source='teacher_created')
     db.session.commit()
     log_server_event(level="info", module="students", message="Tao hoc sinh moi", action_name="create_student", user_id=user.id, metadata={"student_id": student.id})
-    return success_response(student.to_dict(), "Tao hoc sinh thanh cong", 201)
+    return success_response(student.to_dict(), "Tạo học sinh thành công", 201)
 
 
 @api_v1.get('/students/<int:student_id>/teachers')
@@ -160,27 +160,27 @@ def get_student_teachers(student_id: int):
     role = get_jwt().get('role')
     student = StudentProfile.query.get(student_id)
     if not student:
-        return error_response('Khong tim thay hoc sinh', 'STUDENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy học sinh', 'STUDENT_NOT_FOUND', 404)
 
     if role == 'teacher':
         user, error = _require_teacher()
         if error:
             return error
         if not teacher_has_student_access(user.teacher_profile.id, student):
-            return error_response('Khong tim thay hoc sinh', 'STUDENT_NOT_FOUND', 404)
+            return error_response('Không tìm thấy học sinh', 'STUDENT_NOT_FOUND', 404)
         db.session.commit()
     elif role == 'student':
         user, error = _require_student()
         if error:
             return error
         if user.student_profile.id != student.id:
-            return error_response('Khong co quyen truy cap', 'AUTH_FORBIDDEN', 403)
+            return error_response('Không có quyền truy cập', 'AUTH_FORBIDDEN', 403)
     elif role == 'admin':
         user = User.query.get(get_jwt_identity())
         if not user or user.role != 'admin':
-            return error_response('Khong tim thay admin', 'ADMIN_NOT_FOUND', 404)
+            return error_response('Không tìm thấy admin', 'ADMIN_NOT_FOUND', 404)
     else:
-        return error_response('Khong co quyen truy cap', 'AUTH_FORBIDDEN', 403)
+        return error_response('Không có quyền truy cập', 'AUTH_FORBIDDEN', 403)
 
     return success_response(_serialize_student_teacher_links(student))
 
@@ -215,7 +215,7 @@ def get_student(student_id: int):
         return error
     student = StudentProfile.query.get(student_id)
     if not teacher_has_student_access(user.teacher_profile.id, student):
-        return error_response("Khong tim thay hoc sinh", "STUDENT_NOT_FOUND", 404)
+        return error_response("Không tìm thấy học sinh", "STUDENT_NOT_FOUND", 404)
     db.session.commit()
     return success_response(student.to_dict())
 
@@ -228,7 +228,7 @@ def update_student(student_id: int):
         return error
     student = StudentProfile.query.get(student_id)
     if not teacher_has_student_access(user.teacher_profile.id, student):
-        return error_response("Khong tim thay hoc sinh", "STUDENT_NOT_FOUND", 404)
+        return error_response("Không tìm thấy học sinh", "STUDENT_NOT_FOUND", 404)
     payload = request.get_json(silent=True) or {}
     for field in ["full_name", "support_note", "preferred_input", "preferred_read_speed", "preferred_font_size", "preferred_bg_color", "avatar_url"]:
         if field in payload:
@@ -236,4 +236,21 @@ def update_student(student_id: int):
     if payload.get("disability_level") in {"nang", "trung_binh", "nhe"}:
         student.disability_level = payload["disability_level"]
     db.session.commit()
-    return success_response(student.to_dict(), "Cap nhat hoc sinh thanh cong")
+    return success_response(student.to_dict(), "Cập nhật học sinh thành công")
+
+
+@api_v1.put('/students/me/level')
+@jwt_required()
+def update_my_level():
+    user, error = _require_student()
+    if error:
+        return error
+
+    payload = request.get_json(silent=True) or {}
+    next_level = (payload.get('disability_level') or '').strip()
+    if next_level not in {'nang', 'trung_binh', 'nhe'}:
+        return error_response('Mức độ hỗ trợ không hợp lệ', 'VALIDATION_ERROR', 422)
+
+    user.student_profile.disability_level = next_level
+    db.session.commit()
+    return success_response(user.student_profile.to_dict(), 'Cập nhật mức độ hỗ trợ thành công')

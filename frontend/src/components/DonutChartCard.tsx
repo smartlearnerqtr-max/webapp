@@ -82,7 +82,7 @@ export function DonutChartCard({
                   <span className="donut-chart-swatch" style={{ background: item.color ?? '#4a7ae2' }} />
                   <div className="donut-chart-legend-copy">
                     <strong>{item.label}</strong>
-                    <span>{item.value} học sinh ? {percentage}%</span>
+                    <span>{item.value} học sinh • {percentage}%</span>
                     {item.hint ? <small>{item.hint}</small> : null}
                   </div>
                 </div>

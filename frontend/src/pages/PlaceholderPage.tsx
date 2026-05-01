@@ -6,7 +6,7 @@ type PlaceholderPageProps = {
 export function PlaceholderPage({ title, description }: PlaceholderPageProps) {
   return (
     <section className="placeholder-panel">
-      <p className="eyebrow">?ang m? r?ng</p>
+      <p className="eyebrow">Đang mở rộng</p>
       <h2>{title}</h2>
       <p>{description}</p>
     </section>

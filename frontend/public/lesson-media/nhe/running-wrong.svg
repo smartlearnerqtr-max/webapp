@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Tư thế chạy sai</title>
+  <desc id="desc">Hình minh họa học sinh đứng cứng, khoanh tay và không ở tư thế chạy đúng.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fff0ea" />
+      <stop offset="100%" stop-color="#fff8e8" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" rx="32" fill="url(#bg)" />
+  <rect y="250" width="640" height="110" fill="#ebd69f" />
+  <circle cx="320" cy="98" r="34" fill="#ffd89b" stroke="#17324d" stroke-width="6" />
+  <path d="M298 88q24-26 48 0" fill="none" stroke="#17324d" stroke-width="6" stroke-linecap="round" />
+  <path d="M298 152h44" stroke="#17324d" stroke-width="16" stroke-linecap="round" />
+  <path d="M320 130v86" stroke="#17324d" stroke-width="16" stroke-linecap="round" />
+  <path d="M276 174l88 18" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+  <path d="M364 174l-88 18" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+  <path d="M320 214l-22 42" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+  <path d="M320 214l26 44" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+  <path d="M298 256l-22 10" stroke="#17324d" stroke-width="10" stroke-linecap="round" />
+  <path d="M346 258l24 10" stroke="#17324d" stroke-width="10" stroke-linecap="round" />
+  <path d="M238 118l52 26" stroke="#d65b52" stroke-width="10" stroke-linecap="round" />
+  <path d="M290 118l-52 26" stroke="#d65b52" stroke-width="10" stroke-linecap="round" />
+  <circle cx="466" cy="110" r="48" fill="#fff" stroke="#d65b52" stroke-width="8" />
+  <path d="M442 86l48 48" stroke="#d65b52" stroke-width="10" stroke-linecap="round" />
+  <path d="M490 86l-48 48" stroke="#d65b52" stroke-width="10" stroke-linecap="round" />
+  <text x="38" y="52" fill="#d65b52" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Tư thế sai</text>
+  <text x="38" y="88" fill="#17324d" font-family="Segoe UI, Arial, sans-serif" font-size="22">Khoanh tay, đứng cứng và không chuẩn bị chạy.</text>
+</svg>

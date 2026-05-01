@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Tư thế chạy đúng</title>
+  <desc id="desc">Hình minh họa học sinh chạy đúng tư thế với người hơi nghiêng về trước, tay co tự nhiên và mắt nhìn thẳng.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#dff4ff" />
+      <stop offset="100%" stop-color="#fff8e8" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" rx="32" fill="url(#bg)" />
+  <rect y="250" width="640" height="110" fill="#c6e59d" />
+  <rect x="0" y="250" width="640" height="10" fill="#6d8e5a" opacity="0.25" />
+  <path d="M86 250h468" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.85" />
+  <path d="M140 250h56" stroke="#17324d" stroke-width="6" stroke-linecap="round" stroke-dasharray="12 14" opacity="0.35" />
+  <path d="M252 250h56" stroke="#17324d" stroke-width="6" stroke-linecap="round" stroke-dasharray="12 14" opacity="0.35" />
+  <path d="M364 250h56" stroke="#17324d" stroke-width="6" stroke-linecap="round" stroke-dasharray="12 14" opacity="0.35" />
+  <path d="M476 250h56" stroke="#17324d" stroke-width="6" stroke-linecap="round" stroke-dasharray="12 14" opacity="0.35" />
+  <circle cx="312" cy="98" r="34" fill="#ffd89b" stroke="#17324d" stroke-width="6" />
+  <path d="M290 88q24-26 48 0" fill="none" stroke="#17324d" stroke-width="6" stroke-linecap="round" />
+  <path d="M294 108q18 16 36 0" fill="none" stroke="#17324d" stroke-width="5" stroke-linecap="round" />
+  <path d="M286 152l74-30" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+  <path d="M352 124l40 22" stroke="#17324d" stroke-width="12" stroke-linecap="round" />
+  <path d="M294 144l-34 36" stroke="#17324d" stroke-width="12" stroke-linecap="round" />
+  <path d="M318 154l56 52" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+  <path d="M326 162l-52 74" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+  <path d="M372 206l58 28" stroke="#17324d" stroke-width="14" stroke-linecap="round" />
+  <path d="M278 236l-46 8" stroke="#17324d" stroke-width="10" stroke-linecap="round" />
+  <path d="M430 234l42 6" stroke="#17324d" stroke-width="10" stroke-linecap="round" />
+  <path d="M356 118l14 12" stroke="#17324d" stroke-width="6" stroke-linecap="round" />
+  <text x="38" y="52" fill="#1c8f7a" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Tư thế đúng</text>
+  <text x="38" y="88" fill="#17324d" font-family="Segoe UI, Arial, sans-serif" font-size="22">Mắt nhìn trước, tay co tự nhiên, người hơi nghiêng.</text>
+</svg>

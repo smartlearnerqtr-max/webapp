@@ -14,6 +14,7 @@ import {
   sendAIChat,
   startMyAssignment,
   synthesizeAISpeech,
+  updateMyStudentLevel,
   updateMyAssignmentProgress,
   type ClassItem,
   type LessonActivityItem,
@@ -110,7 +111,7 @@ const activityIconMap: Record<string, string> = {
 
 type StudentPanelKey = 'learning' | 'ai' | 'communication' | 'settings'
 
-type StudentEntryLevelKey = 'nang' | 'trung_binh' | 'nhe' | 'adult'
+type StudentEntryLevelKey = 'nang' | 'trung_binh' | 'nhe'
 
 type StudentSubjectMeta = {
   key: string
@@ -124,8 +125,9 @@ type StudentGameMeta = {
   key: string
   label: string
   description: string
-  activityType: 'memory_match' | 'quick_tap'
+  activityType: 'memory_match' | 'quick_tap' | 'drag_drop' | 'image_puzzle' | 'basket_toss' | 'trash_cleanup'
   artworkUrl: string
+  levels: StudentEntryLevelKey[]
 }
 
 type DemoGameCard = {
@@ -151,6 +153,7 @@ type CareerDetailMeta = {
   videoNote: string
   steps: CareerDetailStep[]
   skills: string[]
+  levels: StudentEntryLevelKey[]
 }
 
 type BrowserSpeechRecognitionResultItem = {
@@ -249,6 +252,11 @@ const cleanFeedToneIconMap: Record<string, string> = {
   update: '.',
 }
 
+cleanActivityTypeVisualLabelMap.basket_toss = 'Ném bóng'
+cleanActivityTypeVisualLabelMap.trash_cleanup = 'Dọn rác'
+cleanActivityIconMap.basket_toss = '🏀'
+cleanActivityIconMap.trash_cleanup = '🗑️'
+
 
 const studentTabCopyMap: Record<StudentPanelKey, { title: string; description: string }> = {
   learning: {
@@ -319,6 +327,7 @@ const studentGameCatalog: StudentGameMeta[] = [
     description: 'Lật đúng 2 thẻ giống nhau để ghi điểm.',
     activityType: 'memory_match',
     artworkUrl: '/ichan/games/cat-card.svg',
+    levels: ['nhe'],
   },
   {
     key: 'quick-tap',
@@ -326,6 +335,39 @@ const studentGameCatalog: StudentGameMeta[] = [
     description: 'Chạm thật nhanh vào thẻ mục tiêu trước khi hết giờ.',
     activityType: 'quick_tap',
     artworkUrl: '/ichan/games/swipe-dog-card.svg',
+    levels: ['nhe'],
+  },
+  {
+    key: 'emotion-sort',
+    label: 'Phân loại cảm xúc',
+    description: 'Phân loại khuôn mặt vui, buồn, tức giận vào đúng giỏ.',
+    activityType: 'drag_drop',
+    artworkUrl: '/ichan/communication/vui.jpg',
+    levels: ['trung_binh'],
+  },
+  {
+    key: 'heritage-puzzle',
+    label: 'Xếp hình di tích',
+    description: 'Ghép 4 mảnh để hoàn thành bức ảnh di tích.',
+    activityType: 'image_puzzle',
+    artworkUrl: '/ichan/subjects/lich-su-dia-ly.png',
+    levels: ['trung_binh'],
+  },
+  {
+    key: 'basket-toss',
+    label: 'Bắt bóng rổ',
+    description: 'Vuốt tay trên quả bóng để ném vào rổ to.',
+    activityType: 'basket_toss',
+    artworkUrl: '/student-ui/anh2.jpg',
+    levels: ['nang'],
+  },
+  {
+    key: 'trash-cleanup',
+    label: 'Siêu nhân dọn rác',
+    description: 'Chạm vào rác để đưa vào thùng và làm sạch màn hình.',
+    activityType: 'trash_cleanup',
+    artworkUrl: '/student-ui/cayxanh.jpg',
+    levels: ['nang'],
   },
 ]
 
@@ -372,6 +414,7 @@ const careerPreviewCards: CareerDetailMeta[] = [
       { title: 'Cất bình', description: 'Để bình lại chỗ cũ.' },
     ],
     skills: ['Tưới nước', 'Nhận biết cây', 'Giữ nề nếp', 'Quan sát'],
+    levels: ['nhe'],
   },
   {
     key: 'sap-xep-do-dung',
@@ -389,6 +432,7 @@ const careerPreviewCards: CareerDetailMeta[] = [
       { title: 'Để đúng chỗ', description: 'Cất từng nhóm vào vị trí phù hợp.' },
     ],
     skills: ['Phân loại', 'Ngăn nắp', 'Quan sát', 'Ghi nhớ vị trí'],
+    levels: ['nhe'],
   },
   {
     key: 'cham-soc-cay',
@@ -406,14 +450,33 @@ const careerPreviewCards: CareerDetailMeta[] = [
       { title: 'Dọn khu vực quanh chậu', description: 'Giữ chỗ để cây luôn sạch sẽ.' },
     ],
     skills: ['Kiên nhẫn', 'Chăm sóc cây', 'Giữ sạch sẽ', 'Quan sát thay đổi'],
+    levels: ['nhe'],
   },
 ]
 
 const studentEntryOptions: Array<{ key: StudentEntryLevelKey; title: string; subtitle: string }> = [
   { key: 'nang', title: 'MỨC ĐỘ NẶNG', subtitle: 'Hình ảnh & Âm thanh' },
-  { key: 'trung_binh', title: 'MỨC ĐỘ VỪA', subtitle: 'Sơ đồ tư duy' },
+  { key: 'trung_binh', title: 'MỨC ĐỘ TRUNG BÌNH', subtitle: 'Sơ đồ tư duy' },
   { key: 'nhe', title: 'MỨC ĐỘ NHẸ', subtitle: 'Lộ trình chuẩn' },
 ]
+
+const studentLevelLabelMap: Record<StudentEntryLevelKey, string> = {
+  nhe: 'Nhẹ',
+  trung_binh: 'Trung bình',
+  nang: 'Nặng',
+}
+
+function getStudentLevelLabel(level: string) {
+  if (level === 'nhe' || level === 'trung_binh' || level === 'nang') {
+    return studentLevelLabelMap[level]
+  }
+  return level || 'Chưa rõ'
+}
+
+function contentMatchesStudentLevel(levels: StudentEntryLevelKey[] | null | undefined, studentLevel: string) {
+  if (!levels?.length) return false
+  return levels.includes(studentLevel as StudentEntryLevelKey)
+}
 
 function normalizeLookupText(value: string | null | undefined) {
   return (value ?? '')
@@ -437,6 +500,17 @@ function resolveAssignmentSubjectMeta(assignment: MyAssignmentItem | null | unde
     assignment?.assignment?.lesson?.subject?.name ?? assignment?.assignment?.subject?.name ?? assignment?.lesson?.subject?.name ?? null,
     assignment?.assignment?.lesson?.title ?? assignment?.lesson?.title ?? null,
   )
+}
+
+function resolveAssignmentPrimaryLevel(assignment: MyAssignmentItem | null | undefined) {
+  const primaryLevel = assignment?.assignment?.lesson?.primary_level ?? assignment?.lesson?.primary_level ?? ''
+  return typeof primaryLevel === 'string' ? primaryLevel.trim() : ''
+}
+
+function assignmentMatchesStudentLevel(assignment: MyAssignmentItem | null | undefined, studentLevel: string) {
+  const lessonLevel = resolveAssignmentPrimaryLevel(assignment)
+  if (!lessonLevel) return true
+  return lessonLevel === studentLevel
 }
 
 function renderStudentSubjectArtwork(subjectMeta: StudentSubjectMeta | null | undefined, fallbackSrc: string) {
@@ -470,6 +544,20 @@ type CompletionSummary = {
   completedAt: number
 }
 
+type ActivityCelebrationStar = {
+  id: string
+  leftPercent: number
+  delayMs: number
+  durationMs: number
+  sizeRem: number
+  rotateDeg: number
+}
+
+type ActivityCelebrationState = {
+  stars: ActivityCelebrationStar[]
+  message: string
+}
+
 function hasFilledString(value: unknown) {
   return typeof value === 'string' && value.trim().length > 0
 }
@@ -497,7 +585,7 @@ function textFromConfig(value: unknown) {
 
 function resolveActivityGuidanceAudioUrl(activity: LessonActivityItem) {
   const config = parseActivityConfig(activity.config_json)
-  return textFromConfig(config?.audio_url) || textFromConfig(config?.guidance_audio_url)
+  return textFromConfig(config?.guidance_audio_url)
 }
 
 function resolveActivityGuidanceText(activity: LessonActivityItem) {
@@ -505,21 +593,98 @@ function resolveActivityGuidanceText(activity: LessonActivityItem) {
   return textFromConfig(config?.guidance_text) || textFromConfig(config?.prompt) || activity.instruction_text || activity.title
 }
 
+function isLocalEmbeddedWatchActivity(activity: LessonActivityItem | null) {
+  if (!activity || activity.activity_type !== 'watch_answer') return false
+  const config = parseActivityConfig(activity.config_json)
+  const mediaUrl = textFromConfig(config?.media_url)
+  const answerMode = textFromConfig(config?.answer_mode)
+  return Boolean(mediaUrl) && mediaUrl.startsWith('/') && mediaUrl.toLowerCase().includes('.html') && answerMode === 'none'
+}
+
+function resolveActivityGuidanceHint(activity: LessonActivityItem) {
+  switch (activity.activity_type) {
+    case 'multiple_choice':
+    case 'image_choice':
+    case 'listen_choose':
+      return 'Em nghe hoặc nhìn thật kỹ, rồi chọn một đáp án đúng.'
+    case 'matching':
+      return 'Em nối từng cặp tương ứng với nhau cho đúng.'
+    case 'drag_drop':
+      return 'Em chạm vào hình hoặc chữ, rồi kéo đến đúng vị trí cần đặt.'
+    case 'watch_answer':
+      return isLocalEmbeddedWatchActivity(activity)
+        ? 'Em làm trực tiếp trong khung bên dưới. Khi xong, em bấm nút xác nhận đã tương tác xong.'
+        : 'Em xem kỹ nội dung bên dưới rồi trả lời ngắn gọn.'
+    case 'hidden_image_guess':
+      return 'Em mở dần từng ô và đoán xem hình đang ẩn là gì.'
+    case 'step_by_step':
+      return 'Em làm lần lượt từng bước, xong bước nào thì đánh dấu bước đó.'
+    case 'aac':
+      return 'Em chọn thẻ phù hợp nhất với điều em muốn nói.'
+    case 'memory_match':
+      return 'Em lật từng thẻ và tìm hai thẻ giống nhau.'
+    case 'quick_tap':
+      return 'Em bấm bắt đầu rồi chạm thật nhanh vào hình đúng.'
+    case 'size_order':
+      return 'Em sắp xếp các hình theo đúng thứ tự từ nhỏ đến lớn hoặc theo yêu cầu.'
+    case 'habitat_match':
+      return 'Em ghép mỗi con vật vào đúng nơi sống của nó.'
+    case 'image_puzzle':
+      return 'Em ghép các mảnh hình lại để hoàn thành bức tranh.'
+    case 'basket_toss':
+      return 'Em vuốt tay từ dưới lên trên để ném bóng vào rổ.'
+    case 'trash_cleanup':
+      return 'Em chạm nhanh vào từng món rác để đưa hết vào thùng.'
+    case 'career_simulation':
+      return 'Em đọc tình huống rồi trả lời ngắn gọn theo ý của mình.'
+    case 'ai_chat':
+      return 'Em nói hoặc gõ câu ngắn gọn để trao đổi với trợ lý AI.'
+    default:
+      return 'Em làm chậm rãi từng bước, nếu cần thì bấm nút nghe lại hướng dẫn.'
+  }
+}
+
+function buildDetailedActivityGuidance(activity: LessonActivityItem, activityIndex: number, totalActivities: number) {
+  const stepText = totalActivities > 0 ? `Câu ${activityIndex + 1} trên ${totalActivities}.` : ''
+  const titleText = activity.title ? `Bài này là ${activity.title}.` : ''
+  const baseGuidance = sanitizeStudentFacingText(resolveActivityGuidanceText(activity), '')
+  const hintText = resolveActivityGuidanceHint(activity)
+  return [stepText, titleText, baseGuidance, hintText].filter(Boolean).join(' ')
+}
+
 const studentEncouragementMessages = [
   'Giỏi lắm!',
-  'Em giỏi lắm!',
-  'Hay quá luôn!',
-  'Hôm nay em giỏi quá!',
-  'Tuyệt vời, làm tiếp nhé!',
+  'Em tuyệt lắm!',
+  'Tốt lắm!',
 ]
 
 const studentEncouragementMessagesVi = [
   'Giỏi lắm!',
-  'Em giỏi lắm!',
-  'Hay quá luôn!',
-  'Hôm nay em giỏi quá!',
-  'Tuyệt vời, làm tiếp nhé!',
+  'Em tuyệt lắm!',
+  'Tốt lắm!',
 ]
+
+function resolveStudentEncouragement(activity: LessonActivityItem, activityIndex: number, totalActivities: number) {
+  void activity
+  void activityIndex
+  void totalActivities
+  return (
+    studentEncouragementMessagesVi[Math.abs(activity.id) % studentEncouragementMessagesVi.length] ??
+    studentEncouragementMessagesVi[0] ??
+    studentEncouragementMessages[0]
+  )
+}
+
+function createActivityCelebrationStars(seed: number) {
+  return Array.from({ length: 16 }, (_, index) => ({
+    id: `${seed}-${index}`,
+    leftPercent: 8 + Math.random() * 84,
+    delayMs: Math.round(Math.random() * 180),
+    durationMs: 820 + Math.round(Math.random() * 360),
+    sizeRem: 1.15 + Math.random() * 1.2,
+    rotateDeg: -28 + Math.random() * 56,
+  }))
+}
 
 let activeGuidanceAudio: HTMLAudioElement | null = null
 let activeGuidancePlaybackToken = 0
@@ -552,14 +717,6 @@ function stopStudentEncouragement() {
   }
 }
 
-function resolveStudentEncouragement(activityId: number) {
-  return (
-    studentEncouragementMessagesVi[Math.abs(activityId) % studentEncouragementMessagesVi.length] ??
-    studentEncouragementMessagesVi[0] ??
-    studentEncouragementMessages[0]
-  )
-}
-
 async function playStudentEncouragement(token: string, message: string, cachedAudioUrl?: string) {
   if (typeof window === 'undefined' || !token.trim() || !message.trim()) return false
   stopStudentEncouragement()
@@ -568,7 +725,7 @@ async function playStudentEncouragement(token: string, message: string, cachedAu
       return await playStudentGuidanceAudio(cachedAudioUrl)
     }
     const audioBlob = await synthesizeAISpeech(token, { text: message })
-    const audioUrl = window.URL.createObjectURL(audioBlob)
+    const audioUrl = URL.createObjectURL(audioBlob)
     return await playStudentGuidanceAudio(audioUrl, { revokeOnEnd: true })
   } catch {
     return false
@@ -790,6 +947,91 @@ function buildStandaloneGameActivity(activityType: StudentGameMeta['activityType
   }
 }
 
+void buildStandaloneGameActivity
+
+function buildStandaloneGameActivityV2(activityType: StudentGameMeta['activityType']): LessonActivityItem {
+  const gameConfigs: Record<StudentGameMeta['activityType'], { id: number; title: string; config: Record<string, unknown> }> = {
+    memory_match: {
+      id: -101,
+      title: 'Lật thẻ ghi nhớ',
+      config: {
+        kind: 'memory_match',
+        prompt: 'Lật 2 thẻ giống nhau để ghi điểm.',
+        pair_count: 5,
+        image_cards: demoGameCards,
+      },
+    },
+    quick_tap: {
+      id: -102,
+      title: 'Chạm đúng nhanh',
+      config: {
+        kind: 'quick_tap',
+        prompt: 'Chạm nhanh vào các thẻ con vật trước khi hết giờ.',
+        duration_seconds: 10,
+        target_hits: 6,
+        simultaneous_cards: 4,
+        image_cards: demoGameCards,
+      },
+    },
+    drag_drop: {
+      id: -103,
+      title: 'Phân loại cảm xúc',
+      config: {
+        kind: 'drag_drop',
+        prompt: 'Kéo từng khuôn mặt vào đúng giỏ cảm xúc.',
+        items: ['😀 Mat vui', '😢 Mat buon', '😠 Mat tuc gian'],
+        targets: ['Giỏ vui', 'Giỏ buồn', 'Giỏ tức giận'],
+      },
+    },
+    image_puzzle: {
+      id: -104,
+      title: 'Xếp hình di tích',
+      config: {
+        kind: 'image_puzzle',
+        prompt: 'Ghép 4 mảnh để hoàn thành bức ảnh di tích.',
+        image_url: '/demo-media/nha.webp',
+        rows: 2,
+        cols: 2,
+        piece_count: 4,
+      },
+    },
+    basket_toss: {
+      id: -105,
+      title: 'Bắt bóng rổ',
+      config: {
+        kind: 'basket_toss',
+        prompt: 'Vuốt tay trên quả bóng để ném vào rổ to.',
+        target_shots: 5,
+      },
+    },
+    trash_cleanup: {
+      id: -106,
+      title: 'Siêu nhân dọn rác',
+      config: {
+        kind: 'trash_cleanup',
+        prompt: 'Chạm vào vỏ chuối, bịch nilon và các món rác để đưa vào thùng.',
+        trash_icons: ['🍌', '🛍️', '🧃', '📰', '🥤', '🧴'],
+      },
+    },
+  }
+
+  const game = gameConfigs[activityType]
+  const prompt = typeof game.config.prompt === 'string' ? game.config.prompt : ''
+
+  return {
+    id: game.id,
+    lesson_id: 0,
+    title: game.title,
+    activity_type: activityType,
+    instruction_text: prompt,
+    voice_answer_enabled: false,
+    is_required: true,
+    sort_order: 1,
+    difficulty_stage: 1,
+    config_json: JSON.stringify(game.config),
+  }
+}
+
 function isPuzzleSolved(activity: LessonActivityItem, answers: StudentAnswerState) {
   const config = parseActivityConfig(activity.config_json)
   const pieceCount = resolvedPuzzlePieceCount(config)
@@ -832,7 +1074,17 @@ function getSizeOrderItems(activity: LessonActivityItem) {
 function isSizeOrderCompleted(activity: LessonActivityItem, answers: StudentAnswerState) {
   const items = getSizeOrderItems(activity)
   const currentOrder = configStringArray(answers.dragAnswers[activity.id])
-  return items.length > 0 && currentOrder.length === items.length
+  if (!items.length || currentOrder.length !== items.length) return false
+  const correctOrder = [...items].sort((left, right) => left.rank - right.rank).map((item) => item.id)
+  return currentOrder.every((itemId, index) => itemId === correctOrder[index])
+}
+
+function isChoiceAnswerCorrect(activity: LessonActivityItem, answers: StudentAnswerState) {
+  const config = parseActivityConfig(activity.config_json)
+  const correctAnswer = textFromConfig(config?.correct)
+  const currentAnswer = textFromConfig(answers.choiceAnswers[activity.id])
+  if (!correctAnswer) return hasFilledString(currentAnswer)
+  return currentAnswer === correctAnswer
 }
 
 function getActivityScore(activity: LessonActivityItem, answers: StudentAnswerState) {
@@ -856,11 +1108,15 @@ function isHabitatMatchSolved(activity: LessonActivityItem, answers: StudentAnsw
 }
 
 function isActivityCompleted(activity: LessonActivityItem, answers: StudentAnswerState) {
+  if (activity.activity_type === 'basket_toss' || activity.activity_type === 'trash_cleanup') {
+    return hasFilledString(answers.textAnswers[activity.id])
+  }
+
   switch (activity.activity_type) {
     case 'multiple_choice':
     case 'image_choice':
     case 'listen_choose':
-      return hasFilledString(answers.choiceAnswers[activity.id])
+      return isChoiceAnswerCorrect(activity, answers)
     case 'image_puzzle':
       return isPuzzleSolved(activity, answers)
     case 'memory_match':
@@ -1035,6 +1291,7 @@ export function StudentHomePage() {
   const token = useAuthStore((state) => state.accessToken)
   const user = useAuthStore((state) => state.user)
   const profile = useAuthStore((state) => state.profile)
+  const setSession = useAuthStore((state) => state.setSession)
   const queryClient = useQueryClient()
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null)
   const [selectedSubjectKey, setSelectedSubjectKey] = useState<string | null>(null)
@@ -1046,6 +1303,7 @@ export function StudentHomePage() {
   const [activeActivityIndex, setActiveActivityIndex] = useState(0)
   const [completionSummary, setCompletionSummary] = useState<CompletionSummary | null>(null)
   const [completionLastInteractionAt, setCompletionLastInteractionAt] = useState(0)
+  const [activityCelebration, setActivityCelebration] = useState<ActivityCelebrationState | null>(null)
   const [choiceAnswers, setChoiceAnswers] = useState<Record<number, string>>({})
   const [matchingAnswers, setMatchingAnswers] = useState<Record<number, string[]>>({})
   const [dragAnswers, setDragAnswers] = useState<Record<number, string[]>>({})
@@ -1058,6 +1316,7 @@ export function StudentHomePage() {
   const learningSessionStartedAtRef = useRef<number | null>(null)
   const lastAutoSyncKeyRef = useRef('')
   const autoActionKeyRef = useRef('')
+  const activityCelebrationTimeoutRef = useRef<number | null>(null)
   const activeQuestionRef = useRef<HTMLElement | null>(null)
   const spokenActivityIdsRef = useRef<Set<number>>(new Set())
   const encouragedActivityIdsRef = useRef<Set<number>>(new Set())
@@ -1079,6 +1338,8 @@ export function StudentHomePage() {
   const [communicationError, setCommunicationError] = useState<string | null>(null)
   const [hasCompletedEntryGate, setHasCompletedEntryGate] = useState(false)
   const entryGateStorageKey = user ? `student-entry-gate:${user.id}` : null
+  const currentStudentLevel = typeof profile?.disability_level === 'string' ? String(profile.disability_level) : 'trung_binh'
+  const currentStudentLevelLabel = getStudentLevelLabel(currentStudentLevel)
 
   useEffect(() => {
     if (!entryGateStorageKey) {
@@ -1140,6 +1401,7 @@ export function StudentHomePage() {
   const resetActivityAnswers = () => {
     stopStudentGuidance()
     stopStudentEncouragement()
+    clearActivityCelebration()
     setChoiceAnswers({})
     setMatchingAnswers({})
     setDragAnswers({})
@@ -1194,6 +1456,7 @@ export function StudentHomePage() {
   }
 
   const openCareerDetail = (careerKey: string) => {
+    if (!availableCareerCards.some((item) => item.key === careerKey)) return
     stopCareerAudio()
     stopStudentGuidance()
     setActiveCareerMeaningKey(null)
@@ -1263,6 +1526,48 @@ export function StudentHomePage() {
     },
   })
 
+  const updateStudentLevelMutation = useMutation({
+    mutationFn: (level: StudentEntryLevelKey) => updateMyStudentLevel(token!, { disability_level: level }),
+    onSuccess: async (updatedProfile, level) => {
+      if (user && token) {
+        const refreshToken = useAuthStore.getState().refreshToken
+        if (refreshToken) {
+          setSession({
+            accessToken: token,
+            refreshToken,
+            user,
+            profile: {
+              ...(profile ?? {}),
+              ...updatedProfile,
+            },
+          })
+        } else {
+          useAuthStore.setState({
+            profile: {
+              ...(profile ?? {}),
+              ...updatedProfile,
+            },
+          })
+        }
+      }
+
+      if (entryGateStorageKey) {
+        window.sessionStorage.setItem(entryGateStorageKey, JSON.stringify({ level, selectedAt: Date.now() }))
+      }
+
+      setHasCompletedEntryGate(true)
+      setSelectedAssignmentId(null)
+      setSelectedSubjectKey(null)
+      setSelectedCareerKey(null)
+      setActiveStandaloneGameType(null)
+      setCompletedLessonTitle('')
+      setCompletionSummary(null)
+      resetActivityAnswers()
+      handleStudentPanelChange('learning')
+      await refreshStudentQueries()
+    },
+  })
+
   const joinClassMutation = useMutation({
     mutationFn: () =>
       joinClassByCredential(token!, {
@@ -1291,7 +1596,7 @@ export function StudentHomePage() {
         message,
         context: {
           target_role: user?.role,
-          disability_level: typeof profile?.disability_level === 'string' ? String(profile.disability_level) : 'nhe',
+          disability_level: currentStudentLevel,
           lesson_title: 'Trò chuyện hướng nghiệp',
           subject_name: 'Định hướng nghề nghiệp',
           activity_type: 'career_guidance_voice',
@@ -1340,11 +1645,12 @@ export function StudentHomePage() {
   }, [detail?.id, detail?.status, effectiveSelectedAssignmentId])
 
   const selectedAssignment =
-    assignmentsQuery.data?.find((item) => item.assignment_id === effectiveSelectedAssignmentId) ?? null
+    (assignmentsQuery.data ?? []).find((item) => item.assignment_id === effectiveSelectedAssignmentId) ?? null
   const visualAssignments = useMemo(
     () => (assignmentsQuery.data ?? []).filter((item) => isVisualSupportAssignment(item)),
     [assignmentsQuery.data],
   )
+  const preferredAssignments = visualAssignments.length ? visualAssignments : assignmentsQuery.data ?? []
   const visualSupportClassroom = resolveVisualSupportClassroom(detail, selectedAssignment, visualAssignments)
   const visualThemeKey =
     visualSupportClassroom?.visual_theme && Object.prototype.hasOwnProperty.call(visualThemePresetMap, visualSupportClassroom.visual_theme)
@@ -1360,7 +1666,10 @@ export function StudentHomePage() {
     ['--support-visual-glow' as string]: resolvedVisualTheme.glow,
   }
   const studentName = resolveStudentDisplayName(typeof profile?.full_name === 'string' ? profile.full_name : undefined, user?.email)
-  const allAssignments = visualAssignments.length ? visualAssignments : assignmentsQuery.data ?? []
+  const allAssignments = useMemo(
+    () => preferredAssignments.filter((item) => assignmentMatchesStudentLevel(item, currentStudentLevel)),
+    [currentStudentLevel, preferredAssignments],
+  )
   const heroLessonTitle = sanitizeStudentFacingText(detail?.lesson?.title ?? completedLessonTitle, 'Hôm nay học gì?')
   const requestedPanel = searchParams.get('tab')
   const setupIntent = searchParams.get('setup') === '1'
@@ -1375,6 +1684,12 @@ export function StudentHomePage() {
     !allAssignments.length &&
     !(myClassesQuery.data?.length ?? 0) &&
     !(myTeachersQuery.data?.length ?? 0)
+
+  useEffect(() => {
+    if (effectiveSelectedAssignmentId === null) return
+    if (allAssignments.some((item) => item.assignment_id === effectiveSelectedAssignmentId)) return
+    setSelectedAssignmentId(null)
+  }, [allAssignments, effectiveSelectedAssignmentId])
 
   const chooseAssignment = (assignmentId: number) => {
     const assignment = assignmentsQuery.data?.find((item) => item.assignment_id === assignmentId)
@@ -1404,12 +1719,8 @@ export function StudentHomePage() {
   }
 
   const handleStudentEntrySelect = (level: StudentEntryLevelKey) => {
-    if (entryGateStorageKey) {
-      window.sessionStorage.setItem(entryGateStorageKey, JSON.stringify({ level, selectedAt: Date.now() }))
-    }
-
-    setHasCompletedEntryGate(true)
-    handleStudentPanelChange('learning')
+    if (!token || updateStudentLevelMutation.isPending) return
+    updateStudentLevelMutation.mutate(level)
   }
 
   useEffect(() => {
@@ -1502,11 +1813,22 @@ export function StudentHomePage() {
       ? 'Hôm nay chúng mình cùng khám phá những điều thú vị nhé!'
       : activeTabCopy.title
   const heroBadges = [
+    `Mức ${currentStudentLevelLabel}`,
     `⭐ ${displayCompletedCount} bài học hoàn thành`,
     `🏆 ${totalRewardStars} điểm thưởng`,
     `🏫 ${myClassesQuery.data?.length ?? 0} lớp`,
     `👩‍🏫 ${myTeachersQuery.data?.length ?? 0} giáo viên`,
   ]
+
+  const availableStandaloneGames = useMemo(
+    () => studentGameCatalog.filter((item) => contentMatchesStudentLevel(item.levels, currentStudentLevel)),
+    [currentStudentLevel],
+  )
+
+  const availableCareerCards = useMemo(
+    () => careerPreviewCards.filter((item) => contentMatchesStudentLevel(item.levels, currentStudentLevel)),
+    [currentStudentLevel],
+  )
 
   const subjectCards = useMemo(
     () =>
@@ -1547,13 +1869,29 @@ export function StudentHomePage() {
     [displayAssignments],
   )
   const selectedCareerCard = useMemo(
-    () => careerPreviewCards.find((item) => item.key === selectedCareerKey) ?? null,
-    [selectedCareerKey],
+    () => availableCareerCards.find((item) => item.key === selectedCareerKey) ?? null,
+    [availableCareerCards, selectedCareerKey],
+  )
+  const activeStandaloneGameMeta = useMemo(
+    () => availableStandaloneGames.find((item) => item.activityType === activeStandaloneGameType) ?? null,
+    [activeStandaloneGameType, availableStandaloneGames],
   )
   const standaloneGameActivity = useMemo(
-    () => (activeStandaloneGameType ? buildStandaloneGameActivity(activeStandaloneGameType) : null),
-    [activeStandaloneGameType],
+    () => (activeStandaloneGameType && activeStandaloneGameMeta ? buildStandaloneGameActivityV2(activeStandaloneGameType) : null),
+    [activeStandaloneGameMeta, activeStandaloneGameType],
   )
+
+  useEffect(() => {
+    if (!selectedCareerKey) return
+    if (selectedCareerCard) return
+    setSelectedCareerKey(null)
+  }, [selectedCareerCard, selectedCareerKey])
+
+  useEffect(() => {
+    if (!activeStandaloneGameType) return
+    if (activeStandaloneGameMeta) return
+    setActiveStandaloneGameType(null)
+  }, [activeStandaloneGameMeta, activeStandaloneGameType])
 
   const lessonActivities = useMemo(() => detail?.lesson?.activities ?? [], [detail?.lesson?.activities])
   const boundedActiveActivityIndex = lessonActivities.length ? Math.min(activeActivityIndex, lessonActivities.length - 1) : 0
@@ -1568,6 +1906,7 @@ export function StudentHomePage() {
     (currentActivity
       ? cleanActivityTypeVisualLabelMap[currentActivity.activity_type] ?? activityTypeVisualLabelMap[currentActivity.activity_type] ?? 'Hoạt động'
       : '')
+  const shouldHideCurrentActivityCaption = isLocalEmbeddedWatchActivity(currentActivity)
   const isStudentLessonFocus =
     activePanel === 'learning' && Boolean(detail) && !selectedCareerCard && !activeStandaloneGameType && !completionSummary
   const currentActivityGuidanceAudioUrl = currentActivity ? resolveActivityGuidanceAudioUrl(currentActivity) : ''
@@ -1583,12 +1922,40 @@ export function StudentHomePage() {
     if (!token || !guidanceText.trim()) return false
 
     try {
-      const audioBlob = await synthesizeAISpeech(token, { text: guidanceText })
+      const activityIndex = lessonActivities.findIndex((item) => item.id === activity.id)
+      const detailedGuidanceText = buildDetailedActivityGuidance(
+        activity,
+        activityIndex >= 0 ? activityIndex : boundedActiveActivityIndex,
+        lessonActivities.length,
+      )
+      const audioBlob = await synthesizeAISpeech(token, { text: detailedGuidanceText || guidanceText })
       const audioUrl = window.URL.createObjectURL(audioBlob)
       return await playStudentGuidanceAudio(audioUrl, { revokeOnEnd: true })
     } catch {
       return false
     }
+  }
+
+  const clearActivityCelebration = () => {
+    if (activityCelebrationTimeoutRef.current !== null) {
+      window.clearTimeout(activityCelebrationTimeoutRef.current)
+      activityCelebrationTimeoutRef.current = null
+    }
+    setActivityCelebration(null)
+  }
+
+  const triggerActivityCelebration = (seed: number, message: string) => {
+    if (activityCelebrationTimeoutRef.current !== null) {
+      window.clearTimeout(activityCelebrationTimeoutRef.current)
+    }
+    setActivityCelebration({
+      stars: createActivityCelebrationStars(seed),
+      message,
+    })
+    activityCelebrationTimeoutRef.current = window.setTimeout(() => {
+      setActivityCelebration(null)
+      activityCelebrationTimeoutRef.current = null
+    }, 1200)
   }
 
   useEffect(() => {
@@ -1615,6 +1982,10 @@ export function StudentHomePage() {
   useEffect(() => () => {
     stopStudentGuidance()
     stopStudentEncouragement()
+    if (activityCelebrationTimeoutRef.current !== null) {
+      window.clearTimeout(activityCelebrationTimeoutRef.current)
+      activityCelebrationTimeoutRef.current = null
+    }
     Object.values(encouragementAudioCacheRef.current).forEach((audioUrl) => {
       if (audioUrl.startsWith('blob:')) {
         window.URL.revokeObjectURL(audioUrl)
@@ -1790,17 +2161,28 @@ export function StudentHomePage() {
       return
     }
 
+    const currentIndex = lessonActivities.findIndex((activity) => activity.id === activityId)
+    const completedActivity = currentIndex >= 0 ? lessonActivities[currentIndex] : currentActivity
+    if (!completedActivity) {
+      advanceToNextStep()
+      return
+    }
+
     encouragedActivityIdsRef.current.add(activityId)
-    const encouragementMessage = resolveStudentEncouragement(activityId)
+    const encouragementMessage = resolveStudentEncouragement(completedActivity, currentIndex >= 0 ? currentIndex : boundedActiveActivityIndex, lessonActivities.length)
+    triggerActivityCelebration(activityId, `Xong câu ${currentIndex >= 0 ? currentIndex + 1 : boundedActiveActivityIndex + 1}!`)
     const cachedEncouragementAudioUrl = encouragementAudioCacheRef.current[encouragementMessage]
 
     stopStudentGuidance()
 
-    const playEncouragement = token
-      ? playStudentEncouragement(token, encouragementMessage, cachedEncouragementAudioUrl)
-      : Promise.resolve(false)
+    if (!token) {
+      window.setTimeout(() => {
+        advanceToNextStep()
+      }, 700)
+      return
+    }
 
-    void playEncouragement
+    void playStudentEncouragement(token, encouragementMessage, cachedEncouragementAudioUrl)
       .catch(() => false)
       .finally(() => {
         advanceToNextStep()
@@ -2009,6 +2391,7 @@ export function StudentHomePage() {
   }, [])
 
   const openIchanGame = (activityType: StudentGameMeta['activityType']) => {
+    if (!availableStandaloneGames.some((item) => item.activityType === activityType)) return
     handleStudentPanelChange('learning')
     setSelectedAssignmentId(null)
     setCompletionSummary(null)
@@ -2119,6 +2502,29 @@ export function StudentHomePage() {
 
           {currentActivity ? (
             <article className={currentActivityCompleted ? 'student-visual-step-card student-visual-step-card-complete' : 'student-visual-step-card'}>
+              {activityCelebration ? (
+                <div className="student-visual-step-star-rain" aria-hidden="true">
+                  <div className="student-visual-step-celebration-badge">
+                    <span className="student-visual-step-celebration-badge-star">★</span>
+                    <strong>{activityCelebration.message}</strong>
+                  </div>
+                  {activityCelebration.stars.map((star) => (
+                    <span
+                      key={star.id}
+                      className="student-visual-step-falling-star"
+                      style={{
+                        ['--star-left' as string]: `${star.leftPercent}%`,
+                        ['--star-delay' as string]: `${star.delayMs}ms`,
+                        ['--star-duration' as string]: `${star.durationMs}ms`,
+                        ['--star-size' as string]: `${star.sizeRem}rem`,
+                        ['--star-rotate' as string]: `${star.rotateDeg}deg`,
+                      }}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+              ) : null}
               <div className="student-visual-step-head">
                 <span className="student-visual-step-badge">#{boundedActiveActivityIndex + 1}</span>
                 <div className="student-visual-step-head-actions">
@@ -2141,7 +2547,7 @@ export function StudentHomePage() {
                 <span className="student-visual-step-icon">{cleanActivityIconMap[currentActivity.activity_type] ?? activityIconMap[currentActivity.activity_type] ?? '.'}</span>
                 <div>
                   <h4>{currentActivity.title}</h4>
-                  {currentActivityCaption ? <p>{currentActivityCaption}</p> : null}
+                  {!shouldHideCurrentActivityCaption && currentActivityCaption ? <p>{currentActivityCaption}</p> : null}
                 </div>
               </div>
 
@@ -2237,11 +2643,11 @@ export function StudentHomePage() {
             <div>
               <h3 className="ichan-section-title ichan-section-title-accent">TRÒ CHƠI</h3>
             </div>
-            <span className="subject-pill muted-pill">2 mục</span>
+            <span className="subject-pill muted-pill">{availableStandaloneGames.length} mục</span>
           </div>
 
           <div className="ichan-game-grid">
-            {studentGameCatalog.map((game) => {
+            {availableStandaloneGames.map((game) => {
               const isAvailableInLesson = lessonActivities.some((activity) => activity.activity_type === game.activityType)
               return (
                 <article key={game.key} className="ichan-game-card">
@@ -2255,6 +2661,7 @@ export function StudentHomePage() {
                 </article>
               )
             })}
+            {!availableStandaloneGames.length ? <p className="helper-text">{`Mức ${currentStudentLevelLabel} chưa có trò chơi riêng.`}</p> : null}
           </div>
       </article>
 
@@ -2266,7 +2673,7 @@ export function StudentHomePage() {
           </div>
 
           <div className="ichan-career-grid">
-            {careerPreviewCards.map((item) => (
+            {availableCareerCards.map((item) => (
               <button
                 key={item.key}
                 type="button"
@@ -2277,6 +2684,7 @@ export function StudentHomePage() {
                 <p>{item.description}</p>
               </button>
             ))}
+            {!availableCareerCards.length ? <p className="helper-text">{`Mức ${currentStudentLevelLabel} chưa có nội dung hướng nghiệp riêng.`}</p> : null}
           </div>
       </article>
     </section>
@@ -2339,7 +2747,7 @@ export function StudentHomePage() {
   const renderIchanStandaloneGamePage = () => {
     if (!standaloneGameActivity) return null
 
-  const currentGameMeta = studentGameCatalog.find((item) => item.activityType === activeStandaloneGameType) ?? null
+    const currentGameMeta = activeStandaloneGameMeta
     const isStandaloneGameCompleted = isActivityCompleted(standaloneGameActivity, answers)
 
     return (
@@ -2507,7 +2915,7 @@ export function StudentHomePage() {
 
             <div className="career-voice-copy">
               <strong>{isCareerListening ? 'Em cứ nói nhé' : careerChatMutation.isPending ? 'AI đang trả lời' : 'Bấm mic rồi nói'}</strong>
-              <p>Ví dụ: “Con thích vẽ thì sau này làm nghề gì?” hoặc “Nhắc con làm bài từng bước.”</p>
+              <p>Ví dụ: "Con thích vẽ thì sau này làm nghề gì?" hoặc "Nhắc con làm bài từng bước."</p>
             </div>
 
             <button
@@ -2580,12 +2988,13 @@ export function StudentHomePage() {
           </div>
 
           <div className="ichan-career-grid">
-            {careerPreviewCards.map((item) => (
+            {availableCareerCards.map((item) => (
               <article key={item.title} className="student-visual-mini-card student-visual-mini-card-soft">
                 <strong>{item.title}</strong>
                 <p>{item.description}</p>
               </article>
             ))}
+            {!availableCareerCards.length ? <p className="helper-text">{`Mức ${currentStudentLevelLabel} chưa có gợi ý nghề nghiệp riêng.`}</p> : null}
           </div>
       </article>
 
@@ -2750,7 +3159,7 @@ export function StudentHomePage() {
           <div className="student-entry-gate-copy">
             <p className="student-entry-gate-kicker">CHÀO MỪNG BẠN</p>
             <h2>{studentName}</h2>
-            <p>Hãy chọn mức độ hỗ trợ để bắt đầu.</p>
+            <p>{`Hãy chọn mức độ hỗ trợ để bắt đầu. Mức hiện tại: ${currentStudentLevelLabel}.`}</p>
           </div>
 
           <div className="student-entry-gate-options">
@@ -2759,6 +3168,7 @@ export function StudentHomePage() {
                 key={option.key}
                 type="button"
                 className={`student-entry-gate-option student-entry-gate-option-${option.key}`}
+                disabled={updateStudentLevelMutation.isPending}
                 onClick={() => handleStudentEntrySelect(option.key)}
               >
                 <strong>{option.title}</strong>
@@ -2766,14 +3176,7 @@ export function StudentHomePage() {
               </button>
             ))}
           </div>
-
-          <button
-            type="button"
-            className="student-entry-gate-adult"
-            onClick={() => handleStudentEntrySelect('adult')}
-          >
-            DÀNH CHO NGƯỜI LỚN
-          </button>
+          {updateStudentLevelMutation.error ? <p className="error-text">{(updateStudentLevelMutation.error as Error).message}</p> : null}
         </div>
       </div>
     </section>
@@ -2834,7 +3237,11 @@ export function StudentHomePage() {
           <section className="student-visual-celebration student-visual-result-card" aria-live="assertive">
             <div>
               <p className="student-visual-kicker">Hoàn thành</p>
-              <h3>{completionSummary.title}</h3>
+              <div className="student-visual-result-praise">
+                <h3>Em giỏi lắm!</h3>
+                <span className="student-visual-celebration-star" aria-hidden="true" />
+              </div>
+              <p className="student-visual-result-lesson-title">{completionSummary.title}</p>
               <div className="student-visual-result-metrics">
                 <span>{completionSummary.progressPercent}%</span>
                 <span>{completionSummary.completionScore} điểm</span>
@@ -2842,9 +3249,8 @@ export function StudentHomePage() {
               </div>
             </div>
             <div className="student-visual-celebration-actions">
-              <span className="student-visual-celebration-star" aria-hidden="true" />
               <button type="button" className="student-home-icon" onClick={handleGoHome} aria-label="Về trang chủ">
-                HT
+                Về trang chủ
               </button>
             </div>
           </section>

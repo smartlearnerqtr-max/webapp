@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" rx="32" fill="#eef9ff"/>
+  <circle cx="128" cy="118" r="68" fill="#9fd7ff" stroke="#2f79c4" stroke-width="8"/>
+  <path d="M90 118h76" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+  <path d="M128 80v76" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="128" cy="118" r="24" fill="#ffd55f" stroke="#e4a33e" stroke-width="6"/>
+  <text x="128" y="232" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" fill="#1e517f">Chơi</text>
+</svg>

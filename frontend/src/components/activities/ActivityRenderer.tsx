@@ -16,6 +16,8 @@ type ActivityType =
   | 'aac'
   | 'memory_match'
   | 'quick_tap'
+  | 'basket_toss'
+  | 'trash_cleanup'
   | 'size_order'
   | 'habitat_match'
   | 'career_simulation'
@@ -61,7 +63,7 @@ type HabitatOption = {
   mediaKind: string | null
 }
 
-type WatchAnswerMode = 'text' | 'voice_ai_grade'
+type WatchAnswerMode = 'text' | 'voice_ai_grade' | 'none'
 
 type BrowserSpeechRecognitionResultItem = {
   transcript: string
@@ -141,6 +143,9 @@ const activityTypeLabelMap: Record<string, string> = {
 function activityLabel(activityType: string) {
   return activityTypeLabelMap[activityType] ?? activityType
 }
+
+activityTypeLabelMap.basket_toss = 'Bắt bóng rổ'
+activityTypeLabelMap.trash_cleanup = 'Siêu nhân dọn rác'
 
 function parseActivityConfig(configJson: string | null) {
   if (!configJson) return null
@@ -308,6 +313,15 @@ function speechRecognitionConstructor(): BrowserSpeechRecognitionConstructor | n
   return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null
 }
 
+function speakText(text: string, lang = 'vi-VN') {
+  if (typeof window === 'undefined' || !text.trim() || !('speechSynthesis' in window)) return
+  const utterance = new SpeechSynthesisUtterance(text.trim())
+  utterance.lang = lang
+  utterance.rate = 0.9
+  window.speechSynthesis.cancel()
+  window.speechSynthesis.speak(utterance)
+}
+
 function normalizeYouTubeEmbedUrl(rawUrl: string) {
   try {
     const url = new URL(rawUrl)
@@ -361,12 +375,127 @@ function inferMediaKind(mediaUrl: string, mediaKind: string | null) {
   return 'external'
 }
 
+function isLocalEmbedDocument(mediaUrl: string) {
+  return /^\/(?!\/)/.test(mediaUrl.trim()) && /\.(html)(\?.*)?$/i.test(mediaUrl.trim())
+}
+
+const AdaptiveIframe = React.memo(({
+  src,
+  title,
+  allow,
+  allowFullScreen,
+  minHeight = 320,
+}: {
+  src: string
+  title: string
+  allow?: string
+  allowFullScreen?: boolean
+  minHeight?: number
+}) => {
+  const iframeRef = React.useRef<HTMLIFrameElement | null>(null)
+  const resizeObserverRef = React.useRef<ResizeObserver | null>(null)
+  const [height, setHeight] = React.useState(minHeight)
+
+  const updateHeight = React.useCallback(() => {
+    const iframe = iframeRef.current
+    if (!iframe) return
+    try {
+      const doc = iframe.contentDocument
+      if (!doc) return
+      const body = doc.body
+      const root = doc.documentElement
+      const nextHeight = Math.max(
+        minHeight,
+        Math.ceil(
+          Math.max(
+            body?.scrollHeight ?? 0,
+            body?.offsetHeight ?? 0,
+            root?.scrollHeight ?? 0,
+            root?.offsetHeight ?? 0,
+          ),
+        ),
+      )
+      setHeight((current) => (Math.abs(current - nextHeight) > 2 ? nextHeight : current))
+    } catch {
+      // Cross-origin frames cannot be measured. Keep fallback height.
+    }
+  }, [minHeight])
+
+  React.useEffect(() => {
+    const iframe = iframeRef.current
+    if (!iframe) return
+
+    const handleLoad = () => {
+      updateHeight()
+      window.setTimeout(updateHeight, 120)
+      window.setTimeout(updateHeight, 480)
+
+      try {
+        const doc = iframe.contentDocument
+        if (!doc || typeof ResizeObserver === 'undefined') return
+        resizeObserverRef.current?.disconnect()
+        const observer = new ResizeObserver(() => updateHeight())
+        if (doc.body) observer.observe(doc.body)
+        if (doc.documentElement) observer.observe(doc.documentElement)
+        resizeObserverRef.current = observer
+      } catch {
+        // Ignore same-origin restriction.
+      }
+    }
+
+    iframe.addEventListener('load', handleLoad)
+    handleLoad()
+
+    return () => {
+      iframe.removeEventListener('load', handleLoad)
+      resizeObserverRef.current?.disconnect()
+      resizeObserverRef.current = null
+    }
+  }, [src, updateHeight])
+
+  React.useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const iframeWindow = iframeRef.current?.contentWindow
+      if (!iframeWindow || event.source !== iframeWindow) return
+      const payload = event.data
+      if (!payload || typeof payload !== 'object' || payload.type !== 'lesson-media-height') return
+      const nextHeight = Number(payload.height)
+      if (!Number.isFinite(nextHeight)) return
+      setHeight((current) => {
+        const normalizedHeight = Math.max(minHeight, Math.ceil(nextHeight))
+        return Math.abs(current - normalizedHeight) > 2 ? normalizedHeight : current
+      })
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [minHeight])
+
+  return (
+    <iframe
+      ref={iframeRef}
+      src={src}
+      title={title}
+      allow={allow}
+      allowFullScreen={allowFullScreen}
+      style={{ height: `${height}px` }}
+    />
+  )
+})
+
 function renderEmbeddedMedia(mediaUrl: string, mediaKind: string | null, presentationMode: ActivityPresentationMode = 'standard') {
   const resolvedKind = inferMediaKind(mediaUrl, mediaKind)
   const youtubeEmbedUrl = normalizeYouTubeEmbedUrl(mediaUrl)
   const driveEmbedUrl = normalizeGoogleDriveEmbedUrl(mediaUrl)
   const tikTokEmbedUrl = normalizeTikTokEmbedUrl(mediaUrl)
-  const mediaClassName = presentationMode === 'immersive_square' ? 'embedded-media embedded-media-immersive-square' : 'embedded-media'
+  const usesAdaptiveEmbed = isLocalEmbedDocument(mediaUrl)
+  const mediaClassName = [
+    'embedded-media',
+    presentationMode === 'immersive_square' ? 'embedded-media-immersive-square' : '',
+    usesAdaptiveEmbed ? 'embedded-media-adaptive' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   if (resolvedKind === 'image') {
     return (
@@ -410,7 +539,7 @@ function renderEmbeddedMedia(mediaUrl: string, mediaKind: string | null, present
   if (resolvedKind === 'embed') {
     return (
       <div className={mediaClassName}>
-        <iframe src={mediaUrl} title="Media bài học" />
+        {usesAdaptiveEmbed ? <AdaptiveIframe src={mediaUrl} title="Media bài học" minHeight={420} /> : <iframe src={mediaUrl} title="Media bài học" />}
       </div>
     )
   }
@@ -418,7 +547,7 @@ function renderEmbeddedMedia(mediaUrl: string, mediaKind: string | null, present
   return (
     <div className="detail-stack">
       <div className={mediaClassName}>
-        <iframe src={mediaUrl} title="Media bài học" />
+        {usesAdaptiveEmbed ? <AdaptiveIframe src={mediaUrl} title="Media bài học" minHeight={420} /> : <iframe src={mediaUrl} title="Media bài học" />}
       </div>
       <a className="subject-pill" href={mediaUrl} target="_blank" rel="noreferrer">Mở nguồn gốc nếu media không hiển thị đúng</a>
     </div>
@@ -441,6 +570,7 @@ function scheduleAutoAdvance(onAutoAdvance: ((activityId: number) => void) | und
 function CarouselImageChoiceActivity({
   activity,
   prompt,
+  audioControl,
   cards,
   correct,
   selectedChoice,
@@ -450,6 +580,7 @@ function CarouselImageChoiceActivity({
 }: {
   activity: LessonActivityItem
   prompt: string
+  audioControl?: React.ReactNode
   cards: ImageChoiceCard[]
   correct: string
   selectedChoice: string
@@ -484,6 +615,7 @@ function CarouselImageChoiceActivity({
   return (
     <div className="activity-playground image-carousel-shell">
       <p className="activity-prompt">{prompt}</p>
+      {audioControl}
 
       <div className="image-carousel-header">
         <span className="image-carousel-chip">Ảnh {Math.min(activeIndex + 1, cards.length)}/{cards.length}</span>
@@ -504,7 +636,9 @@ function CarouselImageChoiceActivity({
                 aria-pressed={selectedChoice === card.id}
                 onClick={() => {
                   setAnswers((current) => ({ ...current, [activity.id]: card.id }))
-                  scheduleAutoAdvance(onAutoAdvance, activity.id)
+                  if (!correct || card.id === correct) {
+                    scheduleAutoAdvance(onAutoAdvance, activity.id)
+                  }
                 }}
               >
                 {selectedChoice === card.id ? 'Đã chọn' : 'Chọn'}
@@ -903,7 +1037,10 @@ export const MultipleChoiceActivity = React.memo(({
 }: ActivityComponentProps<StringAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
-  const prompt = toText(config.prompt) || toText(config.audio_text) || activity.instruction_text || 'Hãy chọn đáp án đúng.'
+  const audioText = toText(config.audio_text)
+  const audioUrl = toText(config.audio_url)
+  const audioLang = toText(config.audio_lang, 'vi-VN')
+  const prompt = toText(config.prompt) || audioText || activity.instruction_text || 'Hãy chọn đáp án đúng.'
   const choices = toStringArray(config.choices)
   const correct = toText(config.correct)
   const mediaUrl = toText(config.media_url)
@@ -912,16 +1049,45 @@ export const MultipleChoiceActivity = React.memo(({
   const imageCards = toImageChoiceCardArray(config.image_cards)
   const selectedChoice = answers[activity.id] ?? ''
   const isCorrect = Boolean(selectedChoice) && selectedChoice === correct
+  const audioRef = React.useRef<HTMLAudioElement | null>(null)
   const optionGridClassName =
     presentationMode === 'immersive_square' && choices.length <= 2
       ? 'activity-option-grid activity-option-grid-two-choice'
       : 'activity-option-grid'
+
+  function replayAudioPrompt() {
+    if (audioUrl) {
+      const player = audioRef.current
+      if (!player) return
+      player.currentTime = 0
+      void player.play().catch(() => {})
+      return
+    }
+    if (audioText) {
+      speakText(audioText, audioLang)
+    }
+  }
+
+  React.useEffect(() => {
+    if (!audioUrl && !audioText) return
+    replayAudioPrompt()
+  }, [activity.id, audioLang, audioText, audioUrl])
+
+  const audioControl = audioUrl || audioText ? (
+    <div className="button-row">
+      {audioUrl ? <audio ref={audioRef} preload="auto" src={audioUrl} /> : null}
+      <button type="button" className="ghost-button" onClick={replayAudioPrompt}>
+        Nghe lại
+      </button>
+    </div>
+  ) : null
 
   if (imageSelectionMode === 'carousel_find' && imageCards.length > 0) {
     return (
       <CarouselImageChoiceActivity
         activity={activity}
         prompt={prompt}
+        audioControl={audioControl}
         cards={imageCards}
         correct={correct}
         selectedChoice={selectedChoice}
@@ -936,6 +1102,7 @@ export const MultipleChoiceActivity = React.memo(({
     <div className="activity-playground">
       {mediaUrl ? renderEmbeddedMedia(mediaUrl, mediaKind, presentationMode) : null}
       <p className="activity-prompt">{prompt}</p>
+      {audioControl}
       <div className={optionGridClassName}>
         {choices.map((choice) => (
           <button
@@ -945,7 +1112,9 @@ export const MultipleChoiceActivity = React.memo(({
             aria-pressed={selectedChoice === choice}
             onClick={() => {
               setAnswers((current) => ({ ...current, [activity.id]: choice }))
-              scheduleAutoAdvance(onAutoAdvance, activity.id)
+              if (!correct || choice === correct) {
+                scheduleAutoAdvance(onAutoAdvance, activity.id)
+              }
             }}
           >
             {choice}
@@ -1035,7 +1204,7 @@ export const DragDropActivity = React.memo(({ activity, answers, setAnswers }: A
   )
 })
 
-export const WatchAnswerActivity = React.memo(({ activity, answers, setAnswers, presentationMode = 'standard' }: ActivityComponentProps<StringAnswerMap>) => {
+export const WatchAnswerActivity = React.memo(({ activity, answers, setAnswers, presentationMode = 'standard', onAutoAdvance }: ActivityComponentProps<StringAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const mediaUrl = toText(config.media_url)
@@ -1045,11 +1214,28 @@ export const WatchAnswerActivity = React.memo(({ activity, answers, setAnswers, 
   const expectedAnswer = toText(config.expected_answer)
   const acceptedAnswers = toStringArray(config.accepted_answers)
   const answer = answers[activity.id] ?? ''
+  const shouldHideExternalPrompt = Boolean(mediaUrl) && isLocalEmbedDocument(mediaUrl) && answerMode === 'none'
 
   return (
     <div className="activity-playground watch-answer-shell">
       {mediaUrl ? renderEmbeddedMedia(mediaUrl, mediaKind, presentationMode) : null}
-      <p className="activity-prompt">{prompt}</p>
+      {!shouldHideExternalPrompt ? <p className="activity-prompt">{prompt}</p> : null}
+
+      {answerMode === 'none' ? (
+        <div className="detail-stack">
+          <button
+            type="button"
+            className={answer === 'done' ? 'action-button action-button-secondary' : 'action-button'}
+            onClick={() => {
+              setAnswers((current) => ({ ...current, [activity.id]: 'done' }))
+              onAutoAdvance?.(activity.id)
+            }}
+          >
+            {answer === 'done' ? 'Em đã hoàn thành phần này' : 'Em đã tương tác xong'}
+          </button>
+          {answer === 'done' ? <p className="feedback-note feedback-note-success">Phần tương tác này đã được ghi nhận.</p> : null}
+        </div>
+      ) : null}
 
       {answerMode === 'voice_ai_grade' ? (
         <VoiceAiAnswerBox
@@ -1063,7 +1249,7 @@ export const WatchAnswerActivity = React.memo(({ activity, answers, setAnswers, 
         />
       ) : null}
 
-      {answerMode !== 'voice_ai_grade' ? (
+      {answerMode === 'text' ? (
         <textarea
           value={answer}
           onChange={(event) => setAnswers((current) => ({ ...current, [activity.id]: event.target.value }))}
@@ -1435,7 +1621,10 @@ export const SizeOrderActivity = React.memo(({ activity, answers, setAnswers, on
 
   function updateOrder(nextOrder: string[]) {
     setAnswers((current) => ({ ...current, [activity.id]: nextOrder }))
-    if (nextOrder.length === correctOrder.length) {
+    const nextIsCorrect =
+      nextOrder.length === correctOrder.length &&
+      nextOrder.every((itemId, index) => itemId === correctOrder[index])
+    if (nextIsCorrect) {
       scheduleAutoAdvance(onAutoAdvance, activity.id)
     }
   }
@@ -1742,7 +1931,7 @@ export const HabitatConnectActivity = React.memo(({ activity, answers, setAnswer
                 </span>
                 <strong>{item.label}</strong>
                 <span className="habitat-connect-arrow-hint">
-                  {selectedHabitat ? `Da noi: ${selectedHabitat.label}` : 'Keo hoac cham de noi'}
+                  {selectedHabitat ? `Đã nối: ${selectedHabitat.label}` : 'Kéo hoặc chạm để nối'}
                 </span>
               </button>
             )
@@ -1790,12 +1979,201 @@ export const HabitatConnectActivity = React.memo(({ activity, answers, setAnswer
   )
 })
 
+export const BasketTossActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps<StringAnswerMap>) => {
+  const parsedConfig = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
+  const config = parsedConfig ?? {}
+  const prompt = toText(config.prompt) || activity.instruction_text || 'Vuốt tay lên để ném bóng vào rổ.'
+  const targetShots = Math.max(1, Number(config.target_shots ?? 5) || 5)
+  const storedAnswer = toText(answers[activity.id])
+  const completedShots = storedAnswer.startsWith('completed:') ? Number(storedAnswer.split(':')[1]) || 0 : 0
+  const shotsRef = React.useRef(completedShots)
+  const swipeStartRef = React.useRef<{ x: number; y: number } | null>(null)
+  const [shots, setShots] = React.useState(completedShots)
+  const [feedback, setFeedback] = React.useState('Vuốt qua bóng theo hướng lên trên để ném.')
+
+  React.useEffect(() => {
+    shotsRef.current = completedShots
+    setShots(completedShots)
+  }, [completedShots, activity.id])
+
+  function finishRound(nextShots: number) {
+    setAnswers((current) => ({ ...current, [activity.id]: `completed:${nextShots}` }))
+    scheduleAutoAdvance(onAutoAdvance, activity.id)
+  }
+
+  function registerSwipe(deltaX: number, deltaY: number) {
+    if (deltaY > -40 || Math.abs(deltaY) < Math.abs(deltaX)) {
+      setFeedback('Vuốt tay lên cao hơn để ném bóng vào rổ.')
+      return
+    }
+    const nextShots = shotsRef.current + 1
+    shotsRef.current = nextShots
+    setShots(nextShots)
+    setFeedback(nextShots >= targetShots ? 'Vào rổ rồi. Em đã hoàn thành trò chơi.' : 'Vào rổ rồi. Tiếp tục ném thêm nhé.')
+    if (nextShots >= targetShots) {
+      finishRound(nextShots)
+    }
+  }
+
+  function handlePointerDown(event: React.PointerEvent<HTMLButtonElement>) {
+    swipeStartRef.current = { x: event.clientX, y: event.clientY }
+  }
+
+  function handlePointerUp(event: React.PointerEvent<HTMLButtonElement>) {
+    const swipeStart = swipeStartRef.current
+    swipeStartRef.current = null
+    if (!swipeStart) return
+    registerSwipe(event.clientX - swipeStart.x, event.clientY - swipeStart.y)
+  }
+
+  if (!parsedConfig) return null
+
+  return (
+    <div className="activity-playground">
+      <p className="activity-prompt">{prompt}</p>
+      <div
+        style={{
+          position: 'relative',
+          minHeight: '20rem',
+          borderRadius: '1.5rem',
+          padding: '1.25rem',
+          background: 'linear-gradient(180deg, #fef3c7 0%, #fed7aa 100%)',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <span className="subject-pill">{`Đã vào rổ ${shots}/${targetShots}`}</span>
+          <span className="subject-pill muted-pill">Vuốt để ném</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', fontSize: '5rem', lineHeight: 1, marginTop: '0.5rem' }}>
+          🏀
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem', fontSize: '5.5rem', lineHeight: 1 }}>
+          🥅
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+          <button
+            type="button"
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
+            className="interactive-option"
+            style={{
+              width: '7rem',
+              height: '7rem',
+              borderRadius: '999px',
+              fontSize: '3rem',
+              background: 'radial-gradient(circle at 35% 35%, #fdba74 0%, #f97316 65%, #c2410c 100%)',
+              color: '#fff',
+              boxShadow: '0 16px 32px rgba(194, 65, 12, 0.25)',
+            }}
+            aria-label="Vuốt để ném bóng"
+          >
+            🏀
+          </button>
+        </div>
+      </div>
+      <p className={shots >= targetShots ? 'feedback-note feedback-note-success' : 'feedback-note'}>
+        {feedback}
+      </p>
+    </div>
+  )
+})
+
+export const TrashCleanupActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps<StringAnswerMap>) => {
+  const parsedConfig = React.useMemo(() => parseActivityConfig(activity.config_json), [activity.config_json])
+  const config = parsedConfig ?? {}
+  const prompt = toText(config.prompt) || activity.instruction_text || 'Chạm vào rác để đưa rác vào thùng.'
+  const trashIcons = toStringArray(config.trash_icons)
+  const trashItems = React.useMemo(
+    () =>
+      (trashIcons.length ? trashIcons : ['🍌', '🛍️', '🧃', '📰', '🥤', '🧴']).map((icon, index) => ({
+        id: `trash-${index + 1}`,
+        icon,
+        left: 8 + ((index * 17) % 72),
+        top: 14 + ((index * 13) % 52),
+        rotation: ((index % 5) - 2) * 9,
+      })),
+    [trashIcons],
+  )
+  const storedAnswer = toText(answers[activity.id])
+  const completedCount = storedAnswer.startsWith('completed:') ? Number(storedAnswer.split(':')[1]) || 0 : 0
+  const [clearedIds, setClearedIds] = React.useState<string[]>(() => trashItems.slice(0, completedCount).map((item) => item.id))
+
+  React.useEffect(() => {
+    setClearedIds(trashItems.slice(0, completedCount).map((item) => item.id))
+  }, [completedCount, trashItems, activity.id])
+
+  function clearTrash(trashId: string) {
+    setClearedIds((current) => {
+      if (current.includes(trashId)) return current
+      const nextClearedIds = [...current, trashId]
+      if (nextClearedIds.length >= trashItems.length) {
+        setAnswers((currentAnswers) => ({ ...currentAnswers, [activity.id]: `completed:${nextClearedIds.length}` }))
+        scheduleAutoAdvance(onAutoAdvance, activity.id)
+      }
+      return nextClearedIds
+    })
+  }
+
+  if (!parsedConfig) return null
+
+  return (
+    <div className="activity-playground">
+      <p className="activity-prompt">{prompt}</p>
+      <div
+        style={{
+          position: 'relative',
+          minHeight: '22rem',
+          borderRadius: '1.5rem',
+          padding: '1.25rem',
+          background: 'linear-gradient(180deg, #dcfce7 0%, #bbf7d0 100%)',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span className="subject-pill">{`Đã dọn ${clearedIds.length}/${trashItems.length}`}</span>
+          <span style={{ fontSize: '3.6rem', lineHeight: 1 }} aria-hidden="true">🗑️</span>
+        </div>
+        <div style={{ position: 'relative', minHeight: '15rem', marginTop: '1rem' }}>
+          {trashItems.map((item) =>
+            clearedIds.includes(item.id) ? null : (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => clearTrash(item.id)}
+                className="interactive-option"
+                style={{
+                  position: 'absolute',
+                  left: `${item.left}%`,
+                  top: `${item.top}%`,
+                  width: '3.5rem',
+                  height: '3.5rem',
+                  borderRadius: '1rem',
+                  fontSize: '2rem',
+                  transform: `rotate(${item.rotation}deg)`,
+                  boxShadow: '0 10px 24px rgba(21, 128, 61, 0.18)',
+                }}
+                aria-label="Dọn rác"
+              >
+                {item.icon}
+              </button>
+            ),
+          )}
+        </div>
+      </div>
+      <p className={clearedIds.length >= trashItems.length ? 'feedback-note feedback-note-success' : 'feedback-note'}>
+        {clearedIds.length >= trashItems.length ? 'Em đã dọn sạch màn hình rồi.' : 'Chạm vào từng món rác để đưa vào thùng.'}
+      </p>
+    </div>
+  )
+})
+
 export const AACActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps<StringAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
   const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy chọn thẻ phù hợp.'
   const cards = toStringArray(config.cards)
-  const imageCards = toImageChoiceCardArray(config.image_cards).slice(0, 4)
+  const imageCards = toImageChoiceCardArray(config.image_cards)
   const selectedCard = answers[activity.id] ?? ''
   const selectedImageCard = imageCards.find((card) => card.id === selectedCard) ?? null
 
@@ -1813,6 +2191,7 @@ export const AACActivity = React.memo(({ activity, answers, setAnswers, onAutoAd
               aria-label={card.label}
               onClick={() => {
                 setAnswers((current) => ({ ...current, [activity.id]: card.id }))
+                speakText(card.label)
                 scheduleAutoAdvance(onAutoAdvance, activity.id)
               }}
             >
@@ -1839,6 +2218,7 @@ export const AACActivity = React.memo(({ activity, answers, setAnswers, onAutoAd
             aria-pressed={selectedCard === card}
             onClick={() => {
               setAnswers((current) => ({ ...current, [activity.id]: card }))
+              speakText(card)
               scheduleAutoAdvance(onAutoAdvance, activity.id)
             }}
           >
@@ -1934,6 +2314,10 @@ export const ActivityCard = React.memo(({
         <MemoryMatchActivity activity={activity} answers={answers.dragAnswers} setAnswers={setAnswers.setDragAnswers} onAutoAdvance={onAutoAdvance} />
       ) : activityType === 'quick_tap' ? (
         <QuickTapActivity activity={activity} answers={answers.textAnswers} setAnswers={setAnswers.setTextAnswers} onAutoAdvance={onAutoAdvance} />
+      ) : activityType === 'basket_toss' ? (
+        <BasketTossActivity activity={activity} answers={answers.textAnswers} setAnswers={setAnswers.setTextAnswers} onAutoAdvance={onAutoAdvance} />
+      ) : activityType === 'trash_cleanup' ? (
+        <TrashCleanupActivity activity={activity} answers={answers.textAnswers} setAnswers={setAnswers.setTextAnswers} onAutoAdvance={onAutoAdvance} />
       ) : activityType === 'size_order' ? (
         <SizeOrderActivity activity={activity} answers={answers.dragAnswers} setAnswers={setAnswers.setDragAnswers} onAutoAdvance={onAutoAdvance} />
       ) : activityType === 'habitat_match' ? (
@@ -1943,7 +2327,13 @@ export const ActivityCard = React.memo(({
       ) : activityType === 'drag_drop' ? (
         <DragDropActivity activity={activity} answers={answers.dragAnswers} setAnswers={setAnswers.setDragAnswers} />
       ) : activityType === 'watch_answer' ? (
-        <WatchAnswerActivity activity={activity} answers={answers.textAnswers} setAnswers={setAnswers.setTextAnswers} presentationMode={presentationMode} />
+        <WatchAnswerActivity
+          activity={activity}
+          answers={answers.textAnswers}
+          setAnswers={setAnswers.setTextAnswers}
+          presentationMode={presentationMode}
+          onAutoAdvance={onAutoAdvance}
+        />
       ) : activityType === 'hidden_image_guess' ? (
         <HiddenImageGuessActivity activity={activity} answers={answers.textAnswers} setAnswers={setAnswers.setTextAnswers} presentationMode={presentationMode} />
       ) : activityType === 'step_by_step' ? (

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="32" fill="#fffcef"/>
+  <g fill="#d1b56a">
+    <circle cx="88" cy="118" r="22"/>
+    <circle cx="118" cy="132" r="22"/>
+    <circle cx="148" cy="118" r="22"/>
+    <circle cx="104" cy="154" r="22"/>
+    <circle cx="134" cy="154" r="22"/>
+  </g>
+  <path d="M120 72c-8 10-10 20-10 32" fill="none" stroke="#3e9b52" stroke-width="8" stroke-linecap="round"/>
+  <text x="120" y="214" text-anchor="middle" font-size="24" font-family="Segoe UI, Arial" font-weight="700" fill="#17324d">Nhãn</text>
+</svg>

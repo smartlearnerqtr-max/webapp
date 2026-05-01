@@ -5,9 +5,21 @@ from datetime import date
 from flask import request
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
 
 from ....extensions import db
-from ....models import ParentDailyReport, ParentProfile, ParentStudentLink, StudentLessonProgress, StudentProfile, TeacherParentStudentLink, TeacherProfile, User
+from ....models import (
+    Classroom,
+    LessonAssignment,
+    ParentDailyReport,
+    ParentProfile,
+    ParentStudentLink,
+    StudentLessonProgress,
+    StudentProfile,
+    TeacherParentStudentLink,
+    TeacherProfile,
+    User,
+)
 from ....services.logger import log_server_event
 from ....services.realtime_service import publish_realtime_event
 from ....services.relationship_service import (
@@ -27,19 +39,19 @@ def _current_user() -> User | None:
 
 def _require_teacher_user():
     if get_jwt().get('role') != 'teacher':
-        return None, error_response('Khong co quyen truy cap', 'AUTH_FORBIDDEN', 403)
+        return None, error_response('Không có quyền truy cập', 'AUTH_FORBIDDEN', 403)
     user = _current_user()
     if not user or not user.teacher_profile:
-        return None, error_response('Khong tim thay giao vien', 'TEACHER_NOT_FOUND', 404)
+        return None, error_response('Không tìm thấy giáo viên', 'TEACHER_NOT_FOUND', 404)
     return user, None
 
 
 def _require_parent_user():
     if get_jwt().get('role') != 'parent':
-        return None, error_response('Khong co quyen truy cap', 'AUTH_FORBIDDEN', 403)
+        return None, error_response('Không có quyền truy cập', 'AUTH_FORBIDDEN', 403)
     user = _current_user()
     if not user or not user.parent_profile:
-        return None, error_response('Khong tim thay phu huynh', 'PARENT_NOT_FOUND', 404)
+        return None, error_response('Không tìm thấy phụ huynh', 'PARENT_NOT_FOUND', 404)
     return user, None
 
 
@@ -105,6 +117,52 @@ def _build_progress_summary(student_id: int) -> dict[str, object]:
     }
 
 
+def _build_parent_assignment_item(progress: StudentLessonProgress, student_level: str | None) -> dict[str, object]:
+    assignment = progress.assignment
+    lesson = assignment.lesson if assignment else None
+    classroom = assignment.classroom if assignment else None
+    teacher = classroom.teacher if classroom and classroom.teacher else None
+    readiness = _build_readiness_snapshot(progress)
+    lesson_level = ((lesson.primary_level if lesson else '') or '').strip()
+    normalized_student_level = (student_level or '').strip()
+
+    return {
+        'progress_id': progress.id,
+        'status': progress.status,
+        'progress_percent': progress.progress_percent,
+        'completed_at': progress.completed_at.isoformat() if progress.completed_at else None,
+        'readiness_status': readiness['readiness_status'],
+        'help_count': progress.help_count,
+        'retry_count': progress.retry_count,
+        'completion_score': progress.completion_score,
+        'level_match': not normalized_student_level or not lesson_level or lesson_level == normalized_student_level,
+        'assignment': assignment.to_dict() if assignment else None,
+        'teacher': _build_teacher_payload(teacher) if teacher else None,
+    }
+
+
+def _build_parent_assignment_list(student: StudentProfile) -> list[dict[str, object]]:
+    progresses = (
+        StudentLessonProgress.query.options(
+            joinedload(StudentLessonProgress.assignment).joinedload(LessonAssignment.lesson),
+            joinedload(StudentLessonProgress.assignment).joinedload(LessonAssignment.subject),
+            joinedload(StudentLessonProgress.assignment).joinedload(LessonAssignment.classroom).joinedload(Classroom.teacher),
+        )
+        .filter_by(student_id=student.id)
+        .all()
+    )
+
+    sorted_progresses = sorted(
+        progresses,
+        key=lambda item: (
+            0 if item.status == 'in_progress' else 1 if item.status == 'not_started' else 2,
+            item.assignment.due_at.isoformat() if item.assignment and item.assignment.due_at else '9999-12-31T23:59:59',
+            -int(item.updated_at.timestamp()) if item.updated_at else 0,
+        ),
+    )
+    return [_build_parent_assignment_item(progress, student.disability_level) for progress in sorted_progresses[:8]]
+
+
 def _build_report_payload(report: ParentDailyReport) -> dict[str, object]:
     return {
         **report.to_dict(),
@@ -118,7 +176,7 @@ def _recommendation_for_status(status: str) -> str:
     if status == 'can_ho_tro_them':
         return 'Nen trao doi them voi giao vien de bo sung ho tro va on lai bai cho con.'
     if status == 'san_sang_nang_do_kho':
-        return 'Con dang hoc tot. Gia dinh co the dong vien de con thu them bai nang hon.'
+        return 'Con đang học tốt. Gia đình có thể động viên để con thử thêm bài nặng hơn.'
     return 'Con dang theo kip tien do hien tai. Gia dinh tiep tuc nhac con hoc deu moi ngay.'
 
 
@@ -253,7 +311,7 @@ def list_student_parents(student_id: int):
 
     student = StudentProfile.query.get(student_id)
     if not teacher_has_student_access(user.teacher_profile.id, student):
-        return error_response('Khong tim thay hoc sinh', 'STUDENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy học sinh', 'STUDENT_NOT_FOUND', 404)
 
     sync_legacy_teacher_parent_links(user.teacher_profile.id)
     db.session.commit()
@@ -280,16 +338,16 @@ def link_parent_to_student(student_id: int):
 
     student = StudentProfile.query.get(student_id)
     if not teacher_has_student_access(user.teacher_profile.id, student):
-        return error_response('Khong tim thay hoc sinh', 'STUDENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy học sinh', 'STUDENT_NOT_FOUND', 404)
 
     payload = request.get_json(silent=True) or {}
     parent_id = payload.get('parent_id')
     if not parent_id:
-        return error_response('Can parent_id cua tai khoan phu huynh da dang ky', 'VALIDATION_ERROR', 422)
+        return error_response('Cần parent_id của tài khoản phụ huynh đã đăng ký', 'VALIDATION_ERROR', 422)
 
     parent_profile = ParentProfile.query.get(int(parent_id))
     if not parent_profile:
-        return error_response('Khong tim thay phu huynh', 'PARENT_NOT_FOUND', 404)
+        return error_response('Không tìm thấy phụ huynh', 'PARENT_NOT_FOUND', 404)
 
     ensure_parent_student_link(parent_profile.id, student.id)
     link, _created = ensure_teacher_parent_student_link(user.teacher_profile.id, parent_profile.id, student.id, source='teacher_linked_parent')
@@ -297,7 +355,7 @@ def link_parent_to_student(student_id: int):
     publish_realtime_event(
         'parent_group_updated',
         f'Phu huynh {parent_profile.full_name} vua duoc lien ket voi hoc sinh {student.full_name}.',
-        title='Cap nhat phu huynh',
+        title='Cập nhật phụ huynh',
         recipient_user_ids=[uid for uid in [user.id, parent_profile.user_id] if uid],
         payload={'student_id': student.id, 'student_name': student.full_name, 'parent_id': parent_profile.id, 'parent_name': parent_profile.full_name, 'link_id': link.id},
     )
@@ -308,7 +366,7 @@ def link_parent_to_student(student_id: int):
         'link_id': link.id,
         'student': student.to_dict(),
         'parent': _build_parent_payload(parent_profile),
-    }, 'Lien ket phu huynh thanh cong', 201)
+    }, 'Liên kết phụ huynh thành công', 201)
 
 
 @api_v1.get('/teacher/reports')
@@ -346,7 +404,7 @@ def send_daily_reports():
         query = query.filter_by(student_id=int(student_id))
     links = query.all()
     if not links:
-        return error_response('Chua co phu huynh nao duoc lien ket de gui bao cao', 'PARENT_GROUP_EMPTY', 422)
+        return error_response('Chưa có phụ huynh nào được liên kết để gửi báo cáo', 'PARENT_GROUP_EMPTY', 422)
 
     reports: list[ParentDailyReport] = []
     for link in links:
@@ -419,7 +477,7 @@ def send_daily_reports():
         user_id=user.id,
         metadata={'report_count': len(reports), 'student_id': student_id},
     )
-    return success_response([_build_report_payload(report) for report in reports], 'Gui bao cao cho phu huynh thanh cong', 201)
+    return success_response([_build_report_payload(report) for report in reports], 'Gửi báo cáo cho phụ huynh thành công', 201)
 
 
 @api_v1.get('/parent/my-children')
@@ -448,6 +506,7 @@ def get_my_children():
             'classes': active_classes,
             'teachers': list(teacher_map.values()),
             'progress_summary': _build_progress_summary(link.student.id),
+            'assignments': _build_parent_assignment_list(link.student),
         })
 
     return success_response(children)
@@ -461,11 +520,11 @@ def get_teacher_for_parent(teacher_id: int):
         return error
 
     if not _parent_can_view_teacher(parent_id=user.parent_profile.id, teacher_id=teacher_id):
-        return error_response('Khong tim thay giao vien', 'TEACHER_NOT_FOUND', 404)
+        return error_response('Không tìm thấy giáo viên', 'TEACHER_NOT_FOUND', 404)
 
     teacher = TeacherProfile.query.get(teacher_id)
     if not teacher:
-        return error_response('Khong tim thay giao vien', 'TEACHER_NOT_FOUND', 404)
+        return error_response('Không tìm thấy giáo viên', 'TEACHER_NOT_FOUND', 404)
     return success_response(_build_teacher_payload(teacher))
 
 

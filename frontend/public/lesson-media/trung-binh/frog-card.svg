@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="32" fill="#eefaf0"/>
+  <ellipse cx="120" cy="132" rx="82" ry="66" fill="#63b95b"/>
+  <circle cx="84" cy="78" r="24" fill="#7ecf74"/>
+  <circle cx="156" cy="78" r="24" fill="#7ecf74"/>
+  <circle cx="84" cy="78" r="12" fill="#fff"/>
+  <circle cx="156" cy="78" r="12" fill="#fff"/>
+  <circle cx="86" cy="80" r="5" fill="#17324d"/>
+  <circle cx="154" cy="80" r="5" fill="#17324d"/>
+  <ellipse cx="120" cy="144" rx="44" ry="28" fill="#8fe081"/>
+  <path d="M88 166c14 12 50 12 64 0" fill="none" stroke="#17324d" stroke-width="6" stroke-linecap="round"/>
+  <text x="120" y="214" text-anchor="middle" font-size="26" font-family="Segoe UI, Arial" font-weight="700" fill="#17324d">Ếch</text>
+</svg>

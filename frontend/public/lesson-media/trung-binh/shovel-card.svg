@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="32" fill="#f7f2eb"/>
+  <rect x="112" y="38" width="14" height="118" rx="7" fill="#8b5a2b"/>
+  <path d="M84 152c0-24 16-44 36-44s36 20 36 44c0 24-16 40-36 40s-36-16-36-40z" fill="#b8c4d3" stroke="#17324d" stroke-width="6"/>
+  <text x="120" y="214" text-anchor="middle" font-size="24" font-family="Segoe UI, Arial" font-weight="700" fill="#17324d">Xẻng</text>
+</svg>

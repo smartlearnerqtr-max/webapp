@@ -76,7 +76,7 @@ def _register_blueprints(app: Flask) -> None:
 def _register_error_handlers(app: Flask) -> None:
     @app.errorhandler(404)
     def handle_404(_error):
-        return error_response('Khong tim thay tai nguyen', 'NOT_FOUND', 404)
+        return error_response('Không tìm thấy tài nguyên', 'NOT_FOUND', 404)
 
     @app.errorhandler(Exception)
     def handle_exception(error: Exception):
@@ -108,7 +108,7 @@ def _register_cli_commands(app: Flask) -> None:
         admin_user = seed_admin_user()
         print(f'Seeded subjects: {subjects_created}')
         print(f'Bootstrap admin: {admin_user.email}')
-        print('Mat khau admin lay tu ADMIN_PASSWORD hoac mac dinh admin123456')
+        print('Mật khẩu admin lấy từ ADMIN_PASSWORD hoặc mặc định admin123456')
 
     @app.cli.command('seed-test-scenario')
     def seed_test_scenario_command() -> None:

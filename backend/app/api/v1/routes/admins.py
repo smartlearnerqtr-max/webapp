@@ -12,10 +12,10 @@ from .. import api_v1
 
 def _require_admin_user():
     if get_jwt().get('role') != 'admin':
-        return None, error_response('Khong co quyen truy cap', 'AUTH_FORBIDDEN', 403)
+        return None, error_response('Không có quyền truy cập', 'AUTH_FORBIDDEN', 403)
     user = User.query.get(get_jwt_identity())
     if not user or user.role != 'admin':
-        return None, error_response('Khong tim thay admin', 'ADMIN_NOT_FOUND', 404)
+        return None, error_response('Không tìm thấy admin', 'ADMIN_NOT_FOUND', 404)
     return user, None
 
 
@@ -108,7 +108,7 @@ def create_teacher():
     payload = request.get_json(silent=True) or {}
     created_payload, error_message, error_code = create_teacher_user(payload)
     if error_message or not created_payload:
-        return error_response(error_message or 'Khong tao duoc tai khoan giao vien', error_code or 'VALIDATION_ERROR', 422 if error_code == 'VALIDATION_ERROR' else 409)
+        return error_response(error_message or 'Không tạo được tài khoản giáo viên', error_code or 'VALIDATION_ERROR', 422 if error_code == 'VALIDATION_ERROR' else 409)
 
     log_server_event(level='info', module='admin', message='Admin tao tai khoan giao vien', action_name='admin_create_teacher', user_id=user.id, metadata={'teacher_user_id': created_payload['user']['id']})
-    return success_response(created_payload, 'Tao tai khoan giao vien thanh cong', 201)
+    return success_response(created_payload, 'Tạo tài khoản giáo viên thành công', 201)

@@ -18,10 +18,10 @@ MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 
 def _require_teacher_user():
     if get_jwt().get('role') != 'teacher':
-        return None, error_response('Khong co quyen truy cap', 'AUTH_FORBIDDEN', 403)
+        return None, error_response('Không có quyền truy cập', 'AUTH_FORBIDDEN', 403)
     user = User.query.get(get_jwt_identity())
     if not user or not user.teacher_profile:
-        return None, error_response('Khong tim thay giao vien', 'TEACHER_NOT_FOUND', 404)
+        return None, error_response('Không tìm thấy giáo viên', 'TEACHER_NOT_FOUND', 404)
     return user, None
 
 
@@ -40,7 +40,7 @@ def upload_media():
 
     upload = request.files.get('file')
     if not upload or not upload.filename:
-        return error_response('Chua chon file de tai len', 'FILE_REQUIRED', 422)
+        return error_response('Chưa chọn file để tải lên', 'FILE_REQUIRED', 422)
 
     if request.content_length and request.content_length > MAX_UPLOAD_BYTES:
         return error_response('File vuot qua gioi han 50MB', 'FILE_TOO_LARGE', 413)
@@ -71,7 +71,7 @@ def upload_media():
             'original_name': original_name,
             'media_kind': media_kind,
         },
-        'Tai file len thanh cong',
+        'Tải file lên thành công',
         201,
     )
 
@@ -84,9 +84,9 @@ def get_uploaded_media(filename: str):
     try:
         target.relative_to(uploads_root.resolve())
     except ValueError:
-        return error_response('Duong dan file khong hop le', 'INVALID_FILE_PATH', 400)
+        return error_response('Đường dẫn file không hợp lệ', 'INVALID_FILE_PATH', 400)
 
     if not target.exists() or not target.is_file():
-        return error_response('Khong tim thay file media', 'MEDIA_NOT_FOUND', 404)
+        return error_response('Không tìm thấy file media', 'MEDIA_NOT_FOUND', 404)
 
     return send_from_directory(target.parent, target.name)

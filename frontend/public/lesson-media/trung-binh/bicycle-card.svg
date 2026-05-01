@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="32" fill="#f7f9ff"/>
+  <circle cx="74" cy="156" r="34" fill="none" stroke="#17324d" stroke-width="8"/>
+  <circle cx="172" cy="156" r="34" fill="none" stroke="#17324d" stroke-width="8"/>
+  <path d="M74 156l38-50 30 50m-30-50h34m-40 0l-16 28m46 22h26l-20-42" fill="none" stroke="#2f79c4" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M152 92h18m-56 14l14-16" stroke="#17324d" stroke-width="6" stroke-linecap="round"/>
+  <text x="120" y="214" text-anchor="middle" font-size="26" font-family="Segoe UI, Arial" font-weight="700" fill="#17324d">Xe đạp</text>
+</svg>

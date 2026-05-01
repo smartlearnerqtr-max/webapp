@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="32" fill="#fff4f2"/>
+  <path d="M56 142l92-64c16-10 30 8 18 22l-78 90-32-48z" fill="#d9e1ea" stroke="#17324d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="150" y="72" width="42" height="24" rx="10" fill="#b86c42"/>
+  <text x="120" y="214" text-anchor="middle" font-size="24" font-family="Segoe UI, Arial" font-weight="700" fill="#17324d">Dao</text>
+</svg>

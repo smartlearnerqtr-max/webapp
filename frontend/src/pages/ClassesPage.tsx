@@ -336,6 +336,7 @@ export function ClassesPage() {
                 {selectedClass.ui_variant === 'visual_support' && selectedClass.background_image_url ? (
                   <p>Ảnh nền: {selectedClass.background_image_url}</p>
                 ) : null}
+                <p className="helper-text">Lớp chỉ là nơi tham gia chung. Trong cùng một lớp vẫn có thể có học sinh mức nhẹ, trung bình và nặng.</p>
                 <p>Luồng chính: học sinh tự đăng ký tài khoản rồi nhập `ID lớp` và `mật khẩu` để tham gia.</p>
               </div>
             </article>

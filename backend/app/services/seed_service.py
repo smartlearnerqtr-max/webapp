@@ -222,16 +222,16 @@ def seed_visual_support_demo_bundle() -> dict[str, object]:
     lesson = Lesson.query.filter_by(
         created_by_teacher_id=teacher_profile.id,
         subject_id=subject.id,
-        title='Nhận biết con vật qua hình ảnh và video',
+        title='Trò chơi động vật: ghi nhớ và phản xạ',
     ).first()
     if not lesson:
         lesson = Lesson(
             created_by_teacher_id=teacher_profile.id,
             subject_id=subject.id,
-            title='Nhận biết con vật qua hình ảnh và video',
-            description='Bài học demo gồm clip ngắn, chọn ảnh, ghép hình và trả lời bằng giọng nói.',
+            title='Trò chơi động vật: ghi nhớ và phản xạ',
+            description='Lesson demo chỉ giữ 2 hoạt động game cho mức nhẹ: lật thẻ ghi nhớ và chạm nhanh phản xạ.',
             primary_level='nhe',
-            estimated_minutes=15,
+            estimated_minutes=8,
             difficulty_stage=1,
             is_published=True,
             is_archived=False,
@@ -239,9 +239,10 @@ def seed_visual_support_demo_bundle() -> dict[str, object]:
         db.session.add(lesson)
         db.session.flush()
     else:
-        lesson.description = 'Bài học demo gồm clip ngắn, chọn ảnh, ghép hình và trả lời bằng giọng nói.'
+        lesson.title = 'Trò chơi động vật: ghi nhớ và phản xạ'
+        lesson.description = 'Lesson demo chỉ giữ 2 hoạt động game cho mức nhẹ: lật thẻ ghi nhớ và chạm nhanh phản xạ.'
         lesson.primary_level = 'nhe'
-        lesson.estimated_minutes = 15
+        lesson.estimated_minutes = 8
         lesson.difficulty_stage = 1
         lesson.is_published = True
         lesson.is_archived = False
@@ -415,6 +416,49 @@ def seed_visual_support_demo_bundle() -> dict[str, object]:
                 'overlay_cols': 4,
                 'expected_answer': 'con gấu',
                 'accepted_answers': ['gấu', 'con gấu', 'gau', 'con gau'],
+            },
+        },
+    ]
+
+    activities = [
+        {
+            'sort_order': 1,
+            'title': 'Lật thẻ ghi nhớ',
+            'activity_type': 'memory_match',
+            'instruction_text': 'Lật 2 thẻ giống nhau để ghi điểm.',
+            'voice_answer_enabled': False,
+            'config': {
+                'kind': 'memory_match',
+                'prompt': 'Lật 2 thẻ giống nhau để ghi điểm.',
+                'pair_count': 5,
+                'image_cards': [
+                    {'id': 'dog', 'label': 'Con chó', 'media_url': '/demo-media/concho.jpg', 'media_kind': 'image'},
+                    {'id': 'cat', 'label': 'Con mèo', 'media_url': '/demo-media/conmeo.jpg', 'media_kind': 'image'},
+                    {'id': 'fish', 'label': 'Con cá', 'media_url': '/demo-media/conca.jpg', 'media_kind': 'image'},
+                    {'id': 'tiger', 'label': 'Con hổ', 'media_url': '/demo-media/conho.webp', 'media_kind': 'image'},
+                    {'id': 'rabbit', 'label': 'Con thỏ', 'media_url': '/demo-media/contho.png', 'media_kind': 'image'},
+                ],
+            },
+        },
+        {
+            'sort_order': 2,
+            'title': 'Chạm nhanh phản xạ',
+            'activity_type': 'quick_tap',
+            'instruction_text': 'Chạm nhanh vào các thẻ con vật trước khi hết giờ.',
+            'voice_answer_enabled': False,
+            'config': {
+                'kind': 'quick_tap',
+                'prompt': 'Chạm nhanh vào các thẻ con vật trước khi hết giờ.',
+                'duration_seconds': 10,
+                'target_hits': 6,
+                'simultaneous_cards': 4,
+                'image_cards': [
+                    {'id': 'dog', 'label': 'Con chó', 'media_url': '/demo-media/concho.jpg', 'media_kind': 'image'},
+                    {'id': 'cat', 'label': 'Con mèo', 'media_url': '/demo-media/conmeo.jpg', 'media_kind': 'image'},
+                    {'id': 'fish', 'label': 'Con cá', 'media_url': '/demo-media/conca.jpg', 'media_kind': 'image'},
+                    {'id': 'tiger', 'label': 'Con hổ', 'media_url': '/demo-media/conho.webp', 'media_kind': 'image'},
+                    {'id': 'rabbit', 'label': 'Con thỏ', 'media_url': '/demo-media/contho.png', 'media_kind': 'image'},
+                ],
             },
         },
     ]

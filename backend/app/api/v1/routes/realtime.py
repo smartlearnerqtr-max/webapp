@@ -21,18 +21,18 @@ MAX_EVENTS_PER_BATCH = 30
 def _resolve_stream_user() -> tuple[dict[str, object] | None, object | None]:
     access_token = (request.args.get('access_token') or '').strip()
     if not access_token:
-        return None, error_response('Can access_token de ket noi realtime', 'AUTH_TOKEN_REQUIRED', 401)
+        return None, error_response('Cần access_token để kết nối realtime', 'AUTH_TOKEN_REQUIRED', 401)
 
     try:
         decoded = decode_token(access_token)
         user_id = int(decoded.get('sub'))
         role = str(decoded.get('role') or '')
     except Exception:
-        return None, error_response('Token realtime khong hop le', 'AUTH_INVALID_TOKEN', 401)
+        return None, error_response('Token realtime không hợp lệ', 'AUTH_INVALID_TOKEN', 401)
 
     user = User.query.get(user_id)
     if not user or user.status != 'active':
-        return None, error_response('Khong tim thay nguoi dung hop le', 'USER_NOT_FOUND', 404)
+        return None, error_response('Không tìm thấy người dùng hợp lệ', 'USER_NOT_FOUND', 404)
 
     return {'id': user.id, 'role': role or user.role}, None
 

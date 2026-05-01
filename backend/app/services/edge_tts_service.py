@@ -14,7 +14,7 @@ async def _synthesize_mp3_async(*, text: str, voice_name: str, rate: str, pitch:
     try:
         import edge_tts
     except ImportError as exc:
-        raise EdgeTTSServiceError('Chua cai edge-tts tren backend', 500) from exc
+        raise EdgeTTSServiceError('Chưa cài edge-tts trên backend', 500) from exc
 
     audio_chunks: list[bytes] = []
     communicate = edge_tts.Communicate(text=text, voice=voice_name, rate=rate, pitch=pitch)
@@ -23,7 +23,7 @@ async def _synthesize_mp3_async(*, text: str, voice_name: str, rate: str, pitch:
             audio_chunks.append(chunk['data'])
 
     if not audio_chunks:
-        raise EdgeTTSServiceError('Khong tao duoc audio tieng Viet', 502)
+        raise EdgeTTSServiceError('Không tạo được audio tiếng Việt', 502)
 
     return b''.join(audio_chunks)
 
@@ -31,7 +31,7 @@ async def _synthesize_mp3_async(*, text: str, voice_name: str, rate: str, pitch:
 def synthesize_vietnamese_mp3(*, text: str, voice_name: str, rate: str = '-12%', pitch: str = '+0Hz') -> bytes:
     clean_text = ' '.join(text.strip().split())
     if not clean_text:
-        raise EdgeTTSServiceError('Noi dung doc khong duoc de trong', 422)
+        raise EdgeTTSServiceError('Nội dung đọc không được để trống', 422)
     if len(clean_text) > 1200:
         clean_text = clean_text[:1200].rsplit(' ', 1)[0].strip() or clean_text[:1200]
 
@@ -47,4 +47,4 @@ def synthesize_vietnamese_mp3(*, text: str, voice_name: str, rate: str = '-12%',
     except EdgeTTSServiceError:
         raise
     except Exception as exc:
-        raise EdgeTTSServiceError('Tao audio tieng Viet that bai', 502) from exc
+        raise EdgeTTSServiceError('Tạo audio tiếng Việt thất bại', 502) from exc
