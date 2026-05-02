@@ -8,17 +8,43 @@ import { useAuthStore } from './store/authStore'
 import { prefetchRouteData } from './utils/routePrefetch'
 import { getDefaultRouteForRole } from './utils/roleRoutes'
 
-const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })))
-const AdminPage = lazy(() => import('./pages/AdminPage').then((module) => ({ default: module.AdminPage })))
-const TeacherHomePage = lazy(() => import('./pages/TeacherHomePage').then((module) => ({ default: module.TeacherHomePage })))
-const StudentHomePage = lazy(() => import('./pages/StudentHomePage').then((module) => ({ default: module.StudentHomePage })))
-const StudentsPage = lazy(() => import('./pages/StudentsPage').then((module) => ({ default: module.StudentsPage })))
-const ClassesPage = lazy(() => import('./pages/ClassesPage').then((module) => ({ default: module.ClassesPage })))
-const LessonsPage = lazy(() => import('./pages/LessonsPage').then((module) => ({ default: module.LessonsPage })))
-const AssignmentsPage = lazy(() => import('./pages/AssignmentsPage').then((module) => ({ default: module.AssignmentsPage })))
-const ProgressPage = lazy(() => import('./pages/ProgressPage').then((module) => ({ default: module.ProgressPage })))
-const ParentPage = lazy(() => import('./pages/ParentPage').then((module) => ({ default: module.ParentPage })))
-const AISettingsPage = lazy(() => import('./pages/AISettingsPage').then((module) => ({ default: module.AISettingsPage })))
+const loadHomePage = () => import('./pages/HomePage')
+const loadAdminPage = () => import('./pages/AdminPage')
+const loadTeacherHomePage = () => import('./pages/TeacherHomePage')
+const loadStudentHomePage = () => import('./pages/StudentHomePage')
+const loadStudentsPage = () => import('./pages/StudentsPage')
+const loadClassesPage = () => import('./pages/ClassesPage')
+const loadLessonsPage = () => import('./pages/LessonsPage')
+const loadAssignmentsPage = () => import('./pages/AssignmentsPage')
+const loadProgressPage = () => import('./pages/ProgressPage')
+const loadParentPage = () => import('./pages/ParentPage')
+const loadAISettingsPage = () => import('./pages/AISettingsPage')
+
+const HomePage = lazy(() => loadHomePage().then((module) => ({ default: module.HomePage })))
+const AdminPage = lazy(() => loadAdminPage().then((module) => ({ default: module.AdminPage })))
+const TeacherHomePage = lazy(() => loadTeacherHomePage().then((module) => ({ default: module.TeacherHomePage })))
+const StudentHomePage = lazy(() => loadStudentHomePage().then((module) => ({ default: module.StudentHomePage })))
+const StudentsPage = lazy(() => loadStudentsPage().then((module) => ({ default: module.StudentsPage })))
+const ClassesPage = lazy(() => loadClassesPage().then((module) => ({ default: module.ClassesPage })))
+const LessonsPage = lazy(() => loadLessonsPage().then((module) => ({ default: module.LessonsPage })))
+const AssignmentsPage = lazy(() => loadAssignmentsPage().then((module) => ({ default: module.AssignmentsPage })))
+const ProgressPage = lazy(() => loadProgressPage().then((module) => ({ default: module.ProgressPage })))
+const ParentPage = lazy(() => loadParentPage().then((module) => ({ default: module.ParentPage })))
+const AISettingsPage = lazy(() => loadAISettingsPage().then((module) => ({ default: module.AISettingsPage })))
+
+const routeChunkPreloadMap: Record<string, () => Promise<unknown>> = {
+  '/': loadHomePage,
+  '/admin': loadAdminPage,
+  '/giao-vien': loadTeacherHomePage,
+  '/hoc-tap': loadStudentHomePage,
+  '/hoc-sinh': loadStudentsPage,
+  '/lop-hoc': loadClassesPage,
+  '/bai-hoc': loadLessonsPage,
+  '/giao-bai': loadAssignmentsPage,
+  '/tien-do': loadProgressPage,
+  '/phu-huynh': loadParentPage,
+  '/cai-dat-ai': loadAISettingsPage,
+}
 
 const navItemsByRole: Record<string, Array<{ to: string; label: string; matchTab?: string }>> = {
   admin: [
@@ -71,11 +97,6 @@ function App() {
     hydrate()
   }, [hydrate])
 
-  useEffect(() => {
-    if (!user || !accessToken) return
-    void prefetchRouteData(queryClient, getDefaultRouteForRole(user.role), accessToken)
-  }, [accessToken, queryClient, user])
-
   const navItems = useMemo(() => {
     if (!user) {
       return [{ to: '/', label: 'Đăng nhập / đăng ký' }]
@@ -98,8 +119,13 @@ function App() {
   }
 
   function handleNavPrefetch(targetRoute: string) {
-    if (!user || !accessToken) return
-    void prefetchRouteData(queryClient, targetRoute, accessToken)
+    const [routePath] = targetRoute.split('?')
+    const preloadChunk = routeChunkPreloadMap[routePath]
+    if (preloadChunk) {
+      void preloadChunk()
+    }
+    if (!user || !accessToken || routePath === location.pathname) return
+    void prefetchRouteData(queryClient, routePath, accessToken)
   }
 
   function isNavItemActive(targetRoute: string, matchTab?: string) {
