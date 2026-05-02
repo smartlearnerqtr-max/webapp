@@ -1,23 +1,24 @@
 import './App.css'
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useIsFetching, useIsMutating, useQueryClient } from '@tanstack/react-query'
 
 import { RealtimeBridge } from './components/RealtimeBridge'
-import { AdminPage } from './pages/AdminPage'
-import { AISettingsPage } from './pages/AISettingsPage'
-import { AssignmentsPage } from './pages/AssignmentsPage'
-import { ClassesPage } from './pages/ClassesPage'
-import { HomePage } from './pages/HomePage'
-import { LessonsPage } from './pages/LessonsPage'
-import { ParentPage } from './pages/ParentPage'
-import { ProgressPage } from './pages/ProgressPage'
-import { StudentHomePage } from './pages/StudentHomePage'
-import { StudentsPage } from './pages/StudentsPage'
-import { TeacherHomePage } from './pages/TeacherHomePage'
 import { useAuthStore } from './store/authStore'
 import { prefetchRouteData } from './utils/routePrefetch'
 import { getDefaultRouteForRole } from './utils/roleRoutes'
+
+const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })))
+const AdminPage = lazy(() => import('./pages/AdminPage').then((module) => ({ default: module.AdminPage })))
+const TeacherHomePage = lazy(() => import('./pages/TeacherHomePage').then((module) => ({ default: module.TeacherHomePage })))
+const StudentHomePage = lazy(() => import('./pages/StudentHomePage').then((module) => ({ default: module.StudentHomePage })))
+const StudentsPage = lazy(() => import('./pages/StudentsPage').then((module) => ({ default: module.StudentsPage })))
+const ClassesPage = lazy(() => import('./pages/ClassesPage').then((module) => ({ default: module.ClassesPage })))
+const LessonsPage = lazy(() => import('./pages/LessonsPage').then((module) => ({ default: module.LessonsPage })))
+const AssignmentsPage = lazy(() => import('./pages/AssignmentsPage').then((module) => ({ default: module.AssignmentsPage })))
+const ProgressPage = lazy(() => import('./pages/ProgressPage').then((module) => ({ default: module.ProgressPage })))
+const ParentPage = lazy(() => import('./pages/ParentPage').then((module) => ({ default: module.ParentPage })))
+const AISettingsPage = lazy(() => import('./pages/AISettingsPage').then((module) => ({ default: module.AISettingsPage })))
 
 const navItemsByRole: Record<string, Array<{ to: string; label: string; matchTab?: string }>> = {
   admin: [
@@ -109,6 +110,8 @@ function App() {
     return currentTab === matchTab
   }
 
+  const routeFallback = <div className="helper-text">Đang tải trang...</div>
+
   return (
     <div className={`app-shell ${isTeacherRole ? 'app-shell-teacher' : ''}`}>
       {isLoading && <div className="global-loading-bar" />}
@@ -169,20 +172,22 @@ function App() {
 
       <main className={`content ${isTeacherRole ? 'content-teacher' : ''}`}>
         <RealtimeBridge isNotificationPanelOpen={isMenuOpen} onUnreadCountChange={setUnreadNotificationCount} />
-        <Routes>
-          <Route path="/" element={user ? <Navigate to={getDefaultRouteForRole(user.role)} replace /> : <HomePage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/giao-vien" element={<TeacherHomePage />} />
-          <Route path="/hoc-tap" element={<StudentHomePage />} />
-          <Route path="/hoc-sinh" element={<StudentsPage />} />
-          <Route path="/lop-hoc" element={<ClassesPage />} />
-          <Route path="/bai-hoc" element={<LessonsPage />} />
-          <Route path="/giao-bai" element={<AssignmentsPage />} />
-          <Route path="/tien-do" element={<ProgressPage />} />
-          <Route path="/phu-huynh" element={<ParentPage />} />
-          <Route path="/cai-dat-ai" element={<AISettingsPage />} />
-          <Route path="*" element={<Navigate to={user ? getDefaultRouteForRole(user.role) : '/'} replace />} />
-        </Routes>
+        <Suspense fallback={routeFallback}>
+          <Routes>
+            <Route path="/" element={user ? <Navigate to={getDefaultRouteForRole(user.role)} replace /> : <HomePage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/giao-vien" element={<TeacherHomePage />} />
+            <Route path="/hoc-tap" element={<StudentHomePage />} />
+            <Route path="/hoc-sinh" element={<StudentsPage />} />
+            <Route path="/lop-hoc" element={<ClassesPage />} />
+            <Route path="/bai-hoc" element={<LessonsPage />} />
+            <Route path="/giao-bai" element={<AssignmentsPage />} />
+            <Route path="/tien-do" element={<ProgressPage />} />
+            <Route path="/phu-huynh" element={<ParentPage />} />
+            <Route path="/cai-dat-ai" element={<AISettingsPage />} />
+            <Route path="*" element={<Navigate to={user ? getDefaultRouteForRole(user.role) : '/'} replace />} />
+          </Routes>
+        </Suspense>
       </main>
     </div>
   )
