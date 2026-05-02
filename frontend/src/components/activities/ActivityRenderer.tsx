@@ -2293,19 +2293,21 @@ export const AIChatActivity = React.memo(({ activity, answers, setAnswers }: Act
   )
 })
 
+export type ActivityCardProps = {
+  activity: LessonActivityItem
+  answers: ActivityAnswerBucket
+  setAnswers: ActivityAnswerSetterBucket
+  presentationMode?: ActivityPresentationMode
+  onAutoAdvance?: (activityId: number) => void
+}
+
 export const ActivityCard = React.memo(({
   activity,
   answers,
   setAnswers,
   presentationMode = 'standard',
   onAutoAdvance,
-}: {
-  activity: LessonActivityItem
-  answers: ActivityAnswerBucket
-  setAnswers: ActivityAnswerSetterBucket
-  presentationMode?: ActivityPresentationMode
-  onAutoAdvance?: (activityId: number) => void
-}) => {
+}: ActivityCardProps) => {
   const activityType = activity.activity_type as ActivityType
 
   return (
