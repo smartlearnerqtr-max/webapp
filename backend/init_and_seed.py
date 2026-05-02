@@ -63,17 +63,24 @@ def _maybe_sync_deploy_snapshot() -> None:
 
     source_url = os.getenv("DEPLOY_SNAPSHOT_SOURCE_URL", DEFAULT_SOURCE_URL).strip() or DEFAULT_SOURCE_URL
     target_url = (os.getenv("DATABASE_URL") or "").strip()
+    fail_hard = _bool_env("SYNC_DEPLOY_SNAPSHOT_REQUIRED", False)
 
     if not target_url:
         print("SYNC_DEPLOY_SNAPSHOT is enabled but DATABASE_URL is missing. Skipping snapshot sync.")
         return
 
-    print("SYNC_DEPLOY_SNAPSHOT is enabled. Copying local snapshot into deploy database...")
-    copied_counts = sync_databases(source_url, target_url)
-    total_rows = sum(row_count for _, row_count in copied_counts)
-    print(f"Snapshot sync completed. Total rows copied: {total_rows}")
-    for table_name, row_count in copied_counts:
-        print(f"  - {table_name}: {row_count} row(s)")
+    try:
+        print("SYNC_DEPLOY_SNAPSHOT is enabled. Copying local snapshot into deploy database...")
+        copied_counts = sync_databases(source_url, target_url)
+        total_rows = sum(row_count for _, row_count in copied_counts)
+        print(f"Snapshot sync completed. Total rows copied: {total_rows}")
+        for table_name, row_count in copied_counts:
+            print(f"  - {table_name}: {row_count} row(s)")
+    except Exception as error:
+        print(f"Snapshot sync failed: {error}")
+        if fail_hard:
+            raise
+        print("Continuing startup without deploy snapshot because SYNC_DEPLOY_SNAPSHOT_REQUIRED is false.")
 
 
 def run_init_and_seed() -> None:
