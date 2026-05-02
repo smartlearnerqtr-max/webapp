@@ -109,6 +109,8 @@ const activityIconMap: Record<string, string> = {
 }
 
 
+void activityIconMap
+
 type StudentPanelKey = 'learning' | 'ai' | 'communication' | 'settings'
 
 type StudentEntryLevelKey = 'nang' | 'trung_binh' | 'nhe'
@@ -2526,7 +2528,13 @@ export function StudentHomePage() {
                 </div>
               ) : null}
               <div className="student-visual-step-head">
-                <span className="student-visual-step-badge">#{boundedActiveActivityIndex + 1}</span>
+                <div className="student-visual-step-head-main">
+                  <span className="student-visual-step-badge">#{boundedActiveActivityIndex + 1}</span>
+                  <div className="student-visual-step-head-copy">
+                    <h4>{currentActivity.title}</h4>
+                    {!shouldHideCurrentActivityCaption && currentActivityCaption ? <p>{currentActivityCaption}</p> : null}
+                  </div>
+                </div>
                 <div className="student-visual-step-head-actions">
                   <button
                     type="button"
@@ -2540,14 +2548,6 @@ export function StudentHomePage() {
                   <span className={currentActivityCompleted ? 'student-visual-step-state student-visual-step-state-complete' : 'student-visual-step-state'}>
                     {currentActivityCompleted ? 'Xong' : 'Đang làm'}
                   </span>
-                </div>
-              </div>
-
-              <div className="student-visual-step-intro">
-                <span className="student-visual-step-icon">{cleanActivityIconMap[currentActivity.activity_type] ?? activityIconMap[currentActivity.activity_type] ?? '.'}</span>
-                <div>
-                  <h4>{currentActivity.title}</h4>
-                  {!shouldHideCurrentActivityCaption && currentActivityCaption ? <p>{currentActivityCaption}</p> : null}
                 </div>
               </div>
 

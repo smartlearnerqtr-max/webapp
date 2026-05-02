@@ -1050,6 +1050,7 @@ export const MultipleChoiceActivity = React.memo(({
   const selectedChoice = answers[activity.id] ?? ''
   const isCorrect = Boolean(selectedChoice) && selectedChoice === correct
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
+  const showChoiceKey = presentationMode === 'immersive_square'
   const optionGridClassName =
     presentationMode === 'immersive_square' && choices.length <= 2
       ? 'activity-option-grid activity-option-grid-two-choice'
@@ -1104,11 +1105,15 @@ export const MultipleChoiceActivity = React.memo(({
       <p className="activity-prompt">{prompt}</p>
       {audioControl}
       <div className={optionGridClassName}>
-        {choices.map((choice) => (
+        {choices.map((choice, choiceIndex) => (
           <button
             key={choice}
             type="button"
-            className={selectedChoice === choice ? 'interactive-option interactive-option-active' : 'interactive-option'}
+            className={
+              selectedChoice === choice
+                ? `interactive-option${showChoiceKey ? ' interactive-option-rich' : ''} interactive-option-active`
+                : `interactive-option${showChoiceKey ? ' interactive-option-rich' : ''}`
+            }
             aria-pressed={selectedChoice === choice}
             onClick={() => {
               setAnswers((current) => ({ ...current, [activity.id]: choice }))
@@ -1117,7 +1122,16 @@ export const MultipleChoiceActivity = React.memo(({
               }
             }}
           >
-            {choice}
+            {showChoiceKey ? (
+              <>
+                <span className="interactive-option-choice-key" aria-hidden="true">
+                  {String.fromCharCode(65 + (choiceIndex % 26))}
+                </span>
+                <span className="interactive-option-choice-text">{choice}</span>
+              </>
+            ) : (
+              choice
+            )}
           </button>
         ))}
       </div>
