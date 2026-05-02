@@ -7138,7 +7138,8 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 .student-visual-step-card .embedded-media-adaptive iframe,
 .student-visual-step-card .embedded-media-adaptive.embedded-media-immersive-square iframe {
   min-height: 260px;
-  max-height: 38vh;
+  max-height: none;
+  height: auto;
 }
 
 .student-visual-step-card .interactive-option {
@@ -7312,7 +7313,12 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .action-b
 .student-visual-step-card .embedded-media-adaptive iframe,
 .student-visual-step-card .embedded-media-adaptive.embedded-media-immersive-square iframe {
   min-height: 220px;
-  max-height: 34vh;
+  max-height: none;
+  height: auto;
+}
+
+.student-visual-lesson-progress-head .student-visual-progress-label {
+  color: #ffffff;
 }
 
 .student-visual-step-card .checkbox-row {
