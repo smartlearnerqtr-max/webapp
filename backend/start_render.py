@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
@@ -14,6 +15,18 @@ def _bool_env(name: str, default: bool = False) -> bool:
     return raw_value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _normalize_database_url_local(raw_url: str | None) -> str:
+    if not raw_url:
+        base_dir = Path(__file__).resolve().parent
+        candidate = (base_dir / "instance" / "dev.db").resolve().as_posix()
+        return f"sqlite:///{candidate}"
+    if raw_url.startswith("postgres://"):
+        return raw_url.replace("postgres://", "postgresql+psycopg://", 1)
+    if raw_url.startswith("postgresql://") and "+psycopg" not in raw_url:
+        return raw_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return raw_url
+
+
 def _maybe_fallback_to_sqlite() -> None:
     if not _bool_env("RENDER_SQLITE_FALLBACK", True):
         return
@@ -25,9 +38,7 @@ def _maybe_fallback_to_sqlite() -> None:
         print("DATABASE_URL is empty. Falling back to local SQLite snapshot.")
         return
 
-    from app.config import _normalize_database_url
-
-    normalized_database_url = _normalize_database_url(raw_database_url)
+    normalized_database_url = _normalize_database_url_local(raw_database_url)
 
     try:
         engine = create_engine(normalized_database_url, future=True, pool_pre_ping=True)

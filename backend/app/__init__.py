@@ -8,7 +8,7 @@ from sqlalchemy import inspect, text
 from sqlalchemy.exc import OperationalError
 
 from .api.v1 import api_v1
-from .config import get_config
+from .config import _normalize_database_url, get_config
 from .extensions import cors, db, jwt, migrate
 from .services.logger import log_exception
 from .services.seed_service import seed_admin_user, seed_subjects, seed_test_scenario, seed_visual_support_demo_bundle
@@ -18,6 +18,7 @@ from .utils.responses import error_response
 def create_app(config_name: str | None = None) -> Flask:
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(get_config(config_name))
+    app.config["SQLALCHEMY_DATABASE_URI"] = _normalize_database_url(app.config.get("SQLALCHEMY_DATABASE_URI") or os.getenv("DATABASE_URL"))
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
     _init_extensions(app)
