@@ -41,6 +41,13 @@ export default defineConfig({
         ],
       },
       workbox: {
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        navigateFallbackDenylist: [
+          /^\/lesson-media\//,
+          /\.[^/]+$/,
+        ],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\./,
