@@ -147,7 +147,7 @@ export function AssignmentsPage() {
             <p>Lớp chỉ là nơi chứa học sinh. Khi giáo viên chọn mức, hệ thống chỉ giao cho học sinh đúng mức trong lớp đó.</p>
           </div>
           <div className="teacher-clean-hero-badges">
-            <span>{classesQuery.data?.length ?? 0} lớp</span>
+            <span>{classesQuery.isLoading ? '...' : (classesQuery.data?.length ?? 0)} lớp</span>
             <span>{filteredLessons.length} bài</span>
             <span>{visibleAssignments.length} lượt giao</span>
           </div>
@@ -156,27 +156,27 @@ export function AssignmentsPage() {
         <section className="teacher-clean-metrics">
           <article className="mini-card teacher-clean-metric teacher-clean-metric-blue">
             <span>Trong lớp</span>
-            <strong>{studentCount}</strong>
+            <strong>{classesQuery.isLoading ? '...' : studentCount}</strong>
           </article>
           <article className="mini-card teacher-clean-metric teacher-clean-metric-coral">
-            <span>Đúng mức</span>
-            <strong>{eligibleStudentCount}</strong>
+            <span>Đúng mức ({LEVEL_LABELS[activeAssignmentLevel]})</span>
+            <strong>{classesQuery.isLoading ? '...' : eligibleStudentCount}</strong>
           </article>
           <article className="mini-card teacher-clean-metric teacher-clean-metric-green">
             <span>Hoạt động</span>
-            <strong>{activityCount}</strong>
+            <strong>{lessonsQuery.isLoading ? '...' : activityCount}</strong>
           </article>
           <article className="mini-card teacher-clean-metric teacher-clean-metric-gold">
-            <span>Mức đang giao</span>
-            <strong>{LEVEL_LABELS[activeAssignmentLevel]}</strong>
+            <span>Tổng bài học</span>
+            <strong>{lessonsQuery.isLoading ? '...' : (lessonsQuery.data?.length ?? 0)}</strong>
           </article>
           <article className="mini-card teacher-clean-metric teacher-clean-metric-ink">
-            <span>Hạn</span>
+            <span>Hạn nộp</span>
             <strong>{dueAt ? 'Đã đặt' : 'Chưa đặt'}</strong>
           </article>
           <article className="mini-card teacher-clean-metric teacher-clean-metric-blue">
             <span>Đã giao</span>
-            <strong>{visibleAssignments.length}</strong>
+            <strong>{assignmentsQuery.isLoading ? '...' : (assignmentsQuery.data?.length ?? 0)}</strong>
           </article>
         </section>
 

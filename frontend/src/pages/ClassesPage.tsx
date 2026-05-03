@@ -170,12 +170,12 @@ export function ClassesPage() {
             <strong>{classesQuery.data?.length ?? 0}</strong>
           </article>
           <article className="mini-card teacher-clean-metric teacher-clean-metric-green">
-            <span>Học sinh trong lớp</span>
-            <strong>{classStudentsQuery.data?.length ?? 0}</strong>
+            <span>Tổng học sinh</span>
+            <strong>{classesQuery.data?.reduce((sum, c) => sum + (c.student_count ?? 0), 0) ?? 0}</strong>
           </article>
           <article className="mini-card teacher-clean-metric teacher-clean-metric-gold">
             <span>Môn trong lớp</span>
-            <strong>{classSubjectsQuery.data?.length ?? 0}</strong>
+            <strong>{classSubjectsQuery.data?.length ?? (selectedClass?.subject_count ?? 0)}</strong>
           </article>
           <article className="mini-card teacher-clean-metric teacher-clean-metric-coral">
             <span>Mật khẩu</span>

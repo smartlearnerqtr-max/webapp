@@ -15,6 +15,7 @@ const loadStudentHomePage = () => import('./pages/StudentHomePage')
 const loadStudentsPage = () => import('./pages/StudentsPage')
 const loadClassesPage = () => import('./pages/ClassesPage')
 const loadLessonsPage = () => import('./pages/LessonsPage')
+const loadLessonCreationWizard = () => import('./pages/LessonCreationWizard')
 const loadAssignmentsPage = () => import('./pages/AssignmentsPage')
 const loadProgressPage = () => import('./pages/ProgressPage')
 const loadParentPage = () => import('./pages/ParentPage')
@@ -27,6 +28,7 @@ const StudentHomePage = lazy(() => loadStudentHomePage().then((module) => ({ def
 const StudentsPage = lazy(() => loadStudentsPage().then((module) => ({ default: module.StudentsPage })))
 const ClassesPage = lazy(() => loadClassesPage().then((module) => ({ default: module.ClassesPage })))
 const LessonsPage = lazy(() => loadLessonsPage().then((module) => ({ default: module.LessonsPage })))
+const LessonCreationWizard = lazy(() => loadLessonCreationWizard().then((module) => ({ default: module.LessonCreationWizard })))
 const AssignmentsPage = lazy(() => loadAssignmentsPage().then((module) => ({ default: module.AssignmentsPage })))
 const ProgressPage = lazy(() => loadProgressPage().then((module) => ({ default: module.ProgressPage })))
 const ParentPage = lazy(() => loadParentPage().then((module) => ({ default: module.ParentPage })))
@@ -207,6 +209,7 @@ function App() {
             <Route path="/hoc-sinh" element={<StudentsPage />} />
             <Route path="/lop-hoc" element={<ClassesPage />} />
             <Route path="/bai-hoc" element={<LessonsPage />} />
+            <Route path="/bai-hoc/tao-moi" element={<LessonCreationWizard />} />
             <Route path="/giao-bai" element={<AssignmentsPage />} />
             <Route path="/tien-do" element={<ProgressPage />} />
             <Route path="/phu-huynh" element={<ParentPage />} />
