@@ -1,8 +1,7 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { PWAInstallButton } from '../components/PWAInstallButton'
 import { login, registerAccount } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { getDefaultRouteForRole } from '../utils/roleRoutes'
@@ -238,7 +237,6 @@ export function HomePage() {
             </form>
           )}
 
-          <PWAInstallButton />
           {error ? <p className="error-text">{error}</p> : null}
         </article>
       </section>

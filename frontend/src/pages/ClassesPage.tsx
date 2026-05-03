@@ -15,25 +15,20 @@ import {
 import { RequireAuth } from '../components/RequireAuth'
 import { useAuthStore } from '../store/authStore'
 
-const classUiVariantLabelMap: Record<string, string> = {
-  standard: 'Chuẩn',
-  visual_support: 'Trực quan',
-}
-
 const visualThemeOptions = [
   {
     value: 'garden',
-    title: 'Vườn dịu mắt',
+    title: '🌿 Vườn dịu mắt',
     imageUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
   },
   {
     value: 'ocean',
-    title: 'Mặt hồ êm',
+    title: '🌊 Mặt hồ êm',
     imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80',
   },
   {
     value: 'cosmos',
-    title: 'Phiêu lưu vũ trụ',
+    title: '🌌 Vũ trụ',
     imageUrl: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1600&q=80',
   },
 ] as const
@@ -41,7 +36,7 @@ const visualThemeOptions = [
 const visualThemeLabelMap: Record<(typeof visualThemeOptions)[number]['value'], string> = {
   garden: 'Vườn dịu mắt',
   ocean: 'Mặt hồ êm',
-  cosmos: 'Phiêu lưu vũ trụ',
+  cosmos: 'Vũ trụ',
 }
 
 export function ClassesPage() {
@@ -148,67 +143,48 @@ export function ClassesPage() {
     createMutation.mutate()
   }
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    alert(`Đã sao chép: ${text}`)
+  }
+
   return (
     <RequireAuth allowedRoles={['teacher']}>
       <div className="page-stack teacher-clean-page">
         <section className="roadmap-panel teacher-clean-hero">
           <div>
-            <p className="eyebrow">Lớp học</p>
-            <h2>Mã lớp, học sinh, môn</h2>
-            <p>Giữ phần vào lớp cho học sinh thật rõ, phần thêm tay chỉ để hỗ trợ khi cần.</p>
+            <p className="eyebrow teacher-clean-title-label">Quản lý lớp</p>
+            <h2>Trung tâm điều phối lớp học</h2>
+            <p className="helper-text">Tạo không gian học tập, quản lý danh sách học sinh và phân bổ môn học cho từng lớp.</p>
           </div>
           <div className="teacher-clean-hero-badges">
-            <span>{classesQuery.data?.length ?? 0} lớp</span>
-            <span>{selectedClass?.id ?? '---'} ID lớp</span>
-            <span>{selectedClass?.join_credential?.class_password ?? '---'} mật khẩu</span>
+             <span>{classesQuery.data?.length || 0} Lớp đang dạy</span>
+             <span>ID Lớp & Mật khẩu để học sinh tự tham gia</span>
           </div>
         </section>
 
-        <section className="teacher-clean-metrics">
-          <article className="mini-card teacher-clean-metric teacher-clean-metric-blue">
-            <span>Lớp</span>
-            <strong>{classesQuery.data?.length ?? 0}</strong>
-          </article>
-          <article className="mini-card teacher-clean-metric teacher-clean-metric-green">
-            <span>Tổng học sinh</span>
-            <strong>{classesQuery.data?.reduce((sum, c) => sum + (c.student_count ?? 0), 0) ?? 0}</strong>
-          </article>
-          <article className="mini-card teacher-clean-metric teacher-clean-metric-gold">
-            <span>Môn trong lớp</span>
-            <strong>{classSubjectsQuery.data?.length ?? (selectedClass?.subject_count ?? 0)}</strong>
-          </article>
-          <article className="mini-card teacher-clean-metric teacher-clean-metric-coral">
-            <span>Mật khẩu</span>
-            <strong>{selectedClass?.join_credential?.class_password ?? '---'}</strong>
-          </article>
-          <article className="mini-card teacher-clean-metric teacher-clean-metric-ink">
-            <span>Theme</span>
-            <strong>{selectedClass ? visualThemeLabelMap[selectedClass.visual_theme] ?? selectedClass.visual_theme : '---'}</strong>
-          </article>
-        </section>
-
-        <section className="auth-layout">
+        <section className="auth-layout" style={{ gridTemplateColumns: '1fr 1.5fr' }}>
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Tạo mới</p>
-                <h3>Tạo lớp</h3>
+                <p className="eyebrow">Thao tác</p>
+                <h3>Tạo lớp học mới</h3>
               </div>
             </div>
             <form className="form-stack" onSubmit={handleSubmit}>
               <label>
-                Tên lớp
-                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Ví dụ: Lớp 6A buổi chiều" />
+                Tên lớp (ví dụ: Lớp 6A - Sáng)
+                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Nhập tên lớp..." />
               </label>
 
               <label>
-                Khối lớp
-                <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder="Ví dụ: 6" />
+                Khối lớp (ví dụ: 6)
+                <input value={grade} onChange={(event) => setGrade(event.target.value)} placeholder="Nhập khối..." />
               </label>
 
               <div className="detail-stack">
-                <strong>Theme</strong>
-                <div className="builder-type-grid">
+                <label className="label">Chủ đề thị giác (Theme)</label>
+                <div className="builder-type-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))' }}>
                   {visualThemeOptions.map((theme) => (
                     <button
                       key={theme.value}
@@ -216,135 +192,99 @@ export function ClassesPage() {
                       className={visualTheme === theme.value ? 'builder-type-card builder-type-card-active' : 'builder-type-card'}
                       onClick={() => {
                         setVisualTheme(theme.value)
-                        if (!backgroundImageUrl.trim() || backgroundImageUrl === visualThemeOptions.find((item) => item.value === visualTheme)?.imageUrl) {
-                          setBackgroundImageUrl(theme.imageUrl)
-                        }
+                        setBackgroundImageUrl(theme.imageUrl)
                       }}
+                      style={{ padding: '0.8rem', textAlign: 'center' }}
                     >
-                      <strong>{theme.title}</strong>
+                      <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '0.3rem' }}>
+                        {theme.value === 'garden' ? '🌿' : theme.value === 'ocean' ? '🌊' : '🌌'}
+                      </span>
+                      <strong style={{ fontSize: '0.8rem' }}>{theme.title.split(' ')[1] || theme.title}</strong>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <details className="config-card">
-                <summary className="simple-summary">Ảnh nền riêng</summary>
-                <label>
-                  URL ảnh nền
-                  <input
-                    value={backgroundImageUrl}
-                    onChange={(event) => setBackgroundImageUrl(event.target.value)}
-                    placeholder="Dán URL ảnh nền nếu muốn thay theme mặc định"
-                  />
-                </label>
-              </details>
-
-              <button className="action-button" type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Đang tạo...' : 'Tạo lớp'}
+              <button className="action-button" type="submit" disabled={createMutation.isPending} style={{ marginTop: '1rem' }}>
+                {createMutation.isPending ? 'Đang tạo...' : '✨ Tạo lớp học'}
               </button>
-              {createMutation.error ? <p className="error-text">{(createMutation.error as Error).message}</p> : null}
             </form>
           </article>
 
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Danh sách</p>
-                <h3>Chọn lớp</h3>
+                <p className="eyebrow">Hệ thống</p>
+                <h3>Danh sách lớp của bạn</h3>
               </div>
             </div>
-            <div className="student-list compact-list">
+            <div className="teacher-clean-list-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
               {classesQuery.data?.map((classItem) => (
                 <button
                   key={classItem.id}
                   type="button"
                   className={resolvedSelectedClassId === classItem.id ? 'student-row student-row-button student-row-button-active' : 'student-row student-row-button'}
                   onClick={() => setSelectedClassId(classItem.id)}
+                  style={{ 
+                    flexDirection: 'column', 
+                    alignItems: 'flex-start', 
+                    textAlign: 'left', 
+                    padding: '1.2rem',
+                    border: resolvedSelectedClassId === classItem.id ? '2px solid #335dc4' : '1px solid #f3f4f6'
+                  }}
                 >
-                  <strong>{classItem.name}</strong>
-                  <span>{classItem.grade_label ? `Khối ${classItem.grade_label}` : 'Chưa gắn khối'} / {classItem.student_count} học sinh</span>
-                  <p>Mật khẩu: {classItem.join_credential?.class_password ?? 'Chưa cập nhật'}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '0.5rem' }}>
+                    <strong>{classItem.name}</strong>
+                    <span className="subject-pill muted-pill" style={{ fontSize: '0.7rem' }}>Khối {classItem.grade_label || '---'}</span>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: '#636e72' }}>
+                    👥 {classItem.student_count} học sinh • 📘 {classItem.subject_count} môn
+                  </div>
+                  <div style={{ marginTop: '0.8rem', fontSize: '0.8rem', background: '#f8f9fa', padding: '0.4rem 0.6rem', borderRadius: '8px', width: '100%' }}>
+                     Mật khẩu: <code style={{ color: '#335dc4', fontWeight: 700 }}>{classItem.join_credential?.class_password || '---'}</code>
+                  </div>
                 </button>
               ))}
+              {!classesQuery.data?.length && !classesQuery.isLoading ? <p>Bạn chưa có lớp học nào.</p> : null}
             </div>
-            {!classesQuery.data?.length && !classesQuery.isLoading ? <p>Chưa có lớp nào. Tạo lớp đầu tiên để bắt đầu.</p> : null}
           </article>
         </section>
 
-        {selectedClass ? (
-          <section className="dashboard-grid">
-            <article className="roadmap-panel">
-              <div className="teacher-clean-section-head">
-                <div>
-                  <p className="eyebrow">Đang chọn</p>
-                  <h3>{selectedClass.name}</h3>
-                </div>
+        {selectedClass && (
+          <section className="roadmap-panel" style={{ border: '2px solid #e0e7ff', background: 'linear-gradient(135deg, #ffffff 0%, #f9faff 100%)' }}>
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Thông tin chi tiết</p>
+                <h3 style={{ fontSize: '1.8rem', color: '#1a1a1a' }}>Lớp: {selectedClass.name}</h3>
               </div>
-              <div className="student-row">
-                <strong>{selectedClass.name}</strong>
-                <span>{selectedClass.grade_label ? `Khối ${selectedClass.grade_label}` : 'Chưa gắn khối lớp'}</span>
-                <p>Học sinh dùng `ID lớp + mật khẩu lớp` để tự vào lớp này.</p>
+              <div className="teacher-clean-hero-badges" style={{ margin: 0 }}>
+                 <span className="teacher-clean-metric-blue" onClick={() => copyToClipboard(String(selectedClass.id))} style={{ cursor: 'pointer' }}>🆔 ID: {selectedClass.id} 📋</span>
+                 <span className="teacher-clean-metric-gold" onClick={() => copyToClipboard(selectedClass.join_credential?.class_password || '')} style={{ cursor: 'pointer' }}>🔑 Pass: {selectedClass.join_credential?.class_password} 📋</span>
               </div>
-              <div className="tag-wrap">
-                <span className="subject-pill">{classUiVariantLabelMap[selectedClass.ui_variant] ?? selectedClass.ui_variant}</span>
-                {selectedClass.ui_variant === 'visual_support' ? (
-                  <span className="subject-pill muted-pill">{visualThemeLabelMap[selectedClass.visual_theme] ?? selectedClass.visual_theme}</span>
-                ) : null}
-              </div>
-              <div className="metrics-grid">
-                <div className="mini-card">
-                  <span>ID lớp</span>
-                  <strong>{selectedClass.id}</strong>
-                </div>
-                <div className="mini-card">
-                  <span>Mật khẩu lớp</span>
-                  <strong>{selectedClass.join_credential?.class_password ?? 'Chưa cập nhật'}</strong>
-                </div>
-                <div className="mini-card">
-                  <span>Học sinh</span>
-                  <strong>{selectedClass.student_count}</strong>
-                </div>
-                <div className="mini-card">
-                  <span>Môn học</span>
-                  <strong>{selectedClass.subject_count}</strong>
-                </div>
-              </div>
-            </article>
+            </div>
 
-            <article className="roadmap-panel">
-              <div className="teacher-clean-section-head">
-                <div>
-                  <p className="eyebrow">Vào lớp</p>
-                  <h3>Thông tin gửi học sinh</h3>
+            <div className="dashboard-grid" style={{ marginTop: '2rem' }}>
+              <div className="form-stack">
+                 <strong>Dành cho học sinh</strong>
+                 <p className="helper-text">Gửi ID và Mật khẩu trên cho học sinh. Học sinh tự đăng ký và nhập thông tin này để vào lớp.</p>
+                 <div className="config-card" style={{ background: '#fff', border: '1px dashed #335dc4' }}>
+                    <p style={{ margin: 0, fontSize: '0.9rem' }}>
+                      "Chào các em, để tham gia lớp <strong>{selectedClass.name}</strong>, các em hãy nhập ID: <strong>{selectedClass.id}</strong> và Mật khẩu: <strong>{selectedClass.join_credential?.class_password}</strong> nhé!"
+                    </p>
+                 </div>
+              </div>
+
+              <div className="teacher-clean-metrics" style={{ gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="mini-card" style={{ background: '#fff' }}>
+                   <span>Mức độ hiển thị</span>
+                   <strong>{visualThemeLabelMap[selectedClass.visual_theme] || 'Mặc định'}</strong>
+                </div>
+                <div className="mini-card" style={{ background: '#fff' }}>
+                   <span>Trạng thái</span>
+                   <strong style={{ color: '#2a8f80' }}>Đang hoạt động</strong>
                 </div>
               </div>
-              <div className="detail-stack">
-                <div className="metrics-grid">
-                  <div className="mini-card">
-                    <span>ID lớp</span>
-                    <strong>{selectedClass.id}</strong>
-                  </div>
-                  <div className="mini-card">
-                    <span>Mật khẩu</span>
-                    <strong>{selectedClass.join_credential?.class_password ?? 'Chưa cập nhật'}</strong>
-                  </div>
-                </div>
-                <div className="tag-wrap">
-                  <span className="subject-pill">{selectedClass.status === 'active' ? 'Đang hoạt động' : selectedClass.status}</span>
-                  {selectedClass.grade_label ? <span className="subject-pill muted-pill">{`Khối ${selectedClass.grade_label}`}</span> : null}
-                </div>
-                {selectedClass.ui_variant === 'visual_support' && selectedClass.background_image_url ? (
-                  <p>Ảnh nền: {selectedClass.background_image_url}</p>
-                ) : null}
-                <p className="helper-text">Lớp chỉ là nơi tham gia chung. Trong cùng một lớp vẫn có thể có học sinh mức nhẹ, trung bình và nặng.</p>
-                <p>Luồng chính: học sinh tự đăng ký tài khoản rồi nhập `ID lớp` và `mật khẩu` để tham gia.</p>
-              </div>
-            </article>
-          </section>
-        ) : (
-          <section className="roadmap-panel">
-            <h3>Chưa chọn lớp</h3>
-            <p>Hãy tạo mới hoặc chọn một lớp ở trên để bắt đầu quản lý học sinh và môn học.</p>
+            </div>
           </section>
         )}
 
@@ -352,41 +292,35 @@ export function ClassesPage() {
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Học sinh</p>
-                <h3>Trong lớp</h3>
+                <p className="eyebrow">Thành viên</p>
+                <h3>Học sinh trong lớp ({classStudentsQuery.data?.length || 0})</h3>
               </div>
             </div>
-            <div className="student-list compact-list">
+            <div className="student-list compact-list" style={{ marginTop: '1rem' }}>
               {classStudentsQuery.data?.map((item) => (
-                <div key={item.id} className="student-row">
-                  <strong>{item.student?.full_name ?? `Học sinh #${item.student_id}`}</strong>
-                  <span>{item.student?.preferred_input ?? 'Bàn phím'} / {item.student?.disability_level ?? 'Mức độ nhẹ'}</span>
+                <div key={item.id} className="student-row" style={{ padding: '0.8rem 0' }}>
+                  <div>
+                    <strong>{item.student?.full_name || 'Học sinh'}</strong>
+                    <p style={{ fontSize: '0.8rem', color: '#636e72', margin: 0 }}>
+                      Mức: {item.student?.disability_level === 'nhe' ? 'Nhẹ' : item.student?.disability_level === 'trung_binh' ? 'Trung bình' : 'Nặng'}
+                    </p>
+                  </div>
+                  <span className="subject-pill muted-pill">{item.student?.preferred_input || 'Cảm ứng'}</span>
                 </div>
               ))}
-              {resolvedSelectedClassId && !classStudentsQuery.data?.length && !classStudentsQuery.isLoading ? <p>Lớp này chưa có học sinh nào.</p> : null}
+              {!classStudentsQuery.data?.length && !classStudentsQuery.isLoading && <p className="helper-text">Lớp chưa có học sinh.</p>}
             </div>
 
-            <details className="config-card">
-              <summary className="simple-summary">Thêm thủ công</summary>
-              <div className="form-stack">
-                <label>
-                  Học sinh chưa vào lớp
-                  <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)} disabled={!resolvedSelectedClassId}>
-                    <option value="">Chọn học sinh</option>
-                    {availableStudents.map((student) => (
-                      <option key={student.id} value={student.id}>{student.full_name} - {student.disability_level}</option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  className="action-button"
-                  type="button"
-                  disabled={!resolvedSelectedClassId || !selectedStudentId || addStudentMutation.isPending}
-                  onClick={() => addStudentMutation.mutate()}
-                >
-                  {addStudentMutation.isPending ? 'Đang thêm...' : 'Thêm vào lớp'}
+            <details className="config-card" style={{ marginTop: '1.5rem', border: 'none', background: '#f8f9fa' }}>
+              <summary className="simple-summary" style={{ fontWeight: 600, color: '#335dc4' }}>Thêm học sinh thủ công</summary>
+              <div className="form-stack" style={{ marginTop: '1rem' }}>
+                <select className="teacher-clean-select" value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)}>
+                  <option value="">Chọn học sinh từ danh sách...</option>
+                  {availableStudents.map(s => <option key={s.id} value={s.id}>{s.full_name}</option>)}
+                </select>
+                <button className="action-button" onClick={() => addStudentMutation.mutate()} disabled={!selectedStudentId || addStudentMutation.isPending}>
+                   Thêm ngay
                 </button>
-                {addStudentMutation.error ? <p className="error-text">{(addStudentMutation.error as Error).message}</p> : null}
               </div>
             </details>
           </article>
@@ -394,38 +328,29 @@ export function ClassesPage() {
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Môn học</p>
-                <h3>Trong lớp</h3>
+                <p className="eyebrow">Nội dung</p>
+                <h3>Môn học được phép ({classSubjectsQuery.data?.length || 0})</h3>
               </div>
             </div>
-            <div className="tag-wrap">
+            <div className="tag-wrap" style={{ marginTop: '1.5rem', gap: '0.8rem' }}>
               {classSubjectsQuery.data?.map((item) => (
-                <span key={item.id} className="subject-pill">{item.subject?.name ?? `Môn #${item.subject_id}`}</span>
+                <span key={item.id} className="subject-pill" style={{ padding: '0.6rem 1rem', fontSize: '0.95rem' }}>
+                  📘 {item.subject?.name}
+                </span>
               ))}
-              {resolvedSelectedClassId && !classSubjectsQuery.data?.length && !classSubjectsQuery.isLoading ? <p>Lớp này chưa có môn học nào.</p> : null}
+              {!classSubjectsQuery.data?.length && !classSubjectsQuery.isLoading && <p className="helper-text">Chưa gắn môn học.</p>}
             </div>
 
-            <details className="config-card">
-              <summary className="simple-summary">Gắn môn</summary>
-              <div className="form-stack">
-                <label>
-                  Môn học có sẵn
-                  <select value={selectedSubjectId} onChange={(event) => setSelectedSubjectId(event.target.value)} disabled={!resolvedSelectedClassId}>
-                    <option value="">Chọn môn học</option>
-                    {availableSubjects.map((subject) => (
-                      <option key={subject.id} value={subject.id}>{subject.name}</option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  className="action-button"
-                  type="button"
-                  disabled={!resolvedSelectedClassId || !selectedSubjectId || addSubjectMutation.isPending}
-                  onClick={() => addSubjectMutation.mutate()}
-                >
-                  {addSubjectMutation.isPending ? 'Đang gắn...' : 'Gắn môn học'}
+            <details className="config-card" style={{ marginTop: '2rem', border: 'none', background: '#f8f9fa' }}>
+              <summary className="simple-summary" style={{ fontWeight: 600, color: '#335dc4' }}>Gắn thêm môn học</summary>
+              <div className="form-stack" style={{ marginTop: '1rem' }}>
+                <select className="teacher-clean-select" value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)}>
+                  <option value="">Chọn môn học...</option>
+                  {availableSubjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+                <button className="action-button" onClick={() => addSubjectMutation.mutate()} disabled={!selectedSubjectId || addSubjectMutation.isPending}>
+                   Gắn môn
                 </button>
-                {addSubjectMutation.error ? <p className="error-text">{(addSubjectMutation.error as Error).message}</p> : null}
               </div>
             </details>
           </article>

@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { createLesson, createLessonActivity, fetchSubjects, uploadLessonMedia, type SubjectItem } from '../services/api'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { 
+  createLesson, 
+  createLessonActivity, 
+  fetchSubjects, 
+  uploadLessonMedia, 
+  fetchLessons, 
+  deleteLesson,
+  createAssignment,
+  fetchClasses,
+  type SubjectItem,
+  type LessonItem,
+  type ClassItem
+} from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { RequireAuth } from '../components/RequireAuth'
 import styles from './LessonCreationWizard.module.css'
@@ -59,9 +71,13 @@ const STEP_CONTENT_TYPES = [
 
 export function LessonsPage() {
   const { accessToken } = useAuthStore()
+  const queryClient = useQueryClient()
+  const [viewMode, setViewMode] = useState<'list' | 'create'>('list')
   const [currentStep, setCurrentStep] = useState(1)
   const [isAutoFilled, setIsAutoFilled] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [showAssignModal, setShowAssignModal] = useState(false)
+  const [lessonToAssign, setLessonToAssign] = useState<LessonItem | null>(null)
 
   const [lessonDraft, setLessonDraft] = useState<LessonDraft>({
     title: '',
@@ -72,21 +88,36 @@ export function LessonsPage() {
     activities: [],
   })
 
+  // Queries
   const subjectsQuery = useQuery({
     queryKey: ['subjects'],
     queryFn: () => fetchSubjects(),
   })
 
-  // Merge API subjects with template subjects — deduplicate by name, enrich with icons
+  const lessonsQuery = useQuery({
+    queryKey: ['lessons', accessToken],
+    queryFn: () => fetchLessons(accessToken!),
+    enabled: !!accessToken,
+  })
+
+  const classesQuery = useQuery({
+    queryKey: ['classes', accessToken],
+    queryFn: () => fetchClasses(accessToken!),
+    enabled: !!accessToken,
+  })
+
+  // Mutations
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteLesson(accessToken!, id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lessons'] }),
+  })
+
+  // Merge logic for creation
   const mergedSubjects = useMemo(() => {
     const apiSubjects: Array<{ id: number; name: string; icon?: string }> = (subjectsQuery.data || []).map((s: SubjectItem) => ({ id: s.id, name: s.name }))
     const level = lessonDraft.difficulty_level
     const templates = level ? SUBJECT_TEMPLATES[level] : []
-
-    // Build a lookup from template by subject_name
     const templateByName = new Map(templates.map(t => [t.subject_name, t]))
-
-    // Start with API subjects, enrich with icon
     const seen = new Set<string>()
     const result: Array<{ id: number; name: string; icon: string }> = []
 
@@ -95,15 +126,12 @@ export function LessonsPage() {
       result.push({ id: s.id, name: s.name, icon: tpl?.icon ?? '📘' })
       seen.add(s.name)
     }
-
-    // Add template-only subjects that don't exist in API
     for (const t of templates) {
       if (!seen.has(t.subject_name)) {
         result.push({ id: t.subject_id, name: t.subject_name, icon: t.icon })
         seen.add(t.subject_name)
       }
     }
-
     return result
   }, [subjectsQuery.data, lessonDraft.difficulty_level])
 
@@ -112,7 +140,6 @@ export function LessonsPage() {
     if (lessonDraft.difficulty_level && lessonDraft.subject_id && !isAutoFilled) {
       const templates = SUBJECT_TEMPLATES[lessonDraft.difficulty_level]
       const template = templates.find(t => t.subject_id === lessonDraft.subject_id || t.subject_name === lessonDraft.subject_name)
-      
       if (template) {
         setLessonDraft(prev => ({
           ...prev,
@@ -129,39 +156,17 @@ export function LessonsPage() {
     }
   }, [lessonDraft.difficulty_level, lessonDraft.subject_id, isAutoFilled])
 
-  // Handlers
   const handleLevelSelect = (level: LessonLevel) => {
-    setLessonDraft(prev => ({
-      ...prev,
-      difficulty_level: level,
-      // Reset auto-fill when level changes so new template can be loaded
-      subject_id: undefined,
-      subject_name: undefined,
-      title: '',
-      theme: '',
-      description: '',
-      activities: [],
-    }))
+    setLessonDraft(prev => ({ ...prev, difficulty_level: level, subject_id: undefined, subject_name: undefined, title: '', theme: '', description: '', activities: [] }))
     setIsAutoFilled(false)
   }
 
   const handleSubjectSelect = (id: number, name: string) => {
-    setLessonDraft(prev => ({
-      ...prev,
-      subject_id: id,
-      subject_name: name,
-      // Reset auto-fill so new template can be loaded
-      title: '',
-      theme: '',
-      description: '',
-      activities: [],
-    }))
+    setLessonDraft(prev => ({ ...prev, subject_id: id, subject_name: name, title: '', theme: '', description: '', activities: [] }))
     setIsAutoFilled(false)
   }
 
-  const handleInfoChange = (field: string, value: string) => {
-    setLessonDraft(prev => ({ ...prev, [field]: value }))
-  }
+  const handleInfoChange = (field: string, value: string) => setLessonDraft(prev => ({ ...prev, [field]: value }))
 
   const handleActivityChange = (idx: number, field: string, value: any) => {
     setLessonDraft(prev => {
@@ -227,19 +232,82 @@ export function LessonsPage() {
         })
       }
       alert('🎉 Lưu bài học thành công!')
-      window.location.href = '/bai-hoc'
+      queryClient.invalidateQueries({ queryKey: ['lessons'] })
+      setViewMode('list')
+      setCurrentStep(1)
+      setLessonDraft({ title: '', theme: '', description: '', activities: [] })
     } catch (e) {
       alert('Lỗi lưu bài học: ' + (e as any).message)
     }
   }
 
+  const openAssignModal = (lesson: LessonItem) => {
+    setLessonToAssign(lesson)
+    setShowAssignModal(true)
+  }
+
+  if (viewMode === 'list') {
+    return (
+      <RequireAuth allowedRoles={['teacher']}>
+        <div className={styles.wizardContainer}>
+          <div className={styles.header}>
+            <div className={styles.headerTop}>
+              <h1>📚 Thư Viện Bài Học Của Tôi</h1>
+              <button className={styles.btnPrimary} onClick={() => setViewMode('create')}>+ Tạo bài mới</button>
+            </div>
+            <p style={{color: '#636e72'}}>Quản lý nội dung bài giảng và giao bài cho các lớp của bạn ngay tại đây.</p>
+          </div>
+
+          <div className={styles.content}>
+            <div className={styles.scrollArea}>
+              <div className={styles.lessonListGrid}>
+                {lessonsQuery.data?.map(lesson => (
+                  <div key={lesson.id} className={styles.lessonCard}>
+                    <div className={styles.lessonCardMeta}>
+                      <span className={styles.badge}>{lesson.subject?.name || 'Môn học'}</span>
+                      <span style={{fontSize: '0.8rem', fontWeight: 700, color: '#636e72'}}>
+                        {DIFFICULTY_LEVELS.find(l => l.value === lesson.primary_level)?.icon} {DIFFICULTY_LEVELS.find(l => l.value === lesson.primary_level)?.label}
+                      </span>
+                    </div>
+                    <h3 className={styles.lessonCardTitle}>{lesson.title}</h3>
+                    <p style={{fontSize: '0.9rem', color: '#636e72', margin: 0}}>{lesson.description || 'Không có mô tả.'}</p>
+                    <div className={styles.lessonCardTags}>
+                      <span className={styles.badgeSecondary}>{lesson.activity_count} Hoạt động</span>
+                    </div>
+                    <div className={styles.lessonCardActions}>
+                      <button className={`${styles.btnAction} ${styles.btnAssign}`} onClick={() => openAssignModal(lesson)}>🚀 Giao bài</button>
+                      <button className={`${styles.btnAction} ${styles.btnSecondary}`} onClick={() => { if(confirm('Xóa bài học này?')) deleteMutation.mutate(lesson.id) }}>Xóa</button>
+                    </div>
+                  </div>
+                ))}
+                {lessonsQuery.data?.length === 0 && <p>Bạn chưa có bài học nào. Hãy bấm "Tạo bài mới" để bắt đầu.</p>}
+                {lessonsQuery.isLoading && <p>Đang tải bài học...</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {showAssignModal && lessonToAssign && (
+          <AssignModal 
+            lesson={lessonToAssign} 
+            classes={classesQuery.data || []} 
+            onClose={() => setShowAssignModal(false)}
+            token={accessToken!}
+          />
+        )}
+      </RequireAuth>
+    )
+  }
+
   return (
-    <RequireAuth>
+    <RequireAuth allowedRoles={['teacher']}>
       <div className={styles.wizardContainer}>
-        {/* Progress Header */}
         <div className={styles.header}>
           <div className={styles.headerTop}>
-            <h1>🛠️ Xây Dựng Bài Học Thông Minh</h1>
+            <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
+              <button className={styles.btnSecondary} onClick={() => setViewMode('list')} style={{padding:'0.5rem 1rem'}}>← Quay lại</button>
+              <h1>🛠️ Xây Dựng Bài Học Thông Minh</h1>
+            </div>
             <div className={styles.autoFillBadge}>
               {isAutoFilled ? '✨ Đã nạp mẫu từ Bosung.md' : '💡 Chọn môn để nạp mẫu'}
             </div>
@@ -257,17 +325,10 @@ export function LessonsPage() {
           </div>
         </div>
 
-        {/* Content Area */}
         <div className={styles.content}>
           <div className={styles.scrollArea}>
             {currentStep === 1 && (
-              <StepOne 
-                draft={lessonDraft} 
-                subjects={mergedSubjects} 
-                onLevelSelect={handleLevelSelect} 
-                onSubSelect={handleSubjectSelect}
-                onInfoChange={handleInfoChange}
-              />
+              <StepOne draft={lessonDraft} subjects={mergedSubjects} onLevelSelect={handleLevelSelect} onSubSelect={handleSubjectSelect} onInfoChange={handleInfoChange} />
             )}
             {(currentStep === 2 || currentStep === 3) && (
               <StepBuilder 
@@ -282,7 +343,6 @@ export function LessonsPage() {
           </div>
         </div>
 
-        {/* Footer Nav */}
         <div className={styles.footer}>
           <button type="button" className={styles.btnSecondary} onClick={() => setCurrentStep(prev => prev - 1)} disabled={currentStep === 1}>← Quay lại</button>
           <div className={styles.spacer}></div>
@@ -299,6 +359,67 @@ export function LessonsPage() {
   )
 }
 
+function AssignModal({ lesson, classes, onClose, token }: { lesson: LessonItem, classes: ClassItem[], onClose: () => void, token: string }) {
+  const [classId, setClassId] = useState('')
+  const [percent, setPercent] = useState('80')
+  const [dueAt, setDueAt] = useState('')
+  const queryClient = useQueryClient()
+
+  const assignMutation = useMutation({
+    mutationFn: () => createAssignment(token, {
+      lesson_id: lesson.id,
+      class_id: Number(classId),
+      subject_id: lesson.subject_id,
+      target_type: 'class',
+      due_at: dueAt || undefined,
+      required_completion_percent: Number(percent)
+    }),
+    onSuccess: () => {
+      alert('🚀 Giao bài thành công!')
+      queryClient.invalidateQueries({ queryKey: ['assignments'] })
+      onClose()
+    }
+  })
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <h2>🚀 Giao bài nhanh</h2>
+          <p>Giao bài <strong>{lesson.title}</strong> cho lớp của bạn.</p>
+        </div>
+        <div className={styles.formStack}>
+          <div className={styles.formSection}>
+            <label className={styles.label}>Chọn lớp học</label>
+            <select className={styles.select} value={classId} onChange={e => setClassId(e.target.value)}>
+              <option value="">-- Chọn lớp --</option>
+              {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+          <div className={styles.formSection}>
+            <label className={styles.label}>Mức hoàn thành (%)</label>
+            <select className={styles.select} value={percent} onChange={e => setPercent(e.target.value)}>
+              <option value="70">70% (Dễ)</option>
+              <option value="80">80% (Phổ biến)</option>
+              <option value="100">100% (Bắt buộc)</option>
+            </select>
+          </div>
+          <div className={styles.formSection}>
+            <label className={styles.label}>Hạn nộp (Không bắt buộc)</label>
+            <input className={styles.input} type="datetime-local" value={dueAt} onChange={e => setDueAt(e.target.value)} />
+          </div>
+        </div>
+        <div className={styles.modalFooter}>
+          <button className={`${styles.btnAction} ${styles.btnGhost}`} onClick={onClose}>Hủy</button>
+          <button className={`${styles.btnAction} ${styles.btnAssign}`} onClick={() => assignMutation.mutate()} disabled={!classId || assignMutation.isPending}>
+            {assignMutation.isPending ? 'Đang giao...' : 'Xác nhận giao bài'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function StepOne({ draft, subjects, onLevelSelect, onSubSelect, onInfoChange }: any) {
   return (
     <div className={styles.stepContent}>
@@ -306,75 +427,41 @@ function StepOne({ draft, subjects, onLevelSelect, onSubSelect, onInfoChange }: 
         <h2>🎯 Thiết lập cơ bản</h2>
         <p>Chọn Mức độ và Môn học để hệ thống tự động cấu hình các bước theo Bosung.md.</p>
       </div>
-
-      {/* Mức độ nhận thức - full width */}
       <div className={styles.formSection}>
         <label className={styles.label}>Mức độ nhận thức</label>
         <div className={styles.levelSelector}>
           {DIFFICULTY_LEVELS.map(l => (
-            <button 
-              key={l.value} 
-              type="button"
-              className={`${styles.levelCard} ${draft.difficulty_level === l.value ? styles.selected : ''}`} 
-              onClick={() => onLevelSelect(l.value)} 
-              style={{'--accent-color': l.color} as any}
-            >
+            <button key={l.value} type="button" className={`${styles.levelCard} ${draft.difficulty_level === l.value ? styles.selected : ''}`} onClick={() => onLevelSelect(l.value)} style={{'--accent-color': l.color} as any}>
               <span className={styles.levelIcon}>{l.icon}</span>
               <span>{l.label}</span>
             </button>
           ))}
         </div>
       </div>
-
-      {/* Môn học mục tiêu - full width */}
       <div className={styles.formSection}>
         <label className={styles.label}>Môn học mục tiêu {!draft.difficulty_level && <span style={{color:'#9ca3af', fontWeight:500}}> — Chọn mức độ trước</span>}</label>
         <div className={styles.subjectGrid}>
           {subjects && subjects.length > 0 ? subjects.map((s: any) => (
-            <button 
-              key={`${s.id}-${s.name}`} 
-              type="button"
-              className={`${styles.subjectCard} ${draft.subject_id === s.id ? styles.selected : ''}`} 
-              onClick={() => onSubSelect(s.id, s.name)}
-            >
+            <button key={`${s.id}-${s.name}`} type="button" className={`${styles.subjectCard} ${draft.subject_id === s.id ? styles.selected : ''}`} onClick={() => onSubSelect(s.id, s.name)}>
               <span className={styles.subjectIcon}>{s.icon || '📘'}</span>
               <span>{s.name}</span>
             </button>
           )) : <p>Đang tải danh sách môn học...</p>}
         </div>
       </div>
-
-      {/* Tiêu đề + Chủ đề + Mô tả */}
       <div className={styles.formGrid}>
         <div className={styles.formSection}>
           <label className={styles.label}>Tiêu đề bài học</label>
-          <input 
-            className={styles.input} 
-            value={draft.title} 
-            onChange={e => onInfoChange('title', e.target.value)} 
-            placeholder="Ví dụ: Nhận diện nhân vật..." 
-          />
+          <input className={styles.input} value={draft.title} onChange={e => onInfoChange('title', e.target.value)} placeholder="Ví dụ: Nhận diện nhân vật..." />
         </div>
         <div className={styles.formSection}>
           <label className={styles.label}>Chủ đề</label>
-          <input 
-            className={styles.input} 
-            value={draft.theme} 
-            onChange={e => onInfoChange('theme', e.target.value)} 
-            placeholder="Ví dụ: Truyện cổ tích, Màu sắc..." 
-          />
+          <input className={styles.input} value={draft.theme} onChange={e => onInfoChange('theme', e.target.value)} placeholder="Ví dụ: Truyện cổ tích, Màu sắc..." />
         </div>
       </div>
       <div className={styles.formSection}>
         <label className={styles.label}>Mô tả bài học</label>
-        <textarea 
-          className={styles.input}
-          value={draft.description} 
-          onChange={e => onInfoChange('description', e.target.value)} 
-          placeholder="Mô tả ngắn về mục tiêu và nội dung bài học..." 
-          rows={3}
-          style={{resize: 'none', minHeight: '80px'}}
-        />
+        <textarea className={styles.input} value={draft.description} onChange={e => onInfoChange('description', e.target.value)} placeholder="Mô tả ngắn về mục tiêu và nội dung bài học..." rows={3} style={{resize: 'none', minHeight: '80px'}} />
       </div>
     </div>
   )
@@ -382,14 +469,12 @@ function StepOne({ draft, subjects, onLevelSelect, onSubSelect, onInfoChange }: 
 
 function StepBuilder({ activity, onActChange, onStepChange, onUpload, isH1 }: any) {
   if (!activity) return <div className={styles.loading}>Đang nạp dữ liệu môn học...</div>
-
   return (
     <div className={styles.stepContent}>
       <div className={styles.sectionHeader}>
         <span className={isH1 ? styles.badge : styles.badgeSecondary}>{isH1 ? 'H1 - BÀI TẬP' : 'H2 - HOẠT ĐỘNG'}</span>
         <h2>{isH1 ? '🎯 Dựng các bước bài tập' : '✨ Dựng các bước trải nghiệm'}</h2>
       </div>
-
       <div className={styles.formGrid}>
         <div className={styles.formSection}>
           <label className={styles.label}>Tên hoạt động</label>
@@ -407,7 +492,6 @@ function StepBuilder({ activity, onActChange, onStepChange, onUpload, isH1 }: an
           </select>
         </div>
       </div>
-
       <div className={styles.stepsGrid}>
         {activity.steps.map((s: any, idx: number) => (
           <div key={idx} className={styles.stepBuilderCard}>
@@ -420,7 +504,6 @@ function StepBuilder({ activity, onActChange, onStepChange, onUpload, isH1 }: an
                 </select>
               </div>
               <textarea className={styles.stepDesc} value={s.description} onChange={e => onStepChange(idx, 'description', e.target.value)} rows={2} placeholder="Mô tả chi tiết bước này..." />
-              
               <div className={styles.mediaZone}>
                 {s.media_url ? (
                   <div className={styles.mediaPreview}>
