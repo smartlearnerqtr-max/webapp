@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+  <rect width="220" height="220" rx="32" fill="#eef7ff"/>
+  <path d="M110 44c28 0 52 24 52 52v38c0 28-24 52-52 52s-52-24-52-52V96c0-28 24-52 52-52z" fill="#dfe8f2" stroke="#17324d" stroke-width="7"/>
+  <path d="M110 54v42" fill="none" stroke="#17324d" stroke-width="6" stroke-linecap="round"/>
+  <text x="110" y="206" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#17324d">Chuột máy tính</text>
+</svg>

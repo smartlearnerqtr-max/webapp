@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+  <rect width="220" height="220" rx="32" fill="#fff7ef"/>
+  <circle cx="110" cy="88" r="42" fill="#ffd9c2"/>
+  <path d="M62 78c10-32 86-32 96 0-6-42-90-44-96 0z" fill="#17324d"/>
+  <path d="M76 174c10-34 58-50 68-50s58 16 68 50v18H8v-18c10-34 58-50 68-50z" fill="#f2a647"/>
+  <circle cx="94" cy="88" r="5" fill="#17324d"/>
+  <circle cx="126" cy="88" r="5" fill="#17324d"/>
+  <path d="M96 110c10 8 18 8 28 0" fill="none" stroke="#d9786e" stroke-linecap="round" stroke-width="5"/>
+  <text x="110" y="206" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#17324d">Cô Tấm</text>
+</svg>

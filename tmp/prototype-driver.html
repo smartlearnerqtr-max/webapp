@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Prototype Driver</title>
+  </head>
+  <body>
+    <pre id="log"></pre>
+    <iframe
+      id="appFrame"
+      src="/game/prototype/"
+      style="width: 1400px; height: 1100px; border: 0"
+    ></iframe>
+    <script>
+      const logEl = document.getElementById("log");
+      const frame = document.getElementById("appFrame");
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      const log = (message) => {
+        logEl.textContent += `${message}\n`;
+      };
+
+      async function run() {
+        await new Promise((resolve) => {
+          frame.addEventListener("load", resolve, { once: true });
+        });
+        await sleep(4000);
+
+        const doc = frame.contentWindow.document;
+        log(`eventTitle:init=${doc.querySelector("#eventTitle")?.textContent}`);
+        log(`setupHidden:init=${doc.querySelector("#setupScreen")?.hidden}`);
+        log(`gameHidden:init=${doc.querySelector("#gameScreen")?.hidden}`);
+
+        doc.querySelector("#startGameButton")?.click();
+        log("clicked:startGameButton");
+        await sleep(2500);
+
+        log(`eventTitle:afterStart=${doc.querySelector("#eventTitle")?.textContent}`);
+        log(`setupHidden:afterStart=${doc.querySelector("#setupScreen")?.hidden}`);
+        log(`gameHidden:afterStart=${doc.querySelector("#gameScreen")?.hidden}`);
+        log(`questionHidden:afterStart=${doc.querySelector("#questionModal")?.hidden}`);
+        log(`winHidden:afterStart=${doc.querySelector("#winModal")?.hidden}`);
+
+        const option = doc.querySelector("#questionOptions .option-button");
+        if (option) {
+          log(`clicked:option=${option.textContent}`);
+          option.click();
+          await sleep(3200);
+          log(`eventTitle:afterOption=${doc.querySelector("#eventTitle")?.textContent}`);
+          log(`progress:afterOption=${doc.querySelector("#progressChip")?.textContent}`);
+          log(`questionHidden:afterOption=${doc.querySelector("#questionModal")?.hidden}`);
+          log(`winHidden:afterOption=${doc.querySelector("#winModal")?.hidden}`);
+        } else {
+          log("option:not-found");
+        }
+      }
+
+      run().catch((error) => {
+        log(`error:${error?.message || error}`);
+      });
+    </script>
+  </body>
+  </html>

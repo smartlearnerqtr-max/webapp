@@ -150,7 +150,7 @@ def create_student():
     db.session.flush()
     ensure_teacher_student_link(user.teacher_profile.id, student.id, source='teacher_created')
     db.session.commit()
-    log_server_event(level="info", module="students", message="Tao hoc sinh moi", action_name="create_student", user_id=user.id, metadata={"student_id": student.id})
+    log_server_event(level="info", module="students", message="Tạo học sinh mới", action_name="create_student", user_id=user.id, metadata={"student_id": student.id})
     return success_response(student.to_dict(), "Tạo học sinh thành công", 201)
 
 

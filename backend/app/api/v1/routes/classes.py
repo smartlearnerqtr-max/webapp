@@ -279,7 +279,7 @@ def add_students_to_class(class_id: int):
         student_ids.append(payload['student_id'])
     unique_student_ids = [int(item) for item in dict.fromkeys(student_ids) if item]
     if not unique_student_ids:
-        return error_response('Vui long chon it nhat mot hoc sinh', 'VALIDATION_ERROR', 422)
+        return error_response('Vui lòng chọn ít nhất một học sinh', 'VALIDATION_ERROR', 422)
 
     links = []
     invalid_student_ids = []
@@ -301,7 +301,7 @@ def add_students_to_class(class_id: int):
 
     if invalid_student_ids:
         return error_response(
-            'Chi duoc them hoc sinh da co lien ket voi giao vien nay',
+            'Chỉ được thêm học sinh đã có liên kết với giáo viên này',
             'CLASS_STUDENT_FORBIDDEN',
             422,
             {'student_ids': invalid_student_ids},
@@ -331,7 +331,7 @@ def add_students_to_class(class_id: int):
     )
 
     db.session.commit()
-    log_server_event(level='info', module='classes', message='Them hoc sinh vao lop', action_name='add_students_to_class', user_id=user.id, metadata={'class_id': class_id, 'student_ids': unique_student_ids})
+    log_server_event(level='info', module='classes', message='Thêm học sinh vào lớp', action_name='add_students_to_class', user_id=user.id, metadata={'class_id': class_id, 'student_ids': unique_student_ids})
     return success_response([link.to_dict() for link in links], 'Thêm học sinh vào lớp thành công', 201)
 
 

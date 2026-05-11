@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+  <rect width="220" height="220" rx="32" fill="#fff7ef"/>
+  <circle cx="78" cy="102" r="30" fill="#17324d"/>
+  <circle cx="142" cy="102" r="30" fill="#17324d"/>
+  <rect x="102" y="96" width="16" height="10" rx="5" fill="#17324d"/>
+  <path d="M48 88c-10-8-18-8-26 0m176 0c10-8 18-8 26 0" fill="none" stroke="#17324d" stroke-linecap="round" stroke-width="6"/>
+  <text x="110" y="190" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#17324d">Kính râm</text>
+</svg>

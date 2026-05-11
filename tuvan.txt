@@ -1,0 +1,304 @@
+TU VAN NANG CAP BAI HOC HINH KHOI 3D VA NHAC CU CO INTRO - ANIMATION
+
+1. Muc tieu
+- Cac bai lien quan den hinh khoi khong nen dung anh tinh nua, ma can thanh scene 3D co the xoay, cham, phong to, thu nho.
+- Cac bai nhac cu khong nen chi la nghe audio roi chon dap an, ma nen thanh mot man bieu dien ngan co intro, nhac, animation, anh sang va hieu ung phan hoi ro rang.
+- Giao vien phai co form nhap lieu de chon asset, audio, intro, muc do hieu ung, cach bo tri va dap an dung.
+- Hoc sinh vao bai la thay giao dien "song dong ngay", khong co cam giac dang xem du lieu tho.
+
+2. Hien trang du an
+- File frontend/src/data/lessonTemplates.ts da co noi dung mo ta cac bai hinh khoi, nhac cu, 3D, animation.
+- File frontend/src/pages/LessonsPage.tsx da cho chon media_kind = 3d va interaction_type = 3d_interaction.
+- File frontend/src/components/activities/ActivityRenderer.tsx hien chua co mot renderer 3D rieng hoan chinh cho bai hinh khoi va san khau nhac cu.
+- File frontend/package.json hien chua co bo thu vien 3D de render scene hoc sinh that su.
+
+3. Huong chon cong nghe
+- Nen dung GLB/GLTF lam dinh dang chinh cho model 3D.
+- Khong uu tien FBX cho bai hoc chinh, vi FBX nang hon, kho toi uu hon cho web.
+- Neu co model FBX thi convert sang GLB truoc khi dua vao bai hoc.
+- Bo thu vien nen dung:
+  - three
+  - @react-three/fiber
+  - @react-three/drei
+  - neu can animation timeline dep hon thi them gsap
+- Audio:
+  - narration voice
+  - instrument sound effect
+  - background music rat nhe
+  - am thanh reward khi dung
+
+4. Setup ky thuat de team code
+- Cai package:
+  - npm install three @react-three/fiber @react-three/drei
+- Neu can timeline dep:
+  - npm install gsap
+- Tao thu muc asset:
+  - frontend/public/models/shapes/
+  - frontend/public/models/instruments/
+  - frontend/public/audio/lesson-intros/
+  - frontend/public/audio/instruments/
+  - frontend/public/textures/stage/
+- Tao component moi:
+  - frontend/src/components/3d/LessonCanvas.tsx
+  - frontend/src/components/3d/ShapeLessonScene.tsx
+  - frontend/src/components/3d/InstrumentStageScene.tsx
+  - frontend/src/components/3d/IntroOverlay.tsx
+  - frontend/src/components/3d/EffectBurst.tsx
+- Tao helper:
+  - frontend/src/utils/lesson3d.ts
+  - frontend/src/utils/audioTimeline.ts
+
+5. De xuat cau truc du lieu cho giao vien
+- Moi activity can them config_json kieu nay:
+  - scene_type: shape_3d | instrument_stage
+  - model_url
+  - intro_audio_url
+  - intro_text
+  - intro_duration_ms
+  - animation_preset
+  - effect_level: low | medium | strong
+  - camera_preset
+  - hotspots
+  - labels
+  - target_answer
+  - reward_audio_url
+  - background_music_url
+  - allow_rotate
+  - allow_zoom
+  - allow_replay_intro
+
+- Voi bai nhac cu can them:
+  - instrument_audio_map
+  - beat_bpm
+  - performance_mode: listen_guess | tap_rhythm | watch_perform
+  - note_lane_count
+  - spotlight_color
+  - applause_audio_url
+
+6. Form giao vien can bo sung
+- Khu "Loai bai hoc":
+  - 2D
+  - Video
+  - 3D hinh khoi
+  - San khau nhac cu
+- Khu "Asset":
+  - upload model GLB
+  - upload anh preview
+  - upload intro audio
+  - upload am thanh reward
+  - upload background music
+- Khu "Intro":
+  - tieu de intro
+  - loi dan intro
+  - bat/tat intro tu dong
+  - thoi luong intro
+- Khu "Hieu ung":
+  - muc do hieu ung
+  - mau den san khau
+  - mau spotlight
+  - bat/tat particle, glow, wave
+- Khu "Tuong tac":
+  - cho phep xoay model
+  - cho phep zoom
+  - cho phep cham diem nong
+  - so lan nhac lai audio
+- Khu "Dap an":
+  - dap an dung
+  - cach reward khi dung
+  - cach goi y khi sai
+
+7. Bo tri giao dien bai hinh khoi 3D
+- Man hinh nen chia 3 vung:
+  - Tren: ten bai, huong dan ngan, nut nghe lai
+  - Giua: khung 3D lon chiem khoang 60 den 70 phan tram chieu cao
+  - Duoi: khu nut thao tac va dap an
+- Trong scene 3D:
+  - o giua la model chinh
+  - ben phai la nut xoay trai, xoay phai, phong to, thu nho
+  - ben duoi la cac the dap an hoac nhan ten hinh
+  - khi hoc sinh cham vao model, can phat glow quanh canh va doc ten hinh
+
+8. Luong trai nghiem de xuat cho bai hinh khoi
+- Intro 2 den 4 giay:
+  - nen toi nhe
+  - model bay vao giua man hinh
+  - camera xoay 1 vong ngan
+  - audio doc: "Day la hinh chop"
+- Giai doan quan sat:
+  - model dung nhe va quay cham
+  - hien label vao cac mat hoac dinh quan trong
+- Giai doan tuong tac:
+  - hoc sinh xoay model
+  - hoc sinh cham vao dap an dung
+  - neu la bai ghep hinh, hoc sinh keo vat the vao nhom dung
+- Giai doan reward:
+  - model phat sang
+  - vien sang chay quanh vat the
+  - phat voice khen + sao roi
+
+9. Nhan manh cho bai hinh khoi theo muc do
+- Muc nang:
+  - 1 model
+  - 1 cau hoi
+  - khong nhieu nut
+  - camera auto quay, hoc sinh chi can cham
+- Muc trung binh:
+  - 2 den 3 model
+  - cho phep xoay don gian
+  - co so sanh hinh nao la hinh chop, hinh nao la lang tru
+- Muc nhe:
+  - cho xoay 360 do
+  - them mat cat, label, ghost outline
+  - co the them mini game ghep vat the 3D vao cong dung dung
+
+10. Bo tri giao dien bai nhac cu
+- Man hinh nen nhu mot san khau mini:
+  - Tren: ten bai, ten nhac cu, nut nghe lai intro
+  - Giua: nhac cu 3D hoac nhan vat dang bieu dien
+  - Sau lung: background san khau, den mau, rem, halo
+  - Duoi: nut danh trong, go nhip, chon nhac cu, xem lai
+- Khong nen de giao dien qua phang.
+- Can co center focus ro vao nhac cu.
+
+11. Luong trai nghiem bai nhac cu hop ly
+- Intro 3 den 5 giay:
+  - rem mo ra hoac den bat sang
+  - nhac cu truot vao giua
+  - spotlight bat len
+  - audio dan: "Bay gio chung ta nghe tieng trong"
+- Giai doan bieu dien:
+  - nhac cu co idle animation
+  - neu la trong thi dua cui/trong rung nhe
+  - neu la sao thi tay ga/ong sao chuyen dong
+  - note particle bay ra theo nhip
+- Giai doan tuong tac:
+  - hoc sinh cham vao mat trong de danh
+  - hoac nghe xong roi chon dung nhac cu
+  - hoac xem mot doan ngan roi lap lai nhip
+- Giai doan reward:
+  - den flash theo nhip
+  - audio vo tay
+  - hieu ung sao, phao sang, ring light
+
+12. Hieu ung dam nhung van phai dung
+- Nen dung "dam" o cac diem nay:
+  - intro vao bai
+  - luc dap an dung
+  - luc nhac cu phat am thanh
+  - luc model 3D duoc chon dung
+- Khong nen dam lien tuc suot bai vi se met mat.
+- Cach chia muc hieu ung:
+  - low: glow nhe, 1 lop particle
+  - medium: glow + note particle + light pulse
+  - strong: them spotlight move, burst star, shake nhe, color flash theo nhip
+
+13. Cach bo tri asset cho bai hinh khoi
+- Moi hinh khoi can co:
+  - 1 file model GLB
+  - 1 thumbnail PNG
+  - 1 audio doc ten hinh
+  - 1 audio goi y
+  - 1 audio reward
+- Dat ten file ro rang:
+  - cube.glb
+  - pyramid.glb
+  - prism.glb
+  - pyramid-name.mp3
+  - pyramid-correct.mp3
+
+14. Cach bo tri asset cho bai nhac cu
+- Moi nhac cu can co:
+  - 1 model GLB hoac 1 sprite animation neu chua kip lam 3D that
+  - 1 audio single hit
+  - 1 audio demo ngan
+  - 1 intro audio
+  - 1 thumbnail
+- Dat ten file:
+  - drum.glb
+  - drum-hit.mp3
+  - drum-demo.mp3
+  - drum-intro.mp3
+
+15. De xuat component render bai hinh khoi
+- ShapeLessonScene can nhan props:
+  - modelUrl
+  - labels
+  - hotspots
+  - autoRotate
+  - effectLevel
+  - onSelectHotspot
+  - onCorrect
+- Hanh vi:
+  - load model
+  - set camera theo preset
+  - highlight hotspot khi cham
+  - phat audio ten hinh
+  - trigger reward effect khi dung
+
+16. De xuat component render bai nhac cu
+- InstrumentStageScene can nhan props:
+  - modelUrl
+  - introAudioUrl
+  - performanceAudioUrl
+  - beatBpm
+  - stageTheme
+  - effectLevel
+  - interactionMode
+  - onBeatHit
+  - onComplete
+- Hanh vi:
+  - mo intro overlay
+  - sau intro thi mo san khau
+  - sync animation voi beat
+  - cham vao vung nhac cu thi phat sample sound
+  - dap dung thi mo applause
+
+17. Goi y bo tri trong ActivityRenderer
+- Khi parse config_json, neu scene_type = shape_3d thi render ShapeLessonScene.
+- Khi scene_type = instrument_stage thi render InstrumentStageScene.
+- Can co cleanup audio va animation khi hoc sinh thoat giua chung, tranh lap lai loi audio dang gap.
+- Khi doi activity phai:
+  - stop audio intro
+  - stop background music
+  - dispose model va texture
+  - clear animation frame
+
+18. Goi y cho form LessonsPage cua giao vien
+- O buoc them step, neu giao vien chon media_kind = 3d thi:
+  - hien them o upload model
+  - hien them camera preset
+  - hien them effect level
+  - hien them danh sach hotspot
+- Neu chon loai san khau nhac cu thi:
+  - hien them intro
+  - hien them beat
+  - hien them audio tung nhac cu
+  - hien them chon background san khau
+
+19. Trinh tu lam de khong vo du an
+- Phase 1:
+  - dung 1 bai hinh khoi 3D demo
+  - dung 1 bai trong ao demo
+  - chi render phia hoc sinh
+- Phase 2:
+  - mo rong form giao vien
+  - luu config_json day du
+  - preview ngay tai giao vien
+- Phase 3:
+  - them reward effect dep hon
+  - them 3D cho cac bai lien quan khac
+  - toi uu mobile
+
+20. Uu tien nen lam truoc
+- Uu tien 1: bai Toan co hinh khoi o muc trung binh va muc nhe
+- Uu tien 2: bai Am nhac co trong ao, nghe doan nhac cu, va san khau mini
+- Uu tien 3: cac bai my thuat dang co tao hinh 3D co the dung chung engine
+
+21. Ket luan de team thuc hien
+- Hinh khoi phai chuyen thanh 3D that, khong de mo ta 3D ma man hinh van la anh/video gia lap.
+- Nhac cu phai co intro, san khau, animation va am thanh theo nhip de hoc sinh thay "dang bieu dien".
+- Form giao vien phai dieu khien duoc model, intro, effect, audio, dap an.
+- Renderer hoc sinh phai co 2 che do moi:
+  - ShapeLessonScene
+  - InstrumentStageScene
+- Neu lam dung huong nay thi bai hoc se dep hon, co cam giac cao cap hon, va dung hon voi yeu cau cua ban.

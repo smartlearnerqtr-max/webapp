@@ -23,6 +23,7 @@ class TeacherProfile(TimestampMixin, db.Model):
     parent_links = relationship("ParentStudentLink", back_populates="teacher", foreign_keys="ParentStudentLink.linked_by_teacher_id")
     parent_group_links = relationship("TeacherParentStudentLink", back_populates="teacher", cascade="all, delete-orphan")
     parent_reports = relationship("ParentDailyReport", back_populates="teacher", foreign_keys="ParentDailyReport.teacher_id")
+    career_cards = relationship("TeacherCareerCard", back_populates="teacher", cascade="all, delete-orphan")
 
     def to_dict(self) -> dict[str, object]:
         return {"id": self.id, "user_id": self.user_id, "full_name": self.full_name, "school_name": self.school_name, "avatar_url": self.avatar_url, "note": self.note}

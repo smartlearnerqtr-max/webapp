@@ -493,7 +493,7 @@ export type UploadedMediaItem = {
   url: string
   filename: string
   original_name: string
-  media_kind: 'image' | 'video'
+  media_kind: 'image' | 'video' | 'audio'
 }
 
 export type LogItem = {
@@ -561,6 +561,31 @@ export type TeacherSharedStudentItem = {
   }>
   my_active_class_count: number
   parent_group_count: number
+}
+
+export type CareerCardStep = {
+  title: string
+  description: string
+}
+
+export type CareerCardItem = {
+  id: number
+  teacher_id: number
+  title: string
+  description: string | null
+  cover_image_url: string | null
+  meaning_title: string
+  meaning_text: string
+  video_url: string | null
+  video_note: string | null
+  steps: CareerCardStep[]
+  skills: string[]
+  levels: Array<'nang' | 'trung_binh' | 'nhe'>
+  status: string
+  sort_order: number
+  created_at: string | null
+  updated_at: string | null
+  teacher: TeacherContactItem | null
 }
 
 export async function fetchHealth(): Promise<HealthResponse> {
@@ -672,6 +697,61 @@ export async function fetchMyTeachers(token: string): Promise<StudentTeacherLink
 
 export async function fetchTeacherSharedStudents(token: string): Promise<TeacherSharedStudentItem[]> {
   return request<TeacherSharedStudentItem[]>('/api/v1/teacher/shared-students', { token })
+}
+
+export async function fetchTeacherCareerCards(token: string): Promise<CareerCardItem[]> {
+  return request<CareerCardItem[]>('/api/v1/teacher/career-cards', { token })
+}
+
+export async function createTeacherCareerCard(token: string, payload: {
+  title: string
+  description?: string
+  cover_image_url?: string | null
+  meaning_title?: string
+  meaning_text: string
+  video_url?: string | null
+  video_note?: string
+  steps?: CareerCardStep[]
+  skills?: string[]
+  levels?: Array<'nang' | 'trung_binh' | 'nhe'>
+  sort_order?: number
+}) {
+  return request<CareerCardItem>('/api/v1/teacher/career-cards', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function updateTeacherCareerCard(token: string, cardId: number, payload: {
+  title?: string
+  description?: string
+  cover_image_url?: string | null
+  meaning_title?: string
+  meaning_text?: string
+  video_url?: string | null
+  video_note?: string
+  steps?: CareerCardStep[]
+  skills?: string[]
+  levels?: Array<'nang' | 'trung_binh' | 'nhe'>
+  sort_order?: number
+}) {
+  return request<CareerCardItem>(`/api/v1/teacher/career-cards/${cardId}`, {
+    method: 'PUT',
+    token,
+    body: payload,
+  })
+}
+
+export async function deleteTeacherCareerCard(token: string, cardId: number) {
+  return request<null>(`/api/v1/teacher/career-cards/${cardId}`, {
+    method: 'DELETE',
+    token,
+  })
+}
+
+export async function fetchMyCareerCards(token: string): Promise<CareerCardItem[]> {
+  return request<CareerCardItem[]>('/api/v1/my/career-cards', { token })
 }
 
 export async function createStudent(token: string, payload: { full_name: string; disability_level: string }) {

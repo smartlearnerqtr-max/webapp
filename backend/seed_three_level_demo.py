@@ -28,7 +28,7 @@ from app.models import (
 from app.utils.security import hash_password
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-TEMPLATE_SOURCE = REPO_ROOT / "frontend" / "src" / "pages" / "LessonsPage.tsx"
+TEMPLATE_SOURCE = REPO_ROOT / "frontend" / "src" / "data" / "lessonTemplates.ts"
 
 TEACHER_EMAIL = "teacher.levels.demo@example.com"
 TEACHER_PASSWORD = "Teacher123!"
@@ -56,12 +56,6 @@ STUDENT_DEMOS = [
     },
 ]
 
-LEVEL_MARKERS = {
-    "nhe": "const LIGHT_LEVEL_LESSON_TEMPLATES",
-    "trung_binh": "const MEDIUM_LEVEL_LESSON_TEMPLATES",
-    "nang": "const HEAVY_LEVEL_LESSON_TEMPLATES",
-}
-
 LEVEL_LABELS = {
     "nhe": "nhẹ",
     "trung_binh": "trung bình",
@@ -82,7 +76,7 @@ def build_subject_code(name: str) -> str:
     return f"DEMO_{code.upper()}"[:50]
 
 
-def extract_array_block(source: str, marker: str) -> str:
+def extract_object_block(source: str, marker: str) -> str:
     marker_index = source.find(marker)
     if marker_index < 0:
         raise RuntimeError(f"Không tìm thấy marker: {marker}")
@@ -91,7 +85,7 @@ def extract_array_block(source: str, marker: str) -> str:
     if equals_index < 0:
         raise RuntimeError(f"Không tìm thấy dấu gán mảng cho marker: {marker}")
 
-    start_index = source.find("[", equals_index)
+    start_index = source.find("{", equals_index)
     if start_index < 0:
         raise RuntimeError(f"Không tìm thấy dấu mở mảng cho marker: {marker}")
 
@@ -113,9 +107,9 @@ def extract_array_block(source: str, marker: str) -> str:
         if char in {"'", '"', "`"}:
             in_string = char
             continue
-        if char == "[":
+        if char == "{":
             depth += 1
-        elif char == "]":
+        elif char == "}":
             depth -= 1
             if depth == 0:
                 return source[start_index:index + 1]
@@ -123,18 +117,18 @@ def extract_array_block(source: str, marker: str) -> str:
     raise RuntimeError(f"Không đóng được mảng cho marker: {marker}")
 
 
-def evaluate_javascript_array(array_block: str) -> list[dict[str, object]]:
+def evaluate_javascript_object(object_block: str) -> dict[str, list[dict[str, object]]]:
     script = """
 const fs = require('node:fs');
 const vm = require('node:vm');
 
 const source = fs.readFileSync(0, 'utf8');
-const value = vm.runInNewContext(source);
+const value = vm.runInNewContext(`(${source})`);
 process.stdout.write(JSON.stringify(value));
 """
     result = subprocess.run(
         ["node", "-e", script],
-        input=array_block,
+        input=object_block,
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -147,10 +141,10 @@ process.stdout.write(JSON.stringify(value));
 
 def load_teacher_templates() -> dict[str, list[dict[str, object]]]:
     source = TEMPLATE_SOURCE.read_text(encoding="utf-8")
-    templates_by_level: dict[str, list[dict[str, object]]] = {}
-    for level, marker in LEVEL_MARKERS.items():
-        array_block = extract_array_block(source, marker)
-        templates_by_level[level] = evaluate_javascript_array(array_block)
+    object_block = extract_object_block(source, "export const SUBJECT_TEMPLATES")
+    templates_by_level = evaluate_javascript_object(object_block)
+    if not isinstance(templates_by_level, dict):
+        raise RuntimeError("Dữ liệu SUBJECT_TEMPLATES không hợp lệ.")
     return templates_by_level
 
 
@@ -352,7 +346,8 @@ def upsert_lesson_from_template(
     lesson.description = "\n".join(part for part in description_parts if part)
     lesson.primary_level = level
     lesson.estimated_minutes = int(template.get("estimatedMinutes") or 15)
-    lesson.difficulty_stage = 1
+    level_map = {"nhe": 1, "trung_binh": 2, "nang": 3}
+    lesson.difficulty_stage = level_map.get(level, 1)
     lesson.is_published = True
     lesson.is_archived = False
     db.session.flush()
@@ -388,7 +383,7 @@ def upsert_lesson_from_template(
         activity.voice_answer_enabled = bool(activity_payload.get("voiceAnswerEnabled", False))
         activity.is_required = True
         activity.sort_order = index
-        activity.difficulty_stage = 1
+        activity.difficulty_stage = level_map.get(level, 1)
         activity.config_json = json.dumps(activity_payload.get("config") or {}, ensure_ascii=False)
 
     return lesson

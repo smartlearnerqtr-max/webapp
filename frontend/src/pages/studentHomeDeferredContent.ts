@@ -130,7 +130,7 @@ export function loadCareerPreviewCards() {
   return careerPreviewCards
 }
 
-export function buildStandaloneGameActivity(activityType: StudentGameActivityType): LessonActivityItem {
+export function buildStandaloneGameActivity(activityType: StudentGameActivityType, levelKey: string): LessonActivityItem {
   const gameConfigs: Record<StudentGameActivityType, { id: number; title: string; config: Record<string, unknown> }> = {
     memory_match: {
       id: -101,
@@ -169,7 +169,7 @@ export function buildStandaloneGameActivity(activityType: StudentGameActivityTyp
       title: 'Xếp hình di tích',
       config: {
         kind: 'image_puzzle',
-        prompt: 'Ghép 4 mảnh để hoàn thành bức ảnh di tích.',
+        prompt: 'Ghép các mảnh để hoàn thành bức ảnh di tích.',
         image_url: '/demo-media/nha.webp',
         rows: 2,
         cols: 2,
@@ -207,7 +207,7 @@ export function buildStandaloneGameActivity(activityType: StudentGameActivityTyp
     voice_answer_enabled: false,
     is_required: true,
     sort_order: 1,
-    difficulty_stage: 1,
+    difficulty_stage: levelKey === 'nhe' ? 1 : levelKey === 'trung_binh' ? 2 : levelKey === 'nang' ? 3 : 1,
     config_json: JSON.stringify(selectedGame.config),
   }
 }

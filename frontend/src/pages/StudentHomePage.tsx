@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { LazyActivityCard } from '../components/activities/LazyActivityCard'
 import { RequireAuth } from '../components/RequireAuth'
 import {
+  fetchMyCareerCards,
   completeMyAssignment,
   fetchMyAssignment,
   fetchMyAssignments,
@@ -17,6 +18,7 @@ import {
   updateMyStudentLevel,
   updateMyAssignmentProgress,
   type ClassItem,
+  type CareerCardItem,
   type LessonActivityItem,
   type MyAssignmentDetail,
   type MyAssignmentItem,
@@ -35,7 +37,7 @@ import {
 } from './studentHomeMeta'
 import { useAuthStore } from '../store/authStore'
 import { syncStudentFeed, type StudentFeedItem } from '../utils/studentFeedStore'
-import type { CareerDetailMeta, CommunicationCard } from './studentHomeDeferredContent'
+import type { CommunicationCard } from './studentHomeDeferredContent'
 
 const studentBackgroundImageUrl = '/student-ui/anh4.jpg'
 
@@ -162,6 +164,26 @@ type CareerVoiceTurn = {
   aiText: string
 }
 
+type CareerDetailStep = {
+  title: string
+  description: string
+}
+
+type CareerDetailMeta = {
+  key: string
+  title: string
+  description: string
+  coverImageUrl: string
+  meaningTitle: string
+  meaningText: string
+  videoEmbedUrl: string
+  rawVideoUrl: string
+  videoNote: string
+  steps: CareerDetailStep[]
+  skills: string[]
+  levels: StudentEntryLevelKey[]
+}
+
 const cleanStatusLabelMap: Record<string, string> = {
   not_started: 'Mới',
   in_progress: 'Đang học',
@@ -247,10 +269,35 @@ function normalizeLookupText(value: string | null | undefined) {
     .trim()
 }
 
+function lookupContainsAlias(haystack: string, alias: string) {
+  if (!haystack || !alias) return false
+
+  const haystackTokens = haystack.split(/\s+/).filter(Boolean)
+  const aliasTokens = alias.split(/\s+/).filter(Boolean)
+  if (!haystackTokens.length || !aliasTokens.length) return false
+
+  for (let startIndex = 0; startIndex <= haystackTokens.length - aliasTokens.length; startIndex += 1) {
+    let matches = true
+    for (let offset = 0; offset < aliasTokens.length; offset += 1) {
+      if (haystackTokens[startIndex + offset] !== aliasTokens[offset]) {
+        matches = false
+        break
+      }
+    }
+    if (matches) return true
+  }
+
+  return false
+}
+
 function matchStudentSubject(subjectName: string | null | undefined, lessonTitle: string | null | undefined) {
   const haystack = `${normalizeLookupText(subjectName)} ${normalizeLookupText(lessonTitle)}`.trim()
   if (!haystack) return null
-  return studentSubjectCatalog.find((item) => item.aliases.some((alias) => haystack.includes(alias))) ?? null
+  return (
+    studentSubjectCatalog.find((item) =>
+      item.aliases.some((alias) => lookupContainsAlias(haystack, normalizeLookupText(alias))),
+    ) ?? null
+  )
 }
 
 function resolveAssignmentSubjectMeta(assignment: MyAssignmentItem | null | undefined) {
@@ -269,6 +316,59 @@ function assignmentMatchesStudentLevel(assignment: MyAssignmentItem | null | und
   const lessonLevel = resolveAssignmentPrimaryLevel(assignment)
   if (!lessonLevel) return true
   return lessonLevel === studentLevel
+}
+
+function normalizeCareerEmbedUrl(rawUrl: string) {
+  const trimmedUrl = rawUrl.trim()
+  if (!trimmedUrl) return ''
+  try {
+    const url = new URL(trimmedUrl)
+    const host = url.hostname.toLowerCase()
+    if (host.includes('youtu.be')) {
+      const videoId = url.pathname.split('/').filter(Boolean)[0]
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : ''
+    }
+    if (host.includes('youtube.com')) {
+      if (url.pathname.startsWith('/embed/')) return trimmedUrl
+      const videoId = url.searchParams.get('v')
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : ''
+    }
+    if (host.includes('drive.google.com')) {
+      const fileMatch = url.pathname.match(/\/file\/d\/([^/]+)/)
+      if (fileMatch?.[1]) return `https://drive.google.com/file/d/${fileMatch[1]}/preview`
+      const fileId = url.searchParams.get('id')
+      return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : ''
+    }
+    if (host.includes('tiktok.com')) {
+      const pathname = url.pathname.replace(/\/$/, '')
+      return pathname ? `https://www.tiktok.com/embed/v2${pathname}` : ''
+    }
+  } catch {
+    return ''
+  }
+  return ''
+}
+
+function isDirectCareerVideoUrl(rawUrl: string) {
+  return /\.(mp4|webm|ogg|mov)(?:$|\?)/i.test(rawUrl.trim()) || rawUrl.includes('/api/v1/media/files/')
+}
+
+function mapCareerCardItemToMeta(card: CareerCardItem): CareerDetailMeta {
+  const rawVideoUrl = card.video_url ?? ''
+  return {
+    key: `career-${card.id}`,
+    title: card.title,
+    description: card.description?.trim() || card.meaning_text,
+    coverImageUrl: card.cover_image_url?.trim() || studentBackgroundImageUrl,
+    meaningTitle: card.meaning_title,
+    meaningText: card.meaning_text,
+    videoEmbedUrl: normalizeCareerEmbedUrl(rawVideoUrl),
+    rawVideoUrl,
+    videoNote: card.video_note?.trim() || 'Video giúp em nhìn rõ công việc và học từng bước dễ hơn.',
+    steps: card.steps.length ? card.steps : [{ title: 'Bước 1', description: 'Giáo viên chưa nhập chi tiết.' }],
+    skills: card.skills,
+    levels: card.levels.length ? card.levels : ['nhe'],
+  }
 }
 
 function renderStudentSubjectArtwork(subjectMeta: StudentSubjectMeta | null | undefined, fallbackSrc: string) {
@@ -349,6 +449,11 @@ function resolveActivityGuidanceAudioUrl(activity: LessonActivityItem) {
 function resolveActivityGuidanceText(activity: LessonActivityItem) {
   const config = parseActivityConfig(activity.config_json)
   return textFromConfig(config?.guidance_text) || textFromConfig(config?.prompt) || activity.instruction_text || activity.title
+}
+
+function activityHasEmbeddedPromptAudio(activity: LessonActivityItem) {
+  const config = parseActivityConfig(activity.config_json)
+  return Boolean(textFromConfig(config?.audio_text) || textFromConfig(config?.audio_url))
 }
 
 function isLocalEmbeddedWatchActivity(activity: LessonActivityItem | null) {
@@ -449,14 +554,85 @@ let activeGuidancePlaybackToken = 0
 let activeGuidanceAudioUrl: string | null = null
 let activeGuidanceAudioShouldRevoke = false
 
+function selectSpeechSynthesisVoice(lang: string) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null
+  const voices = window.speechSynthesis.getVoices()
+  if (!voices.length) return null
+
+  const normalizedLang = lang.trim().toLowerCase()
+  const exactMatch = voices.find((voice) => voice.lang.toLowerCase() === normalizedLang)
+  if (exactMatch) return exactMatch
+
+  const languagePrefix = normalizedLang.split('-')[0]
+  const prefixMatch = voices.find((voice) => voice.lang.toLowerCase().startsWith(languagePrefix))
+  if (prefixMatch) return prefixMatch
+
+  if (languagePrefix === 'vi') {
+    return voices.find((voice) => /viet|vietnam|linh|hoai|mai|an/i.test(voice.name)) ?? null
+  }
+
+  return null
+}
+
 function clearActiveGuidanceAudio() {
   activeGuidanceAudio?.pause()
   activeGuidanceAudio = null
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel()
+  }
   if (activeGuidanceAudioShouldRevoke && activeGuidanceAudioUrl?.startsWith('blob:')) {
     window.URL.revokeObjectURL(activeGuidanceAudioUrl)
   }
   activeGuidanceAudioUrl = null
   activeGuidanceAudioShouldRevoke = false
+}
+
+async function playStudentGuidanceText(text: string, lang = 'vi-VN') {
+  if (typeof window === 'undefined' || typeof SpeechSynthesisUtterance === 'undefined') return false
+  const cleanText = text.trim()
+  if (!cleanText || !('speechSynthesis' in window)) return false
+
+  activeGuidancePlaybackToken += 1
+  const playbackToken = activeGuidancePlaybackToken
+  clearActiveGuidanceAudio()
+
+  return await new Promise<boolean>((resolve) => {
+    let isSettled = false
+    const utterance = new SpeechSynthesisUtterance(cleanText)
+    const selectedVoice = selectSpeechSynthesisVoice(lang)
+    const cancelWatcher = window.setInterval(() => {
+      if (playbackToken !== activeGuidancePlaybackToken) {
+        window.clearInterval(cancelWatcher)
+        finish(false)
+      }
+    }, 120)
+
+    const finish = (result: boolean) => {
+      if (isSettled) return
+      isSettled = true
+      window.clearInterval(cancelWatcher)
+      if (playbackToken === activeGuidancePlaybackToken) {
+        window.speechSynthesis.cancel()
+      }
+      resolve(result)
+    }
+
+    utterance.lang = lang
+    if (selectedVoice) {
+      utterance.voice = selectedVoice
+    }
+    utterance.rate = 0.92
+    utterance.pitch = 1
+    utterance.onend = () => finish(true)
+    utterance.onerror = () => finish(false)
+
+    try {
+      window.speechSynthesis.cancel()
+      window.speechSynthesis.speak(utterance)
+    } catch {
+      finish(false)
+    }
+  })
 }
 
 function speechRecognitionConstructor(): BrowserSpeechRecognitionConstructor | null {
@@ -480,13 +656,14 @@ async function playStudentEncouragement(token: string, message: string, cachedAu
   stopStudentEncouragement()
   try {
     if (cachedAudioUrl) {
-      return await playStudentGuidanceAudio(cachedAudioUrl)
+      const played = await playStudentGuidanceAudio(cachedAudioUrl)
+      if (played) return true
     }
     const audioBlob = await synthesizeAISpeech(token, { text: message })
     const audioUrl = URL.createObjectURL(audioBlob)
     return await playStudentGuidanceAudio(audioUrl, { revokeOnEnd: true })
   } catch {
-    return false
+    return await playStudentGuidanceText(message)
   }
 }
 
@@ -955,14 +1132,13 @@ export function StudentHomePage() {
   const [activeStandaloneGameType, setActiveStandaloneGameType] = useState<StudentGameActivityType | null>(null)
   const [standaloneGameActivity, setStandaloneGameActivity] = useState<LessonActivityItem | null>(null)
   const [isStandaloneGameLoading, setIsStandaloneGameLoading] = useState(false)
-  const [careerPreviewCards, setCareerPreviewCards] = useState<CareerDetailMeta[]>([])
-  const [isCareerPreviewLoading, setIsCareerPreviewLoading] = useState(false)
   const [communicationCards, setCommunicationCards] = useState<CommunicationCard[]>([])
   const [isCommunicationCardsLoading, setIsCommunicationCardsLoading] = useState(false)
   const [aiPromptCards, setAiPromptCards] = useState<string[]>([])
   const [isAiPromptCardsLoading, setIsAiPromptCardsLoading] = useState(false)
   const learningBaseSecondsRef = useRef(0)
   const learningSessionStartedAtRef = useRef<number | null>(null)
+  const lessonAudioSessionRef = useRef(0)
   const lastAutoSyncKeyRef = useRef('')
   const autoActionKeyRef = useRef('')
   const activityCelebrationTimeoutRef = useRef<number | null>(null)
@@ -1009,29 +1185,6 @@ export function StudentHomePage() {
       document.body.style.overflow = originalOverflow
     }
   }, [hasCompletedEntryGate, user?.role])
-
-  useEffect(() => {
-    const shouldLoadCareerContent = activePanel === 'learning' || activePanel === 'ai' || Boolean(selectedCareerKey)
-    if (!shouldLoadCareerContent || careerPreviewCards.length) return
-
-    let cancelled = false
-    setIsCareerPreviewLoading(true)
-
-    void import('./studentHomeDeferredContent')
-      .then((module) => {
-        if (cancelled) return
-        setCareerPreviewCards(module.loadCareerPreviewCards())
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsCareerPreviewLoading(false)
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [activePanel, careerPreviewCards.length, selectedCareerKey])
 
   useEffect(() => {
     if (activePanel !== 'communication' || communicationCards.length) return
@@ -1095,6 +1248,15 @@ export function StudentHomePage() {
     enabled: Boolean(token && user?.role === 'student'),
   })
 
+  const careerCardsQuery = useQuery({
+    queryKey: ['my-career-cards', token],
+    queryFn: async () => {
+      const cards = await fetchMyCareerCards(token!)
+      return cards.map(mapCareerCardItemToMeta)
+    },
+    enabled: Boolean(token && user?.role === 'student'),
+  })
+
   const effectiveSelectedAssignmentId = selectedAssignmentId
 
   const assignmentDetailQuery = useQuery({
@@ -1114,8 +1276,13 @@ export function StudentHomePage() {
     ])
   }
 
-  const resetActivityAnswers = () => {
+  const cancelLessonAudio = () => {
+    lessonAudioSessionRef.current += 1
     stopStudentGuidance()
+  }
+
+  const resetActivityAnswers = () => {
+    cancelLessonAudio()
     stopStudentEncouragement()
     clearActivityCelebration()
     setChoiceAnswers({})
@@ -1131,7 +1298,7 @@ export function StudentHomePage() {
   }
 
   const closeLessonView = () => {
-    stopStudentGuidance()
+    cancelLessonAudio()
     setSelectedAssignmentId(null)
     handleStudentPanelChange('learning')
     resetActivityAnswers()
@@ -1140,7 +1307,7 @@ export function StudentHomePage() {
   }
 
   const handleSelectSubject = (subjectKey: string) => {
-    stopStudentGuidance()
+    cancelLessonAudio()
     setSelectedSubjectKey(subjectKey)
     setSelectedAssignmentId(null)
     setCompletedLessonTitle('')
@@ -1152,7 +1319,7 @@ export function StudentHomePage() {
   }
 
   const handleBackToSubjects = () => {
-    stopStudentGuidance()
+    cancelLessonAudio()
     setSelectedSubjectKey(null)
     setSelectedAssignmentId(null)
     setCompletedLessonTitle('')
@@ -1164,7 +1331,7 @@ export function StudentHomePage() {
   }
 
   const closeStandaloneGame = () => {
-    stopStudentGuidance()
+    cancelLessonAudio()
     setActiveStandaloneGameType(null)
     setCompletionSummary(null)
     setActiveActivityIndex(0)
@@ -1174,7 +1341,7 @@ export function StudentHomePage() {
   const openCareerDetail = (careerKey: string) => {
     if (!availableCareerCards.some((item) => item.key === careerKey)) return
     stopCareerAudio()
-    stopStudentGuidance()
+    cancelLessonAudio()
     setActiveCareerMeaningKey(null)
     setCareerMeaningError(null)
     setSelectedCareerKey(careerKey)
@@ -1182,7 +1349,7 @@ export function StudentHomePage() {
 
   const closeCareerDetail = () => {
     stopCareerAudio()
-    stopStudentGuidance()
+    cancelLessonAudio()
     setIsCareerMeaningSpeaking(false)
     setActiveCareerMeaningKey(null)
     setCareerMeaningError(null)
@@ -1542,8 +1709,8 @@ export function StudentHomePage() {
   )
 
   const availableCareerCards = useMemo(
-    () => careerPreviewCards.filter((item) => contentMatchesStudentLevel(item.levels, currentStudentLevel)),
-    [careerPreviewCards, currentStudentLevel],
+    () => (careerCardsQuery.data ?? []).filter((item) => contentMatchesStudentLevel(item.levels, currentStudentLevel)),
+    [careerCardsQuery.data, currentStudentLevel],
   )
 
   const subjectCards = useMemo(
@@ -1618,7 +1785,7 @@ export function StudentHomePage() {
     void import('./studentHomeDeferredContent')
       .then((module) => {
         if (cancelled) return
-        setStandaloneGameActivity(module.buildStandaloneGameActivity(activeStandaloneGameType))
+        setStandaloneGameActivity(module.buildStandaloneGameActivity(activeStandaloneGameType, currentStudentLevel))
       })
       .finally(() => {
         if (!cancelled) {
@@ -1650,13 +1817,16 @@ export function StudentHomePage() {
   const currentActivityGuidanceAudioUrl = currentActivity ? resolveActivityGuidanceAudioUrl(currentActivity) : ''
   const playActivityGuidance = async (activity: LessonActivityItem | null) => {
     if (!activity) return false
+    const playbackSession = lessonAudioSessionRef.current
+    const isPlaybackStillAllowed = () => lessonAudioSessionRef.current === playbackSession
     const guidanceAudioUrl = resolveActivityGuidanceAudioUrl(activity)
+    const guidanceText = resolveActivityGuidanceText(activity)
     if (guidanceAudioUrl) {
+      if (!isPlaybackStillAllowed()) return false
       const played = await playStudentGuidanceAudio(guidanceAudioUrl)
       if (played) return true
     }
 
-    const guidanceText = resolveActivityGuidanceText(activity)
     if (!token || !guidanceText.trim()) return false
 
     try {
@@ -1667,11 +1837,16 @@ export function StudentHomePage() {
         lessonActivities.length,
       )
       const audioBlob = await synthesizeAISpeech(token, { text: detailedGuidanceText || guidanceText })
+      if (!isPlaybackStillAllowed()) return false
       const audioUrl = window.URL.createObjectURL(audioBlob)
-      return await playStudentGuidanceAudio(audioUrl, { revokeOnEnd: true })
+      const played = await playStudentGuidanceAudio(audioUrl, { revokeOnEnd: true })
+      if (played) return true
     } catch {
-      return false
+      // Fall through to browser speech synthesis below.
     }
+
+    if (!isPlaybackStillAllowed()) return false
+    return await playStudentGuidanceText(guidanceText)
   }
 
   const clearActivityCelebration = () => {
@@ -1706,6 +1881,7 @@ export function StudentHomePage() {
 
   useEffect(() => {
     if (!currentActivity || activePanel !== 'learning' || completionSummary) return
+    if (activityHasEmbeddedPromptAudio(currentActivity)) return
     if (spokenActivityIdsRef.current.has(currentActivity.id)) return
 
     spokenActivityIdsRef.current.add(currentActivity.id)
@@ -1718,6 +1894,7 @@ export function StudentHomePage() {
   }, [activePanel, completionSummary, currentActivity, currentActivityGuidanceAudioUrl, token])
 
   useEffect(() => () => {
+    lessonAudioSessionRef.current += 1
     stopStudentGuidance()
     stopStudentEncouragement()
     if (activityCelebrationTimeoutRef.current !== null) {
@@ -2421,8 +2598,8 @@ export function StudentHomePage() {
                 <p>{item.description}</p>
               </button>
             ))}
-            {isCareerPreviewLoading && !availableCareerCards.length ? <p className="helper-text">Đang tải nội dung nghề nghiệp...</p> : null}
-            {!isCareerPreviewLoading && !availableCareerCards.length ? <p className="helper-text">{`Mức ${currentStudentLevelLabel} chưa có nội dung hướng nghiệp riêng.`}</p> : null}
+            {careerCardsQuery.isLoading && !availableCareerCards.length ? <p className="helper-text">Đang tải nội dung nghề nghiệp...</p> : null}
+            {!careerCardsQuery.isLoading && !availableCareerCards.length ? <p className="helper-text">{`Mức ${currentStudentLevelLabel} chưa có nội dung hướng nghiệp riêng.`}</p> : null}
           </div>
       </article>
     </section>
@@ -2580,21 +2757,30 @@ export function StudentHomePage() {
           >
             <div className="ichan-career-meaning-head">
               <strong>{selectedCareerCard.meaningTitle}</strong>
-              <span>{isCareerMeaningSpeaking ? 'Đang đọc' : 'Bấm để nghe'}</span>
+              <span>{activeCareerMeaningKey === selectedCareerCard.key && isCareerMeaningSpeaking ? 'Đang đọc' : 'Bấm để nghe'}</span>
             </div>
-            {activeCareerMeaningKey === selectedCareerCard.key ? <p>{selectedCareerCard.meaningText}</p> : null}
+            <p>{selectedCareerCard.meaningText}</p>
           </button>
 
           {careerMeaningError ? <p className="error-text">{careerMeaningError}</p> : null}
 
           <div className="ichan-career-video-shell">
-            <iframe
-              src={selectedCareerCard.videoEmbedUrl}
-              title={`Video nghề nghiệp ${selectedCareerCard.title}`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
+            {selectedCareerCard.videoEmbedUrl ? (
+              <iframe
+                src={selectedCareerCard.videoEmbedUrl}
+                title={`Video nghề nghiệp ${selectedCareerCard.title}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            ) : isDirectCareerVideoUrl(selectedCareerCard.rawVideoUrl) ? (
+              <video src={selectedCareerCard.rawVideoUrl} controls preload="metadata" playsInline />
+            ) : (
+              <div className="ichan-career-video-note">
+                <span>✦</span>
+                <p>Giáo viên chưa thêm video cho nghề này.</p>
+              </div>
+            )}
           </div>
 
           <div className="ichan-career-video-note">
@@ -2742,8 +2928,8 @@ export function StudentHomePage() {
                 <p>{item.description}</p>
               </article>
             ))}
-            {isCareerPreviewLoading && !availableCareerCards.length ? <p className="helper-text">Đang tải gợi ý nghề nghiệp...</p> : null}
-            {!isCareerPreviewLoading && !availableCareerCards.length ? <p className="helper-text">{`Mức ${currentStudentLevelLabel} chưa có gợi ý nghề nghiệp riêng.`}</p> : null}
+            {careerCardsQuery.isLoading && !availableCareerCards.length ? <p className="helper-text">Đang tải gợi ý nghề nghiệp...</p> : null}
+            {!careerCardsQuery.isLoading && !availableCareerCards.length ? <p className="helper-text">{`Mức ${currentStudentLevelLabel} chưa có gợi ý nghề nghiệp riêng.`}</p> : null}
           </div>
       </article>
 

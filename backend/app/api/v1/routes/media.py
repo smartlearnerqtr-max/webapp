@@ -13,6 +13,7 @@ from .. import api_v1
 
 ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
 ALLOWED_VIDEO_EXTENSIONS = {'.mp4', '.webm', '.ogg', '.mov'}
+ALLOWED_AUDIO_EXTENSIONS = {'.mp3', '.wav', '.m4a', '.aac', '.oga', '.ogg', '.flac'}
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 
 
@@ -47,13 +48,22 @@ def upload_media():
 
     original_name = secure_filename(upload.filename)
     extension = Path(original_name).suffix.lower()
+    mimetype = (upload.mimetype or '').lower()
 
-    if extension in ALLOWED_IMAGE_EXTENSIONS:
+    if mimetype.startswith('audio/') and extension in (ALLOWED_AUDIO_EXTENSIONS | ALLOWED_VIDEO_EXTENSIONS):
+        media_kind = 'audio'
+    elif mimetype.startswith('video/') and extension in ALLOWED_VIDEO_EXTENSIONS:
+        media_kind = 'video'
+    elif mimetype.startswith('image/') and extension in ALLOWED_IMAGE_EXTENSIONS:
+        media_kind = 'image'
+    elif extension in ALLOWED_IMAGE_EXTENSIONS:
         media_kind = 'image'
     elif extension in ALLOWED_VIDEO_EXTENSIONS:
         media_kind = 'video'
+    elif extension in ALLOWED_AUDIO_EXTENSIONS:
+        media_kind = 'audio'
     else:
-        return error_response('Chi ho tro upload anh hoac video pho bien', 'FILE_TYPE_NOT_SUPPORTED', 422)
+        return error_response('Chi ho tro upload anh, video hoac audio pho bien', 'FILE_TYPE_NOT_SUPPORTED', 422)
 
     teacher_folder = _uploads_root() / f'teacher_{user.teacher_profile.id}'
     teacher_folder.mkdir(parents=True, exist_ok=True)

@@ -13,7 +13,11 @@ VALID_LEVELS = {"nang", "trung_binh", "nhe"}
 VALID_ACTIVITY_TYPES = {
     "multiple_choice",
     "image_choice",
+    "matching",
+    "drag_drop",
+    "listen_choose",
     "watch_answer",
+    "step_by_step",
     "aac",
     "image_puzzle",
     "hidden_image_guess",
@@ -21,6 +25,10 @@ VALID_ACTIVITY_TYPES = {
     "quick_tap",
     "size_order",
     "habitat_match",
+    "basket_toss",
+    "trash_cleanup",
+    "career_simulation",
+    "ai_chat",
 }
 
 

@@ -28,6 +28,18 @@
       background: radial-gradient(circle at top, #fffdf8, var(--bg));
       color: var(--ink);
     }
+    @keyframes pulseHalo {
+      0%, 100% { transform: scale(1); opacity: 0.72; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes floatGlow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
     .shell { padding: 16px; }
     .card {
       background: var(--panel);
@@ -502,23 +514,120 @@
     }
 
     function renderShapeSort() {
-      mountPickerBoard({
-        title: 'Phân loại hình khối',
-        subtitle: 'Kéo từng đồ vật vào đúng nhóm hình chóp hoặc lăng trụ đứng.',
-        success: 'Các vật đã được xếp đúng nhóm hình học rồi.',
-        slots: [
-          { id: 'chop-1', label: 'Nhóm hình chóp', placeholder: 'Đặt vật giống hình chóp vào đây.', answer: 'leu' },
-          { id: 'chop-2', label: 'Nhóm hình chóp', placeholder: 'Đặt vật giống hình chóp vào đây.', answer: 'mai-nha' },
-          { id: 'lang-tru-1', label: 'Nhóm lăng trụ', placeholder: 'Đặt vật giống lăng trụ vào đây.', answer: 'tu-lanh' },
-          { id: 'lang-tru-2', label: 'Nhóm lăng trụ', placeholder: 'Đặt vật giống lăng trụ vào đây.', answer: 'hop-sua' }
-        ],
-        cards: [
-          { id: 'leu', label: 'Cái lều', hint: 'Mái nhọn, đáy rộng.' },
-          { id: 'tu-lanh', label: 'Tủ lạnh', hint: 'Thân dài, mặt bên phẳng.' },
-          { id: 'hop-sua', label: 'Hộp sữa', hint: 'Dáng hộp đứng quen thuộc.' },
-          { id: 'mai-nha', label: 'Mái nhà', hint: 'Có đỉnh nhọn như hình chóp.' }
-        ]
-      });
+      let selected = null;
+      const state = {};
+      const items = [
+        { id: 'leu', label: 'Cái lều', hint: 'Mái nhọn, đáy rộng.', kind: 'pyramid', accent: '#f7b348', answer: 'chop' },
+        { id: 'mai-nha', label: 'Mái nhà', hint: 'Có đỉnh nhọn như hình chóp.', kind: 'roof', accent: '#ef8550', answer: 'chop' },
+        { id: 'tu-lanh', label: 'Tủ lạnh', hint: 'Thân dài, mặt bên phẳng.', kind: 'prism', accent: '#5ea4ff', answer: 'lang-tru' },
+        { id: 'hop-sua', label: 'Hộp sữa', hint: 'Dáng hộp đứng quen thuộc.', kind: 'prism', accent: '#6fd0c4', answer: 'lang-tru' }
+      ];
+      const groups = [
+        { id: 'chop', label: 'Nhóm hình chóp', copy: 'Đỉnh nhọn, các mặt gặp nhau ở phía trên.' },
+        { id: 'lang-tru', label: 'Nhóm lăng trụ', copy: 'Thân thẳng, nhiều mặt phẳng song song.' }
+      ];
+
+      function renderShapeObject(item, compact) {
+        if (item.kind === 'prism') {
+          return `
+            <div style="position:relative;width:${compact ? 74 : 94}px;height:${compact ? 74 : 94}px;display:grid;place-items:center;">
+              <div style="position:absolute;left:16px;top:22px;width:${compact ? 42 : 54}px;height:${compact ? 34 : 42}px;border-radius:14px;background:linear-gradient(135deg,${item.accent},#1d4f92);box-shadow:0 16px 24px rgba(29,79,146,0.22);"></div>
+              <div style="position:absolute;left:24px;top:14px;width:${compact ? 32 : 42}px;height:${compact ? 12 : 14}px;transform:skew(-34deg);border-radius:10px 10px 0 0;background:rgba(255,255,255,0.8);"></div>
+              <div style="position:absolute;right:10px;top:24px;width:${compact ? 14 : 16}px;height:${compact ? 36 : 44}px;transform:skewY(-34deg);border-radius:0 12px 12px 0;background:#193f77;"></div>
+            </div>
+          `;
+        }
+        return `
+          <div style="position:relative;width:${compact ? 74 : 94}px;height:${compact ? 74 : 94}px;display:grid;place-items:center;">
+            <div style="position:absolute;left:${compact ? 16 : 20}px;bottom:${compact ? 10 : 12}px;width:0;height:0;border-left:${compact ? 20 : 26}px solid transparent;border-right:${compact ? 20 : 26}px solid transparent;border-bottom:${compact ? 44 : 54}px solid ${item.accent};filter:drop-shadow(0 14px 18px rgba(155,88,18,0.24));"></div>
+            <div style="position:absolute;left:${compact ? 20 : 26}px;bottom:${compact ? 6 : 8}px;width:${compact ? 34 : 42}px;height:8px;border-radius:999px;background:rgba(27,50,77,0.16);"></div>
+          </div>
+        `;
+      }
+
+      function redraw() {
+        const assignedCount = Object.keys(state).length;
+        const correctCount = items.filter((item) => state[item.id] === item.answer).length;
+        const pool = items
+          .filter((item) => !state[item.id])
+          .map((item) => `
+            <button class="choice ${selected === item.id ? 'choice-active' : ''}" data-item="${item.id}" style="padding:14px;border-radius:22px;background:linear-gradient(180deg,#ffffff,#eef5ff);box-shadow:0 18px 28px rgba(33,63,103,0.1);">
+              <div style="display:grid;justify-items:center;gap:8px;">
+                ${renderShapeObject(item, false)}
+                <strong>${item.label}</strong>
+                <div class="hint">${item.hint}</div>
+              </div>
+            </button>
+          `)
+          .join('');
+
+        const zones = groups.map((group) => {
+          const assignedItems = items.filter((item) => state[item.id] === group.id);
+          return `
+            <button class="slot ${selected ? 'slot-active' : ''}" data-group="${group.id}" style="min-height:220px;border-radius:24px;padding:16px;background:linear-gradient(180deg,#ffffff,#f8fbff);box-shadow:0 18px 30px rgba(33,63,103,0.08);">
+              <span class="slot-label">${group.label}</span>
+              <strong style="font-size:18px;">${group.copy}</strong>
+              <div style="min-height:86px;border-radius:20px;background:linear-gradient(180deg,rgba(230,241,255,0.96),rgba(255,248,240,0.96));border:1px dashed rgba(87,128,176,0.34);display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;flex-wrap:wrap;">
+                ${assignedItems.length ? assignedItems.map((item) => `
+                  <span data-remove="${item.id}" style="display:inline-grid;justify-items:center;gap:4px;padding:10px 12px;border-radius:18px;background:#fff;box-shadow:0 12px 22px rgba(23,50,77,0.1);">
+                    ${renderShapeObject(item, true)}
+                    <strong style="font-size:12px;">${item.label}</strong>
+                  </span>
+                `).join('') : '<span class="hint">Chạm vào vật ở khay trên rồi đặt vào nhóm này.</span>'}
+              </div>
+            </button>
+          `;
+        }).join('');
+
+        setHTML(shell('Phân loại hình khối 3D', 'Quan sát mô hình nổi, rồi đưa từng vật vào đúng sân khấu hình chóp hoặc lăng trụ.', `
+          <div class="grid">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px;border-radius:22px;background:linear-gradient(135deg,#17324d,#285f9a);color:#fff;box-shadow:0 20px 32px rgba(23,50,77,0.18);">
+              <div>
+                <div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.84;">Khởi động 3D</div>
+                <strong style="font-size:18px;">Nhìn vật thật, đoán hình khối</strong>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <span class="pill" style="background:rgba(255,255,255,0.14);color:#fff;">Đã xếp ${correctCount}/4</span>
+              </div>
+            </div>
+            <div class="pool">${pool}</div>
+            <div class="slots">${zones}</div>
+            <p class="${assignedCount === items.length && correctCount === items.length ? 'success' : 'hint'}">
+              ${assignedCount === items.length && correctCount === items.length ? 'Đúng rồi. Em đã phân loại đủ 4 vật theo hình khối 3D.' : `Đã đặt ${assignedCount}/4 vật. Chạm vào thẻ trong nhóm để bỏ ra nếu muốn làm lại.`}
+            </p>
+          </div>
+        `, 'Không gian 3D'));
+
+        app.querySelectorAll('[data-item]').forEach((node) => {
+          node.addEventListener('click', () => {
+            selected = node.getAttribute('data-item');
+            redraw();
+          });
+        });
+
+        app.querySelectorAll('[data-group]').forEach((node) => {
+          node.addEventListener('click', () => {
+            const groupId = node.getAttribute('data-group');
+            if (!selected || !groupId) return;
+            state[selected] = groupId;
+            selected = null;
+            redraw();
+          });
+        });
+
+        app.querySelectorAll('[data-remove]').forEach((node) => {
+          node.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const itemId = node.getAttribute('data-remove');
+            if (itemId) {
+              delete state[itemId];
+              redraw();
+            }
+          });
+        });
+      }
+
+      redraw();
     }
 
     function renderCoinTask() {
@@ -596,12 +705,22 @@
     function renderGlobe() {
       let selected = '';
       function redraw() {
-        setHTML(shell('Chỉ điểm bản đồ', 'Chạm vào vùng đất sáng để tìm Châu Mỹ trên quả địa cầu 3D mô phỏng.', `
+        setHTML(shell('Chỉ điểm bản đồ 3D', 'Xoay mắt theo quầng sáng rồi chạm vào vùng đất đúng trên quả địa cầu mô phỏng.', `
           <div class="grid">
-            <div class="globe">
-              <button class="continent ${selected === 'chau-my' ? 'continent-active' : ''}" data-continent="chau-my" style="left:34px;top:56px;width:82px;height:118px;"></button>
-              <button class="continent ${selected === 'chau-au' ? 'continent-active' : ''}" data-continent="chau-au" style="right:62px;top:56px;width:46px;height:44px;"></button>
-              <button class="continent ${selected === 'chau-a' ? 'continent-active' : ''}" data-continent="chau-a" style="right:28px;top:84px;width:86px;height:86px;"></button>
+            <div style="display:grid;gap:14px;justify-items:center;">
+              <div style="padding:10px 14px;border-radius:999px;background:#eef5ff;color:#2f79c4;font-weight:800;">Bật chế độ quan sát không gian</div>
+              <div class="globe" style="box-shadow:0 24px 44px rgba(19,97,154,0.2);">
+                <div style="position:absolute;inset:14px;border-radius:50%;border:1px dashed rgba(255,255,255,0.38);animation:spinSlow 18s linear infinite;"></div>
+                <div style="position:absolute;inset:28px;border-radius:50%;border:1px solid rgba(255,255,255,0.18);animation:pulseHalo 2.8s ease-in-out infinite;"></div>
+                <button class="continent ${selected === 'chau-my' ? 'continent-active' : ''}" data-continent="chau-my" style="left:34px;top:56px;width:82px;height:118px;"></button>
+                <button class="continent ${selected === 'chau-au' ? 'continent-active' : ''}" data-continent="chau-au" style="right:62px;top:56px;width:46px;height:44px;"></button>
+                <button class="continent ${selected === 'chau-a' ? 'continent-active' : ''}" data-continent="chau-a" style="right:28px;top:84px;width:86px;height:86px;"></button>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                <span class="pill">Trái: Châu Mỹ</span>
+                <span class="pill">Giữa: Châu Âu</span>
+                <span class="pill">Phải: Châu Á</span>
+              </div>
             </div>
             <p class="${selected === 'chau-my' ? 'success' : selected ? 'warn' : 'hint'}">${selected === 'chau-my' ? 'Đúng rồi. Em đã chạm vào Châu Mỹ.' : selected ? 'Vùng em chạm chưa phải Châu Mỹ. Thử lại ở phía bên trái quả địa cầu nhé.' : 'Âm thanh hỏi “Châu Mỹ ở đâu?”. Em hãy chạm vào vùng đất sáng phù hợp.'}</p>
           </div>
@@ -775,11 +894,19 @@
       }
 
       function redraw() {
-        setHTML(shell('Trống ảo theo nhịp', 'Các nốt nhạc chạy xuống vạch đích. Em chạm vào mặt trống khi nốt xuống gần cuối.', `
+        setHTML(shell('Trống ảo theo nhịp', 'Mở sân khấu mini, canh đúng nhịp và chạm vào mặt trống khi nốt rơi xuống vạch sáng.', `
           <div class="grid">
-            <div class="drum-stage">
-              <div class="note" style="top:${noteTop}px;">🎵</div>
-              <button class="drum" id="hit-drum">🥁</button>
+            <div class="drum-stage" style="background:
+              radial-gradient(circle at 50% 18%, rgba(255,222,129,0.34), transparent 28%),
+              linear-gradient(180deg, #10253d 0%, #1f4f78 46%, #fff6ea 100%);">
+              <div style="position:absolute;left:24px;right:24px;top:18px;display:flex;justify-content:space-between;pointer-events:none;">
+                <span style="width:18px;height:18px;border-radius:50%;background:#ffd86f;box-shadow:0 0 18px rgba(255,216,111,0.7);animation:pulseHalo 1.8s ease-in-out infinite;"></span>
+                <span style="width:18px;height:18px;border-radius:50%;background:#7ee0ff;box-shadow:0 0 18px rgba(126,224,255,0.72);animation:pulseHalo 2.1s ease-in-out infinite;"></span>
+                <span style="width:18px;height:18px;border-radius:50%;background:#ffd86f;box-shadow:0 0 18px rgba(255,216,111,0.7);animation:pulseHalo 1.6s ease-in-out infinite;"></span>
+              </div>
+              <div style="position:absolute;left:26px;right:26px;bottom:118px;height:8px;border-radius:999px;background:linear-gradient(90deg,#ffe698,#ff9d5c,#ffe698);box-shadow:0 0 24px rgba(255,189,102,0.46);"></div>
+              <div class="note" style="top:${noteTop}px;animation:${active ? 'floatGlow 1.6s ease-in-out infinite' : 'none'};">🎵</div>
+              <button class="drum" id="hit-drum" style="box-shadow:0 22px 36px rgba(82,34,4,0.3);">🥁</button>
             </div>
             <div class="tool-row">
               <button class="tool ${active ? 'tool-active' : ''}" id="start-drum">${active ? 'Đang chạy' : 'Bắt đầu nhịp mới'}</button>
@@ -799,18 +926,23 @@
     function renderOrangeFill() {
       let fill = '#f7f2ea';
       function redraw() {
-        setHTML(shell('Đổ màu hình khối', 'Chọn màu rồi chạm vào quả cam để tô kín vùng màu như trong bài mỹ thuật.', `
+        const glow = fill === '#f5a623' ? 'drop-shadow(0 16px 22px rgba(245,166,35,0.32))' : 'none';
+        setHTML(shell('Tô màu nổi khối', 'Chọn màu rồi làm quả cam sáng lên như một vật thể nổi trong bài mỹ thuật.', `
           <div class="grid">
-            <svg class="orange-svg" viewBox="0 0 220 220" aria-hidden="true">
+            <div style="padding:18px;border-radius:28px;background:linear-gradient(180deg,#fffaf0,#eef8ff);box-shadow:0 18px 30px rgba(23,50,77,0.1);">
+            <svg class="orange-svg" viewBox="0 0 220 220" aria-hidden="true" style="filter:${glow};">
+              <ellipse cx="110" cy="184" rx="54" ry="14" fill="rgba(23,50,77,0.12)"></ellipse>
               <circle cx="110" cy="118" r="62" fill="${fill}" stroke="#17324d" stroke-width="8"></circle>
+              <circle cx="88" cy="98" r="16" fill="rgba(255,255,255,0.24)"></circle>
               <path d="M112 42c18-18 42-8 48 12-18 8-34 8-48 4z" fill="#5ba35b" stroke="#17324d" stroke-width="5"></path>
               <path d="M110 58c-8-18 10-34 28-34" fill="none" stroke="#17324d" stroke-width="5" stroke-linecap="round"></path>
             </svg>
+            </div>
             <div class="palette">
-              <button data-color="#f5a623" style="background:#f5a623;"></button>
-              <button data-color="#ffe066" style="background:#ffe066;"></button>
-              <button data-color="#86c5ff" style="background:#86c5ff;"></button>
-              <button data-color="#ef7ab2" style="background:#ef7ab2;"></button>
+              <button data-color="#f5a623" style="background:#f5a623;box-shadow:${fill === '#f5a623' ? '0 0 0 4px rgba(245,166,35,0.24)' : '0 0 0 1px var(--line)'};"></button>
+              <button data-color="#ffe066" style="background:#ffe066;box-shadow:${fill === '#ffe066' ? '0 0 0 4px rgba(255,224,102,0.24)' : '0 0 0 1px var(--line)'};"></button>
+              <button data-color="#86c5ff" style="background:#86c5ff;box-shadow:${fill === '#86c5ff' ? '0 0 0 4px rgba(134,197,255,0.24)' : '0 0 0 1px var(--line)'};"></button>
+              <button data-color="#ef7ab2" style="background:#ef7ab2;box-shadow:${fill === '#ef7ab2' ? '0 0 0 4px rgba(239,122,178,0.24)' : '0 0 0 1px var(--line)'};"></button>
             </div>
             <p class="${fill === '#f5a623' ? 'success' : 'hint'}">${fill === '#f5a623' ? 'Quả cam đã được tô đúng màu nổi bật rồi.' : 'Em thử chọn màu cam để bức tranh gần với quả thật hơn.'}</p>
           </div>
@@ -828,9 +960,14 @@
     function renderPottery() {
       let shape = '';
       function redraw() {
-        setHTML(shell('Tạo hình gốm ảo', 'Vuốt tay được mô phỏng bằng các nút chỉnh dáng để nắn khối đất thành chiếc bình.', `
+        setHTML(shell('Tạo hình gốm ảo', 'Mô phỏng bàn xoay mini: chọn thao tác để nắn khối đất thành chiếc bình có chiều sâu hơn.', `
           <div class="pottery-shell">
-            <div class="pottery-piece ${shape === 'wide' ? 'pottery-piece-wide' : shape === 'tall' ? 'pottery-piece-tall' : ''}"></div>
+            <div style="position:relative;display:grid;justify-items:center;gap:0;">
+              <div style="position:absolute;top:-18px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle, rgba(255,236,180,0.62), transparent 68%);animation:pulseHalo 2.4s ease-in-out infinite;"></div>
+              <div class="pottery-piece ${shape === 'wide' ? 'pottery-piece-wide' : shape === 'tall' ? 'pottery-piece-tall' : ''}" style="position:relative;z-index:1;"></div>
+              <div style="width:186px;height:24px;margin-top:-6px;border-radius:999px;background:linear-gradient(180deg,#5f7286,#2d3d52);box-shadow:0 18px 24px rgba(23,50,77,0.18);"></div>
+              <div class="hint" style="margin-top:10px;">Bàn xoay đang chờ động tác nắn tiếp theo.</div>
+            </div>
             <div class="tool-row">
               <button class="tool ${shape === 'wide' ? 'tool-active' : ''}" id="wide">Mở thân bình</button>
               <button class="tool ${shape === 'tall' ? 'tool-active' : ''}" id="tall">Kéo cao cổ bình</button>

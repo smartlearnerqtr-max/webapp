@@ -5,8 +5,11 @@ import { BarChartCard } from '../components/BarChartCard'
 import { ChatDock } from '../components/ChatDock'
 import { RequireAuth } from '../components/RequireAuth'
 import {
+  createTeacherCareerCard,
+  deleteTeacherCareerCard,
   fetchParents,
   fetchStudents,
+  fetchTeacherCareerCards,
   fetchTeacherMessages,
   fetchTeacherParentGroups,
   fetchTeacherReports,
@@ -14,8 +17,10 @@ import {
   markTeacherMessagesRead,
   sendDailyReports,
   sendTeacherMessage,
+  updateTeacherCareerCard,
+  uploadLessonMedia,
 } from '../services/api'
-import type { ParentTeacherConversationItem } from '../services/api'
+import type { CareerCardItem, ParentTeacherConversationItem } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
 const readinessLabelMap: Record<string, string> = {
@@ -24,7 +29,98 @@ const readinessLabelMap: Record<string, string> = {
   san_sang_nang_do_kho: 'Sẵn sàng tăng mức',
 }
 
-type TeacherWorkspaceView = 'home' | 'overview' | 'parent_groups' | 'parent_link' | 'reports' | 'report_history' | 'messages'
+type TeacherWorkspaceView = 'home' | 'overview' | 'parent_groups' | 'parent_link' | 'reports' | 'report_history' | 'messages' | 'career_cards'
+
+type TeacherCareerStepDraft = {
+  title: string
+  description: string
+}
+
+type TeacherCareerFormState = {
+  title: string
+  description: string
+  coverImageUrl: string
+  videoUrl: string
+  meaningTitle: string
+  meaningText: string
+  videoNote: string
+  sortOrder: string
+  skillsText: string
+  levels: Array<'nang' | 'trung_binh' | 'nhe'>
+  steps: TeacherCareerStepDraft[]
+}
+
+function createEmptyCareerForm(): TeacherCareerFormState {
+  return {
+    title: '',
+    description: '',
+    coverImageUrl: '',
+    videoUrl: '',
+    meaningTitle: 'Ý nghĩa công việc',
+    meaningText: '',
+    videoNote: '',
+    sortOrder: '0',
+    skillsText: '',
+    levels: ['nhe'],
+    steps: [
+      { title: 'Bước 1', description: '' },
+      { title: 'Bước 2', description: '' },
+      { title: 'Bước 3', description: '' },
+    ],
+  }
+}
+
+function buildCareerFormFromCard(card: CareerCardItem): TeacherCareerFormState {
+  return {
+    title: card.title,
+    description: card.description ?? '',
+    coverImageUrl: card.cover_image_url ?? '',
+    videoUrl: card.video_url ?? '',
+    meaningTitle: card.meaning_title,
+    meaningText: card.meaning_text,
+    videoNote: card.video_note ?? '',
+    sortOrder: String(card.sort_order ?? 0),
+    skillsText: card.skills.join(', '),
+    levels: card.levels.length ? card.levels : ['nhe'],
+    steps: card.steps.length
+      ? card.steps.map((step) => ({ title: step.title, description: step.description }))
+      : [{ title: 'Bước 1', description: '' }],
+  }
+}
+
+const teacherCareerLevelLabelMap: Record<'nhe' | 'trung_binh' | 'nang', string> = {
+  nhe: 'Nhẹ',
+  trung_binh: 'Trung bình',
+  nang: 'Nặng',
+}
+
+function parseCareerSkills(skillsText: string) {
+  return skillsText
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function normalizeCareerSteps(steps: TeacherCareerStepDraft[]) {
+  return steps
+    .map((step) => ({ title: step.title.trim(), description: step.description.trim() }))
+    .filter((step) => step.title || step.description)
+}
+
+function canPreviewCareerVideoInline(videoUrl: string) {
+  const trimmedUrl = videoUrl.trim()
+  return /\.(mp4|webm|ogg|mov)(?:$|\?)/i.test(trimmedUrl) || trimmedUrl.includes('/api/v1/media/files/')
+}
+
+function validateCareerForm(careerForm: TeacherCareerFormState) {
+  if (!careerForm.title.trim()) return 'Cần nhập tiêu đề nghề nghiệp.'
+  if (!careerForm.coverImageUrl.trim()) return 'Cần thêm ảnh bìa cho nghề nghiệp.'
+  if (!careerForm.videoUrl.trim()) return 'Cần thêm video nghề nghiệp.'
+  if (!careerForm.meaningText.trim()) return 'Cần nhập ý nghĩa công việc để học sinh nghe audio.'
+  if (!parseCareerSkills(careerForm.skillsText).length) return 'Cần nhập ít nhất 1 kỹ năng học được.'
+  if (!normalizeCareerSteps(careerForm.steps).length) return 'Cần nhập ít nhất 1 bước thực hiện.'
+  return null
+}
 
 export function TeacherHomePage() {
   const token = useAuthStore((state) => state.accessToken)
@@ -43,6 +139,11 @@ export function TeacherHomePage() {
   const [selectedChatStudentId, setSelectedChatStudentId] = useState('')
   const [conversationSearchTerm, setConversationSearchTerm] = useState('')
   const [activeWorkspaceView, setActiveWorkspaceView] = useState<TeacherWorkspaceView>('home')
+  const [editingCareerCardId, setEditingCareerCardId] = useState<number | null>(null)
+  const [careerForm, setCareerForm] = useState<TeacherCareerFormState>(() => createEmptyCareerForm())
+  const [isCareerUploading, setIsCareerUploading] = useState(false)
+  const [careerUploadError, setCareerUploadError] = useState<string | null>(null)
+  const [careerFormError, setCareerFormError] = useState<string | null>(null)
 
   const deferredSearchTerm = useDeferredValue(conversationSearchTerm)
   const deferredParentLookup = useDeferredValue(parentLookup)
@@ -69,6 +170,12 @@ export function TeacherHomePage() {
   const reportsQuery = useQuery({
     queryKey: ['teacher-reports', token],
     queryFn: () => fetchTeacherReports(token!),
+    enabled: Boolean(token),
+  })
+
+  const careerCardsQuery = useQuery({
+    queryKey: ['teacher-career-cards', token],
+    queryFn: () => fetchTeacherCareerCards(token!),
     enabled: Boolean(token),
   })
 
@@ -184,6 +291,60 @@ export function TeacherHomePage() {
     markReadMutation.mutate(selectedConversation)
   }, [isChatOpen, markReadMutation, selectedConversation])
 
+  const saveCareerCardMutation = useMutation({
+    mutationFn: async () => {
+      const validationError = validateCareerForm(careerForm)
+      if (validationError) {
+        setCareerFormError(validationError)
+        throw new Error(validationError)
+      }
+
+      const payload = {
+        title: careerForm.title.trim(),
+        description: careerForm.description.trim() || undefined,
+        cover_image_url: careerForm.coverImageUrl.trim() || null,
+        meaning_title: careerForm.meaningTitle.trim() || 'Ý nghĩa công việc',
+        meaning_text: careerForm.meaningText.trim(),
+        video_url: careerForm.videoUrl.trim() || null,
+        video_note: careerForm.videoNote.trim() || undefined,
+        sort_order: Number(careerForm.sortOrder) || 0,
+        skills: parseCareerSkills(careerForm.skillsText),
+        levels: careerForm.levels,
+        steps: normalizeCareerSteps(careerForm.steps),
+      }
+
+      if (editingCareerCardId) {
+        return updateTeacherCareerCard(token!, editingCareerCardId, payload)
+      }
+      return createTeacherCareerCard(token!, payload)
+    },
+    onSuccess: async () => {
+      setEditingCareerCardId(null)
+      setCareerForm(createEmptyCareerForm())
+      setCareerFormError(null)
+      setCareerUploadError(null)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['teacher-career-cards', token] }),
+        queryClient.invalidateQueries({ queryKey: ['my-career-cards'] }),
+      ])
+    },
+  })
+
+  const deleteCareerCardMutation = useMutation({
+    mutationFn: (cardId: number) => deleteTeacherCareerCard(token!, cardId),
+    onSuccess: async () => {
+      if (editingCareerCardId) {
+        setEditingCareerCardId(null)
+        setCareerForm(createEmptyCareerForm())
+      }
+      setCareerFormError(null)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['teacher-career-cards', token] }),
+        queryClient.invalidateQueries({ queryKey: ['my-career-cards'] }),
+      ])
+    },
+  })
+
   const teacherId = typeof profile?.id === 'number' ? profile.id : null
   const studentCount = studentsQuery.data?.length ?? 0
   const parentGroupCount = parentGroupsQuery.data?.length ?? 0
@@ -211,6 +372,81 @@ export function TeacherHomePage() {
     setIsChatOpen(true)
   }
 
+  function updateCareerFormField<K extends keyof TeacherCareerFormState>(field: K, value: TeacherCareerFormState[K]) {
+    setCareerFormError(null)
+    setCareerForm((current) => ({ ...current, [field]: value }))
+  }
+
+  function updateCareerStep(stepIndex: number, field: keyof TeacherCareerStepDraft, value: string) {
+    setCareerFormError(null)
+    setCareerForm((current) => ({
+      ...current,
+      steps: current.steps.map((step, index) => index === stepIndex ? { ...step, [field]: value } : step),
+    }))
+  }
+
+  function addCareerStep() {
+    setCareerFormError(null)
+    setCareerForm((current) => ({
+      ...current,
+      steps: [...current.steps, { title: `Bước ${current.steps.length + 1}`, description: '' }],
+    }))
+  }
+
+  function removeCareerStep(stepIndex: number) {
+    setCareerFormError(null)
+    setCareerForm((current) => ({
+      ...current,
+      steps: current.steps.filter((_, index) => index !== stepIndex),
+    }))
+  }
+
+  function toggleCareerLevel(level: 'nang' | 'trung_binh' | 'nhe') {
+    setCareerFormError(null)
+    setCareerForm((current) => {
+      const hasLevel = current.levels.includes(level)
+      const levels = hasLevel ? current.levels.filter((item) => item !== level) : [...current.levels, level]
+      return {
+        ...current,
+        levels: levels.length ? levels : ['nhe'],
+      }
+    })
+  }
+
+  async function handleCareerMediaUpload(kind: 'image' | 'video', file: File) {
+    if (!token) return
+    setCareerFormError(null)
+    setCareerUploadError(null)
+    setIsCareerUploading(true)
+    try {
+      const upload = await uploadLessonMedia(token, file)
+      if (kind === 'image') {
+        updateCareerFormField('coverImageUrl', upload.url)
+      } else {
+        updateCareerFormField('videoUrl', upload.url)
+      }
+    } catch (error) {
+      setCareerUploadError(error instanceof Error ? error.message : 'Không tải được media.')
+    } finally {
+      setIsCareerUploading(false)
+    }
+  }
+
+  function startEditCareerCard(card: CareerCardItem) {
+    setEditingCareerCardId(card.id)
+    setCareerForm(buildCareerFormFromCard(card))
+    setCareerFormError(null)
+    setCareerUploadError(null)
+    setActiveWorkspaceView('career_cards')
+  }
+
+  function resetCareerEditor() {
+    setEditingCareerCardId(null)
+    setCareerForm(createEmptyCareerForm())
+    setCareerFormError(null)
+    setCareerUploadError(null)
+  }
+
   const workspaceCards = [
     { key: 'overview', eyebrow: 'Tổng quan', title: 'Xem số liệu lớp', description: 'Mở toàn màn hình để theo dõi các số chính trong ngày.', badge: `${studentCount} học sinh` },
     { key: 'parent_groups', eyebrow: 'Theo dõi', title: 'Nhóm phụ huynh', description: 'Xem toàn bộ học sinh đã liên kết và tiến độ gần nhất.', badge: `${parentGroupCount} nhóm` },
@@ -218,6 +454,7 @@ export function TeacherHomePage() {
     { key: 'reports', eyebrow: 'Báo cáo', title: 'Gửi báo cáo nhanh', description: 'Mở trang gửi báo cáo riêng để thao tác thoải mái hơn.', badge: reportStudentId ? 'Đã chọn học sinh' : 'Gửi nhanh' },
     { key: 'report_history', eyebrow: 'Lịch sử', title: 'Xem báo cáo gần đây', description: 'Hiển thị trọn danh sách báo cáo thay vì bó trong khung nhỏ.', badge: `${reportCount} báo cáo` },
     { key: 'messages', eyebrow: 'Trao đổi', title: 'Chat phụ huynh', description: 'Xem danh sách hội thoại trên màn hình riêng rồi mở chat ngay.', badge: unreadConversationCount ? `${unreadConversationCount} tin mới` : 'Đã đọc hết' },
+    { key: 'career_cards', eyebrow: 'Hướng nghiệp', title: 'Quản lý nghề nghiệp', description: 'Giáo viên nhập video, ảnh, ý nghĩa công việc, các bước và kỹ năng để hiện sang trang học sinh.', badge: `${careerCardsQuery.data?.length ?? 0} thẻ` },
   ] as const satisfies Array<{ key: Exclude<TeacherWorkspaceView, 'home'>; eyebrow: string; title: string; description: string; badge: string }>
 
   function renderWorkspaceHeader(eyebrow: string, title: string, description: string) {
@@ -571,6 +808,237 @@ export function TeacherHomePage() {
     )
   }
 
+  function renderCareerCardsWorkspace() {
+    const careerCards = careerCardsQuery.data ?? []
+
+    return (
+      <>
+        {renderWorkspaceHeader('Hướng nghiệp', 'Quản lý thẻ nghề nghiệp', 'Giáo viên nhập dữ liệu tại đây để trang /hoc-tap của học sinh hiện đúng ảnh, video, ý nghĩa công việc, các bước và kỹ năng học được.')}
+        <section className="page-stack">
+          <article className="roadmap-panel">
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Kho dữ liệu</p>
+                <h3>Thẻ nghề nghiệp đã tạo</h3>
+              </div>
+              <button type="button" className="ghost-button" onClick={resetCareerEditor}>
+                Tạo thẻ mới
+              </button>
+            </div>
+            <div className="student-list compact-list">
+              {careerCards.map((card) => (
+                <div key={card.id} className="student-row">
+                  <strong>{card.title}</strong>
+                  <span>{card.levels.map((level) => teacherCareerLevelLabelMap[level] ?? level).join(', ')} • {card.skills.length} kỹ năng • {card.steps.length} bước</span>
+                  <p>{card.description || card.meaning_text}</p>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
+                    <button type="button" className="ghost-button" onClick={() => startEditCareerCard(card)}>
+                      Sửa
+                    </button>
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() => {
+                        if (window.confirm(`Ẩn thẻ nghề "${card.title}"?`)) {
+                          deleteCareerCardMutation.mutate(card.id)
+                        }
+                      }}
+                      disabled={deleteCareerCardMutation.isPending}
+                    >
+                      Ẩn
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {!careerCards.length && !careerCardsQuery.isLoading ? <p>Chưa có thẻ nghề nghiệp nào.</p> : null}
+            </div>
+          </article>
+
+          <article className="roadmap-panel">
+            <div className="teacher-clean-section-head">
+              <div>
+                <p className="eyebrow">Biên tập</p>
+                <h3>{editingCareerCardId ? 'Cập nhật thẻ nghề nghiệp' : 'Tạo thẻ nghề nghiệp mới'}</h3>
+              </div>
+              {editingCareerCardId ? <span className="subject-pill muted-pill">Đang sửa #{editingCareerCardId}</span> : null}
+            </div>
+
+            <div className="form-stack">
+              <p className="helper-text">Bắt buộc: tiêu đề, ảnh bìa, video, ý nghĩa công việc, ít nhất 1 bước và 1 kỹ năng.</p>
+              <label>
+                Tiêu đề nghề nghiệp
+                <input value={careerForm.title} onChange={(event) => updateCareerFormField('title', event.target.value)} placeholder="Ví dụ: Làm vườn" />
+              </label>
+
+              <label>
+                Mô tả ngắn
+                <textarea value={careerForm.description} onChange={(event) => updateCareerFormField('description', event.target.value)} rows={3} placeholder="Giới thiệu ngắn để học sinh nhìn là hiểu." />
+              </label>
+
+              <label>
+                Ảnh bìa
+                <input value={careerForm.coverImageUrl} onChange={(event) => updateCareerFormField('coverImageUrl', event.target.value)} placeholder="Dán URL ảnh hoặc upload ở dưới" />
+              </label>
+
+              <label>
+                Video nghề nghiệp
+                <input value={careerForm.videoUrl} onChange={(event) => updateCareerFormField('videoUrl', event.target.value)} placeholder="Dán YouTube, Google Drive, TikTok hoặc URL video upload" />
+              </label>
+
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <label className="ghost-button" style={{ cursor: 'pointer' }}>
+                  Tải ảnh lên
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0]
+                      if (file) {
+                        void handleCareerMediaUpload('image', file)
+                      }
+                    }}
+                  />
+                </label>
+                <label className="ghost-button" style={{ cursor: 'pointer' }}>
+                  Tải video lên
+                  <input
+                    hidden
+                    type="file"
+                    accept="video/*"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0]
+                      if (file) {
+                        void handleCareerMediaUpload('video', file)
+                      }
+                    }}
+                  />
+                </label>
+                <span className="subject-pill muted-pill">{isCareerUploading ? 'Đang tải media...' : 'Có thể nhập link hoặc upload'}</span>
+              </div>
+
+              {careerForm.coverImageUrl.trim() ? (
+                <div className="teacher-career-preview-card">
+                  <strong>Xem trước ảnh bìa</strong>
+                  <img src={careerForm.coverImageUrl} alt={careerForm.title || 'Ảnh bìa nghề nghiệp'} className="teacher-career-preview-image" />
+                </div>
+              ) : null}
+
+              {careerForm.videoUrl.trim() ? (
+                <div className="teacher-career-preview-card">
+                  <strong>Xem trước video</strong>
+                  {canPreviewCareerVideoInline(careerForm.videoUrl) ? (
+                    <video src={careerForm.videoUrl} controls preload="metadata" className="teacher-career-preview-video" />
+                  ) : (
+                    <a href={careerForm.videoUrl} target="_blank" rel="noreferrer" className="ghost-button" style={{ width: 'fit-content' }}>
+                      Mở link video để kiểm tra
+                    </a>
+                  )}
+                </div>
+              ) : null}
+
+              <label>
+                Tiêu đề phần ý nghĩa
+                <input value={careerForm.meaningTitle} onChange={(event) => updateCareerFormField('meaningTitle', event.target.value)} placeholder="Ý nghĩa công việc" />
+              </label>
+
+              <label>
+                Ý nghĩa công việc
+                <textarea value={careerForm.meaningText} onChange={(event) => updateCareerFormField('meaningText', event.target.value)} rows={5} placeholder="Đoạn này sẽ hiện cho học sinh và dùng để phát audio." />
+              </label>
+
+              <label>
+                Ghi chú dưới video
+                <textarea value={careerForm.videoNote} onChange={(event) => updateCareerFormField('videoNote', event.target.value)} rows={3} placeholder="Giải thích ngắn cho học sinh xem video để làm gì." />
+              </label>
+
+              <label>
+                Kỹ năng học được
+                <input value={careerForm.skillsText} onChange={(event) => updateCareerFormField('skillsText', event.target.value)} placeholder="Ví dụ: Quan sát, Kiên nhẫn, Gọn gàng" />
+              </label>
+
+              <label>
+                Thứ tự hiển thị
+                <input value={careerForm.sortOrder} onChange={(event) => updateCareerFormField('sortOrder', event.target.value)} inputMode="numeric" />
+              </label>
+
+              <div>
+                <strong>Mức độ áp dụng</strong>
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
+                  {[
+                    { value: 'nhe', label: 'Nhẹ' },
+                    { value: 'trung_binh', label: 'Trung bình' },
+                    { value: 'nang', label: 'Nặng' },
+                  ].map((level) => (
+                    <label key={level.value} className="ghost-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={careerForm.levels.includes(level.value as 'nhe' | 'trung_binh' | 'nang')}
+                        onChange={() => toggleCareerLevel(level.value as 'nhe' | 'trung_binh' | 'nang')}
+                      />
+                      {level.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="teacher-clean-section-head">
+                  <div>
+                    <p className="eyebrow">Các bước</p>
+                    <h3>Quy trình thực hiện</h3>
+                  </div>
+                  <button type="button" className="ghost-button" onClick={addCareerStep}>
+                    Thêm bước
+                  </button>
+                </div>
+                <div className="student-list compact-list">
+                  {careerForm.steps.map((step, index) => (
+                    <div key={`${index}-${step.title}`} className="student-row">
+                      <strong>Bước {index + 1}</strong>
+                      <label>
+                        Tiêu đề bước
+                        <input value={step.title} onChange={(event) => updateCareerStep(index, 'title', event.target.value)} />
+                      </label>
+                      <label>
+                        Mô tả bước
+                        <textarea value={step.description} onChange={(event) => updateCareerStep(index, 'description', event.target.value)} rows={3} />
+                      </label>
+                      {careerForm.steps.length > 1 ? (
+                        <button type="button" className="ghost-button" onClick={() => removeCareerStep(index)}>
+                          Xóa bước này
+                        </button>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {careerFormError ? <p className="error-text">{careerFormError}</p> : null}
+              {careerUploadError ? <p className="error-text">{careerUploadError}</p> : null}
+              {saveCareerCardMutation.error ? <p className="error-text">{(saveCareerCardMutation.error as Error).message}</p> : null}
+              {deleteCareerCardMutation.error ? <p className="error-text">{(deleteCareerCardMutation.error as Error).message}</p> : null}
+
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <button
+                  className="action-button"
+                  type="button"
+                  disabled={saveCareerCardMutation.isPending || isCareerUploading}
+                  onClick={() => saveCareerCardMutation.mutate()}
+                >
+                  {saveCareerCardMutation.isPending ? 'Đang lưu...' : editingCareerCardId ? 'Cập nhật thẻ nghề' : 'Tạo thẻ nghề'}
+                </button>
+                <button className="ghost-button" type="button" onClick={resetCareerEditor}>
+                  Làm mới form
+                </button>
+              </div>
+            </div>
+          </article>
+        </section>
+      </>
+    )
+  }
+
   function renderWorkspaceBody() {
     switch (activeWorkspaceView) {
       case 'overview':
@@ -585,6 +1053,8 @@ export function TeacherHomePage() {
         return renderReportHistoryWorkspace()
       case 'messages':
         return renderMessagesWorkspace()
+      case 'career_cards':
+        return renderCareerCardsWorkspace()
       default:
         return renderHomeWorkspace()
     }

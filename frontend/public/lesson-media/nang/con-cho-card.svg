@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+  <rect width="220" height="220" rx="32" fill="#eef7ff"/>
+  <ellipse cx="110" cy="126" rx="58" ry="46" fill="#b97845"/>
+  <circle cx="110" cy="88" r="40" fill="#c88852"/>
+  <ellipse cx="82" cy="66" rx="18" ry="30" transform="rotate(-28 82 66)" fill="#8a5632"/>
+  <ellipse cx="138" cy="66" rx="18" ry="30" transform="rotate(28 138 66)" fill="#8a5632"/>
+  <circle cx="95" cy="86" r="5" fill="#17324d"/>
+  <circle cx="125" cy="86" r="5" fill="#17324d"/>
+  <ellipse cx="110" cy="100" rx="10" ry="8" fill="#17324d"/>
+  <path d="M102 112c6 6 10 8 16 0" fill="none" stroke="#17324d" stroke-linecap="round" stroke-width="4"/>
+  <text x="110" y="206" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#17324d">Con chó</text>
+</svg>

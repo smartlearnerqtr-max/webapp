@@ -110,5 +110,5 @@ def create_teacher():
     if error_message or not created_payload:
         return error_response(error_message or 'Không tạo được tài khoản giáo viên', error_code or 'VALIDATION_ERROR', 422 if error_code == 'VALIDATION_ERROR' else 409)
 
-    log_server_event(level='info', module='admin', message='Admin tao tai khoan giao vien', action_name='admin_create_teacher', user_id=user.id, metadata={'teacher_user_id': created_payload['user']['id']})
+    log_server_event(level='info', module='admin', message='Admin tạo tài khoản giáo viên', action_name='admin_create_teacher', user_id=user.id, metadata={'teacher_user_id': created_payload['user']['id']})
     return success_response(created_payload, 'Tạo tài khoản giáo viên thành công', 201)

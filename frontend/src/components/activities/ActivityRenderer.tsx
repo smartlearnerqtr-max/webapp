@@ -855,12 +855,18 @@ function VoiceAiAnswerBox({
 function createInitialPuzzleOrder(pieceCount: number) {
   const pieces = Array.from({ length: pieceCount }, (_, index) => `piece-${index}`)
   if (pieceCount <= 1) return pieces
-  const pivot = Math.max(1, Math.floor(pieceCount / 2))
-  const shifted = [...pieces.slice(pivot), ...pieces.slice(0, pivot)]
-  if (shifted.every((pieceId, index) => pieceId === pieces[index])) {
-    ;[shifted[0], shifted[1]] = [shifted[1], shifted[0]]
+  
+  // Fisher-Yates shuffle for true randomness
+  for (let i = pieces.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
   }
-  return shifted
+  
+  // Ensure it's not accidentally solved at start
+  if (pieces.every((pieceId, index) => pieceId === `piece-${index}`)) {
+    [pieces[0], pieces[1]] = [pieces[1], pieces[0]]
+  }
+  return pieces
 }
 
 function renderPuzzlePiece({
@@ -894,9 +900,9 @@ function ImagePuzzleActivity({ activity, answers, setAnswers }: ActivityComponen
   const config = parsedConfig ?? {}
   const imageUrl = toText(config.image_url)
   const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy ghép lại thành bức tranh hoàn chỉnh.'
-  const rows = Math.max(1, Number(config.rows ?? 2) || 2)
-  const cols = Math.max(1, Number(config.cols ?? 3) || 3)
-  const pieceCount = Math.max(2, Number(config.piece_count ?? rows * cols) || rows * cols)
+  const rows = activity.difficulty_stage === 1 ? 2 : activity.difficulty_stage === 2 ? 2 : activity.difficulty_stage === 3 ? 4 : Math.max(1, Number(config.rows ?? 2) || 2)
+  const cols = activity.difficulty_stage === 1 ? 2 : activity.difficulty_stage === 2 ? 4 : activity.difficulty_stage === 3 ? 4 : Math.max(1, Number(config.cols ?? 2) || 2)
+  const pieceCount = rows * cols
   const initialOrder = React.useMemo(() => createInitialPuzzleOrder(pieceCount), [pieceCount])
   const currentSlots = Array.isArray(answers[activity.id]) && answers[activity.id].length === pieceCount ? answers[activity.id] : initialOrder
   const [draggingPieceId, setDraggingPieceId] = React.useState<string | null>(null)
@@ -1181,40 +1187,87 @@ export const MatchingActivity = React.memo(({ activity, answers, setAnswers }: A
   )
 })
 
-export const DragDropActivity = React.memo(({ activity, answers, setAnswers }: ActivityComponentProps<StringArrayAnswerMap>) => {
+export const DragDropActivity = React.memo(({ activity, answers, setAnswers, onAutoAdvance }: ActivityComponentProps<StringArrayAnswerMap>) => {
   const config = parseActivityConfig(activity.config_json)
   if (!config) return null
-  const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy kéo từng mục vào đúng vị trí.'
+  const prompt = toText(config.prompt) || activity.instruction_text || 'Hãy phân loại các mục vào đúng vị trí.'
   const items = toStringArray(config.items)
   const targets = toStringArray(config.targets)
-  const currentAnswers = answers[activity.id] ?? Array.from({ length: items.length }, () => '')
+  const currentAnswers = Array.isArray(answers[activity.id]) 
+    ? (answers[activity.id] as string[]) 
+    : Array.from({ length: items.length }, () => '')
+  
+  const [activeItemIndex, setActiveItemIndex] = React.useState<number | null>(null)
+  
+  const handleItemClick = (index: number) => {
+    if (currentAnswers[index]) {
+      // Allow deselecting / removing from bin
+      const nextAnswers = [...currentAnswers]
+      nextAnswers[index] = ''
+      setAnswers((current) => ({ ...current, [activity.id]: nextAnswers }))
+      return
+    }
+    setActiveItemIndex(index === activeItemIndex ? null : index)
+  }
+  
+  const handleBinClick = (target: string) => {
+    if (activeItemIndex === null) return
+    const nextAnswers = [...currentAnswers]
+    nextAnswers[activeItemIndex] = target
+    setAnswers((current) => ({ ...current, [activity.id]: nextAnswers }))
+    setActiveItemIndex(null)
+    
+    if (nextAnswers.filter(Boolean).length === items.length) {
+      scheduleAutoAdvance(onAutoAdvance, activity.id)
+    }
+  }
+  
   const completedCount = currentAnswers.filter(Boolean).length
 
   return (
-    <>
-      <p>{prompt}</p>
-      <div className="activity-playground activity-list-grid">
+    <div className="activity-playground classification-shell">
+      <p className="activity-prompt">{prompt}</p>
+      
+      <div className="classification-items-pool">
         {items.map((item, index) => (
-          <label key={`${activity.id}-${item}-${index}`} className="activity-inline-field">
-            <span>{item}</span>
-            <select
-              value={currentAnswers[index] ?? ''}
-              onChange={(event) => {
-                const nextAnswers = [...currentAnswers]
-                nextAnswers[index] = event.target.value
-                setAnswers((current) => ({ ...current, [activity.id]: nextAnswers }))
-              }}
-            >
-              <option value="">Chọn vị trí đích</option>
-              {targets.map((target) => (
-                <option key={`${item}-${target}`} value={target}>{target}</option>
-              ))}
-            </select>
-          </label>
+          <button
+            key={`${activity.id}-item-${index}`}
+            type="button"
+            className={[
+              'classification-item-card',
+              activeItemIndex === index ? 'is-active' : '',
+              currentAnswers[index] ? 'is-completed' : ''
+            ].join(' ')}
+            onClick={() => handleItemClick(index)}
+          >
+            <span className="classification-item-content">{item}</span>
+            <span className="classification-item-label">{currentAnswers[index] || 'Chưa phân loại'}</span>
+          </button>
         ))}
-        <p className="feedback-note">Đã gắn {completedCount}/{items.length} mục.</p>
       </div>
-    </>
+      
+      <div className="classification-bins">
+        {targets.map((target) => {
+          const itemsInThisBin = currentAnswers.filter(ans => ans === target).length
+          return (
+            <button
+              key={`${activity.id}-bin-${target}`}
+              type="button"
+              className="classification-bin"
+              onClick={() => handleBinClick(target)}
+            >
+              <span className="classification-bin-icon">📥</span>
+              <strong>{target}</strong>
+              {itemsInThisBin > 0 && (
+                <span className="classification-bin-count">Đã có {itemsInThisBin} mục</span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+      
+      <p className="feedback-note">Đã hoàn thành {completedCount}/{items.length} mục.</p>
+    </div>
   )
 })
 

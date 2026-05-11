@@ -201,7 +201,7 @@ def create_assignment():
     else:
         invalid_student_ids = [student_id for student_id in requested_student_ids if student_id not in class_student_ids]
         if invalid_student_ids:
-            return error_response('Chi duoc giao cho hoc sinh dang thuoc lop muc tieu', 'ASSIGNMENT_STUDENT_NOT_IN_CLASS', 422, {'student_ids': invalid_student_ids})
+            return error_response('Chỉ được giao cho học sinh đang thuộc lớp mục tiêu', 'ASSIGNMENT_STUDENT_NOT_IN_CLASS', 422, {'student_ids': invalid_student_ids})
         if lesson_level:
             student_level_map = {student.id: student.disability_level for student in active_students}
             mismatched_student_ids = [student_id for student_id in requested_student_ids if student_level_map.get(student_id) != lesson_level]
@@ -217,7 +217,7 @@ def create_assignment():
     if not final_student_ids:
         if lesson_level:
             return error_response(
-                'Lop nay chua co hoc sinh phu hop voi muc do cua bai hoc',
+                'Lớp này chưa có học sinh phù hợp với mức độ của bài học',
                 'ASSIGNMENT_NO_MATCHING_LEVEL_STUDENTS',
                 422,
                 {'lesson_level': lesson_level},
@@ -278,7 +278,7 @@ def create_assignment():
     log_server_event(
         level='info',
         module='assignments',
-        message='Giao bai hoc',
+        message='Giao bài học',
         action_name='create_assignment',
         user_id=user.id,
         metadata={'assignment_id': assignment.id, 'class_id': classroom.id, 'student_count': len(final_student_ids)},
@@ -488,4 +488,3 @@ def complete_my_assignment(assignment_id: int):
     _publish_assignment_progress_event(progress, 'assignment_completed', f'Bài học {assignment_id} đã hoàn thành.')
     db.session.commit()
     return success_response(progress.to_dict(), 'Đã hoàn thành bài học')
-

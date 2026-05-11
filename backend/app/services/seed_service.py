@@ -14,7 +14,7 @@ from ..models import (
 )
 from ..utils.security import hash_password
 
-BASE_SUBJECTS = [('TOAN', 'To\u00e1n'), ('VAN', 'V\u0103n'), ('KHTN', 'Khoa h\u1ecdc t\u1ef1 nhi\u00ean'), ('KY_NANG_SONG', 'K\u1ef9 n\u0103ng s\u1ed1ng')]
+BASE_SUBJECTS = [('TOAN', 'Toán'), ('VAN', 'Văn'), ('KHTN', 'Khoa học tự nhiên'), ('KY_NANG_SONG', 'Kỹ năng sống')]
 DEFAULT_ADMIN_EMAIL = 'admin@example.com'
 DEFAULT_ADMIN_PASSWORD = 'admin123456'
 DEFAULT_VISUAL_DEMO_TEACHER_EMAIL = 'visual.teacher.demo@example.com'
@@ -763,7 +763,7 @@ def seed_test_scenario():
             completed_count=random.randint(0, 3),
             in_progress_count=1,
             last_progress_percent=random.randint(50, 100),
-            readiness_status="tiep_thu_tot"
+            readiness_status="dang_phu_hop"
         )
         db.session.add(report)
 

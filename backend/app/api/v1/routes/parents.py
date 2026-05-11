@@ -174,10 +174,10 @@ def _build_report_payload(report: ParentDailyReport) -> dict[str, object]:
 
 def _recommendation_for_status(status: str) -> str:
     if status == 'can_ho_tro_them':
-        return 'Nen trao doi them voi giao vien de bo sung ho tro va on lai bai cho con.'
+        return 'Nên trao đổi thêm với giáo viên để bổ sung hỗ trợ và ôn lại bài cho con.'
     if status == 'san_sang_nang_do_kho':
         return 'Con đang học tốt. Gia đình có thể động viên để con thử thêm bài nặng hơn.'
-    return 'Con dang theo kip tien do hien tai. Gia dinh tiep tuc nhac con hoc deu moi ngay.'
+    return 'Con đang theo kịp tiến độ hiện tại. Gia đình tiếp tục nhắc con học đều mỗi ngày.'
 
 
 def _user_ids_for_parent_links(links: list[TeacherParentStudentLink]) -> list[int]:
@@ -282,7 +282,7 @@ def create_parent():
     user, error = _require_teacher_user()
     if error:
         return error
-    return error_response('Phu huynh can tu dang ky tai khoan', 'AUTH_FORBIDDEN', 403)
+    return error_response('Phụ huynh cần tự đăng ký tài khoản', 'AUTH_FORBIDDEN', 403)
 
 
 @api_v1.get('/teacher/parent-groups')
@@ -354,7 +354,7 @@ def link_parent_to_student(student_id: int):
 
     publish_realtime_event(
         'parent_group_updated',
-        f'Phu huynh {parent_profile.full_name} vua duoc lien ket voi hoc sinh {student.full_name}.',
+        f'Phụ huynh {parent_profile.full_name} vừa được liên kết với học sinh {student.full_name}.',
         title='Cập nhật phụ huynh',
         recipient_user_ids=[uid for uid in [user.id, parent_profile.user_id] if uid],
         payload={'student_id': student.id, 'student_name': student.full_name, 'parent_id': parent_profile.id, 'parent_name': parent_profile.full_name, 'link_id': link.id},
@@ -396,7 +396,7 @@ def send_daily_reports():
     payload = request.get_json(silent=True) or {}
     student_id = payload.get('student_id')
     report_date = str(payload.get('report_date') or date.today().isoformat())
-    title = (payload.get('title') or f'Bao cao hoc tap ngay {report_date}').strip()
+    title = (payload.get('title') or f'Báo cáo học tập ngày {report_date}').strip()
     teacher_note = (payload.get('note') or '').strip() or None
 
     query = TeacherParentStudentLink.query.filter_by(teacher_id=user.teacher_profile.id, status='active')
@@ -413,8 +413,8 @@ def send_daily_reports():
         summary = _build_progress_summary(link.student_id)
         student_name = link.student.full_name
         summary_text = (
-            f'{student_name} co {summary["completed_count"]}/{summary["total_assignments"]} bai da hoan thanh, '
-            f'{summary["in_progress_count"]} bai dang hoc, tien do gan nhat {summary["last_progress_percent"]}%.'
+            f'{student_name} có {summary["completed_count"]}/{summary["total_assignments"]} bài đã hoàn thành, '
+            f'{summary["in_progress_count"]} bài đang học, tiến độ gần nhất {summary["last_progress_percent"]}%.'
         )
         report = ParentDailyReport.query.filter_by(
             teacher_id=user.teacher_profile.id,
@@ -462,8 +462,8 @@ def send_daily_reports():
     parent_user_ids = _user_ids_for_parent_links(links)
     publish_realtime_event(
         'parent_report_sent',
-        f'Da gui {len(reports)} bao cao hoc tap moi.',
-        title='Bao cao hoc tap',
+        f'Đã gửi {len(reports)} báo cáo học tập mới.',
+        title='Báo cáo học tập',
         recipient_user_ids=[user.id, *parent_user_ids],
         payload={'report_count': len(reports), 'student_id': student_id, 'source': 'daily_report'},
     )
@@ -472,7 +472,7 @@ def send_daily_reports():
     log_server_event(
         level='info',
         module='parents',
-        message='Gui bao cao hoc tap cho phu huynh',
+        message='Gửi báo cáo học tập cho phụ huynh',
         action_name='send_parent_reports',
         user_id=user.id,
         metadata={'report_count': len(reports), 'student_id': student_id},

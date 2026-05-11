@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import uuid
 from pathlib import Path
 
@@ -67,6 +68,8 @@ def _register_request_hooks(app: Flask) -> None:
     @app.after_request
     def append_request_id(response):
         response.headers['X-Request-Id'] = getattr(g, 'request_id', '')
+        if response.mimetype == 'application/json' and 'charset' not in response.content_type.lower():
+            response.content_type = f"{response.content_type}; charset=utf-8"
         return response
 
 
@@ -82,7 +85,7 @@ def _register_error_handlers(app: Flask) -> None:
     @app.errorhandler(Exception)
     def handle_exception(error: Exception):
         log_exception('unhandled_exception', str(error))
-        return error_response('Co loi he thong xay ra', 'INTERNAL_SERVER_ERROR', 500)
+        return error_response('Có lỗi hệ thống xảy ra', 'INTERNAL_SERVER_ERROR', 500)
 
 
 def _register_shell_context(app: Flask) -> None:

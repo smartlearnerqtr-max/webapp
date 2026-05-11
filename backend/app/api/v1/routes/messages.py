@@ -240,8 +240,8 @@ def send_teacher_message():
     if link.parent and link.parent.user_id:
         publish_realtime_event(
             "parent_teacher_message_created",
-            f"Giao vien {link.teacher.full_name if link.teacher else 'giao vien'} vua gui tin nhan moi.",
-            title="Tin nhan moi",
+            f"Giáo viên {link.teacher.full_name if link.teacher else 'giáo viên'} vừa gửi tin nhắn mới.",
+            title="Tin nhắn mới",
             recipient_user_ids=[link.parent.user_id],
             payload={
                 "message_id": message.id,
@@ -261,7 +261,7 @@ def send_teacher_message():
     log_server_event(
         level="info",
         module="messages",
-        message="Giao vien gui tin nhan cho phu huynh",
+        message="Giáo viên gửi tin nhắn cho phụ huynh",
         action_name="teacher_send_message",
         user_id=user.id,
         metadata={"teacher_id": link.teacher_id, "parent_id": link.parent_id, "student_id": link.student_id, "message_id": message.id},
@@ -293,7 +293,7 @@ def mark_teacher_messages_read():
         viewer_role="teacher",
     )
     db.session.commit()
-    return success_response({"updated_count": updated_count}, "Da cap nhat trang thai da doc")
+    return success_response({"updated_count": updated_count}, "Đã cập nhật trạng thái đã đọc")
 
 
 @api_v1.get("/parent/messages")
@@ -362,8 +362,8 @@ def send_parent_message():
     if link.teacher and link.teacher.user_id:
         publish_realtime_event(
             "parent_teacher_message_created",
-            f"Phu huynh {link.parent.full_name if link.parent else 'phu huynh'} vua gui tin nhan moi.",
-            title="Tin nhan moi",
+            f"Phụ huynh {link.parent.full_name if link.parent else 'phụ huynh'} vừa gửi tin nhắn mới.",
+            title="Tin nhắn mới",
             recipient_user_ids=[link.teacher.user_id],
             payload={
                 "message_id": message.id,
@@ -383,7 +383,7 @@ def send_parent_message():
     log_server_event(
         level="info",
         module="messages",
-        message="Phu huynh gui tin nhan cho giao vien",
+        message="Phụ huynh gửi tin nhắn cho giáo viên",
         action_name="parent_send_message",
         user_id=user.id,
         metadata={"teacher_id": link.teacher_id, "parent_id": link.parent_id, "student_id": link.student_id, "message_id": message.id},
@@ -415,4 +415,4 @@ def mark_parent_messages_read():
         viewer_role="parent",
     )
     db.session.commit()
-    return success_response({"updated_count": updated_count}, "Da cap nhat trang thai da doc")
+    return success_response({"updated_count": updated_count}, "Đã cập nhật trạng thái đã đọc")

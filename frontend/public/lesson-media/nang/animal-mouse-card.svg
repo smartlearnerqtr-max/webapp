@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+  <rect width="220" height="220" rx="32" fill="#fff8ef"/>
+  <ellipse cx="116" cy="118" rx="54" ry="40" fill="#a97a58"/>
+  <circle cx="78" cy="88" r="20" fill="#c99874"/>
+  <circle cx="144" cy="86" r="20" fill="#c99874"/>
+  <circle cx="106" cy="108" r="5" fill="#17324d"/>
+  <circle cx="128" cy="108" r="5" fill="#17324d"/>
+  <ellipse cx="118" cy="120" rx="10" ry="8" fill="#17324d"/>
+  <path d="M168 126c20 4 32 18 28 34" fill="none" stroke="#c99874" stroke-linecap="round" stroke-width="8"/>
+  <text x="110" y="206" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#17324d">Con chuột</text>
+</svg>

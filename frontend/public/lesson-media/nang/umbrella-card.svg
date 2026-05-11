@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+  <rect width="220" height="220" rx="32" fill="#f3f8ff"/>
+  <path d="M42 102c14-44 44-66 68-66s54 22 68 66H42z" fill="#4c8dff"/>
+  <path d="M110 102v54c0 16 12 18 18 10" fill="none" stroke="#17324d" stroke-linecap="round" stroke-width="8"/>
+  <path d="M58 102c8 10 18 12 26 0m0 0c8 10 18 12 26 0m0 0c8 10 18 12 26 0m0 0c8 10 18 12 26 0" fill="none" stroke="#17324d" stroke-width="4"/>
+  <text x="110" y="196" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#17324d">Cái ô</text>
+</svg>

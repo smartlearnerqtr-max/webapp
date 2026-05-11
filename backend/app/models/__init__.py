@@ -1,5 +1,6 @@
-﻿from .ai import UserAISetting
+from .ai import UserAISetting
 from .base import TimestampMixin
+from .career import TeacherCareerCard
 from .classroom import ClassJoinCredential, ClassStudent, Classroom
 from .lesson import Lesson, LessonActivity, LessonAssignment, LessonAssignmentStudent, StudentLessonProgress
 from .log import ServerLog
@@ -25,6 +26,7 @@ __all__ = [
     "Subject",
     "ClassSubject",
     "UserAISetting",
+    "TeacherCareerCard",
     "Lesson",
     "LessonActivity",
     "LessonAssignment",

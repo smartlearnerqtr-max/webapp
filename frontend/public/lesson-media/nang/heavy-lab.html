@@ -565,6 +565,129 @@
       });
     }
 
+    function renderStoryBook() {
+      let page = 0;
+      const pages = [
+        {
+          title: 'Trang 1',
+          copy: 'Cô Tấm đang đứng bên vườn hoa, lắng nghe câu chuyện cổ tích bắt đầu.'
+        },
+        {
+          title: 'Trang 2',
+          copy: 'Các trang được lật chậm, ít chi tiết để em tập trung vào lời kể.'
+        },
+        {
+          title: 'Trang 3',
+          copy: 'Em nghe xong rồi có thể bấm xác nhận để chuyển sang phần tiếp theo.'
+        }
+      ];
+      function redraw() {
+        const current = pages[page];
+        setHTML(shell('Nghe truyện bằng tranh động', 'Mỗi lần bấm, app sẽ lật sang một trang mới và giữ nhịp kể chậm, rõ.', `
+          <div class="grid">
+            <div class="scene" style="background:linear-gradient(180deg,#fff8ef,#eef7ff);">
+              <div class="center-panel">
+                <div style="display:grid;gap:12px;justify-items:center;">
+                  <div style="width:180px;height:120px;border-radius:24px;background:linear-gradient(135deg,#f2a647,#ffd991);display:grid;place-items:center;box-shadow:0 18px 28px rgba(172,103,23,0.18);font-size:56px;">📖</div>
+                  <strong style="font-size:20px;">${current.title}</strong>
+                  <p class="sub" style="max-width:420px;">${current.copy}</p>
+                </div>
+              </div>
+            </div>
+            <div class="tool-row">
+              <button class="tool" id="story-next">${page >= pages.length - 1 ? 'Xem lại từ đầu' : 'Lật sang trang tiếp'}</button>
+            </div>
+            <p class="${page >= pages.length - 1 ? 'success' : 'hint'}">${page >= pages.length - 1 ? 'Em đã xem xong 3 trang tranh động của câu chuyện.' : `Trang ${page + 1}/${pages.length}. App giữ nhịp chậm để em nghe lời kể rõ hơn.`}</p>
+          </div>
+        `, 'Tranh động'));
+        app.querySelector('#story-next').addEventListener('click', () => {
+          page = page >= pages.length - 1 ? 0 : page + 1;
+          redraw();
+        });
+      }
+      redraw();
+    }
+
+    function renderStandUpScene() {
+      let done = false;
+      function redraw() {
+        setHTML(shell('Học qua bắt chước hành động', 'Nhìn chữ Stand up, làm theo mẫu rồi bấm xác nhận khi em đã đứng lên.', `
+          <div class="grid">
+            <div class="scene" style="background:linear-gradient(180deg,#eef8ff,#fff9ef);">
+              <div class="center-panel">
+                <div style="display:grid;gap:14px;justify-items:center;">
+                  <div style="width:220px;height:120px;border-radius:24px;background:linear-gradient(135deg,#1c8f7a,#3dc0a8);display:grid;place-items:center;color:#fff;font-size:36px;font-weight:800;box-shadow:0 18px 30px rgba(28,143,122,0.2);">Stand up</div>
+                  <p class="sub" style="max-width:420px;">Camera AI có thể kiểm tra xem em đã đứng lên theo đúng mẫu hay chưa.</p>
+                </div>
+              </div>
+            </div>
+            <div class="tool-row">
+              <button class="tool ${done ? 'tool-active' : ''}" id="standup-done">${done ? 'Đã đứng lên rồi' : 'Em đã làm theo'}</button>
+            </div>
+            <p class="${done ? 'success' : 'hint'}">${done ? 'Tốt rồi. App đã ghi nhận em làm đúng hành động Stand up.' : 'Bấm xác nhận sau khi em đứng lên theo mẫu.'}</p>
+          </div>
+        `, 'AI Camera'));
+        app.querySelector('#standup-done').addEventListener('click', () => {
+          done = !done;
+          redraw();
+        });
+      }
+      redraw();
+    }
+
+    function renderFaceParts() {
+      let selected = '';
+      const state = {};
+      const parts = [
+        { id: 'mat', label: 'Mắt', target: 'eye' },
+        { id: 'mui', label: 'Mũi', target: 'nose' },
+        { id: 'mieng', label: 'Miệng', target: 'mouth' },
+      ];
+      const slots = [
+        { id: 'eye', label: 'Vị trí mắt' },
+        { id: 'nose', label: 'Vị trí mũi' },
+        { id: 'mouth', label: 'Vị trí miệng' },
+      ];
+      function redraw() {
+        const done = parts.every((part) => state[part.id] === part.target);
+        const pool = parts
+          .filter((part) => !state[part.id])
+          .map((part) => `<button class="piece ${selected === part.id ? 'active' : ''}" data-part="${part.id}">${part.label}</button>`)
+          .join('');
+        const slotButtons = slots.map((slot) => {
+          const assigned = parts.find((part) => state[part.id] === slot.id);
+          return `<button class="piece" data-slot="${slot.id}" style="min-width:120px;">${assigned ? assigned.label : slot.label}</button>`;
+        }).join('');
+        setHTML(shell('Ghép bộ phận khuôn mặt', 'Chạm vào Mắt, Mũi, Miệng rồi đặt vào đúng vị trí trên khuôn mặt.', `
+          <div class="grid">
+            <div class="piece-row">${pool}</div>
+            <div class="scene" style="display:grid;place-items:center;background:linear-gradient(180deg,#fff8ef,#eef7ff);">
+              <div class="face">
+                <div class="eye left"></div>
+                <div class="eye right"></div>
+                <div class="nose"></div>
+                <div class="mouth"></div>
+              </div>
+            </div>
+            <div class="piece-row" style="justify-content:center;">${slotButtons}</div>
+            <p class="${done ? 'success' : 'hint'}">${done ? 'Em đã đặt đủ mắt, mũi, miệng vào đúng vị trí.' : 'Chạm vào bộ phận rồi chạm tiếp vào vị trí tương ứng.'}</p>
+          </div>
+        `, 'Cơ thể người'));
+        app.querySelectorAll('[data-part]').forEach((node) => node.addEventListener('click', () => {
+          selected = node.getAttribute('data-part');
+          redraw();
+        }));
+        app.querySelectorAll('[data-slot]').forEach((node) => node.addEventListener('click', () => {
+          const slotId = node.getAttribute('data-slot');
+          if (!selected || !slotId) return;
+          state[selected] = slotId;
+          selected = '';
+          redraw();
+        }));
+      }
+      redraw();
+    }
+
     function renderPrism() {
       let mode = '';
       let angle = 18;
@@ -843,6 +966,73 @@
       redraw();
     }
 
+    function renderLitterChoiceVideo() {
+      let playing = false;
+      let percent = 0;
+      let dropped = false;
+      let timer = null;
+
+      function stopTimer() {
+        if (timer) {
+          window.clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      function redraw() {
+        setHTML(shell('Tình huống bỏ rác', 'Xem bạn nhỏ cầm rác, rồi chọn mặt phù hợp ở hoạt động chính của bài học.', `
+          <div class="video-frame">
+            <div class="scene" style="background:linear-gradient(180deg,#eef8ff,#fff6ea);display:grid;place-items:center;">
+              <div style="width:280px;height:184px;position:relative;border-radius:28px;background:linear-gradient(180deg,#c7ebff 0%,#f5fbff 46%,#d7efc9 46%,#d7efc9 100%);overflow:hidden;box-shadow:0 20px 34px rgba(23,50,77,0.18);">
+                <div style="position:absolute;left:24px;top:112px;width:108px;height:18px;border-radius:999px;background:rgba(23,50,77,0.12);"></div>
+                <div style="position:absolute;right:30px;top:126px;width:86px;height:18px;border-radius:999px;background:rgba(23,50,77,0.12);"></div>
+                <div style="position:absolute;left:58px;top:42px;width:52px;height:52px;border-radius:50%;background:#ffd9bc;border:4px solid #17324d;"></div>
+                <div style="position:absolute;left:50px;top:88px;width:72px;height:60px;border-radius:22px;background:#ef8f2f;border:4px solid #17324d;"></div>
+                <div style="position:absolute;left:64px;top:146px;width:16px;height:28px;border-radius:999px;background:#17324d;"></div>
+                <div style="position:absolute;left:94px;top:146px;width:16px;height:28px;border-radius:999px;background:#17324d;"></div>
+                <div style="position:absolute;left:${dropped ? 134 : 114}px;top:${dropped ? 118 : 98}px;width:26px;height:26px;border-radius:8px;background:#b28d63;border:4px solid #17324d;transform:rotate(${dropped ? 16 : -12}deg);transition:all .25s ease;"></div>
+                <div style="position:absolute;right:34px;top:74px;width:48px;height:72px;border-radius:14px 14px 10px 10px;background:#4b647f;border:4px solid #17324d;"></div>
+                <div style="position:absolute;right:24px;top:64px;width:68px;height:14px;border-radius:999px;background:#17324d;"></div>
+                <div style="position:absolute;right:44px;top:92px;width:28px;height:34px;border-radius:4px;background:${dropped ? '#d9534f' : '#7bd389'};opacity:0.9;"></div>
+              </div>
+            </div>
+            <div class="video-bar">
+              <strong>${percent < 100 ? 'Clip đang chạy: bạn nhỏ cầm rác rồi thả xuống sân' : 'Clip đã dừng lại'}</strong>
+              <div class="bar-track"><div class="bar-fill" style="width:${percent}%"></div></div>
+              <span>${percent < 100 ? 'Quan sát kỹ hành vi của bạn nhỏ.' : 'Bây giờ em hãy chọn mặt mếu để đánh dấu hành vi chưa đúng.'}</span>
+            </div>
+          </div>
+          <div class="tool-row">
+            <button class="tool" id="play-litter">${playing ? 'Đang chạy' : percent >= 100 ? 'Xem lại clip' : 'Bắt đầu clip'}</button>
+          </div>
+          <p class="${percent >= 100 ? 'success' : 'hint'}">${percent >= 100 ? 'Gợi ý: bỏ rác ra sân là hành vi chưa đúng.' : 'Clip mô phỏng ngắn để học sinh nhìn trước khi chọn đáp án.'}</p>
+        `, 'Ứng xử đúng đắn'));
+
+        app.querySelector('#play-litter').addEventListener('click', () => {
+          if (playing) return;
+          playing = true;
+          dropped = false;
+          percent = 0;
+          redraw();
+          stopTimer();
+          timer = window.setInterval(() => {
+            percent += 20;
+            if (percent >= 60) {
+              dropped = true;
+            }
+            if (percent >= 100) {
+              percent = 100;
+              playing = false;
+              stopTimer();
+            }
+            redraw();
+          }, 900);
+        });
+      }
+
+      redraw();
+    }
+
     function renderBudget() {
       const total = 20;
       let save = 0;
@@ -935,6 +1125,46 @@
         app.querySelectorAll('[data-template]').forEach((node) => node.addEventListener('click', () => { template = node.getAttribute('data-template'); redraw(); }));
         app.querySelectorAll('[data-photo]').forEach((node) => node.addEventListener('click', () => { photo = node.getAttribute('data-photo'); redraw(); }));
         app.querySelector('#slide-title').addEventListener('input', (event) => { title = event.target.value || 'Bài thuyết trình của em'; });
+      }
+      redraw();
+    }
+
+    function renderSwipeTablet() {
+      let page = 0;
+      let lit = false;
+      const pages = ['Trang 1', 'Trang 2', 'Trang 3'];
+      function redraw() {
+        setHTML(shell('Thực hành Tap / Swipe', 'Vuốt trái phải để lật trang và chạm để bật sáng màn hình máy tính bảng.', `
+          <div class="grid">
+            <div class="scene" style="display:grid;place-items:center;background:linear-gradient(180deg,#eef8ff,#fffaf0);">
+              <div style="width:240px;height:168px;border-radius:26px;padding:12px;background:#17324d;box-shadow:0 22px 34px rgba(23,50,77,0.22);">
+                <div style="width:100%;height:100%;border-radius:18px;background:${lit ? 'linear-gradient(135deg,#daf4ed,#fff8c9)' : 'linear-gradient(135deg,#3f5268,#1f2d3b)'};display:grid;place-items:center;color:${lit ? '#17324d' : '#f5f7fa'};font-size:26px;font-weight:800;">
+                  ${lit ? pages[page] : 'Màn hình tối'}
+                </div>
+              </div>
+            </div>
+            <div class="tool-row">
+              <button class="tool" id="tablet-tap">${lit ? 'Tap: Tắt màn hình' : 'Tap: Bật sáng màn hình'}</button>
+              <button class="tool" id="tablet-left">Swipe trái</button>
+              <button class="tool" id="tablet-right">Swipe phải</button>
+            </div>
+            <p class="${lit ? 'success' : 'hint'}">${lit ? `Em đang ở ${pages[page]}. Hãy thử vuốt sang trái hoặc phải để lật trang.` : 'Bấm Tap để bật sáng màn hình trước.'}</p>
+          </div>
+        `, 'Thiết bị số'));
+        app.querySelector('#tablet-tap').addEventListener('click', () => {
+          lit = !lit;
+          redraw();
+        });
+        app.querySelector('#tablet-left').addEventListener('click', () => {
+          if (!lit) return;
+          page = page === 0 ? pages.length - 1 : page - 1;
+          redraw();
+        });
+        app.querySelector('#tablet-right').addEventListener('click', () => {
+          if (!lit) return;
+          page = page === pages.length - 1 ? 0 : page + 1;
+          redraw();
+        });
       }
       redraw();
     }
@@ -1077,6 +1307,72 @@
       redraw();
     }
 
+    function renderWarmupCoach() {
+      let step = 0;
+      let playing = false;
+      let timer = null;
+      const poses = [
+        { label: 'Bước 1: Đứng thẳng, nhìn theo thầy.', armLeft: 18, armRight: -18, knee: 0, glow: '#9fd3ff' },
+        { label: 'Bước 2: Vươn tay sang ngang thật chậm.', armLeft: -24, armRight: 24, knee: 0, glow: '#ffd07f' },
+        { label: 'Bước 3: Nhún gối nhẹ rồi đứng thẳng lại.', armLeft: -10, armRight: 10, knee: 10, glow: '#8be0b2' },
+      ];
+
+      function stopTimer() {
+        if (timer) {
+          window.clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      function redraw() {
+        const pose = poses[step];
+        setHTML(shell('Video làm mẫu chậm', 'Xem thầy giáo làm mẫu từng nhịp chậm rồi bắt chước theo.', `
+          <div class="grid">
+            <div class="scene" style="background:radial-gradient(circle at top,#eff8ff,#eaf3ff 34%,#fff7ea 72%);display:grid;place-items:center;overflow:hidden;">
+              <div style="position:relative;width:300px;height:220px;">
+                <div style="position:absolute;inset:auto 26px 14px 26px;height:22px;border-radius:999px;background:rgba(23,50,77,0.1);"></div>
+                <div style="position:absolute;left:106px;top:24px;width:88px;height:88px;border-radius:50%;background:${pose.glow};filter:blur(22px);opacity:.7;"></div>
+                <div style="position:absolute;left:126px;top:28px;width:48px;height:48px;border-radius:50%;background:#ffd9bc;border:4px solid #17324d;"></div>
+                <div style="position:absolute;left:118px;top:78px;width:64px;height:78px;border-radius:28px;background:#ef8f2f;border:4px solid #17324d;"></div>
+                <div style="position:absolute;left:96px;top:86px;width:54px;height:14px;border-radius:999px;background:#17324d;transform-origin:right center;transform:rotate(${pose.armLeft}deg);"></div>
+                <div style="position:absolute;left:150px;top:86px;width:54px;height:14px;border-radius:999px;background:#17324d;transform-origin:left center;transform:rotate(${pose.armRight}deg);"></div>
+                <div style="position:absolute;left:126px;top:150px;width:14px;height:${58 - pose.knee}px;border-radius:999px;background:#17324d;"></div>
+                <div style="position:absolute;left:162px;top:150px;width:14px;height:${58 - pose.knee}px;border-radius:999px;background:#17324d;"></div>
+                <div style="position:absolute;left:114px;top:${196 + pose.knee}px;width:36px;height:12px;border-radius:999px;background:#17324d;"></div>
+                <div style="position:absolute;left:154px;top:${196 + pose.knee}px;width:36px;height:12px;border-radius:999px;background:#17324d;"></div>
+                <div style="position:absolute;left:26px;top:18px;padding:8px 12px;border-radius:999px;background:#ffffffcf;border:1px solid rgba(23,50,77,0.1);font-weight:700;color:#17324d;">${pose.label}</div>
+              </div>
+            </div>
+            <div class="tool-row">
+              <button class="tool" id="play-warmup">${playing ? 'Đang chạy mẫu' : 'Chạy mẫu chậm'}</button>
+              <button class="tool" id="next-pose">Đổi tư thế</button>
+            </div>
+            <p class="${step === poses.length - 1 ? 'success' : 'hint'}">${step === poses.length - 1 ? 'Kết thúc chuỗi mẫu. Em làm lại toàn bộ động tác một lần nữa.' : 'Quan sát tay, vai và đầu gối của thầy rồi làm theo thật chậm.'}</p>
+          </div>
+        `, 'Vận động định hướng'));
+
+        app.querySelector('#play-warmup').addEventListener('click', () => {
+          if (playing) return;
+          playing = true;
+          stopTimer();
+          timer = window.setInterval(() => {
+            step = (step + 1) % poses.length;
+            if (step === poses.length - 1) {
+              playing = false;
+              stopTimer();
+            }
+            redraw();
+          }, 1200);
+        });
+        app.querySelector('#next-pose').addEventListener('click', () => {
+          step = (step + 1) % poses.length;
+          redraw();
+        });
+      }
+
+      redraw();
+    }
+
     function renderRhythmTap() {
       let noteTop = 18;
       let running = false;
@@ -1151,11 +1447,17 @@
       case 'ngu-van-mindmap':
         renderMindmap();
         break;
+      case 'nguvan-story':
+        renderStoryBook();
+        break;
       case 'toan-prism':
         renderPrism();
         break;
       case 'khtn-magnet':
         renderMagnet();
+        break;
+      case 'khtn-face':
+        renderFaceParts();
         break;
       case 'khtn-atom':
         renderAtom();
@@ -1206,6 +1508,9 @@
       case 'gdcd-bullying':
         renderBullyingVideo();
         break;
+      case 'gdcd-litter':
+        renderLitterChoiceVideo();
+        break;
       case 'gdcd-budget':
         renderBudget();
         break;
@@ -1214,6 +1519,9 @@
         break;
       case 'tinhoc-slide':
         renderSlide();
+        break;
+      case 'tinhoc-swipe':
+        renderSwipeTablet();
         break;
       case 'mythuat-fill':
         renderFillColor();
@@ -1230,8 +1538,14 @@
       case 'gdtc-ar':
         renderArBurst();
         break;
+      case 'gdtc-warmup':
+        renderWarmupCoach();
+        break;
       case 'amnhac-rhythm':
         renderRhythmTap();
+        break;
+      case 'tienganh-standup':
+        renderStandUpScene();
         break;
       default:
         renderSceneCard({ title: 'Media mẫu', subtitle: 'Hoạt động đang được chuẩn bị', copy: 'Mô-đun này sẽ hiển thị nội dung bám theo bosung.md.', emoji: '🧩' });
