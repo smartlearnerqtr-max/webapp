@@ -1614,6 +1614,7 @@ function StepBuilder({
         onStructuredAudioUpload={onStructuredAudioUpload}
         onChoiceCardUpload={onChoiceCardUpload}
         isH1={isH1}
+        level={level}
       />
     )
   }
@@ -1715,6 +1716,7 @@ function MediumActivityBuilder({
   onStructuredAudioUpload,
   onChoiceCardUpload,
   isH1,
+  level,
 }: {
   activity: ActivityDraft
   onChange: (activity: ActivityDraft) => void
@@ -1722,6 +1724,7 @@ function MediumActivityBuilder({
   onStructuredAudioUpload: (file: File) => void
   onChoiceCardUpload: (field: 'choice_cards' | 'aac_image_cards', cardIndex: number, file: File) => void
   isH1: boolean
+  level?: LessonLevel
 }) {
   const activityType = isTeacherActivityType(activity.activity_type) ? activity.activity_type : 'image_choice'
   const showSharedMedia = activityType === 'multiple_choice' || activityType === 'image_choice' || activityType === 'image_puzzle' || activityType === 'listen_choose' || activityType === 'watch_answer' || activityType === 'step_by_step'
@@ -2184,7 +2187,6 @@ function StudentActivityPreview({
             setAacSelections,
           }}
           presentationMode="immersive_square"
-          autoPlayAudio={false}
         />
       </div>
     </aside>
