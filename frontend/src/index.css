@@ -5,17 +5,26 @@
   --font-title: 'Montserrat', sans-serif;
   --font-learning: 'Be Vietnam Pro', sans-serif;
   
-  --primary: hsl(230, 75%, 65%);
-  --primary-light: hsl(230, 85%, 95%);
-  --primary-dark: hsl(230, 70%, 50%);
-  --secondary: hsl(190, 80%, 45%);
-  --accent: hsl(35, 100%, 65%);
-  --bg: hsl(230, 40%, 98%);
-  --card: #ffffff;
-  --text: hsl(230, 50%, 20%);
-  --text-muted: hsl(230, 20%, 45%);
-  --border: hsl(230, 30%, 94%);
-  --shadow-soft: 0 12px 40px -10px hsla(230, 40%, 50%, 0.08);
+  /* Coastal Theme Colors */
+  --primary: hsl(205, 85%, 35%);       /* Deep Ocean Blue */
+  --primary-light: hsl(200, 70%, 95%); /* Sea Foam */
+  --primary-dark: hsl(210, 90%, 20%);  /* Midnight Depth */
+  --secondary: hsl(175, 60%, 45%);     /* Tropical Teal */
+  --accent: hsl(42, 90%, 65%);         /* Golden Sand */
+  --coral: hsl(15, 85%, 65%);          /* Sunset Coral */
+  
+  --bg: hsl(205, 40%, 98%);            /* Coastal Breeze */
+  --card: rgba(255, 255, 255, 0.85);   /* Sea Glass Base */
+  --text: hsl(210, 60%, 15%);          /* Deep Abyss Text */
+  --text-muted: hsl(210, 20%, 45%);
+  --border: hsla(205, 40%, 80%, 0.3);  /* Soft Reef Border */
+  
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-blur: blur(12px);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+  
+  --shadow-soft: 0 12px 40px -10px hsla(205, 60%, 20%, 0.12);
+  --shadow-coastal: 0 8px 30px rgba(36, 123, 183, 0.08);
   
   color: var(--text);
   background: var(--bg);
@@ -34,8 +43,53 @@
 
 body {
   min-height: 100vh;
-  background-color: var(--bg);
+  background: radial-gradient(circle at top, hsl(205, 90%, 96%), hsl(205, 50%, 95%) 28%, hsl(205, 43%, 92%) 56%, var(--bg) 100%);
   color: var(--text);
+  overflow-x: hidden;
+}
+
+/* Coastal Utilities */
+.sea-glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  box-shadow: var(--shadow-coastal);
+}
+
+.floating-buoy {
+  animation: buoy 4s ease-in-out infinite;
+}
+
+@keyframes buoy {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: width 0.6s ease-out, height 0.6s ease-out, opacity 0.6s ease-out;
+}
+
+.ripple-effect:active::after {
+  width: 200%;
+  height: 200%;
+  opacity: 1;
+  transition: 0s;
 }
 
 h1, h2, h3, h4, .sidebar-title, .hero-title {

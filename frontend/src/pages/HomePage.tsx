@@ -9,14 +9,6 @@ import { getDefaultRouteForRole } from '../utils/roleRoutes'
 type AuthMode = 'login' | 'register'
 type RegisterRole = 'student' | 'parent'
 
-const homeStats = [
-  { label: 'Bài học trực quan', value: '24+' },
-  { label: 'Vai trò phối hợp', value: '4' },
-  { label: 'Theo dõi mỗi ngày', value: '100%' },
-]
-
-const learningTags = ['Toán dễ hiểu', 'Ngôn ngữ', 'Kỹ năng sống', 'Theo dõi tiến độ']
-
 function resolvePostRegisterRoute(role: RegisterRole) {
   if (role === 'student') return '/hoc-tap?tab=settings&setup=1'
   return '/phu-huynh?setup=1'
@@ -101,65 +93,35 @@ export function HomePage() {
   return (
     <div className="page-stack home-page">
       <section className="auth-layout auth-layout-home">
-        <article className="roadmap-panel auth-hero">
-          <div className="hero-copy">
-            <h1 className="hero-title hero-title-green">Bạn học thông minh, xin chào!</h1>
-          </div>
-
-          <div className="home-stats">
-            {homeStats.map((item) => (
-              <div key={item.label} className="home-stat-card">
-                <span>{item.label}</span>
-                <strong>{item.value}</strong>
-              </div>
-            ))}
-          </div>
-
-          <div className="phone-stage">
-            <div className="phone-frame">
-              <div className="phone-topbar">
-                <span className="phone-dot"></span>
-                <span className="phone-dot"></span>
-                <span className="phone-dot"></span>
-              </div>
-              <div className="phone-hero-area">
-                <div className="hero-bubble hero-bubble-large"></div>
-                <div className="hero-bubble hero-bubble-small"></div>
-                <div className="hero-character hero-character-left"></div>
-                <div className="hero-character hero-character-right"></div>
-                <div className="hero-book"></div>
-              </div>
-              <div className="phone-course-list">
-                <div className="phone-course-card phone-course-card-blue">
-                  <span>Lộ trình cá nhân</span>
-                  <strong>Bài hôm nay</strong>
-                </div>
-                <div className="phone-course-card phone-course-card-yellow">
-                  <span>Tiến độ</span>
-                  <strong>Đang ổn định</strong>
-                </div>
-                <div className="phone-course-card phone-course-card-coral">
-                  <span>Gắn kết phụ huynh</span>
-                  <strong>Nhắc việc rõ ràng</strong>
-                </div>
-              </div>
+        <article className="sealife-hero">
+          <div className="sealife-underwater-scene">
+            <div className="sealife-creature sealife-jellyfish">🪼</div>
+            <div className="sealife-creature sealife-turtle">🐢</div>
+            <div className="sealife-creature sealife-octopus">🐙</div>
+            <div className="sealife-creature sealife-crab">🦀</div>
+            <div className="sealife-creature sealife-fish1">🐠</div>
+            <div className="sealife-creature sealife-fish2">🐟</div>
+            <div className="sealife-coral sealife-coral1">🪸</div>
+            <div className="sealife-coral sealife-coral2">🌿</div>
+            <div className="sealife-rock">🪨</div>
+            <div className="sealife-bubbles">
+              <span className="bubble"></span><span className="bubble"></span><span className="bubble"></span>
             </div>
-            <div className="floating-note note-top">Lớp học trực quan</div>
-            <div className="floating-note note-bottom">Theo dõi dễ hiểu</div>
           </div>
-
-          <div className="hero-pill-row">
-            {learningTags.map((tag) => (
-              <span key={tag} className="hero-pill">{tag}</span>
-            ))}
+          <div className="sealife-wave-divider" aria-hidden="true">
+            <svg viewBox="0 0 100 1000" preserveAspectRatio="none">
+              <path className="wave-layer wave-layer-1" d="M0,0 C40,200 60,400 30,600 C0,800 50,900 100,1000 L100,0 Z" />
+              <path className="wave-layer wave-layer-2" d="M20,0 C60,250 80,450 50,650 C20,850 70,950 100,1000 L100,0 Z" />
+              <path className="wave-layer wave-layer-3" d="M40,0 C80,300 100,500 70,700 C40,900 90,980 100,1000 L100,0 Z" />
+              <path className="wave-layer wave-layer-4" d="M70,0 C100,350 110,550 90,750 C70,950 100,1000 100,1000 L100,0 Z" />
+            </svg>
           </div>
         </article>
 
-        <article className="roadmap-panel auth-card">
-          <div className="form-card-header">
-            <p className="eyebrow form-eyebrow">Bắt đầu</p>
+        <article className="sealife-auth-card">
+          <div className="sealife-auth-header">
+            <h1 className="hero-title">BẠN HỌC THÔNG MINH</h1>
           </div>
-
           <div className="mode-switch" role="tablist" aria-label="Chọn chế độ tài khoản">
             <button className={mode === 'login' ? 'mode-switch-button mode-switch-button-active' : 'mode-switch-button'} type="button" onClick={() => setMode('login')}>
               Đăng nhập

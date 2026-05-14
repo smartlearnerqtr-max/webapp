@@ -474,13 +474,10 @@
 
     function shell(title, subtitle, body, badge = 'Mức nhẹ') {
       return `
-        <div class="hero">
+        <div class="hero" style="display: none;">
           <div>
-            <p class="eyebrow">Bám theo bosung.md</p>
             <h1>${title}</h1>
-            <p class="sub">${subtitle}</p>
           </div>
-          <span class="pill">${badge}</span>
         </div>
         ${body}
       `;

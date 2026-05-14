@@ -1,35 +1,38 @@
+@charset "UTF-8";
 
 :root {
-  --primary: hsl(230, 75%, 65%);
-  --primary-strong: hsl(230, 70%, 50%);
-  --primary-soft: hsl(230, 85%, 95%);
-  --accent: hsl(35, 100%, 65%);
-  --accent-soft: hsl(35, 100%, 95%);
-  --coral: hsl(10, 100%, 74%);
-  --coral-soft: hsl(10, 100%, 96%);
-  --mint: hsl(166, 58%, 64%);
-  --bg: hsl(230, 40%, 98%);
-  --bg-layer: hsl(230, 40%, 99%);
-  --card: rgba(255, 255, 255, 0.95);
+  --primary: hsl(205, 85%, 35%);
+  --primary-strong: hsl(210, 90%, 25%);
+  --primary-soft: hsl(200, 70%, 95%);
+  --accent: hsl(42, 90%, 65%);
+  --accent-soft: hsl(42, 90%, 95%);
+  --coral: hsl(15, 85%, 65%);
+  --coral-soft: hsl(15, 85%, 96%);
+  --mint: hsl(175, 50%, 60%);
+  --bg: hsl(205, 40%, 98%);
+  --bg-layer: hsl(205, 40%, 99%);
+  --card: rgba(255, 255, 255, 0.88);
   --card-solid: #ffffff;
-  --text: hsl(230, 50%, 20%);
-  --text-muted: hsl(230, 20%, 45%);
-  --border: hsla(230, 30%, 80%, 0.15);
-  --shadow: 0 12px 36px hsla(230, 50%, 30%, 0.08);
-  --shadow-lg: 0 24px 60px hsla(230, 50%, 30%, 0.12);
-  --radius-xl: 28px;
-  --radius-lg: 20px;
-  --radius-md: 14px;
+  --text: hsl(210, 60%, 15%);
+  --text-muted: hsl(210, 20%, 45%);
+  --border: hsla(205, 30%, 70%, 0.2);
+  --shadow: 0 12px 36px hsla(205, 60%, 30%, 0.08);
+  --shadow-lg: 0 24px 60px hsla(205, 60%, 30%, 0.12);
+  --shadow-coastal: 0 12px 36px hsla(205, 60%, 30%, 0.08);
+  --radius-xl: 32px;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --secondary: hsl(175, 50%, 60%);
 
-  /* Premium Glassmorphism Tokens */
-  --glass-bg: rgba(255, 255, 255, 0.65);
-  --glass-bg-hover: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --glass-border-strong: rgba(255, 255, 255, 0.6);
-  --glass-blur: blur(12px);
-  --premium-shadow: 0 10px 40px -10px rgba(31, 38, 135, 0.15);
-  --premium-shadow-lg: 0 20px 60px -15px rgba(31, 38, 135, 0.25);
-  --glow-primary: 0 0 20px hsla(230, 75%, 65%, 0.3);
+  /* Premium Coastal Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-hover: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass-border-strong: rgba(255, 255, 255, 0.7);
+  --glass-blur: blur(14px);
+  --premium-shadow: 0 12px 45px -10px hsla(205, 70%, 20%, 0.15);
+  --premium-shadow-lg: 0 25px 70px -15px hsla(205, 70%, 20%, 0.25);
+  --glow-primary: 0 0 25px hsla(205, 85%, 35%, 0.25);
 }
 
 * {
@@ -48,9 +51,9 @@ body {
   padding: 0;
   font-family: var(--font-body);
   background:
-    radial-gradient(circle at top left, rgba(255, 190, 61, 0.18), transparent 28%),
-    radial-gradient(circle at top right, rgba(61, 111, 214, 0.18), transparent 30%),
-    linear-gradient(180deg, #f5f9ff 0%, #edf4fb 100%);
+    radial-gradient(circle at top left, hsla(42, 90%, 65%, 0.15), transparent 30%),
+    radial-gradient(circle at bottom right, hsla(205, 85%, 35%, 0.12), transparent 40%),
+    linear-gradient(180deg, hsl(205, 60%, 97%) 0%, hsl(200, 50%, 94%) 100%);
   color: var(--text);
 }
 
@@ -59,11 +62,23 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.35) 1px, transparent 1px);
-  background-size: 26px 26px;
+    radial-gradient(circle at 50% 50%, hsla(205, 80%, 40%, 0.03) 2px, transparent 0);
+  background-size: 40px 40px;
   pointer-events: none;
-  opacity: 0.35;
+  opacity: 0.8;
+  z-index: -1;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 25vh;
+  background: linear-gradient(to top, hsla(175, 60%, 45%, 0.05), transparent);
+  pointer-events: none;
+  z-index: -1;
 }
 
 a {
@@ -183,14 +198,16 @@ button {
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
-  background: linear-gradient(180deg, rgba(20, 86, 61, 0.42) 0%, rgba(25, 99, 76, 0.5) 48%, rgba(9, 55, 45, 0.58) 100%);
+  background: linear-gradient(180deg, hsla(205, 90%, 25%, 0.8) 0%, hsla(205, 85%, 20%, 0.85) 50%, hsla(210, 90%, 15%, 0.9) 100%);
   color: #ffffff;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 15px 0 50px -10px hsla(210, 90%, 10%, 0.3);
   z-index: 110;
   transform: translateX(-110%);
-  transition: transform 260ms ease;
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
   overflow-y: auto;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-open {
@@ -347,9 +364,11 @@ button {
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   background: var(--card);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
-  padding: 1.6rem;
+  box-shadow: var(--shadow-coastal, var(--shadow));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 1.8rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .roadmap-panel::before,
@@ -360,9 +379,9 @@ button {
   content: '';
   position: absolute;
   inset: 0 0 auto 0;
-  height: 6px;
-  background: linear-gradient(90deg, var(--primary) 0%, #6a9ef0 55%, var(--accent) 100%);
-  opacity: 0.95;
+  height: 5px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary, hsl(175,50%,60%)) 50%, var(--accent) 100%);
+  opacity: 0.8;
 }
 
 .roadmap-panel h1,
@@ -400,6 +419,30 @@ button {
 
 .auth-layout-home {
   align-items: stretch;
+  grid-template-columns: minmax(320px, 1fr) minmax(420px, 1.2fr);
+  gap: 2rem;
+}
+
+.home-page {
+  position: relative;
+  padding-top: 1.6rem;
+}
+
+.home-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.45), transparent 13%),
+    radial-gradient(circle at 85% 8%, rgba(255, 255, 255, 0.32), transparent 12%),
+    radial-gradient(circle at 50% 95%, rgba(255, 255, 255, 0.18), transparent 18%);
+  opacity: 0.7;
+}
+
+.home-page > .auth-layout {
+  position: relative;
+  z-index: 1;
 }
 
 .card-grid,
@@ -790,8 +833,8 @@ button {
 .action-button {
   border: 0;
   color: #ffffff;
-  background: linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%);
-  box-shadow: 0 16px 28px rgba(51, 93, 196, 0.25);
+  background: linear-gradient(160deg, hsl(205, 80%, 40%) 0%, hsl(210, 90%, 25%) 100%);
+  box-shadow: 0 16px 32px hsla(205, 80%, 30%, 0.3);
 }
 
 .action-button:hover:not(:disabled),
@@ -801,20 +844,21 @@ button {
 }
 
 .action-button:hover:not(:disabled) {
-  box-shadow: 0 22px 32px rgba(51, 93, 196, 0.32);
+  box-shadow: 0 22px 40px hsla(205, 80%, 30%, 0.38);
 }
 
 .action-button:disabled,
 .ghost-button:disabled,
 .mode-switch-button:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .ghost-button {
-  border: 1px solid rgba(61, 111, 214, 0.22);
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid hsla(205, 50%, 50%, 0.25);
+  background: rgba(255, 255, 255, 0.75);
   color: var(--primary-strong);
+  backdrop-filter: blur(8px);
 }
 
 .mode-switch {
@@ -823,20 +867,20 @@ button {
   gap: 0.6rem;
   padding: 0.45rem;
   border-radius: 22px;
-  background: #edf4ff;
-  border: 1px solid rgba(61, 111, 214, 0.14);
+  background: hsl(200, 50%, 96%);
+  border: 1px solid hsla(205, 40%, 70%, 0.2);
 }
 
 .mode-switch-button {
   border: 0;
   background: transparent;
-  color: #5577b2;
+  color: hsl(205, 50%, 40%);
 }
 
 .mode-switch-button-active {
-  background: linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%);
+  background: linear-gradient(160deg, hsl(205, 80%, 40%) 0%, hsl(210, 90%, 25%) 100%);
   color: #ffffff;
-  box-shadow: 0 12px 22px rgba(51, 93, 196, 0.24);
+  box-shadow: 0 12px 22px hsla(205, 80%, 30%, 0.24);
 }
 
 .error-text {
@@ -860,8 +904,9 @@ button {
   gap: 0.9rem;
   padding: 1rem;
   border-radius: 22px;
-  border: 1px solid rgba(101, 144, 219, 0.16);
-  background: linear-gradient(180deg, rgba(248, 251, 255, 0.96) 0%, rgba(255, 255, 255, 0.96) 100%);
+  border: 1px solid hsla(205, 40%, 70%, 0.2);
+  background: linear-gradient(160deg, rgba(236, 248, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
+  backdrop-filter: blur(8px);
 }
 
 .builder-type-grid {
@@ -989,7 +1034,7 @@ button {
   margin-bottom: 1rem;
   border: 0;
   border-radius: 20px;
-  background: linear-gradient(135deg, #3d6fd6 0%, #2446a8 100%);
+  background: linear-gradient(135deg, hsl(205, 75%, 40%) 0%, hsl(210, 90%, 25%) 100%);
   color: #ffffff;
   font-size: 1rem;
   font-weight: 800;
@@ -998,7 +1043,7 @@ button {
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 16px 30px rgba(36, 70, 168, 0.28);
+  box-shadow: 0 16px 30px hsla(205, 80%, 30%, 0.28);
 }
 
 .simple-toggle-button-disabled {
@@ -1023,9 +1068,10 @@ button {
   gap: 0.9rem;
   padding: 1rem 1.05rem;
   border-radius: 22px;
-  border: 1px solid rgba(101, 144, 219, 0.16);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 249, 255, 0.95) 100%);
-  box-shadow: 0 10px 22px rgba(45, 87, 150, 0.07);
+  border: 1px solid hsla(205, 40%, 70%, 0.18);
+  background: linear-gradient(160deg, rgba(236, 248, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
+  box-shadow: 0 10px 22px hsla(205, 60%, 30%, 0.07);
+  backdrop-filter: blur(8px);
 }
 
 .activity-playground,
@@ -1081,18 +1127,20 @@ button {
 .interactive-option {
   min-height: 48px;
   padding: 0.85rem 1rem;
-  border: 1px solid rgba(61, 111, 214, 0.18);
+  border: 1px solid hsla(205, 50%, 60%, 0.2);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.9);
   color: var(--primary-strong);
   font-weight: 800;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .interactive-option-active {
-  background: linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%);
+  background: linear-gradient(160deg, hsl(205, 80%, 40%) 0%, hsl(210, 90%, 25%) 100%);
   color: #ffffff;
   border-color: transparent;
+  box-shadow: 0 8px 20px hsla(205, 80%, 30%, 0.25);
 }
 
 .aac-image-grid {
@@ -1138,19 +1186,19 @@ button {
   margin: 0;
   padding: 0.8rem 0.95rem;
   border-radius: 16px;
-  background: #eef4ff;
+  background: hsl(200, 60%, 95%);
   color: var(--primary-strong);
   font-weight: 700;
 }
 
 .feedback-note-success {
-  background: #e9fbf4;
-  color: #1d7a54;
+  background: hsl(160, 60%, 93%);
+  color: hsl(160, 60%, 25%);
 }
 
 .feedback-note-warning {
-  background: #fff4df;
-  color: #9a6716;
+  background: hsl(42, 80%, 93%);
+  color: hsl(35, 80%, 30%);
 }
 
 .activity-guidance {
@@ -2979,10 +3027,11 @@ button {
   position: relative;
   overflow: hidden;
   border-radius: 32px;
-  border: 1px solid rgba(221, 224, 214, 0.9);
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 14px 32px rgba(80, 93, 112, 0.08);
-  backdrop-filter: none;
+  border: 1px solid hsla(200, 40%, 80%, 0.35);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 40px hsla(205, 60%, 25%, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .student-visual-hero {
@@ -3109,8 +3158,9 @@ button {
 }
 
 .student-visual-menu-button-active {
-  background: linear-gradient(180deg, #1f8fff 0%, #146fd0 100%);
+  background: linear-gradient(160deg, hsl(205, 80%, 40%) 0%, hsl(210, 90%, 25%) 100%);
   color: #ffffff;
+  box-shadow: 0 8px 24px hsla(205, 80%, 30%, 0.3);
 }
 
 .student-visual-menu-button span:last-child {
@@ -3664,6 +3714,153 @@ button {
   width: min(100%, 1180px);
   margin-inline: auto;
   padding: clamp(1rem, 2.4vw, 1.8rem);
+}
+
+.student-visual-lesson-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.95fr);
+  gap: clamp(1.3rem, 2vw, 2rem);
+  align-items: start;
+}
+
+.student-visual-lesson-main {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.student-visual-lesson-sidebar {
+  display: grid;
+  gap: 1rem;
+}
+
+.student-visual-sidebar-card {
+  padding: 1.25rem;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(45, 87, 129, 0.12);
+  box-shadow: 0 18px 40px rgba(52, 84, 122, 0.08);
+}
+
+.student-visual-sidebar-card strong {
+  display: block;
+  margin-bottom: 0.85rem;
+  font-size: 1rem;
+  color: #0f2d4a;
+}
+
+.student-visual-sidebar-card p {
+  margin: 0;
+  color: #3c536c;
+  line-height: 1.6;
+}
+
+.student-visual-sidebar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0 0.5rem;
+  color: #5c738f;
+  font-size: 0.95rem;
+}
+
+.student-visual-sidebar-note {
+  margin-top: 1rem;
+  color: #5f7189;
+  font-size: 0.95rem;
+}
+
+.student-visual-activity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.student-visual-activity-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(30, 94, 217, 0.08);
+  color: #1b4eb6;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.student-visual-activity-info {
+  color: #4c6585;
+  font-weight: 600;
+}
+
+.student-visual-activity-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.student-visual-activity-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  background: #f8fbff;
+  border: 1px solid rgba(36, 70, 216, 0.12);
+}
+
+.student-visual-activity-item-active {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(226, 236, 255, 0.95) 100%);
+  border-color: rgba(36, 70, 216, 0.18);
+}
+
+.student-visual-activity-index {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(36, 70, 216, 0.1);
+  color: #1f4ab8;
+  font-weight: 900;
+}
+
+.student-visual-activity-item p {
+  margin: 0 0 0.35rem;
+  color: #122c47;
+  font-weight: 700;
+}
+
+.student-visual-activity-status {
+  display: inline-flex;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4b6c8b;
+  background: rgba(74, 119, 168, 0.12);
+}
+
+.student-visual-activity-status-complete {
+  background: rgba(42, 192, 139, 0.16);
+  color: #1f7b61;
+}
+
+@media (max-width: 920px) {
+  .student-visual-lesson-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .student-visual-lesson-sidebar,
+  .student-visual-lesson-main {
+    gap: 1rem;
+  }
 }
 
 .student-visual-lesson-progress-head {
@@ -4354,10 +4551,11 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   justify-content: center;
   padding: 0.68rem 1rem;
   border-radius: 999px;
-  border: 1px solid rgba(61, 111, 214, 0.18);
-  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid hsla(205, 50%, 60%, 0.2);
+  background: rgba(255, 255, 255, 0.88);
   color: var(--primary-strong);
   font-weight: 800;
+  backdrop-filter: blur(6px);
 }
 
 .pill-button {
@@ -4365,14 +4563,15 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 }
 
 .pill-button-active {
-  background: linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%);
+  background: linear-gradient(160deg, hsl(205, 80%, 40%) 0%, hsl(210, 90%, 25%) 100%);
   border-color: transparent;
   color: #ffffff;
 }
 
 .muted-pill {
-  background: #f4f7fb;
-  color: #60718d;
+  background: hsl(200, 40%, 95%);
+  color: hsl(205, 30%, 45%);
+  border-color: transparent;
 }
 
 .info-card span,
@@ -4399,8 +4598,9 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 .response-box {
   padding: 1rem;
   border-radius: 22px;
-  border: 1px solid rgba(101, 144, 219, 0.16);
-  background: #f9fbff;
+  border: 1px solid hsla(205, 40%, 70%, 0.18);
+  background: linear-gradient(160deg, hsl(200, 60%, 97%) 0%, rgba(255, 255, 255, 0.95) 100%);
+  backdrop-filter: blur(6px);
 }
 
 .settings-grid span {
@@ -4424,11 +4624,15 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 
 .auth-hero {
   display: grid;
-  gap: 1.4rem;
+  gap: 1.6rem;
+  padding: 2rem;
   background:
-    radial-gradient(circle at top right, rgba(255, 190, 61, 0.22), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(61, 111, 214, 0.15), transparent 34%),
-    linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%);
+    radial-gradient(circle at top right, rgba(255,255,255,0.26), transparent 22%),
+    radial-gradient(circle at 30% 22%, hsla(200, 100%, 92%, 0.38), transparent 20%),
+    radial-gradient(circle at bottom left, hsla(205, 90%, 46%, 0.22), transparent 32%),
+    linear-gradient(160deg, hsl(205, 84%, 96%) 0%, hsl(205, 72%, 91%) 45%, hsl(205, 70%, 97%) 100%);
+  border: 1px solid hsla(205, 85%, 95%, 0.55);
+  box-shadow: 0 26px 70px rgba(13, 58, 102, 0.12);
 }
 
 .hero-copy {
@@ -4470,14 +4674,16 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 .home-stat-card {
   padding: 1rem 1.05rem;
   border-radius: 22px;
-  background: linear-gradient(180deg, rgba(237, 244, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
-  border: 1px solid rgba(61, 111, 214, 0.16);
+  background: linear-gradient(160deg, rgba(255,255,255,0.96) 0%, rgba(235, 248, 255, 0.95) 100%);
+  border: 1px solid hsla(205, 80%, 90%, 0.4);
+  box-shadow: 0 18px 36px rgba(37, 84, 142, 0.08);
+  backdrop-filter: blur(10px);
 }
 
 .home-stat-card span {
   display: block;
   margin-bottom: 0.3rem;
-  color: #6280b1;
+  color: hsl(205, 30%, 45%);
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -4498,8 +4704,8 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   margin: 0 auto;
   padding: 0.85rem;
   border-radius: 36px;
-  background: linear-gradient(180deg, #2f5abf 0%, #456fd3 100%);
-  box-shadow: 0 28px 50px rgba(47, 88, 189, 0.3);
+  background: linear-gradient(160deg, hsl(205, 80%, 30%) 0%, hsl(205, 75%, 20%) 100%);
+  box-shadow: 0 28px 60px hsla(205, 80%, 20%, 0.35);
 }
 
 .phone-topbar {
@@ -4640,14 +4846,36 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 }
 
 .hero-pill {
-  background: rgba(255, 255, 255, 0.8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--primary-dark);
+  font-weight: 700;
+  box-shadow: 0 12px 24px rgba(28, 87, 136, 0.08);
+}
+
+.floating-note {
+  position: absolute;
+  padding: 0.85rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--primary-dark);
+  font-weight: 800;
+  box-shadow: 0 18px 30px rgba(20, 60, 110, 0.16);
 }
 
 .auth-card {
   display: grid;
   gap: 1.2rem;
   align-content: start;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 255, 0.96) 100%);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid hsla(205, 75%, 85%, 0.45);
+  box-shadow: 0 18px 40px rgba(23, 76, 135, 0.08);
+  backdrop-filter: blur(18px);
 }
 
 .form-card-header {
@@ -5932,8 +6160,8 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 .ichan-hero {
   padding: 0;
   border: 0;
-  background: linear-gradient(135deg, #2790ff 0%, #1274ea 52%, #0c62cc 100%);
-  box-shadow: 0 24px 48px rgba(18, 98, 204, 0.22);
+  background: linear-gradient(160deg, hsl(205, 85%, 35%) 0%, hsl(210, 90%, 25%) 100%);
+  box-shadow: 0 24px 48px hsla(205, 80%, 30%, 0.25);
 }
 
 .ichan-hero-note {
@@ -6028,7 +6256,7 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 }
 
 .ichan-section-title {
-  color: #0f2d4a;
+  color: hsl(210, 60%, 15%);
   font-size: clamp(1.55rem, 3vw, 2.2rem);
   line-height: 1.04;
   letter-spacing: 0.02em;
@@ -6036,7 +6264,7 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 }
 
 .student-visual-section-head .ichan-section-title.ichan-section-title-accent {
-  color: #1768c5;
+  color: hsl(205, 85%, 35%);
 }
 
 .ichan-section-note {
@@ -6097,13 +6325,15 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 .ichan-voice-button {
   min-height: 50px;
   padding: 0.8rem 1.25rem;
-  border: 1px solid rgba(215, 219, 209, 0.96);
+  border: 1px solid hsla(205, 50%, 70%, 0.3);
   border-radius: 999px;
-  background: #f6f4ee;
-  color: #26384a;
+  background: rgba(255, 255, 255, 0.8);
+  color: hsl(210, 60%, 20%);
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(80, 93, 112, 0.08);
+  box-shadow: 0 10px 24px hsla(205, 60%, 30%, 0.08);
+  backdrop-filter: blur(8px);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .ichan-subject-grid {
@@ -6129,17 +6359,17 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   border-radius: 30px;
   text-align: center;
   background:
-    radial-gradient(circle at top right, rgba(107, 185, 255, 0.16), transparent 28%),
-    linear-gradient(180deg, #ffffff 0%, #fbfbf7 100%);
-  box-shadow: 0 18px 36px rgba(80, 93, 112, 0.11);
+    radial-gradient(circle at top right, hsla(205, 80%, 70%, 0.14), transparent 30%),
+    linear-gradient(160deg, #ffffff 0%, hsl(200, 40%, 97%) 100%);
+  box-shadow: 0 18px 36px hsla(205, 60%, 30%, 0.1);
   transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
 }
 
 .ichan-subject-card:hover,
 .ichan-game-card:hover,
 .ichan-prompt-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 24px 42px rgba(31, 71, 120, 0.16);
+  transform: translateY(-4px);
+  box-shadow: 0 28px 50px hsla(205, 70%, 25%, 0.18);
 }
 
 .ichan-subject-card:disabled {
@@ -6148,14 +6378,15 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 }
 
 .ichan-subject-card-active {
-  outline: 3px solid rgba(31, 143, 255, 0.28);
-  box-shadow: 0 24px 42px rgba(21, 116, 234, 0.16);
+  outline: 3px solid hsla(205, 85%, 50%, 0.3);
+  box-shadow: 0 24px 48px hsla(205, 80%, 30%, 0.2);
 }
 
 .ichan-subject-card-muted {
   background:
-    radial-gradient(circle at top right, rgba(107, 185, 255, 0.16), transparent 28%),
-    linear-gradient(180deg, #ffffff 0%, #fbfbf7 100%);
+    radial-gradient(circle at top right, hsla(205, 50%, 80%, 0.1), transparent 28%),
+    linear-gradient(160deg, hsl(200, 30%, 97%) 0%, #f8fbfd 100%);
+  opacity: 0.7;
 }
 
 .ichan-subject-media,
@@ -6816,29 +7047,29 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   }
 }
 
-/* Lesson solving UI refresh */
+/* Lesson solving UI refresh - Ocean Theme */
 .student-visual-question-panel,
 .student-visual-action-bar {
-  --lesson-primary: #3d2b8e;
-  --lesson-primary-hover: #2f1d75;
-  --lesson-primary-soft: #ebe4ff;
-  --lesson-primary-border: rgba(61, 43, 142, 0.18);
-  --lesson-accent: #a8f0d6;
-  --lesson-accent-strong: #5cc8a5;
-  --lesson-status-active-bg: rgba(168, 240, 214, 0.28);
-  --lesson-status-active-text: #245848;
-  --lesson-status-active-dot: #5cc8a5;
-  --lesson-status-done-bg: rgba(168, 240, 214, 0.34);
-  --lesson-status-done-text: #1f5f4a;
+  --lesson-primary: hsl(205, 85%, 35%);
+  --lesson-primary-hover: hsl(205, 85%, 25%);
+  --lesson-primary-soft: hsl(200, 60%, 94%);
+  --lesson-primary-border: hsla(205, 80%, 35%, 0.18);
+  --lesson-accent: hsl(175, 50%, 60%);
+  --lesson-accent-strong: hsl(175, 50%, 40%);
+  --lesson-status-active-bg: hsla(175, 50%, 60%, 0.28);
+  --lesson-status-active-text: hsl(175, 50%, 25%);
+  --lesson-status-active-dot: hsl(175, 50%, 40%);
+  --lesson-status-done-bg: hsla(175, 50%, 60%, 0.34);
+  --lesson-status-done-text: hsl(175, 50%, 20%);
   --lesson-status-error-bg: #fcebeb;
   --lesson-status-error-text: #a32d2d;
-  --lesson-bg-page: #f4f1ff;
+  --lesson-bg-page: hsl(205, 40%, 97%);
   --lesson-bg-card: rgba(255, 255, 255, 0.96);
-  --lesson-bg-muted: rgba(244, 241, 255, 0.78);
-  --lesson-text-main: #2f2658;
-  --lesson-text-muted: #6a6198;
-  --lesson-border: rgba(61, 43, 142, 0.12);
-  --lesson-border-strong: rgba(168, 240, 214, 0.48);
+  --lesson-bg-muted: hsla(205, 40%, 97%, 0.78);
+  --lesson-text-main: hsl(210, 60%, 15%);
+  --lesson-text-muted: hsl(210, 30%, 45%);
+  --lesson-border: hsla(205, 80%, 35%, 0.12);
+  --lesson-border-strong: hsla(175, 50%, 60%, 0.48);
   --lesson-font: var(--font-learning);
 }
 
@@ -6863,18 +7094,31 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   top: 0;
   z-index: 3;
   margin-bottom: 0;
-  padding: 1rem 1.1rem 0.9rem;
-  border-radius: 18px;
-  background: var(--lesson-primary);
+  padding: 1rem 1.4rem 1rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, hsl(205, 85%, 30%) 0%, hsl(215, 90%, 20%) 100%);
   align-items: center;
+  overflow: hidden;
+  box-shadow: 0 8px 24px hsla(205, 80%, 20%, 0.3);
+}
+
+/* Decorative wave lines in the progress header */
+.student-visual-lesson-progress-head::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80'%3E%3Cpath fill='rgba(255,255,255,0.06)' d='M0,40 C360,0 1080,80 1440,40 L1440,80 L0,80 Z'/%3E%3C/svg%3E");
+  background-size: 200% 100%;
+  background-position: bottom;
+  pointer-events: none;
 }
 
 .student-visual-progress-label {
-  margin: 0 0 0.35rem;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  margin: 0 0 0.25rem;
+  color: hsla(175, 70%, 80%, 0.9);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -6882,30 +7126,36 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   margin: 0;
   color: #ffffff;
   font-family: var(--lesson-font);
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: 0;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 8px hsla(205, 80%, 10%, 0.4);
 }
 
 .student-visual-progress-copy {
-  margin: 0.25rem 0 0;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 14px;
+  margin: 0.3rem 0 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
   font-weight: 500;
-  line-height: 1.6;
+  line-height: 1.5;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 60ch;
 }
 
 .student-visual-progress-pill {
   min-height: auto;
-  padding: 0.45rem 0.85rem;
+  padding: 0.4rem 1rem;
   border-radius: 20px;
-  border: 0.5px solid rgba(168, 240, 214, 0.4);
-  background: rgba(168, 240, 214, 0.14);
-  color: #ffffff;
+  border: 1px solid hsla(175, 60%, 60%, 0.4);
+  background: hsla(175, 60%, 60%, 0.18);
+  color: hsl(175, 70%, 85%);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   box-shadow: none;
+  white-space: nowrap;
 }
 
 .student-visual-step-dots {
@@ -6920,18 +7170,19 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   flex: 1 1 0;
   width: auto;
   min-width: 24px;
-  height: 4px;
+  height: 6px;
   border-radius: 999px;
-  background: rgba(61, 43, 142, 0.1);
+  background: hsla(205, 60%, 75%, 0.25);
+  transition: all 0.3s ease;
 }
 
 .student-visual-step-dot-active {
-  background: linear-gradient(90deg, var(--lesson-accent) 70%, rgba(61, 43, 142, 0.1) 70%);
-  box-shadow: none;
+  background: linear-gradient(90deg, hsl(175, 55%, 55%) 60%, hsla(205, 60%, 75%, 0.25) 60%);
+  box-shadow: 0 0 8px hsla(175, 55%, 55%, 0.5);
 }
 
 .student-visual-step-dot-complete {
-  background: var(--lesson-primary);
+  background: hsl(175, 55%, 45%);
 }
 
 .student-visual-step-card {
@@ -6939,15 +7190,16 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   min-height: min(72vh, 860px);
   padding: 18px;
   gap: 16px;
-  border-radius: 16px;
-  border: 0.5px solid var(--lesson-border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 245, 255, 0.98) 100%);
-  box-shadow: none;
+  border-radius: 20px;
+  border: 1px solid hsla(205, 60%, 75%, 0.25);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, hsl(205, 40%, 98%) 100%);
+  box-shadow: 0 4px 20px hsla(205, 60%, 30%, 0.08);
 }
 
 .student-visual-step-card-complete {
-  border-color: var(--lesson-primary-border);
-  background: var(--lesson-bg-card);
+  border-color: hsla(175, 55%, 55%, 0.35);
+  background: linear-gradient(180deg, #ffffff 0%, hsl(175, 40%, 97%) 100%);
+  box-shadow: 0 0 30px hsla(175, 55%, 55%, 0.2), 0 4px 20px hsla(205, 60%, 30%, 0.06);
 }
 
 .student-visual-step-head {
@@ -6981,32 +7233,43 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 .student-visual-step-state {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 32px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  background: var(--lesson-status-active-bg);
-  color: var(--lesson-status-active-text);
+  gap: 6px;
+  min-height: 30px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 20px;
+  background: hsla(175, 55%, 55%, 0.12);
+  border: 1px solid hsla(175, 55%, 55%, 0.25);
+  color: hsl(175, 55%, 28%);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .student-visual-step-state::before {
   content: '';
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--lesson-status-active-dot);
+  background: hsl(175, 55%, 45%);
   animation: lessonPulseDot 1.5s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
 .student-visual-step-state-complete {
-  background: var(--lesson-status-done-bg);
-  color: var(--lesson-status-done-text);
+  background: hsla(175, 55%, 45%, 0.12);
+  border-color: hsla(175, 55%, 45%, 0.25);
+  color: hsl(175, 55%, 25%);
 }
 
 .student-visual-step-state-complete::before {
-  background: var(--lesson-primary);
+  content: "\2714";
+  width: 16px;
+  height: 16px;
+  background: hsl(175, 55%, 45%);
+  color: white;
+  font-size: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   animation: none;
 }
 
@@ -7119,9 +7382,9 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 .student-visual-step-card .embedded-media-adaptive,
 .student-visual-step-card .embedded-media-adaptive.embedded-media-immersive-square {
   border-radius: 16px;
-  border: 0.5px solid var(--lesson-border);
-  background: linear-gradient(180deg, rgba(244, 241, 255, 0.88) 0%, rgba(255, 255, 255, 0.92) 100%);
-  box-shadow: none;
+  border: 1px solid hsla(205, 60%, 75%, 0.25);
+  background: linear-gradient(180deg, hsl(205, 40%, 98%) 0%, hsl(200, 35%, 96%) 100%);
+  box-shadow: 0 2px 12px hsla(205, 60%, 30%, 0.06);
 }
 
 .student-visual-step-card .embedded-media-immersive-square:not(.embedded-media-adaptive) {
@@ -7158,16 +7421,16 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 
 .student-visual-step-card .interactive-option:hover,
 .student-visual-step-card .interactive-option:focus-visible {
-  border-color: var(--lesson-accent-strong);
-  background: rgba(168, 240, 214, 0.18);
+  border-color: hsl(175, 55%, 50%);
+  background: hsla(175, 55%, 55%, 0.1);
   color: var(--lesson-text-main);
   outline: none;
 }
 
 .student-visual-step-card .interactive-option-active {
-  border-color: var(--lesson-accent-strong);
-  background: rgba(168, 240, 214, 0.22);
-  color: var(--lesson-text-main);
+  border-color: hsl(175, 55%, 45%);
+  background: hsla(175, 55%, 55%, 0.15);
+  color: hsl(175, 55%, 25%);
 }
 
 .student-visual-step-card .interactive-option-rich {
@@ -7203,10 +7466,10 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 0.5px solid var(--lesson-border);
-  background: var(--lesson-bg-muted);
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid hsla(205, 60%, 75%, 0.25);
+  background: hsl(205, 40%, 97%);
   color: var(--lesson-text-main);
   font-size: 13px;
   font-weight: 500;
@@ -7222,21 +7485,21 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  background: rgba(168, 240, 214, 0.28);
-  color: var(--lesson-primary);
+  background: hsla(205, 80%, 35%, 0.12);
+  color: hsl(205, 80%, 35%);
   font-size: 12px;
   font-weight: 700;
 }
 
 .student-visual-step-card .feedback-note-success {
-  border-color: rgba(168, 240, 214, 0.5);
-  background: rgba(168, 240, 214, 0.22);
-  color: var(--lesson-status-done-text);
+  border-color: hsla(175, 55%, 55%, 0.35);
+  background: hsla(175, 55%, 55%, 0.1);
+  color: hsl(175, 55%, 25%);
 }
 
 .student-visual-step-card .feedback-note-success::before {
-  content: '✓';
-  background: var(--lesson-primary);
+  content: "\2714";
+  background: hsl(175, 55%, 45%);
   color: #ffffff;
 }
 
@@ -7289,36 +7552,44 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   padding: 14px 24px 18px;
   justify-content: space-between;
   gap: 12px;
-  background: var(--lesson-primary);
-  border: 0.5px solid rgba(168, 240, 214, 0.22);
-  border-radius: 18px;
-  box-shadow: none;
+  background: linear-gradient(135deg, hsl(205, 85%, 28%) 0%, hsl(215, 90%, 18%) 100%);
+  border: 0;
+  border-radius: 20px;
+  box-shadow: 0 -4px 24px hsla(205, 80%, 20%, 0.25), 0 8px 32px hsla(205, 80%, 20%, 0.2);
 }
 
 .student-visual-action-bar .ghost-button,
 .student-visual-action-bar .action-button {
   min-width: 160px;
-  min-height: 44px;
+  min-height: 48px;
   padding: 11px 22px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .student-visual-action-bar .ghost-button {
-  border-color: rgba(47, 38, 88, 0.12);
-  background: rgba(255, 255, 255, 0.94);
-  color: #1f1f1f;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+}
+
+.student-visual-action-bar .ghost-button:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 .student-visual-action-bar .action-button {
-  background: var(--lesson-accent);
-  color: var(--lesson-primary);
+  background: linear-gradient(135deg, hsl(175, 55%, 50%) 0%, hsl(175, 55%, 38%) 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 16px hsla(175, 55%, 40%, 0.4);
 }
 
 .student-visual-action-bar .action-button:hover {
-  background: #90e8ca;
-  color: var(--lesson-primary-hover);
+  background: linear-gradient(135deg, hsl(175, 55%, 44%) 0%, hsl(175, 55%, 32%) 100%);
+  box-shadow: 0 6px 20px hsla(175, 55%, 35%, 0.5);
+  transform: translateY(-1px);
 }
 
 .student-visual-page-lesson-focus .student-visual-question-panel {
@@ -7395,7 +7666,7 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   gap: 0.55rem;
   padding-bottom: 0.65rem;
   overflow: visible;
-  background: linear-gradient(180deg, #f4f1ff 0%, #efebff 100%);
+  background: linear-gradient(180deg, hsl(200, 35%, 96%) 0%, hsl(205, 40%, 93%) 100%);
 }
 
 .student-visual-question-panel {
@@ -7426,8 +7697,8 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 }
 
 .student-visual-step-card-complete {
-  border-color: var(--lesson-primary);
-  box-shadow: 0 0 30px rgba(168, 240, 214, 0.25);
+  border-color: hsl(175, 55%, 55%);
+  box-shadow: 0 0 30px hsla(175, 55%, 55%, 0.25);
 }
 
 .student-visual-step-card .activity-card,
@@ -7552,7 +7823,7 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 }
 
 .student-visual-step-card .feedback-note-success::before {
-  content: '✓';
+  content: "\2714";
   background: var(--lesson-primary);
   color: white;
 }
@@ -7605,7 +7876,7 @@ body:has(.student-visual-page-lesson-focus) .content > * {
 }
 
 .memory-card-back {
-  background: linear-gradient(135deg, var(--lesson-primary) 0%, var(--lesson-primary-hover) 100%);
+  background: linear-gradient(135deg, hsl(205, 85%, 35%) 0%, hsl(215, 90%, 22%) 100%);
   color: white;
   font-size: 2.5rem;
   font-weight: 800;
@@ -7673,6 +7944,19 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .ghost-button {
+  border: 1.5px solid hsla(205, 40%, 40%, 0.4);
+  background: hsla(205, 40%, 40%, 0.06);
+  color: hsl(205, 70%, 30%);
+  backdrop-filter: none;
+}
+
+body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .ghost-button:hover {
+  background: hsla(205, 30%, 50%, 0.15);
+  border-color: hsla(205, 60%, 35%, 0.5);
+  color: hsl(205, 80%, 25%);
 }
 
 body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .ghost-button,
@@ -8051,7 +8335,7 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .action-b
 }
 
 .student-visual-celebration-star::before {
-  content: '🏆';
+  content: "\1F3C6";
 }
 
 .student-visual-result-metrics {
@@ -8208,3 +8492,240 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .action-b
   border-radius: 99px;
 }
 
+/* Ocean Wave Animations & Decorations */
+.ocean-waves-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15vh;
+  min-height: 100px;
+  max-height: 150px;
+  overflow: hidden;
+  line-height: 0;
+  transform: rotate(180deg);
+  z-index: -1;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.ocean-waves-container svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 100px;
+}
+
+.ocean-wave-parallax > use {
+  animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+}
+.ocean-wave-parallax > use:nth-child(1) {
+  animation-delay: -2s;
+  animation-duration: 7s;
+}
+.ocean-wave-parallax > use:nth-child(2) {
+  animation-delay: -3s;
+  animation-duration: 10s;
+}
+.ocean-wave-parallax > use:nth-child(3) {
+  animation-delay: -4s;
+  animation-duration: 13s;
+}
+.ocean-wave-parallax > use:nth-child(4) {
+  animation-delay: -5s;
+  animation-duration: 20s;
+}
+
+@keyframes move-forever {
+  0% { transform: translate3d(-90px, 0, 0); }
+  100% { transform: translate3d(85px, 0, 0); }
+}
+
+@media (max-width: 768px) {
+  .ocean-waves-container svg {
+    height: 40px;
+    min-height: 40px;
+  }
+}
+
+/* ==========================================
+   SEALIFE LANDING PAGE DESIGN
+========================================== */
+.auth-layout-home {
+  gap: 0 !important;
+  align-items: stretch;
+  background: var(--card);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-coastal, var(--shadow-lg));
+  min-height: 80vh;
+  position: relative;
+}
+
+.auth-layout-home > article::before {
+  display: none !important;
+}
+
+.auth-layout-home > .sealife-hero {
+  background: linear-gradient(180deg, hsl(210, 100%, 30%) 0%, hsl(220, 100%, 15%) 100%) !important;
+  border: none;
+  border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+}
+
+.auth-layout-home > .sealife-auth-card {
+  background: #ffffff !important;
+  border: none;
+  border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+}
+
+.sealife-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden; /* Contains the waves and creatures */
+}
+
+.sealife-underwater-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  font-size: 3rem; /* Control emoji sizes */
+}
+
+.sealife-creature, .sealife-coral, .sealife-rock {
+  position: absolute;
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+}
+
+.sealife-jellyfish { top: 15%; left: 15%; font-size: 5rem; animation: float-slow 6s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(255,255,255,0.4)); }
+.sealife-turtle { top: 25%; left: 40%; font-size: 4rem; transform: scaleX(-1); animation: float-swim 10s ease-in-out infinite; }
+.sealife-octopus { bottom: 10%; right: 25%; font-size: 6rem; animation: float-slow 5s ease-in-out infinite alternate-reverse; }
+.sealife-crab { bottom: 5%; left: 20%; font-size: 3rem; animation: crab-walk 8s linear infinite alternate; }
+.sealife-fish1 { top: 40%; left: 60%; font-size: 2rem; transform: scaleX(-1); animation: float-swim 15s ease-in-out infinite reverse; }
+.sealife-fish2 { top: 50%; right: 10%; font-size: 2.5rem; animation: float-swim 12s ease-in-out infinite; }
+.sealife-coral1 { bottom: -10px; right: 5%; font-size: 5rem; transform: scaleX(-1); }
+.sealife-coral2 { bottom: -5px; left: 5%; font-size: 6rem; }
+.sealife-rock { bottom: -20px; left: 10%; font-size: 8rem; filter: brightness(0.6); z-index: -1; }
+
+.sealife-bubbles {
+  position: absolute;
+  bottom: 0;
+  left: 30%;
+  width: 50px;
+  height: 100%;
+}
+.sealife-bubbles .bubble {
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  animation: float-bubble 4s infinite ease-in;
+}
+.sealife-bubbles .bubble:nth-child(2) { left: 20px; animation-duration: 5s; animation-delay: 1s; width: 15px; height: 15px; }
+.sealife-bubbles .bubble:nth-child(3) { left: -10px; animation-duration: 3.5s; animation-delay: 2s; }
+
+.sealife-wave-divider {
+  position: absolute;
+  top: -1%;
+  bottom: -1%;
+  right: -2px; /* Overlap slightly to prevent gaps */
+  left: auto;
+  width: 120px;
+  height: 102%;
+  z-index: 10;
+  pointer-events: none;
+}
+.sealife-wave-divider svg {
+  width: 100%;
+  height: 100%;
+}
+.wave-layer {
+  fill: #ffffff;
+}
+.wave-layer-1 { fill: hsl(205, 80%, 45%); opacity: 1; }
+.wave-layer-2 { fill: hsl(200, 70%, 65%); opacity: 1; }
+.wave-layer-3 { fill: hsl(195, 60%, 85%); opacity: 1; }
+.wave-layer-4 { fill: #ffffff; opacity: 1; }
+
+.sealife-auth-card {
+  padding: 3rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 5;
+  position: relative;
+}
+
+.sealife-auth-header {
+  margin-bottom: 2rem;
+}
+.sealife-auth-header .hero-title {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 900;
+  color: hsl(205, 40%, 60%); /* Discover */
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+.hero-title-blue {
+  color: var(--primary); /* OCEAN */
+  font-size: clamp(3rem, 5vw, 5rem);
+  display: block;
+  letter-spacing: 0.05em;
+}
+.sealife-auth-lead {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* Animations */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+@keyframes float-swim {
+  0%, 100% { transform: translate(0, 0) scaleX(-1); }
+  50% { transform: translate(20px, -15px) scaleX(-1); }
+}
+@keyframes crab-walk {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(50px); }
+}
+@keyframes float-bubble {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-400px) scale(1.5); opacity: 0; }
+}
+
+@media (max-width: 1100px) {
+  .auth-layout-home {
+    grid-template-columns: 1fr !important;
+    min-height: auto;
+  }
+  .auth-layout-home > .sealife-hero {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+  .auth-layout-home > .sealife-auth-card {
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  }
+  .sealife-hero {
+    min-height: 300px;
+  }
+  .sealife-wave-divider {
+    top: auto;
+    bottom: -2px;
+    right: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    transform: rotate(90deg); /* Adjust wave direction for mobile */
+  }
+  .sealife-auth-card {
+    padding: 2rem;
+  }
+}

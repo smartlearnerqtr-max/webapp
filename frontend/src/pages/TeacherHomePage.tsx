@@ -446,6 +446,18 @@ export function TeacherHomePage() {
     setCareerFormError(null)
     setCareerUploadError(null)
   }
+  function renderParentOnboarding() {
+    if (!showTeacherParentOnboarding) return null
+    return (
+      <article className="roadmap-panel">
+        <h3>Bắt đầu gắn phụ huynh</h3>
+        <p>1. Phụ huynh tự đăng ký tài khoản.</p>
+        <p>2. Phụ huynh gửi Parent ID hoặc email cho giáo viên.</p>
+        <p>3. Giáo viên chọn học sinh, tìm đúng phụ huynh rồi bấm gắn.</p>
+      </article>
+    )
+  }
+
 
   const workspaceCards = [
     { key: 'overview', eyebrow: 'Tổng quan', title: 'Xem số liệu lớp', description: 'Mở toàn màn hình để theo dõi các số chính trong ngày.', badge: `${studentCount} học sinh` },
@@ -457,16 +469,16 @@ export function TeacherHomePage() {
     { key: 'career_cards', eyebrow: 'Hướng nghiệp', title: 'Quản lý nghề nghiệp', description: 'Giáo viên nhập video, ảnh, ý nghĩa công việc, các bước và kỹ năng để hiện sang trang học sinh.', badge: `${careerCardsQuery.data?.length ?? 0} thẻ` },
   ] as const satisfies Array<{ key: Exclude<TeacherWorkspaceView, 'home'>; eyebrow: string; title: string; description: string; badge: string }>
 
-  function renderWorkspaceHeader(eyebrow: string, title: string, description: string) {
+  function renderWorkspaceHeader(title: string) {
     return (
       <section className="roadmap-panel teacher-clean-hero">
         <div>
           <button type="button" className="ghost-button" onClick={() => setActiveWorkspaceView('home')}>
             Quay lại
           </button>
-          <p className="eyebrow teacher-clean-title-label" style={{ marginTop: '0.9rem' }}>{eyebrow}</p>
-          <h2>{title}</h2>
-          <p className="helper-text">{description}</p>
+
+          <h2 style={{ marginTop: '0.9rem' }}>{title}</h2>
+
         </div>
         <div className="teacher-clean-hero-badges">
           <span>ID {teacherId ?? '---'}</span>
@@ -482,7 +494,7 @@ export function TeacherHomePage() {
       <>
         <section className="roadmap-panel teacher-clean-hero">
           <div>
-            <p className="eyebrow teacher-clean-title-label">Giáo viên</p>
+
             <h2>Bảng điều khiển</h2>
             <p className="helper-text">Chọn đúng mục để vào một màn hình làm việc riêng, không còn bị bó trong các khung nhỏ.</p>
           </div>
@@ -534,12 +546,12 @@ export function TeacherHomePage() {
   function renderOverviewWorkspace() {
     return (
       <>
-        {renderWorkspaceHeader('Tổng quan', 'Nhìn nhanh toàn lớp', 'Màn hình này hiển thị đầy đủ số liệu chính thay vì nén trong dashboard.')}
+        {renderWorkspaceHeader('Nhìn nhanh toàn lớp')}
         <section className="page-stack">
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Hôm nay</p>
+
                 <h3>Số liệu chính</h3>
               </div>
               <span className="subject-pill muted-pill">{studentCount} HS</span>
@@ -554,7 +566,7 @@ export function TeacherHomePage() {
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Theo dõi</p>
+
                 <h3>Nhóm phụ huynh gần đây</h3>
               </div>
               <span className="subject-pill muted-pill">{averageLatestProgress}% TB</span>
@@ -578,21 +590,14 @@ export function TeacherHomePage() {
   function renderParentGroupsWorkspace() {
     return (
       <>
-        {renderWorkspaceHeader('Theo dõi', 'Nhóm phụ huynh', 'Xem đầy đủ các phụ huynh đang theo dõi từng học sinh cùng tiến độ gần nhất.')}
+        {renderWorkspaceHeader('Nhóm phụ huynh')}
         <section className="page-stack">
-          {showTeacherParentOnboarding ? (
-            <article className="roadmap-panel">
-              <h3>Bắt đầu gắn phụ huynh</h3>
-              <p>1. Phụ huynh tự đăng ký tài khoản.</p>
-              <p>2. Phụ huynh gửi Parent ID hoặc email cho giáo viên.</p>
-              <p>3. Giáo viên chọn học sinh, tìm đúng phụ huynh rồi bấm gắn.</p>
-            </article>
-          ) : null}
+          {renderParentOnboarding()}
 
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Danh sách đầy đủ</p>
+
                 <h3>Học sinh và phụ huynh</h3>
               </div>
               <span className="subject-pill muted-pill">{parentGroupCount} nhóm</span>
@@ -616,21 +621,14 @@ export function TeacherHomePage() {
   function renderParentLinkWorkspace() {
     return (
       <>
-        {renderWorkspaceHeader('Thiết lập', 'Gắn phụ huynh cho học sinh', 'Mở riêng màn hình thao tác để chọn học sinh, tìm Parent ID và gắn đúng tài khoản.')}
+        {renderWorkspaceHeader('Gắn phụ huynh cho học sinh')}
         <section className="page-stack">
-          {showTeacherParentOnboarding ? (
-            <article className="roadmap-panel">
-              <h3>Bắt đầu gắn phụ huynh</h3>
-              <p>1. Phụ huynh tự đăng ký tài khoản.</p>
-              <p>2. Phụ huynh gửi Parent ID hoặc email cho giáo viên.</p>
-              <p>3. Giáo viên chọn học sinh, tìm đúng phụ huynh rồi bấm gắn.</p>
-            </article>
-          ) : null}
+          {renderParentOnboarding()}
 
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Thiết lập</p>
+
                 <h3>Gắn phụ huynh</h3>
               </div>
             </div>
@@ -693,12 +691,12 @@ export function TeacherHomePage() {
   function renderReportsWorkspace() {
     return (
       <>
-        {renderWorkspaceHeader('Báo cáo', 'Gửi báo cáo nhanh', 'Màn hình riêng để gửi báo cáo cho một học sinh hoặc toàn bộ phụ huynh đã liên kết.')}
+        {renderWorkspaceHeader('Gửi báo cáo nhanh')}
         <section className="page-stack">
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Báo cáo</p>
+
                 <h3>Gửi nhanh</h3>
               </div>
             </div>
@@ -746,12 +744,12 @@ export function TeacherHomePage() {
   function renderReportHistoryWorkspace() {
     return (
       <>
-        {renderWorkspaceHeader('Lịch sử', 'Báo cáo gần đây', 'Xem trọn danh sách báo cáo đã gửi thay vì chỉ vài dòng tóm tắt.')}
+        {renderWorkspaceHeader('Báo cáo gần đây')}
         <section className="page-stack">
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Lịch sử</p>
+
                 <h3>Tất cả báo cáo</h3>
               </div>
               <span className="subject-pill muted-pill">{reportCount}</span>
@@ -775,12 +773,12 @@ export function TeacherHomePage() {
   function renderMessagesWorkspace() {
     return (
       <>
-        {renderWorkspaceHeader('Trao đổi', 'Chat phụ huynh', 'Danh sách hội thoại được mở thành một màn hình riêng. Chọn cuộc trò chuyện rồi mở khung chat đầy đủ.')}
+        {renderWorkspaceHeader('Chat phụ huynh')}
         <section className="page-stack">
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Trao đổi</p>
+
                 <h3>Hội thoại gần đây</h3>
               </div>
               <button type="button" className="action-button" onClick={() => setIsChatOpen(true)}>
@@ -813,12 +811,12 @@ export function TeacherHomePage() {
 
     return (
       <>
-        {renderWorkspaceHeader('Hướng nghiệp', 'Quản lý thẻ nghề nghiệp', 'Giáo viên nhập dữ liệu tại đây để trang /hoc-tap của học sinh hiện đúng ảnh, video, ý nghĩa công việc, các bước và kỹ năng học được.')}
+        {renderWorkspaceHeader('Quản lý thẻ nghề nghiệp')}
         <section className="page-stack">
           <article className="roadmap-panel">
             <div className="teacher-clean-section-head">
               <div>
-                <p className="eyebrow">Kho dữ liệu</p>
+
                 <h3>Thẻ nghề nghiệp đã tạo</h3>
               </div>
               <button type="button" className="ghost-button" onClick={resetCareerEditor}>
@@ -1104,3 +1102,4 @@ export function TeacherHomePage() {
     </RequireAuth>
   )
 }
+

@@ -1538,7 +1538,7 @@ export function StudentHomePage() {
   const visualThemeKey =
     visualSupportClassroom?.visual_theme && Object.prototype.hasOwnProperty.call(visualThemePresetMap, visualSupportClassroom.visual_theme)
       ? (visualSupportClassroom.visual_theme as keyof typeof visualThemePresetMap)
-      : 'garden'
+      : 'ocean'
   const resolvedVisualTheme = visualThemePresetMap[visualThemeKey]
   const visualSupportStyle = {
     ['--support-visual-bg-image' as string]: 'none',
@@ -2383,6 +2383,10 @@ export function StudentHomePage() {
       )
     }
 
+    const currentActivityTypeLabel = currentActivity
+      ? cleanActivityTypeVisualLabelMap[currentActivity.activity_type] ?? activityTypeVisualLabelMap[currentActivity.activity_type] ?? 'Hoạt động'
+      : null
+
     return (
       <>
         <section ref={activeQuestionRef} tabIndex={-1} className="student-visual-panel student-visual-question-panel">
@@ -2395,88 +2399,132 @@ export function StudentHomePage() {
             <span className="subject-pill student-visual-progress-pill">{`${activityProgress.completedActivities}/${activityProgress.totalActivities || 0} hoàn thành`}</span>
           </div>
 
-          <div className="student-visual-step-dots" aria-label="Tiến độ câu hỏi">
-            {lessonActivities.map((activity, index) => {
-              const isCompleted = isActivityCompleted(activity, answers)
-              const isActive = index === boundedActiveActivityIndex
-              return (
-                <span
-                  key={activity.id}
-                  className={
-                    isCompleted
-                      ? 'student-visual-step-dot student-visual-step-dot-complete'
-                      : isActive
-                        ? 'student-visual-step-dot student-visual-step-dot-active'
-                        : 'student-visual-step-dot'
-                  }
-                  aria-hidden="true"
-                />
-              )
-            })}
-          </div>
-
-          {currentActivity ? (
-            <article className={currentActivityCompleted ? 'student-visual-step-card student-visual-step-card-complete' : 'student-visual-step-card'}>
-              {activityCelebration ? (
-                <div className="student-visual-step-star-rain" aria-hidden="true">
-                  <div className="student-visual-step-celebration-badge">
-                    <span className="student-visual-step-celebration-badge-star">★</span>
-                    <strong>{activityCelebration.message}</strong>
-                  </div>
-                  {activityCelebration.stars.map((star) => (
+          <div className="student-visual-lesson-grid">
+            <div className="student-visual-lesson-main">
+              <div className="student-visual-step-dots" aria-label="Tiến độ câu hỏi">
+                {lessonActivities.map((activity, index) => {
+                  const isCompleted = isActivityCompleted(activity, answers)
+                  const isActive = index === boundedActiveActivityIndex
+                  return (
                     <span
-                      key={star.id}
-                      className="student-visual-step-falling-star"
-                      style={{
-                        ['--star-left' as string]: `${star.leftPercent}%`,
-                        ['--star-delay' as string]: `${star.delayMs}ms`,
-                        ['--star-duration' as string]: `${star.durationMs}ms`,
-                        ['--star-size' as string]: `${star.sizeRem}rem`,
-                        ['--star-rotate' as string]: `${star.rotateDeg}deg`,
-                      }}
-                    >
-                      ★
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              <div className="student-visual-step-head">
-                <div className="student-visual-step-head-main">
-                  <span className="student-visual-step-badge">#{boundedActiveActivityIndex + 1}</span>
-                  <div className="student-visual-step-head-copy">
-                    <h4>{currentActivity.title}</h4>
-                    {!shouldHideCurrentActivityCaption && currentActivityCaption ? <p>{currentActivityCaption}</p> : null}
-                  </div>
-                </div>
-                <div className="student-visual-step-head-actions">
-                  <button
-                    type="button"
-                    className="student-visual-audio-button"
-                    onClick={handleReplayGuidance}
-                    aria-label="Phát lại hướng dẫn"
-                    disabled={!currentActivity}
-                  >
-                    <span aria-hidden="true">🔊</span>
-                  </button>
-                  <span className={currentActivityCompleted ? 'student-visual-step-state student-visual-step-state-complete' : 'student-visual-step-state'}>
-                    {currentActivityCompleted ? 'Xong' : 'Đang làm'}
-                  </span>
-                </div>
+                      key={activity.id}
+                      className={
+                        isCompleted
+                          ? 'student-visual-step-dot student-visual-step-dot-complete'
+                          : isActive
+                            ? 'student-visual-step-dot student-visual-step-dot-active'
+                            : 'student-visual-step-dot'
+                      }
+                      aria-hidden="true"
+                    />
+                  )
+                })}
               </div>
 
-              <LazyActivityCard
-                key={currentActivity.id}
-                activity={currentActivity}
-                answers={answers}
-                setAnswers={setAnswersMap}
-                presentationMode="immersive_square"
-                onAutoAdvance={handleAutoAdvance}
-                loadingLabel="Đang tải bài tập..."
-              />
-            </article>
-          ) : (
-            <p className="helper-text">Chưa có hoạt động.</p>
-          )}
+              {currentActivity ? (
+                <article className={currentActivityCompleted ? 'student-visual-step-card student-visual-step-card-complete' : 'student-visual-step-card'}>
+                  {activityCelebration ? (
+                    <div className="student-visual-step-star-rain" aria-hidden="true">
+                      <div className="student-visual-step-celebration-badge">
+                        <span className="student-visual-step-celebration-badge-star">★</span>
+                        <strong>{activityCelebration.message}</strong>
+                      </div>
+                      {activityCelebration.stars.map((star) => (
+                        <span
+                          key={star.id}
+                          className="student-visual-step-falling-star"
+                          style={{
+                            ['--star-left' as string]: `${star.leftPercent}%`,
+                            ['--star-delay' as string]: `${star.delayMs}ms`,
+                            ['--star-duration' as string]: `${star.durationMs}ms`,
+                            ['--star-size' as string]: `${star.sizeRem}rem`,
+                            ['--star-rotate' as string]: `${star.rotateDeg}deg`,
+                          }}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  <div className="student-visual-step-head">
+                    <div className="student-visual-step-head-main">
+                      <span className="student-visual-step-badge">#{boundedActiveActivityIndex + 1}</span>
+                      <div className="student-visual-step-head-copy">
+                        <h4>{currentActivity.title}</h4>
+                        {!shouldHideCurrentActivityCaption && currentActivityCaption ? <p>{currentActivityCaption}</p> : null}
+                      </div>
+                    </div>
+                    <div className="student-visual-step-head-actions">
+                      <button
+                        type="button"
+                        className="student-visual-audio-button"
+                        onClick={handleReplayGuidance}
+                        aria-label="Phát lại hướng dẫn"
+                        disabled={!currentActivity}
+                      >
+                        <span aria-hidden="true">🔊</span>
+                      </button>
+                      <span className={currentActivityCompleted ? 'student-visual-step-state student-visual-step-state-complete' : 'student-visual-step-state'}>
+                        {currentActivityCompleted ? 'Xong' : 'Đang làm'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="student-visual-activity-meta">
+                    <span className="student-visual-activity-chip">{currentActivityTypeLabel}</span>
+                    <span className="student-visual-activity-info">{detail?.lesson?.subject?.name ?? 'Môn học khác'}</span>
+                  </div>
+
+                  <LazyActivityCard
+                    key={currentActivity.id}
+                    activity={currentActivity}
+                    answers={answers}
+                    setAnswers={setAnswersMap}
+                    presentationMode="immersive_square"
+                    onAutoAdvance={handleAutoAdvance}
+                    loadingLabel="Đang tải bài tập..."
+                  />
+                </article>
+              ) : (
+                <p className="helper-text">Chưa có hoạt động.</p>
+              )}
+            </div>
+
+            <aside className="student-visual-lesson-sidebar">
+              <div className="student-visual-sidebar-card">
+                <strong>Thông tin bài học</strong>
+                <p>{detail?.lesson?.title ? sanitizeStudentFacingText(detail.lesson.title, 'Bài học') : 'Bài học chưa có tiêu đề.'}</p>
+                <div className="student-visual-sidebar-row">
+                  <span>{`${lessonActivities.length} hoạt động`}</span>
+                  <span>{detail?.lesson?.subject?.name ?? 'Không xác định môn'}</span>
+                </div>
+                <p className="student-visual-sidebar-note">Giao diện này hoạt động với mọi loại nội dung: bài tập, trò chơi, video và đa phương tiện.</p>
+              </div>
+
+              {lessonActivities.length ? (
+                <div className="student-visual-sidebar-card student-visual-sidebar-activities">
+                  <strong>Hoạt động tiếp theo</strong>
+                  <ul className="student-visual-activity-timeline">
+                    {lessonActivities.map((activity, index) => {
+                      const isCompleted = isActivityCompleted(activity, answers)
+                      const isActive = index === boundedActiveActivityIndex
+                      return (
+                        <li key={activity.id} className={isActive ? 'student-visual-activity-item student-visual-activity-item-active' : 'student-visual-activity-item'}>
+                          <span className="student-visual-activity-index">{index + 1}</span>
+                          <div>
+                            <p>{activity.title}</p>
+                            <span className={isCompleted ? 'student-visual-activity-status student-visual-activity-status-complete' : 'student-visual-activity-status'}>
+                              {isCompleted ? 'Đã xong' : isActive ? 'Đang làm' : 'Chưa làm'}
+                            </span>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              ) : null}
+            </aside>
+          </div>
         </section>
 
         <section className="student-visual-action-bar" aria-label="Thao tác bài học">
@@ -3087,7 +3135,6 @@ export function StudentHomePage() {
     <section className="student-entry-gate" aria-label="Chọn mức độ hỗ trợ">
       <div className="student-entry-gate-shell">
         <div className="student-entry-gate-brand">
-          <span className="student-entry-gate-brand-mark">Bạn học thông minh</span>
           <h1>Bạn học thông minh</h1>
         </div>
 

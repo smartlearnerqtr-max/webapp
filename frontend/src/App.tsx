@@ -211,6 +211,20 @@ function App() {
           </Routes>
         </Suspense>
       </main>
+
+      <div className="ocean-waves-container" aria-hidden="true">
+        <svg className="ocean-waves" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shapeRendering="auto">
+          <defs>
+            <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+          </defs>
+          <g className="ocean-wave-parallax">
+            <use xlinkHref="#gentle-wave" x="48" y="0" fill="hsla(205, 80%, 35%, 0.1)" />
+            <use xlinkHref="#gentle-wave" x="48" y="3" fill="hsla(205, 80%, 35%, 0.15)" />
+            <use xlinkHref="#gentle-wave" x="48" y="5" fill="hsla(205, 80%, 35%, 0.05)" />
+            <use xlinkHref="#gentle-wave" x="48" y="7" fill="hsla(200, 60%, 97%, 0.5)" />
+          </g>
+        </svg>
+      </div>
     </div>
   )
 }

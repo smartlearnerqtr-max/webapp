@@ -153,7 +153,6 @@ export function ClassesPage() {
       <div className="page-stack teacher-clean-page">
         <section className="roadmap-panel teacher-clean-hero">
           <div>
-            <p className="eyebrow teacher-clean-title-label">Quản lý lớp</p>
             <h2>Trung tâm điều phối lớp học</h2>
             <p className="helper-text">Tạo không gian học tập, quản lý danh sách học sinh và phân bổ môn học cho từng lớp.</p>
           </div>

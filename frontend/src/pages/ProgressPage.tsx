@@ -61,7 +61,6 @@ export function ProgressPage() {
       <div className="page-stack teacher-clean-page">
         <section className="roadmap-panel teacher-clean-hero">
           <div>
-            <p className="eyebrow teacher-clean-title-label">Tiến độ</p>
             <h2>Theo dõi học tập tự động</h2>
             <p className="helper-text">Chọn một bài tập để xem dữ liệu học thật mà hệ thống tự đồng bộ từ quá trình làm bài của học sinh.</p>
           </div>

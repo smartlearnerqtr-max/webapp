@@ -58,7 +58,6 @@ export function AdminPage() {
     <RequireAuth allowedRoles={['admin']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Không gian admin</p>
           <h2>Cấp tài khoản giáo viên và xem liên kết</h2>
           <p>Admin tạo tài khoản giáo viên và theo dõi nhanh số liên kết giáo viên, học sinh và phụ huynh trong hệ thống.</p>
         </section>

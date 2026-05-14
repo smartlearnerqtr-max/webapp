@@ -2365,10 +2365,12 @@ export const ActivityCard = React.memo(({
 
   return (
     <div className="activity-card">
-      <div className="student-row">
-        <strong>{activity.sort_order}. {activity.title}</strong>
-        <span>{activityLabel(activity.activity_type)}</span>
-      </div>
+      {presentationMode !== 'immersive_square' && (
+        <div className="student-row">
+          <strong>{activity.sort_order}. {activity.title}</strong>
+          <span>{activityLabel(activity.activity_type)}</span>
+        </div>
+      )}
       {activityType === 'multiple_choice' || activityType === 'image_choice' || activityType === 'listen_choose' ? (
         <MultipleChoiceActivity
           activity={activity}

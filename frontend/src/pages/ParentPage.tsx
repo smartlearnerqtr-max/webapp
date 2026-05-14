@@ -245,7 +245,6 @@ export function ParentPage() {
     <RequireAuth allowedRoles={['parent']}>
       <div className="page-stack">
         <section className="roadmap-panel">
-          <p className="eyebrow">Phụ huynh</p>
           <h2>Theo dõi đúng mức học của con</h2>
           <p>
             Lớp học có thể có đủ ba mức nhẹ, trung bình và nặng. Phụ huynh cần thấy rõ con đang thuộc mức nào, giáo viên nào
