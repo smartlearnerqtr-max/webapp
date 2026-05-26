@@ -1075,10 +1075,7 @@ export const MultipleChoiceActivity = React.memo(({
     }
   }
 
-  React.useEffect(() => {
-    if (!audioUrl && !audioText) return
-    replayAudioPrompt()
-  }, [activity.id, audioLang, audioText, audioUrl])
+  // Do not auto-play guidance audio on mount — require user to press "Nghe lại" button.
 
   const audioControl = audioUrl || audioText ? (
     <div className="button-row">

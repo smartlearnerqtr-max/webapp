@@ -1113,6 +1113,17 @@ export function StudentHomePage() {
   const queryClient = useQueryClient()
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null)
   const [selectedSubjectKey, setSelectedSubjectKey] = useState<string | null>(null)
+  const [showSimulationModal, setShowSimulationModal] = useState(false)
+  useEffect(() => {
+    if (showSimulationModal) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [showSimulationModal])
   const [selectedCareerKey, setSelectedCareerKey] = useState<string | null>(null)
   const [activePanel, setActivePanel] = useState<StudentPanelKey>('learning')
   const [joinClassId, setJoinClassId] = useState('')
@@ -2656,6 +2667,31 @@ export function StudentHomePage() {
   const renderIchanSubjectAssignmentsPage = () => {
     if (!selectedSubjectCard) return null
 
+    if (showSimulationModal) {
+      return (
+        <section className="visual-simulation-page" aria-label="Mô phỏng trực quan">
+          <header className="visual-simulation-header">
+            <button className="ghost-button visual-simulation-back" type="button" onClick={() => setShowSimulationModal(false)}>
+              Quay lại
+            </button>
+            <div>
+              <p className="chat-modal-eyebrow">Mô phỏng</p>
+              <h3>Mô phỏng trực quan</h3>
+            </div>
+          </header>
+          <div className="visual-simulation-frame-wrap">
+            <iframe
+              className="visual-simulation-frame"
+              title="Mô phỏng trực quan"
+              src="https://tuanminh7.github.io/hoctapmophong/"
+              allow="fullscreen; autoplay; encrypted-media; clipboard-write; picture-in-picture; microphone; camera"
+              allowFullScreen
+            />
+          </div>
+        </section>
+      )
+    }
+
     return (
       <section className="ichan-layout">
         <article className="student-visual-panel ichan-section">
@@ -2666,7 +2702,14 @@ export function StudentHomePage() {
               </button>
               <p className="ichan-section-note" style={{ marginTop: '0.9rem' }}>Chọn bài em muốn học rồi bắt đầu ngay.</p>
             </div>
-            <span className="subject-pill muted-pill">{`${selectedSubjectAssignments.length} bài`}</span>
+            <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+              {selectedSubjectCard?.key === 'khoa-hoc-tu-nhien' ? (
+                <button className="ghost-button" type="button" onClick={() => setShowSimulationModal(true)}>
+                  Mô phỏng trực quan
+                </button>
+              ) : null}
+              <span className="subject-pill muted-pill">{`${selectedSubjectAssignments.length} bài`}</span>
+            </div>
           </div>
 
           <div className="student-visual-assignment-list ichan-assignment-list">

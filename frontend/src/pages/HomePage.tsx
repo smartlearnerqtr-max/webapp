@@ -23,6 +23,7 @@ export function HomePage() {
   const [mode, setMode] = useState<AuthMode>('login')
   const [identity, setIdentity] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [submitState, setSubmitState] = useState<'idle' | 'submitting'>('idle')
   const [error, setError] = useState<string | null>(null)
 
@@ -31,6 +32,7 @@ export function HomePage() {
   const [registerEmail, setRegisterEmail] = useState('')
   const [registerPhone, setRegisterPhone] = useState('')
   const [registerPassword, setRegisterPassword] = useState('')
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false)
   const [registerDisabilityLevel, setRegisterDisabilityLevel] = useState('trung_binh')
   const [relationshipLabel, setRelationshipLabel] = useState('')
 
@@ -93,22 +95,27 @@ export function HomePage() {
   return (
     <div className="page-stack home-page">
       <section className="auth-layout auth-layout-home">
-        <article className="sealife-hero">
-          <div className="sealife-underwater-scene">
-            <div className="sealife-creature sealife-jellyfish">🪼</div>
-            <div className="sealife-creature sealife-turtle">🐢</div>
-            <div className="sealife-creature sealife-octopus">🐙</div>
-            <div className="sealife-creature sealife-crab">🦀</div>
-            <div className="sealife-creature sealife-fish1">🐠</div>
-            <div className="sealife-creature sealife-fish2">🐟</div>
-            <div className="sealife-coral sealife-coral1">🪸</div>
-            <div className="sealife-coral sealife-coral2">🌿</div>
-            <div className="sealife-rock">🪨</div>
-            <div className="sealife-bubbles">
-              <span className="bubble"></span><span className="bubble"></span><span className="bubble"></span>
+        <article className="study-hero">
+          <div className="study-scene">
+            <div className="study-item study-book">📚</div>
+            <div className="study-item study-cap">🎓</div>
+            <div className="study-item study-laptop">💻</div>
+            <div className="study-item study-bulb">💡</div>
+            <div className="study-item study-rocket">🚀</div>
+            <div className="study-item study-rocket-2">🚀</div>
+            <div className="study-item study-rocket-3">🚀</div>
+            <div className="study-item study-rocket-4">🚀</div>
+            <div className="study-item study-friends">🤝</div>
+            <div className="study-item study-apple">🍎</div>
+            <div className="study-item study-pencil">✏️</div>
+            <div className="study-item study-star">🌟</div>
+            <div className="study-item study-globe">🌍</div>
+            
+            <div className="study-sparkles">
+              <span className="sparkle"></span><span className="sparkle"></span><span className="sparkle"></span>
             </div>
           </div>
-          <div className="sealife-wave-divider" aria-hidden="true">
+          <div className="study-wave-divider" aria-hidden="true">
             <svg viewBox="0 0 100 1000" preserveAspectRatio="none">
               <path className="wave-layer wave-layer-1" d="M0,0 C40,200 60,400 30,600 C0,800 50,900 100,1000 L100,0 Z" />
               <path className="wave-layer wave-layer-2" d="M20,0 C60,250 80,450 50,650 C20,850 70,950 100,1000 L100,0 Z" />
@@ -118,8 +125,8 @@ export function HomePage() {
           </div>
         </article>
 
-        <article className="sealife-auth-card">
-          <div className="sealife-auth-header">
+        <article className="study-auth-card">
+          <div className="study-auth-header">
             <h1 className="hero-title">BẠN HỌC THÔNG MINH</h1>
           </div>
           <div className="mode-switch" role="tablist" aria-label="Chọn chế độ tài khoản">
@@ -139,7 +146,12 @@ export function HomePage() {
               </label>
               <label>
                 Mật khẩu
-                <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Nhập mật khẩu" />
+                <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                  <input type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Nhập mật khẩu" />
+                  <button type="button" aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'} onClick={() => setShowPassword((s) => !s)} style={{background: 'transparent', border: 'none', cursor: 'pointer'}}>
+                    {showPassword ? '🙈' : '👁️'}
+                  </button>
+                </div>
               </label>
               <div className="button-row">
                 <button className="action-button" type="submit" disabled={submitState === 'submitting'}>
@@ -175,7 +187,12 @@ export function HomePage() {
               </label>
               <label>
                 Mật khẩu
-                <input type="password" value={registerPassword} onChange={(event) => setRegisterPassword(event.target.value)} placeholder="Tự đặt mật khẩu" />
+                <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                  <input type={showRegisterPassword ? 'text' : 'password'} value={registerPassword} onChange={(event) => setRegisterPassword(event.target.value)} placeholder="Tự đặt mật khẩu" />
+                  <button type="button" aria-label={showRegisterPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'} onClick={() => setShowRegisterPassword((s) => !s)} style={{background: 'transparent', border: 'none', cursor: 'pointer'}}>
+                    {showRegisterPassword ? '🙈' : '👁️'}
+                  </button>
+                </div>
               </label>
               {registerRole === 'student' ? (
                 <label>

@@ -45,16 +45,6 @@ function formatDate(value: string | null | undefined) {
   return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short' }).format(parsed)
 }
 
-function formatDateTime(value: string | null | undefined) {
-  if (!value) return 'Chưa đặt'
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return value
-  return new Intl.DateTimeFormat('vi-VN', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(parsed)
-}
-
 function levelLabel(value: string | null | undefined) {
   if (!value) return 'Chưa rõ mức'
   return LEVEL_LABELS[value] ?? value
@@ -157,38 +147,6 @@ export function ParentPage() {
     return grouped
   }, [reportsQuery.data])
 
-  const familyProgressChartItems = useMemo(() => {
-    const summary = children.reduce(
-      (accumulator, item) => {
-        accumulator.totalAssignments += item.progress_summary.total_assignments
-        accumulator.completedCount += item.progress_summary.completed_count
-        accumulator.inProgressCount += item.progress_summary.in_progress_count
-        return accumulator
-      },
-      { totalAssignments: 0, completedCount: 0, inProgressCount: 0 },
-    )
-
-    const remainingCount = Math.max(summary.totalAssignments - summary.completedCount - summary.inProgressCount, 0)
-
-    return [
-      { label: 'Số con theo dõi', value: children.length, color: 'linear-gradient(180deg, #4a7ae2 0%, #335dc4 100%)' },
-      { label: 'Tổng bài được giao', value: summary.totalAssignments, color: 'linear-gradient(180deg, #53b7a8 0%, #2a8f80 100%)' },
-      { label: 'Đã hoàn thành', value: summary.completedCount, color: 'linear-gradient(180deg, #ffbe3d 0%, #f29f05 100%)' },
-      { label: 'Chưa bắt đầu', value: remainingCount, color: 'linear-gradient(180deg, #ff8d7a 0%, #ec6a55 100%)' },
-    ]
-  }, [children])
-
-  const familyLevelBreakdown = useMemo(() => {
-    const counts = { nhe: 0, trung_binh: 0, nang: 0 }
-    for (const child of children) {
-      const level = child.student.disability_level
-      if (level === 'nhe' || level === 'trung_binh' || level === 'nang') {
-        counts[level] += 1
-      }
-    }
-    return counts
-  }, [children])
-
   const familyAssignmentMismatchCount = useMemo(
     () => children.reduce((sum, child) => sum + summarizeChildAssignments(child).mismatchedCount, 0),
     [children],
@@ -243,89 +201,66 @@ export function ParentPage() {
 
   return (
     <RequireAuth allowedRoles={['parent']}>
-      <div className="page-stack">
-        <section className="roadmap-panel">
-          <h2>Theo dõi đúng mức học của con</h2>
+      <div className="parent-dashboard-container">
+        <section className="parent-hero">
+          <div className="parent-hero-decor parent-hero-decor-1">👨‍👩‍👧</div>
+          <div className="parent-hero-decor parent-hero-decor-2">📈</div>
+          <h2>Đồng hành cùng con</h2>
           <p>
-            Lớp học có thể có đủ ba mức nhẹ, trung bình và nặng. Phụ huynh cần thấy rõ con đang thuộc mức nào, giáo viên nào
-            đang theo dõi, và các bài được giao có đúng mức của con hay không.
+            Theo dõi tiến độ học tập, kiểm tra báo cáo và giữ liên lạc với giáo viên. Cùng nhau giúp con đạt kết quả tốt nhất.
           </p>
         </section>
 
-        <section className="dashboard-grid">
-          <article className="roadmap-panel">
-            <div className="teacher-clean-section-head">
-              <div>
-                <p className="eyebrow">Tài khoản</p>
-                <h3>Tổng quan gia đình</h3>
-              </div>
-              <span className="subject-pill muted-pill">{children.length} con</span>
-            </div>
-
-            <div className="metrics-grid">
-              <div className="mini-card">
-                <span>Parent ID</span>
-                <strong>{parentId ?? '---'}</strong>
-              </div>
-              <div className="mini-card">
-                <span>Họ tên</span>
-                <strong>{parentName}</strong>
-              </div>
-              <div className="mini-card">
-                <span>Tin nhắn chưa đọc</span>
-                <strong>{unreadConversationCount}</strong>
-              </div>
-              <div className="mini-card">
-                <span>Bài lệch mức</span>
-                <strong>{familyAssignmentMismatchCount}</strong>
-              </div>
-            </div>
-
-            <BarChartCard
-              title="Biểu đồ tổng quan"
-              description="Nhìn nhanh khối lượng bài học của các con trên ứng dụng."
-              items={familyProgressChartItems}
-              emptyMessage="Chưa có dữ liệu học sinh để hiển thị."
-            />
-
-            <div className="teacher-flow-summary">
-              <article className="teacher-step-card teacher-step-card-active">
-                <span>Mức nhẹ</span>
-                <strong>{familyLevelBreakdown.nhe}</strong>
-                <p>Số con đang ở mức nhẹ.</p>
-              </article>
-              <article className="teacher-step-card teacher-step-card-active">
-                <span>Trung bình</span>
-                <strong>{familyLevelBreakdown.trung_binh}</strong>
-                <p>Số con đang ở mức trung bình.</p>
-              </article>
-              <article className="teacher-step-card teacher-step-card-active">
-                <span>Mức nặng</span>
-                <strong>{familyLevelBreakdown.nang}</strong>
-                <p>Số con đang ở mức nặng.</p>
-              </article>
-            </div>
-
-            <div className="teacher-inline-note">
-              Gửi Parent ID này cho giáo viên khi cần liên kết đúng tài khoản phụ huynh với hồ sơ học sinh.
-            </div>
+        <section className="parent-metrics-row">
+          <article className="parent-stat-card">
+            <span>Mã Phụ Huynh (ID)</span>
+            <strong>{parentId ?? '---'}</strong>
+          </article>
+          <article className="parent-stat-card">
+            <span>Họ Tên</span>
+            <strong>{parentName}</strong>
+          </article>
+          <article className="parent-stat-card">
+            <span>Tin Nhắn Mới</span>
+            <strong>{unreadConversationCount}</strong>
+          </article>
+          <article className="parent-stat-card">
+            <span>Số Bài Lệch Mức</span>
+            <strong>{familyAssignmentMismatchCount}</strong>
           </article>
         </section>
 
         {isParentSetupPending ? (
-          <section className="dashboard-grid">
-            <article className="roadmap-panel">
-              <h3>Bắt đầu kết nối</h3>
-              <p>
-                Tài khoản phụ huynh đã tạo xong. Bước tiếp theo là gửi Parent ID hoặc email này cho giáo viên để họ gắn đúng
-                vào hồ sơ học sinh.
-              </p>
-              <p>Sau khi liên kết xong, trang này sẽ hiện con, bài học, báo cáo và khung chat với giáo viên.</p>
+          <section className="parent-content-grid">
+            <article className="parent-panel-card">
+              <div className="parent-panel-header">
+                <h3>Bắt đầu kết nối</h3>
+              </div>
+              <div className="parent-panel-body">
+                <p>
+                  Tài khoản phụ huynh đã tạo xong. Bước tiếp theo là gửi Parent ID hoặc email này cho giáo viên để họ gắn đúng
+                  vào hồ sơ học sinh.
+                </p>
+                <p>Sau khi liên kết xong, trang này sẽ hiện con, bài học, báo cáo và khung chat với giáo viên.</p>
+              </div>
             </article>
           </section>
         ) : null}
 
-        <section className="dashboard-grid">
+        {!children.length && !childrenQuery.isLoading && !isParentSetupPending ? (
+          <section className="parent-content-grid">
+            <article className="parent-panel-card">
+              <div className="parent-panel-header">
+                <h3>Chưa có liên kết nào</h3>
+              </div>
+              <div className="parent-panel-body">
+                <p>Giáo viên cần liên kết phụ huynh với học sinh trước khi bảng theo dõi có dữ liệu.</p>
+              </div>
+            </article>
+          </section>
+        ) : null}
+
+        <section className="parent-content-grid two-cols">
           {children.map((item) => {
             const studentReports = reportsByStudent.get(item.student.id) ?? []
             const remainingAssignments = Math.max(
@@ -342,160 +277,117 @@ export function ParentPage() {
             ]
 
             return (
-              <article key={item.student.id} className="roadmap-panel">
-                <div className="teacher-clean-section-head">
+              <article key={item.student.id} className="parent-panel-card">
+                <div className="parent-panel-header">
                   <div>
-                    <p className="eyebrow">Học sinh</p>
-                    <h3>{item.student.full_name}</h3>
-                    <p className="helper-text">
+                    <h3 style={{ fontSize: '1.5rem', marginBottom: '0.2rem' }}>{item.student.full_name}</h3>
+                    <p className="helper-text" style={{ margin: 0 }}>
                       {`Mức ${levelLabel(item.student.disability_level)} / ${inputLabel(item.student.preferred_input)}`}
                     </p>
                   </div>
                   <span className="subject-pill">{levelLabel(item.student.disability_level)}</span>
                 </div>
 
-                <div className="metrics-grid">
-                  <div className="mini-card">
-                    <span>Tổng bài tập</span>
-                    <strong>{item.progress_summary.total_assignments}</strong>
+                <div className="parent-panel-body">
+                  <div className="metrics-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="mini-card" style={{ padding: '1rem' }}>
+                      <span>Khớp mức</span>
+                      <strong>{assignmentSummary.matchingCount}</strong>
+                    </div>
+                    <div className="mini-card" style={{ padding: '1rem' }}>
+                      <span>Lệch mức</span>
+                      <strong>{assignmentSummary.mismatchedCount}</strong>
+                    </div>
+                    <div className="mini-card" style={{ padding: '1rem' }}>
+                      <span>Tiến độ gần nhất</span>
+                      <strong>{item.progress_summary.last_progress_percent}%</strong>
+                    </div>
+                    <div className="mini-card" style={{ padding: '1rem' }}>
+                      <span>Mức độ sẵn sàng</span>
+                      <strong style={{ fontSize: '1.2rem', marginTop: 'auto' }}>{readinessLabel(item.progress_summary.readiness_status)}</strong>
+                    </div>
                   </div>
-                  <div className="mini-card">
-                    <span>Khớp mức</span>
-                    <strong>{assignmentSummary.matchingCount}</strong>
-                  </div>
-                  <div className="mini-card">
-                    <span>Lệch mức</span>
-                    <strong>{assignmentSummary.mismatchedCount}</strong>
-                  </div>
-                  <div className="mini-card">
-                    <span>Tiến độ gần nhất</span>
-                    <strong>{item.progress_summary.last_progress_percent}%</strong>
-                  </div>
-                </div>
 
-                <BarChartCard
-                  title="Biểu đồ tiến độ của con"
-                  description="Nhìn nhanh phần đã xong, đang học và phần còn lại."
-                  items={childProgressChartItems}
-                />
+                  {assignmentSummary.mismatchedCount > 0 ? (
+                    <p className="error-text" style={{ margin: 0 }}>
+                      {`Có ${assignmentSummary.mismatchedCount} bài không khớp mức hiện tại của con. Phụ huynh nên trao đổi lại với giáo viên.`}
+                    </p>
+                  ) : null}
 
-                <p className="helper-text">
-                  Bài học gần nhất: {item.progress_summary.last_assignment_title ?? 'Chưa có bài tập nào'}.
-                </p>
-                <p>Mức độ sẵn sàng: {readinessLabel(item.progress_summary.readiness_status)}</p>
+                  <BarChartCard
+                    title="Biểu đồ tiến độ của con"
+                    description="Phần đã xong, đang học và phần còn lại."
+                    items={childProgressChartItems}
+                  />
 
-                <div className="teacher-inline-note">
-                  {`Con hiện ở mức ${levelLabel(item.student.disability_level)}. Dù trong cùng một lớp có nhiều mức khác nhau, bài giao cho con vẫn phải bám theo đúng mức này.`}
-                </div>
-
-                {assignmentSummary.mismatchedCount > 0 ? (
-                  <p className="error-text">
-                    {`Có ${assignmentSummary.mismatchedCount} bài không khớp mức hiện tại của con. Phụ huynh nên trao đổi lại với giáo viên.`}
-                  </p>
-                ) : null}
-
-                <div className="detail-stack">
-                  <strong>Lớp đang tham gia</strong>
-                  <div className="tag-wrap">
-                    {item.classes.map((classroom) => (
-                      <span key={classroom.id} className="subject-pill">
-                        {classroom.name}
-                      </span>
-                    ))}
-                    {!item.classes.length ? <p>Chưa được gắn lớp học nào.</p> : null}
-                  </div>
-                </div>
-
-                <div className="detail-stack">
-                  <strong>Giáo viên đang theo dõi</strong>
-                  <div className="tag-wrap">
-                    {item.teachers.map((teacher) => (
-                      <span key={teacher.id} className="subject-pill">
-                        {`${teacher.full_name} / ID ${teacher.id}`}
-                      </span>
-                    ))}
-                    {!item.teachers.length ? <p>Chưa có giáo viên nào được gắn cho học sinh này.</p> : null}
-                  </div>
-                </div>
-
-                <div className="detail-stack">
-                  <strong>Bài giáo viên đã giao</strong>
-                  <div className="student-list compact-list">
-                    {item.assignments.map((assignmentItem) => {
-                      const lesson = assignmentItem.assignment?.lesson
-                      const lessonLevel = lesson?.primary_level ?? ''
-                      return (
-                        <div
-                          key={assignmentItem.progress_id}
-                          className={assignmentItem.level_match ? 'student-row' : 'student-row parent-assignment-row-warning'}
-                        >
-                          <strong>{lesson?.title ?? `Bài học #${assignmentItem.assignment?.lesson_id ?? assignmentItem.progress_id}`}</strong>
-                          <span>{renderAssignmentMeta(assignmentItem)}</span>
-                          <p>
-                            {`Mức bài: ${levelLabel(lessonLevel)} / Trạng thái: ${assignmentStatusLabel(assignmentItem.status)} / Tiến độ: ${assignmentItem.progress_percent}%`}
-                          </p>
-                          <p>
-                            {`Mức cần đạt: ${assignmentItem.assignment?.required_completion_percent ?? 0}% / Hạn nộp: ${formatDateTime(assignmentItem.assignment?.due_at)}`}
-                          </p>
-                          <p>{`Đánh giá hiện tại: ${readinessLabel(assignmentItem.readiness_status)}`}</p>
-                          {!assignmentItem.level_match ? (
-                            <p className="helper-text">
-                              {`Bài này đang ở mức ${levelLabel(lessonLevel)} trong khi con hiện ở mức ${levelLabel(item.student.disability_level)}.`}
+                  <div className="detail-stack">
+                    <strong>Bài giáo viên đã giao</strong>
+                    <div className="parent-scrollable-list" style={{ padding: 0, border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--background)' }}>
+                      {item.assignments.map((assignmentItem) => {
+                        const lesson = assignmentItem.assignment?.lesson
+                        const lessonLevel = lesson?.primary_level ?? ''
+                        return (
+                          <div
+                            key={assignmentItem.progress_id}
+                            className={assignmentItem.level_match ? 'admin-list-item' : 'admin-list-item parent-assignment-row-warning'}
+                            style={{ padding: '1rem', background: assignmentItem.level_match ? 'white' : 'inherit' }}
+                          >
+                            <strong>{lesson?.title ?? `Bài học #${assignmentItem.assignment?.lesson_id ?? assignmentItem.progress_id}`}</strong>
+                            <span>{renderAssignmentMeta(assignmentItem)}</span>
+                            <p>
+                              {`Mức: ${levelLabel(lessonLevel)} / ${assignmentStatusLabel(assignmentItem.status)} / ${assignmentItem.progress_percent}%`}
                             </p>
-                          ) : null}
-                        </div>
-                      )
-                    })}
-                    {!item.assignments.length ? <p>Chưa có bài nào được giao cho học sinh này.</p> : null}
+                            {!assignmentItem.level_match ? (
+                              <span style={{ color: 'var(--error)', marginTop: '0.5rem', display: 'block', fontSize: '0.85rem' }}>
+                                {`⚠ Bài mức ${levelLabel(lessonLevel)} trong khi con ở mức ${levelLabel(item.student.disability_level)}.`}
+                              </span>
+                            ) : null}
+                          </div>
+                        )
+                      })}
+                      {!item.assignments.length ? <p style={{ padding: '1rem' }}>Chưa có bài nào được giao.</p> : null}
+                    </div>
                   </div>
-                </div>
 
-                <div className="detail-stack">
-                  <strong>Báo cáo gần đây</strong>
-                  <div className="student-list compact-list">
-                    {studentReports.slice(0, 3).map((report) => (
-                      <div key={report.id} className="student-row">
-                        <strong>{report.title}</strong>
-                        <span>{formatDate(report.report_date)}</span>
-                        <p>{report.summary_text}</p>
-                        {report.teacher_note ? <p>Ghi chú giáo viên: {report.teacher_note}</p> : null}
-                      </div>
-                    ))}
-                    {!studentReports.length ? <p>Chưa có báo cáo nào cho học sinh này.</p> : null}
+                  <div className="detail-stack">
+                    <strong>Báo cáo gần đây</strong>
+                    <div className="parent-scrollable-list" style={{ padding: 0, border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--background)' }}>
+                      {studentReports.slice(0, 3).map((report) => (
+                        <div key={report.id} className="admin-list-item" style={{ padding: '1rem', background: 'white' }}>
+                          <strong>{report.title}</strong>
+                          <span>{formatDate(report.report_date)}</span>
+                          <span style={{ color: 'var(--text)' }}>{report.summary_text}</span>
+                        </div>
+                      ))}
+                      {!studentReports.length ? <p style={{ padding: '1rem' }}>Chưa có báo cáo nào.</p> : null}
+                    </div>
                   </div>
                 </div>
               </article>
             )
           })}
-
-          {!children.length && !childrenQuery.isLoading ? (
-            <article className="roadmap-panel">
-              <h3>Chưa có liên kết nào</h3>
-              <p>Giáo viên cần liên kết phụ huynh với học sinh trước khi bảng theo dõi có dữ liệu.</p>
-            </article>
-          ) : null}
         </section>
 
-        <section className="roadmap-panel">
-          <div className="teacher-clean-section-head">
-            <div>
-              <p className="eyebrow">Báo cáo</p>
+        <section className="parent-content-grid">
+          <article className="parent-panel-card">
+            <div className="parent-panel-header">
               <h3>Tất cả báo cáo đã nhận</h3>
+              <span className="subject-pill muted-pill">{reportsQuery.data?.length ?? 0}</span>
             </div>
-            <span className="subject-pill muted-pill">{reportsQuery.data?.length ?? 0}</span>
-          </div>
-          <div className="student-list compact-list">
-            {(reportsQuery.data ?? []).map((report) => (
-              <div key={report.id} className="student-row">
-                <strong>{report.student?.full_name ?? `Học sinh #${report.student_id}`}</strong>
-                <span>{`${report.title} / ${formatDate(report.report_date)}`}</span>
-                <p>{report.summary_text}</p>
-                <p>Khuyến nghị: {report.recommendation ?? 'Chưa có'}</p>
-                {report.teacher ? <p>{`Gửi bởi: ${report.teacher.full_name} (Teacher ID ${report.teacher.id})`}</p> : null}
+            <div className="parent-panel-body no-padding">
+              <div className="parent-scrollable-list">
+                {(reportsQuery.data ?? []).map((report) => (
+                  <div key={report.id} className="admin-list-item">
+                    <strong>{report.student?.full_name ?? `Học sinh #${report.student_id}`}</strong>
+                    <span>{`${report.title} / ${formatDate(report.report_date)}`}</span>
+                    <span style={{ color: 'var(--text)' }}>{report.summary_text}</span>
+                    {report.recommendation ? <span style={{ color: 'var(--text-muted)' }}>Khuyến nghị: {report.recommendation}</span> : null}
+                  </div>
+                ))}
+                {!reportsQuery.data?.length && !reportsQuery.isLoading ? <p style={{ padding: '1rem' }}>Chưa có báo cáo nào được gửi tới tài khoản này.</p> : null}
               </div>
-            ))}
-            {!reportsQuery.data?.length && !reportsQuery.isLoading ? <p>Chưa có báo cáo nào được gửi tới tài khoản này.</p> : null}
-          </div>
+            </div>
+          </article>
         </section>
       </div>
 
