@@ -9083,6 +9083,7 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .action-b
   font-weight: 900;
   color: hsl(25, 90%, 55%); /* Warm accent */
   line-height: 1;
+  overflow-wrap: anywhere;
 }
 
 .parent-content-grid {
@@ -9118,6 +9119,7 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .action-b
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
 
 .parent-panel-header h3 {
@@ -9125,6 +9127,7 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .action-b
   font-size: 1.25rem;
   font-weight: 800;
   color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .parent-panel-body {
@@ -9140,11 +9143,148 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .action-b
 
 .parent-scrollable-list {
   max-height: 350px;
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 1rem 1.5rem;
+}
+
+.parent-scrollable-list .admin-list-item,
+.parent-scrollable-list .admin-list-item strong,
+.parent-scrollable-list .admin-list-item span,
+.parent-scrollable-list .admin-list-item p {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .parent-scrollable-list::-webkit-scrollbar { width: 6px; }
 .parent-scrollable-list::-webkit-scrollbar-track { background: transparent; }
 .parent-scrollable-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 .parent-scrollable-list::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+@media (max-width: 900px) {
+  .parent-dashboard-container {
+    gap: 1.25rem;
+    padding-bottom: 2rem;
+  }
+
+  .parent-hero {
+    padding: 2.5rem 1.25rem 4.25rem;
+    margin-bottom: -2.75rem;
+  }
+
+  .parent-hero h2 {
+    font-size: 2rem;
+    line-height: 1.12;
+  }
+
+  .parent-hero p {
+    font-size: 1rem;
+    max-width: 100%;
+  }
+
+  .parent-metrics-row,
+  .parent-content-grid {
+    gap: 1rem;
+    padding-inline: 1rem;
+  }
+
+  .parent-metrics-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .parent-stat-card {
+    border-radius: 18px;
+    padding: 1.1rem;
+  }
+
+  .parent-stat-card strong {
+    font-size: 2rem;
+  }
+
+  .parent-panel-card {
+    border-radius: 18px;
+  }
+
+  .parent-panel-header,
+  .parent-panel-body {
+    padding: 1.15rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .content:has(.parent-dashboard-container) {
+    padding-inline: 0.65rem;
+  }
+
+  .parent-hero {
+    padding: 2.25rem 1rem 4rem;
+    border-radius: 0 0 24px 24px;
+  }
+
+  .parent-hero h2 {
+    font-size: 1.7rem;
+  }
+
+  .parent-hero-decor {
+    font-size: 5.5rem;
+  }
+
+  .parent-hero-decor-1 {
+    right: -1rem;
+  }
+
+  .parent-hero-decor-2 {
+    right: 1.25rem;
+    font-size: 4.5rem;
+  }
+
+  .parent-metrics-row,
+  .parent-content-grid {
+    padding-inline: 0.25rem;
+  }
+
+  .parent-metrics-row {
+    grid-template-columns: 1fr;
+  }
+
+  .parent-stat-card {
+    min-width: 0;
+  }
+
+  .parent-stat-card span {
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+  }
+
+  .parent-panel-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .parent-panel-header .subject-pill {
+    align-self: flex-start;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .parent-panel-body .metrics-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .parent-panel-body .mini-card {
+    min-width: 0;
+  }
+
+  .parent-scrollable-list {
+    max-height: none;
+    padding: 0.75rem;
+  }
+
+  .parent-scrollable-list .admin-list-item {
+    padding: 0.85rem !important;
+  }
+
+  .parent-scrollable-list .admin-list-item p {
+    width: 100%;
+  }
+}
