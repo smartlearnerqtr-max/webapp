@@ -6,11 +6,16 @@ import {
   createLessonActivity,
   deleteLesson,
   fetchClasses,
+  fetchLesson,
   fetchLessons,
   fetchSubjects,
+  generateLessonQuestionDraft,
+  updateLesson,
+  updateLessonActivity,
   type ClassItem,
   type LessonActivityItem,
   type LessonItem,
+  type LessonQuestionDraftSuggestion,
   type SubjectItem,
   uploadLessonMedia,
 } from '../services/api'
@@ -62,6 +67,7 @@ interface MatchingPairDraft {
 }
 
 interface ActivityDraft {
+  id?: number
   title: string
   activity_type: TeacherActivityType | 'exercise' | 'activity'
   interaction_type?: InteractionType | 'ai_camera' | '3d_interaction' | 'voice_ai'
@@ -90,11 +96,14 @@ interface ActivityDraft {
   aac_cards: string[]
   aac_image_cards: ChoiceCardDraft[]
   suggested_steps: EnhancedStepItem[]
+  is_approved?: boolean
 }
 
 interface LessonDraft {
   subject_id?: number
   subject_name?: string
+  class_id?: number
+  class_name?: string
   difficulty_level?: LessonLevel
   title: string
   theme: string
@@ -107,6 +116,10 @@ const DIFFICULTY_LEVELS: Array<{ value: LessonLevel; label: string; icon: string
   { value: 'trung_binh', label: 'Trung bình', icon: '🟡', color: '#f1c40f' },
   { value: 'nhe', label: 'Nhẹ', icon: '🟢', color: '#2ecc71' },
 ]
+
+function isLessonLevel(value: string): value is LessonLevel {
+  return value === 'nang' || value === 'trung_binh' || value === 'nhe'
+}
 
 const STEP_CONTENT_TYPES = [
   { value: 'display', label: '📺 Hiển thị (Ảnh/Video)' },
@@ -162,6 +175,268 @@ function createPresetChoiceCard(id: string, label: string, mediaUrl: string, med
   }
 }
 
+function cleanAIString(value: unknown) {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+function cleanAIStringList(value: unknown, fallback: string[] = ['']) {
+  if (!Array.isArray(value)) return fallback
+  const items = value.map((item) => cleanAIString(item)).filter(Boolean)
+  return items.length ? items : fallback
+}
+
+function slugChoiceId(value: string, fallback: string) {
+  const normalized = value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return normalized || fallback
+}
+
+function normalizeAIChoiceCards(value: unknown, prefix: string): ChoiceCardDraft[] {
+  if (!Array.isArray(value)) return [createChoiceCardDraft('Lua chon 1'), createChoiceCardDraft('Lua chon 2')]
+  const cards = value
+    .map((item, index): ChoiceCardDraft | null => {
+      if (!item || typeof item !== 'object') return null
+      const rawItem = item as { id?: unknown; label?: unknown; media_url?: unknown; media_kind?: unknown }
+      const label = cleanAIString(rawItem.label) || `Lua chon ${index + 1}`
+      const id = slugChoiceId(cleanAIString(rawItem.id) || label, `${prefix}-${index + 1}`)
+      const mediaKind = cleanAIString(rawItem.media_kind)
+      return {
+        id,
+        label,
+        media_url: cleanAIString(rawItem.media_url),
+        media_kind: mediaKind === 'image' || mediaKind === 'video' ? mediaKind : 'image',
+      } satisfies ChoiceCardDraft
+    })
+    .filter((item): item is ChoiceCardDraft => item !== null)
+  return cards.length ? cards : [createChoiceCardDraft('Lua chon 1'), createChoiceCardDraft('Lua chon 2')]
+}
+
+function mergeAIChoiceCards(existingCards: ChoiceCardDraft[], suggestionValue: unknown, prefix: string): ChoiceCardDraft[] {
+  const suggestedCards = normalizeAIChoiceCards(suggestionValue, prefix)
+  if (!existingCards.some((card) => card.media_url.trim())) return suggestedCards
+
+  return existingCards.map((card, index) => {
+    const suggestion = suggestedCards[index]
+    return {
+      ...card,
+      label: suggestion?.label?.trim() || card.label,
+    }
+  })
+}
+
+function normalizeAIMatchingPairs(value: unknown) {
+  if (!Array.isArray(value)) return [createMatchingPairDraft(), createMatchingPairDraft()]
+  const pairs = value
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const rawItem = item as { left?: unknown; right?: unknown }
+      const left = cleanAIString(rawItem.left)
+      const right = cleanAIString(rawItem.right)
+      return left || right ? { left, right } : null
+    })
+    .filter((item): item is MatchingPairDraft => item !== null)
+  return pairs.length ? pairs : [createMatchingPairDraft(), createMatchingPairDraft()]
+}
+
+function resolveAICorrectChoiceForCards(rawCorrectChoice: string, cards: ChoiceCardDraft[]) {
+  if (!cards.length) return ''
+  const normalizedCorrect = rawCorrectChoice.trim().toLowerCase()
+  const matchedCard = cards.find((card) => (
+    card.id.toLowerCase() === normalizedCorrect || card.label.trim().toLowerCase() === normalizedCorrect
+  ))
+  return matchedCard?.id ?? cards[0].id
+}
+
+function getAISuggestionCards(suggestion: LessonQuestionDraftSuggestion) {
+  const cards = Array.isArray(suggestion.choice_cards) ? suggestion.choice_cards : []
+  return cards
+    .map((card, index) => ({
+      id: cleanAIString(card.id) || `card-${index + 1}`,
+      label: cleanAIString(card.label) || `Lựa chọn ${index + 1}`,
+      media_url: cleanAIString(card.media_url),
+      media_kind: cleanAIString(card.media_kind),
+    }))
+    .filter((card) => card.label || card.media_url)
+}
+
+function getAISuggestionAnswerText(suggestion: LessonQuestionDraftSuggestion) {
+  const correctChoice = cleanAIString(suggestion.correct_choice)
+  if (!correctChoice) return ''
+  const matchedCard = getAISuggestionCards(suggestion).find((card) => card.id === correctChoice || card.label === correctChoice)
+  return matchedCard?.label || correctChoice
+}
+
+function isStructuredLessonLevel(level?: LessonLevel) {
+  return level === 'nhe' || level === 'trung_binh' || level === 'nang'
+}
+
+function shouldApplyAISuggestionMedia(activity: ActivityDraft, suggestionMediaUrl: string) {
+  if (!suggestionMediaUrl) return false
+  const currentMediaUrl = activity.media_url.trim()
+  if (!currentMediaUrl) return activity.activity_type === 'image_puzzle'
+  return !currentMediaUrl.startsWith('/lesson-media/')
+}
+
+function isLightMathStepLabUrl(mediaUrl: string) {
+  return mediaUrl.includes('/lesson-media/nhe/light-lab.html') && mediaUrl.includes('activity=toan-step')
+}
+
+function isLightMathShapeLabUrl(mediaUrl: string) {
+  return (
+    (mediaUrl.includes('/lesson-media/nhe/light-lab.html') && mediaUrl.includes('activity=toan-prism'))
+    || mediaUrl.includes('/lesson-media/nhe/shape-prism-3d.html')
+  )
+}
+
+function getAISuggestionMathNumber(value: unknown) {
+  const numberValue = Number(value)
+  return Number.isFinite(numberValue) && numberValue > 0 ? Math.floor(numberValue) : null
+}
+
+function getAISuggestionMathOperation(value: unknown) {
+  const operation = cleanAIString(value)
+  return operation === '+' || operation === '-' || operation === 'x' || operation === ':' ? operation : ''
+}
+
+function buildMathStepLabUrl(activity: ActivityDraft, suggestion: LessonQuestionDraftSuggestion) {
+  const currentMediaUrl = activity.media_url.trim()
+  if (!isLightMathStepLabUrl(currentMediaUrl)) return ''
+
+  const left = getAISuggestionMathNumber(suggestion.math_left)
+  const right = getAISuggestionMathNumber(suggestion.math_right)
+  const operation = getAISuggestionMathOperation(suggestion.math_operation)
+  const groupLabel = cleanAIString(suggestion.math_group_label)
+  const itemLabel = cleanAIString(suggestion.math_item_label)
+  if (!left && !right && !operation && !groupLabel && !itemLabel) return ''
+
+  try {
+    const url = new URL(currentMediaUrl, window.location.origin)
+    if (left) url.searchParams.set('left', String(left))
+    if (right) url.searchParams.set('right', String(right))
+    if (operation) url.searchParams.set('operation', operation)
+    if (groupLabel) url.searchParams.set('groupLabel', groupLabel)
+    if (itemLabel) url.searchParams.set('itemLabel', itemLabel)
+    return `${url.pathname}?${url.searchParams.toString()}`
+  } catch {
+    const params = new URLSearchParams()
+    params.set('activity', 'toan-step')
+    if (left) params.set('left', String(left))
+    if (right) params.set('right', String(right))
+    if (operation) params.set('operation', operation)
+    if (groupLabel) params.set('groupLabel', groupLabel)
+    if (itemLabel) params.set('itemLabel', itemLabel)
+    return `/lesson-media/nhe/light-lab.html?${params.toString()}`
+  }
+}
+
+function getAISuggestionShapeModel(value: unknown) {
+  const model = cleanAIString(value)
+  return model === 'cube' || model === 'prism' ? model : ''
+}
+
+function getAISuggestionShapeFocus(value: unknown) {
+  const focus = cleanAIString(value)
+  return focus === 'vertices' || focus === 'edges' || focus === 'faces' ? focus : ''
+}
+
+function buildMathShapeLabUrl(activity: ActivityDraft, suggestion: LessonQuestionDraftSuggestion) {
+  const currentMediaUrl = activity.media_url.trim()
+  if (!isLightMathShapeLabUrl(currentMediaUrl)) return ''
+
+  const shapeModel = getAISuggestionShapeModel(suggestion.shape_model)
+  const shapeFocus = getAISuggestionShapeFocus(suggestion.shape_focus)
+  const title = cleanAIString(suggestion.title)
+  const prompt = cleanAIString(suggestion.prompt)
+  if (!shapeModel && !shapeFocus && !title && !prompt) return ''
+
+  const params = new URLSearchParams()
+  params.set('shape', shapeModel || (currentMediaUrl.includes('shape=cube') ? 'cube' : 'prism'))
+  if (shapeFocus) params.set('focus', shapeFocus)
+  if (title) params.set('title', title)
+  if (prompt) params.set('prompt', prompt)
+  return `/lesson-media/nhe/shape-prism-3d.html?${params.toString()}`
+}
+
+function buildDynamicLocalLabUrl(activity: ActivityDraft, suggestion: LessonQuestionDraftSuggestion) {
+  const currentMediaUrl = activity.media_url.trim()
+  if (!currentMediaUrl.startsWith('/lesson-media/') || !currentMediaUrl.includes('.html')) return ''
+
+  const title = cleanAIString(suggestion.title)
+  const prompt = cleanAIString(suggestion.prompt)
+  const example = cleanAIString(suggestion.example)
+  if (!title && !prompt && !example) return ''
+
+  try {
+    const url = new URL(currentMediaUrl, window.location.origin)
+    if (title) url.searchParams.set('title', title)
+    if (prompt) url.searchParams.set('prompt', prompt)
+    if (example) url.searchParams.set('example', example)
+    url.searchParams.set('variant', String(Date.now()))
+    return `${url.pathname}?${url.searchParams.toString()}`
+  } catch {
+    return currentMediaUrl
+  }
+}
+
+function applyLessonQuestionSuggestion(activity: ActivityDraft, suggestion: LessonQuestionDraftSuggestion): ActivityDraft {
+  const nextType = isTeacherActivityType(activity.activity_type) ? activity.activity_type : 'multiple_choice'
+  const textChoices = cleanAIStringList(suggestion.text_choices, activity.text_choices.length ? activity.text_choices : ['', ''])
+  const choiceCards = mergeAIChoiceCards(activity.choice_cards, suggestion.choice_cards, 'choice')
+  const aacImageCards = mergeAIChoiceCards(activity.aac_image_cards, suggestion.aac_image_cards, 'aac')
+  const suggestionMediaUrl = cleanAIString(suggestion.media_url)
+  const suggestionMediaKind = cleanAIString(suggestion.media_kind)
+  const shouldApplyMedia = shouldApplyAISuggestionMedia(activity, suggestionMediaUrl)
+  const mathStepLabUrl = buildMathStepLabUrl(activity, suggestion)
+  const mathShapeLabUrl = buildMathShapeLabUrl(activity, suggestion)
+  const dynamicLocalLabUrl = buildDynamicLocalLabUrl(activity, suggestion)
+  const answerMode = cleanAIString(suggestion.answer_mode)
+
+  let correctChoice = cleanAIString(suggestion.correct_choice) || activity.correct_choice
+  if (nextType === 'multiple_choice') {
+    if (choiceCards.some((card) => card.media_url.trim())) {
+      correctChoice = resolveAICorrectChoiceForCards(correctChoice, choiceCards)
+    } else {
+      correctChoice = textChoices.includes(correctChoice) ? correctChoice : textChoices[0] || ''
+    }
+  }
+  if (nextType === 'image_choice' || nextType === 'listen_choose') {
+    correctChoice = resolveAICorrectChoiceForCards(correctChoice, choiceCards)
+  }
+
+  return {
+    ...activity,
+    activity_type: nextType,
+    title: cleanAIString(suggestion.title) || activity.title,
+    objective: cleanAIString(suggestion.objective) || activity.objective,
+    prompt: cleanAIString(suggestion.prompt) || activity.prompt,
+    audio_text: cleanAIString(suggestion.audio_text) || activity.audio_text,
+    audio_url: cleanAIString(suggestion.audio_url) || activity.audio_url,
+    audio_lang: cleanAIString(suggestion.audio_lang) || activity.audio_lang || 'vi-VN',
+    media_url: mathStepLabUrl || mathShapeLabUrl || dynamicLocalLabUrl || (shouldApplyMedia ? suggestionMediaUrl : activity.media_url),
+    media_kind: mathStepLabUrl || mathShapeLabUrl || dynamicLocalLabUrl ? '' : shouldApplyMedia && (suggestionMediaKind === 'image' || suggestionMediaKind === 'video') ? suggestionMediaKind : activity.media_kind,
+    puzzle_rows: Number(suggestion.puzzle_rows) || activity.puzzle_rows || 1,
+    puzzle_cols: Number(suggestion.puzzle_cols) || activity.puzzle_cols || 2,
+    text_choices: textChoices,
+    correct_choice: correctChoice,
+    choice_cards: choiceCards,
+    matching_pairs: normalizeAIMatchingPairs(suggestion.matching_pairs),
+    drag_items: cleanAIStringList(suggestion.drag_items, activity.drag_items.length ? activity.drag_items : ['']),
+    drag_targets: cleanAIStringList(suggestion.drag_targets, activity.drag_targets.length ? activity.drag_targets : ['']),
+    visual_style: cleanAIString(suggestion.visual_style) || activity.visual_style,
+    step_items: cleanAIStringList(suggestion.step_items, activity.step_items.length ? activity.step_items : ['']),
+    answer_mode: answerMode === 'text' || answerMode === 'voice_ai_grade' || answerMode === 'none' ? answerMode : activity.answer_mode,
+    expected_answer: cleanAIString(suggestion.expected_answer) || activity.expected_answer,
+    accepted_answers: cleanAIStringList(suggestion.accepted_answers, activity.accepted_answers.length ? activity.accepted_answers : ['']),
+    aac_cards: cleanAIStringList(suggestion.aac_cards, activity.aac_cards.length ? activity.aac_cards : ['']),
+    aac_image_cards: aacImageCards,
+    is_approved: false,
+  }
+}
+
 function normalizeSubjectLookup(value: string) {
   return value
     .normalize('NFD')
@@ -192,6 +467,25 @@ function canonicalSubjectLookup(value: string) {
   return SUBJECT_LOOKUP_CANONICAL_MAP[lookup] ?? lookup
 }
 
+function findSubjectTemplate<T extends { subject_id: number; subject_name: string }>(
+  templates: T[],
+  subjectId?: number,
+  subjectName?: string,
+) {
+  const selectedLookup = canonicalSubjectLookup(subjectName ?? '')
+  if (selectedLookup) {
+    const exactNameMatch = templates.find((template) => canonicalSubjectLookup(template.subject_name) === selectedLookup)
+    if (exactNameMatch) return exactNameMatch
+
+    return templates.find((template) => {
+      const templateLookup = canonicalSubjectLookup(template.subject_name)
+      return templateLookup.includes(selectedLookup) || selectedLookup.includes(templateLookup)
+    })
+  }
+
+  return subjectId ? templates.find((template) => template.subject_id === subjectId) : undefined
+}
+
 function createCommonActivityDraft() {
   return {
     prompt: '',
@@ -216,18 +510,6 @@ function createCommonActivityDraft() {
     aac_cards: ['', ''],
     aac_image_cards: [createChoiceCardDraft('Thẻ 1'), createChoiceCardDraft('Thẻ 2')],
     suggested_steps: [] as EnhancedStepItem[],
-  }
-}
-
-function buildLegacyDraftFromTemplate(templateActivity: TemplateActivityTemplate, isMandatory: boolean): ActivityDraft {
-  return {
-    title: templateActivity.title,
-    activity_type: templateActivity.activity_type,
-    interaction_type: templateActivity.interaction_type,
-    objective: templateActivity.objective,
-    steps: templateActivity.steps.map((step) => ({ ...step, media_kind: step.content_type as EnhancedStepItem['media_kind'] })),
-    is_mandatory: isMandatory,
-    ...createCommonActivityDraft(),
   }
 }
 
@@ -590,6 +872,230 @@ function buildMediumActivityDrafts(template: {
   }
 }
 
+function buildLightActivityDrafts(template: {
+  subject_name: string
+  h1: TemplateActivityTemplate
+  h2: TemplateActivityTemplate
+}): ActivityDraft[] {
+  const firstDraft = buildStructuredDraftFromTemplate(template.h1, template.subject_name, true)
+  const secondDraft = buildStructuredDraftFromTemplate(template.h2, template.subject_name, false)
+  const subjectKey = canonicalSubjectLookup(template.subject_name)
+  const lightLabUrl = (activity: string) => `/lesson-media/nhe/light-lab.html?activity=${activity}`
+  const makeLabActivity = (
+    draft: ActivityDraft,
+    activity: string,
+    prompt: string,
+    patch: Partial<ActivityDraft> = {},
+  ): ActivityDraft => ({
+    ...draft,
+    activity_type: 'watch_answer',
+    prompt,
+    media_url: lightLabUrl(activity),
+    media_kind: '',
+    answer_mode: 'none',
+    ...patch,
+  })
+
+  switch (subjectKey) {
+    case 'ngu van':
+      return [
+        makeLabActivity(firstDraft, 'ngu-van-mindmap', 'Kéo các từ khóa vào đúng nhánh sơ đồ tư duy.'),
+        {
+          ...secondDraft,
+          activity_type: 'watch_answer',
+          prompt: 'Bấm micro và kể lại bài học rút ra từ câu chuyện.',
+          media_url: '',
+          media_kind: '',
+          answer_mode: 'voice_ai_grade',
+          expected_answer: 'Kiên trì sẽ thành công',
+          accepted_answers: ['Kiên trì', 'Cố gắng sẽ thành công', 'Không bỏ cuộc'],
+        },
+      ]
+    case 'toan hoc':
+      return [
+        {
+          ...firstDraft,
+          activity_type: 'watch_answer',
+          title: template.h1.title,
+          prompt: 'Làm bài toán theo từng bước: đọc đề, chọn phép tính, rồi điền kết quả.',
+          media_url: lightLabUrl('toan-step'),
+          media_kind: '',
+          answer_mode: 'none',
+        },
+        {
+          ...secondDraft,
+          activity_type: 'watch_answer',
+          title: template.h2.title,
+          prompt: 'Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.',
+          media_url: '/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices',
+          media_kind: '',
+          answer_mode: 'none',
+        },
+      ]
+    case 'tieng anh':
+      return [
+        {
+          ...firstDraft,
+          activity_type: 'listen_choose',
+          prompt: 'Listen and choose the Festival picture.',
+          audio_text: 'Festival',
+          audio_lang: 'en-US',
+          choice_cards: [
+            createPresetChoiceCard('festival', 'Festival', '/lesson-media/nhe/photos/festival-viet-nam.jpg'),
+            createPresetChoiceCard('hospital', 'Hospital', '/lesson-media/nhe/photos/hospital-building.jpg'),
+            createPresetChoiceCard('traffic', 'Traffic', '/lesson-media/nhe/photos/traffic-viet-nam.jpg'),
+          ],
+          correct_choice: 'festival',
+        },
+        {
+          ...secondDraft,
+          activity_type: 'watch_answer',
+          prompt: 'AI hỏi: How are you? Em bấm micro và trả lời.',
+          media_url: '',
+          media_kind: '',
+          answer_mode: 'voice_ai_grade',
+          expected_answer: 'I am fine',
+          accepted_answers: ['I am fine', 'Fine', 'I am good', 'I am OK'],
+        },
+      ]
+    case 'khoa hoc tu nhien':
+      return [
+        makeLabActivity(firstDraft, 'khtn-magnet', 'Kéo nam châm lại gần vật và quan sát vật nào bị hút.'),
+        makeLabActivity(secondDraft, 'khtn-atom', 'Chạm từng electron để xếp vào đúng vòng nguyên tử.'),
+      ]
+    case 'lich su dia ly':
+      return [
+        makeLabActivity(firstDraft, 'lsdl-globe', 'Xoay bản đồ và chạm vào Châu Mỹ.'),
+        makeLabActivity(secondDraft, 'lsdl-timeline', 'Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.'),
+      ]
+    case 'cong nghe':
+      return [
+        makeLabActivity(firstDraft, 'congnghe-steps', 'Sắp xếp đúng quy trình trồng trọt.'),
+        makeLabActivity(secondDraft, 'congnghe-animals', 'Phân loại vật nuôi vào đúng nhóm nông nghiệp.'),
+      ]
+    case 'giao duc cong dan':
+      return [
+        {
+          ...firstDraft,
+          activity_type: 'multiple_choice',
+          prompt: 'Nếu thấy bạn bị bắt nạt, em nên làm gì?',
+          text_choices: ['Báo cô giáo', 'Đứng xem'],
+          correct_choice: 'Báo cô giáo',
+          media_url: lightLabUrl('gdcd-bullying'),
+          media_kind: '',
+        },
+        makeLabActivity(secondDraft, 'gdcd-budget', 'Phân bổ tiền vào tiết kiệm và mua sắm sao cho hợp lí.'),
+      ]
+    case 'tin hoc':
+      return [
+        makeLabActivity(firstDraft, 'tinhoc-excel', 'Kéo hàm SUM vào bảng tính để tính tổng tiền.'),
+        makeLabActivity(secondDraft, 'tinhoc-slide', 'Chọn template và hoàn thiện một slide nhanh.'),
+      ]
+    case 'giao duc the chat':
+      return [
+        {
+          ...firstDraft,
+          activity_type: 'multiple_choice',
+          prompt: 'Đâu là tư thế chạy giúp em không bị đau lưng?',
+          audio_text: 'Đâu là tư thế chạy giúp em không bị đau lưng?',
+          text_choices: ['run-correct-card', 'run-wrong-card'],
+          choice_cards: [
+            createPresetChoiceCard('run-correct-card', 'Chạy đúng tư thế', lightLabUrl('run-correct-card'), 'video'),
+            createPresetChoiceCard('run-wrong-card', 'Chạy sai tư thế', lightLabUrl('run-wrong-card'), 'video'),
+          ],
+          correct_choice: 'run-correct-card',
+        },
+        makeLabActivity(secondDraft, 'gdtc-ar', 'Chạm hoặc vung tay để làm vỡ các vòng tròn ảo theo nhịp.'),
+      ]
+    case 'am nhac':
+      return [
+        {
+          ...firstDraft,
+          activity_type: 'listen_choose',
+          prompt: 'Nghe âm thanh rồi chọn đúng nhạc cụ.',
+          audio_url: '/lesson-media/nhe/audio/flute.ogg',
+          audio_lang: 'vi-VN',
+          choice_cards: [
+            createPresetChoiceCard('flute', 'Sáo trúc', '/lesson-media/nhe/photos/bamboo-flute.jpg'),
+            createPresetChoiceCard('dan-bau', 'Đàn bầu', '/lesson-media/nhe/photos/dan-bau.jpg'),
+          ],
+          correct_choice: 'flute',
+        },
+        makeLabActivity(secondDraft, 'amnhac-rhythm', 'Canh đúng nhịp rồi chạm vào trống để gõ phách.'),
+      ]
+    case 'my thuat':
+      return [
+        makeLabActivity(firstDraft, 'mythuat-fill', 'Chọn màu và tô kín vùng tranh theo mảng rõ ràng.'),
+        makeLabActivity(secondDraft, 'mythuat-card', 'Kéo sticker để thiết kế thiệp điện tử.'),
+      ]
+    case 'giao duc dia phuong':
+      return [
+        makeLabActivity(firstDraft, 'dia-phuong-flashcard', 'Chạm để lật flashcard địa danh và đặc sản Đồng Nai.'),
+        makeLabActivity(secondDraft, 'dia-phuong-video', 'Xem video rồi bấm micro trả lời: Đây là đâu?', {
+          answer_mode: 'voice_ai_grade',
+          expected_answer: 'Văn miếu Trấn Biên',
+          accepted_answers: ['Văn miếu Trấn Biên', 'Trấn Biên', 'Văn miếu'],
+        }),
+      ]
+    case 'hoat dong trai nghiem':
+      return [
+        {
+          ...firstDraft,
+          activity_type: 'drag_drop',
+          prompt: 'Kéo đúng đồ dùng vào nhóm cần cho ngày đi học.',
+          drag_items: ['Sách Toán', 'Vở ghi', 'Bút chì', 'Đồ chơi'],
+          drag_targets: ['Cho vào cặp', 'Để ở nhà'],
+        },
+        {
+          ...secondDraft,
+          activity_type: 'drag_drop',
+          prompt: 'Chia tiền vào nhóm tiết kiệm và chi tiêu.',
+          drag_items: ['10 xu', '5 xu', 'Kẹo', 'Heo đất'],
+          drag_targets: ['Tiết kiệm', 'Chi tiêu'],
+        },
+      ]
+    default:
+      return [firstDraft, secondDraft]
+  }
+}
+
+function buildActivityDraftsForLevel(level: LessonLevel, template: {
+  subject_name: string
+  h1: TemplateActivityTemplate
+  h2: TemplateActivityTemplate
+}): ActivityDraft[] {
+  if (level === 'nhe') return buildLightActivityDrafts(template)
+  if (level === 'trung_binh') return buildMediumActivityDrafts(template)
+  return buildHeavyActivityDrafts(template)
+}
+
+function buildBlankActivityDraftsForSubject(subjectName: string): ActivityDraft[] {
+  const common = createCommonActivityDraft()
+  return [
+    {
+      title: `Bài tập ${subjectName || 'môn học'}`,
+      activity_type: 'image_choice',
+      interaction_type: 'selection',
+      objective: '',
+      steps: [],
+      is_mandatory: true,
+      ...common,
+      prompt: '',
+      choice_cards: [createChoiceCardDraft('Lựa chọn 1'), createChoiceCardDraft('Lựa chọn 2')],
+    },
+    {
+      title: `Hoạt động ${subjectName || 'môn học'}`,
+      activity_type: 'watch_answer',
+      interaction_type: 'selection',
+      objective: '',
+      steps: [],
+      is_mandatory: false,
+      ...createCommonActivityDraft(),
+      answer_mode: 'none',
+    },
+  ]
+}
+
 function buildHeavyActivityDrafts(template: {
   subject_name: string
   h1: TemplateActivityTemplate
@@ -870,6 +1376,15 @@ function buildStructuredActivityConfig(activity: ActivityDraft) {
         prompt,
         choices: activity.text_choices.map((item) => item.trim()).filter(Boolean),
         correct: activity.correct_choice.trim(),
+        image_selection_mode: activity.choice_cards.some((card) => card.media_url.trim()) ? 'carousel_find' : undefined,
+        image_cards: activity.choice_cards
+          .filter((card) => card.label.trim() || card.media_url.trim())
+          .map((card) => ({
+            id: card.id,
+            label: card.label.trim() || 'Lựa chọn',
+            media_url: card.media_url.trim(),
+            media_kind: card.media_kind || undefined,
+          })),
         audio_text: activity.audio_text.trim() || undefined,
         audio_url: activity.audio_url.trim() || undefined,
         audio_lang: activity.audio_lang.trim() || undefined,
@@ -1036,7 +1551,6 @@ function getStructuredActivityValidationError(activity: ActivityDraft) {
       return null
     }
     case 'watch_answer':
-      if (!activity.media_url.trim()) return `Hoạt động "${activity.title}" cần có media hoặc video minh họa.`
       return null
     case 'step_by_step': {
       const steps = activity.step_items.map((item) => item.trim()).filter(Boolean)
@@ -1058,15 +1572,173 @@ function mediumActivityTypeDescription(activityType: TeacherActivityType) {
   return TEACHER_ACTIVITY_TYPE_OPTIONS.find((item) => item.value === activityType)?.hint ?? ''
 }
 
+function parseActivityConfigJson(configJson: string | null): Record<string, unknown> {
+  if (!configJson) return {}
+  try {
+    const parsed = JSON.parse(configJson)
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed as Record<string, unknown> : {}
+  } catch {
+    return {}
+  }
+}
+
+function configStringArray(value: unknown, fallback: string[] = ['']) {
+  if (!Array.isArray(value)) return fallback
+  const items = value.map((item) => {
+    if (typeof item === 'string') return item
+    if (item && typeof item === 'object') {
+      const rawItem = item as { title?: unknown; text?: unknown; label?: unknown; description?: unknown }
+      return cleanAIString(rawItem.title) || cleanAIString(rawItem.text) || cleanAIString(rawItem.label) || cleanAIString(rawItem.description)
+    }
+    return String(item ?? '').trim()
+  }).filter(Boolean)
+  return items.length ? items : fallback
+}
+
+function normalizeSavedMediaKind(value: unknown): ActivityMediaKind | '' {
+  const mediaKind = cleanAIString(value)
+  return mediaKind === 'image' || mediaKind === 'video' ? mediaKind : ''
+}
+
+function savedImageCardsToDraft(value: unknown, labelPrefix: string) {
+  if (!Array.isArray(value)) return [createChoiceCardDraft(`${labelPrefix} 1`), createChoiceCardDraft(`${labelPrefix} 2`)]
+  const cards = value
+    .map((item, index) => {
+      if (!item || typeof item !== 'object') return null
+      const rawItem = item as { id?: unknown; label?: unknown; media_url?: unknown; media_kind?: unknown }
+      return {
+        id: cleanAIString(rawItem.id) || makeDraftId('card'),
+        label: cleanAIString(rawItem.label) || `${labelPrefix} ${index + 1}`,
+        media_url: cleanAIString(rawItem.media_url),
+        media_kind: normalizeSavedMediaKind(rawItem.media_kind),
+      } satisfies ChoiceCardDraft
+    })
+    .filter((item): item is ChoiceCardDraft => item !== null)
+  return cards.length ? cards : [createChoiceCardDraft(`${labelPrefix} 1`), createChoiceCardDraft(`${labelPrefix} 2`)]
+}
+
+function savedPairsToDraft(value: unknown) {
+  if (!Array.isArray(value)) return [createMatchingPairDraft(), createMatchingPairDraft()]
+  const pairs = value
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const rawItem = item as { left?: unknown; right?: unknown }
+      const left = cleanAIString(rawItem.left)
+      const right = cleanAIString(rawItem.right)
+      return left || right ? { left, right } : null
+    })
+    .filter((item): item is MatchingPairDraft => item !== null)
+  return pairs.length ? pairs : [createMatchingPairDraft(), createMatchingPairDraft()]
+}
+
+function activityItemToDraft(item: LessonActivityItem): ActivityDraft {
+  const config = parseActivityConfigJson(item.config_json)
+  const activityType = isTeacherActivityType(item.activity_type) ? item.activity_type : 'step_by_step'
+  const base: ActivityDraft = {
+    ...createCommonActivityDraft(),
+    id: item.id,
+    title: item.title || 'Hoạt động',
+    activity_type: activityType,
+    objective: item.instruction_text || '',
+    steps: [],
+    is_mandatory: item.is_required,
+    is_approved: true,
+  }
+
+  const prompt = cleanAIString(config.prompt) || item.instruction_text || item.title || ''
+  const shared = {
+    ...base,
+    prompt,
+    media_url: cleanAIString(config.media_url || config.image_url),
+    media_kind: normalizeSavedMediaKind(config.media_kind),
+    audio_text: cleanAIString(config.audio_text),
+    audio_url: cleanAIString(config.audio_url),
+    audio_lang: cleanAIString(config.audio_lang) || 'vi-VN',
+  }
+
+  switch (activityType) {
+    case 'multiple_choice': {
+      const choices = configStringArray(config.choices, ['', ''])
+      return {
+        ...shared,
+        text_choices: choices,
+        correct_choice: cleanAIString(config.correct) || choices[0] || '',
+      }
+    }
+    case 'image_choice':
+    case 'listen_choose': {
+      const cards = savedImageCardsToDraft(config.image_cards, 'Lựa chọn')
+      return {
+        ...shared,
+        choice_cards: cards,
+        correct_choice: cleanAIString(config.correct) || cards[0]?.id || '',
+      }
+    }
+    case 'image_puzzle':
+      return {
+        ...shared,
+        media_url: cleanAIString(config.image_url || config.media_url),
+        puzzle_rows: Number(config.rows) || 1,
+        puzzle_cols: Number(config.cols) || 2,
+      }
+    case 'matching':
+      return { ...shared, matching_pairs: savedPairsToDraft(config.pairs) }
+    case 'drag_drop':
+      return {
+        ...shared,
+        drag_items: configStringArray(config.items, ['', '']),
+        drag_targets: configStringArray(config.targets, ['', '']),
+        visual_style: cleanAIString(config.visual_style),
+      }
+    case 'watch_answer': {
+      const answerMode = cleanAIString(config.answer_mode)
+      return {
+        ...shared,
+        answer_mode: answerMode === 'text' || answerMode === 'voice_ai_grade' || answerMode === 'none' ? answerMode : 'none',
+        expected_answer: cleanAIString(config.expected_answer),
+        accepted_answers: configStringArray(config.accepted_answers, []),
+      }
+    }
+    case 'step_by_step':
+      return { ...shared, step_items: configStringArray(config.steps, ['']) }
+    case 'aac':
+      return {
+        ...shared,
+        aac_cards: configStringArray(config.cards, ['']),
+        aac_image_cards: savedImageCardsToDraft(config.image_cards, 'Thẻ'),
+      }
+    default:
+      return shared
+  }
+}
+
+function lessonItemToDraft(lesson: LessonItem): LessonDraft {
+  return {
+    subject_id: lesson.subject_id,
+    subject_name: lesson.subject?.name,
+    class_id: lesson.class_id ?? undefined,
+    class_name: lesson.classroom?.name,
+    difficulty_level: isLessonLevel(lesson.primary_level) ? lesson.primary_level : undefined,
+    title: lesson.title,
+    theme: '',
+    description: lesson.description || '',
+    activities: (lesson.activities || [])
+      .slice()
+      .sort((left, right) => left.sort_order - right.sort_order)
+      .map(activityItemToDraft),
+  }
+}
+
 export function LessonsPage() {
   const { accessToken } = useAuthStore()
   const queryClient = useQueryClient()
   const [viewMode, setViewMode] = useState<'list' | 'create'>('list')
+  const [editingLessonId, setEditingLessonId] = useState<number | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
   const [isAutoFilled, setIsAutoFilled] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
-  const [showAssignModal, setShowAssignModal] = useState(false)
-  const [lessonToAssign, setLessonToAssign] = useState<LessonItem | null>(null)
+  const [isLoadingEdit, setIsLoadingEdit] = useState(false)
+  const [assigningLessonId, setAssigningLessonId] = useState<number | null>(null)
 
   const [lessonDraft, setLessonDraft] = useState<LessonDraft>({
     title: '',
@@ -1099,6 +1771,43 @@ export function LessonsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lessons'] }),
   })
 
+  const resetWizardDraft = () => {
+    setCurrentStep(1)
+    setLessonDraft({
+      title: '',
+      theme: '',
+      description: '',
+      difficulty_level: undefined,
+      subject_id: undefined,
+      subject_name: undefined,
+      activities: [],
+    })
+    setIsAutoFilled(false)
+  }
+
+  const startCreateLesson = () => {
+    setEditingLessonId(null)
+    resetWizardDraft()
+    setViewMode('create')
+  }
+
+  const openEditLesson = async (lesson: LessonItem) => {
+    if (!accessToken) return
+    setIsLoadingEdit(true)
+    try {
+      const fullLesson = await fetchLesson(accessToken, lesson.id)
+      setEditingLessonId(fullLesson.id)
+      setLessonDraft(lessonItemToDraft(fullLesson))
+      setCurrentStep(2)
+      setIsAutoFilled(true)
+      setViewMode('create')
+    } catch (error) {
+      alert('Không mở được bài để chỉnh sửa: ' + (error as Error).message)
+    } finally {
+      setIsLoadingEdit(false)
+    }
+  }
+
   const mergedSubjects = useMemo(() => {
     const apiSubjects: Array<{ id: number; name: string; icon?: string }> = (subjectsQuery.data || []).map((subject: SubjectItem) => ({
       id: subject.id,
@@ -1129,28 +1838,43 @@ export function LessonsPage() {
   useEffect(() => {
     if (!lessonDraft.difficulty_level || !lessonDraft.subject_id || isAutoFilled) return
     const templates = SUBJECT_TEMPLATES[lessonDraft.difficulty_level]
-    const template = templates.find((item) => canonicalSubjectLookup(item.subject_name) === canonicalSubjectLookup(lessonDraft.subject_name ?? ''))
-    if (!template) return
+    const template = findSubjectTemplate(templates, lessonDraft.subject_id, lessonDraft.subject_name)
 
-    const activities =
-      lessonDraft.difficulty_level === 'trung_binh'
-        ? buildMediumActivityDrafts(template)
-        : lessonDraft.difficulty_level === 'nang'
-          ? buildHeavyActivityDrafts(template)
-        : [
-            buildLegacyDraftFromTemplate(template.h1, true),
-            buildLegacyDraftFromTemplate(template.h2, false),
-          ]
+    const activities = template
+      ? buildActivityDraftsForLevel(lessonDraft.difficulty_level, template)
+      : buildBlankActivityDraftsForSubject(lessonDraft.subject_name ?? '')
 
     setLessonDraft((current) => ({
       ...current,
-      title: template.title,
-      theme: template.theme,
-      description: template.description,
+      title: template?.title ?? current.title,
+      theme: template?.theme ?? current.theme,
+      description: template?.description ?? current.description,
       activities,
     }))
     setIsAutoFilled(true)
   }, [isAutoFilled, lessonDraft.difficulty_level, lessonDraft.subject_id, lessonDraft.subject_name])
+
+  useEffect(() => {
+    if (!(currentStep === 2 || currentStep === 3)) return
+    if (lessonDraft.activities && lessonDraft.activities.length) return
+    if (!lessonDraft.difficulty_level || !lessonDraft.subject_id) return
+
+    const templates = SUBJECT_TEMPLATES[lessonDraft.difficulty_level]
+    const template = findSubjectTemplate(templates, lessonDraft.subject_id, lessonDraft.subject_name)
+
+    const activities = template
+      ? buildActivityDraftsForLevel(lessonDraft.difficulty_level, template)
+      : buildBlankActivityDraftsForSubject(lessonDraft.subject_name ?? '')
+
+    setLessonDraft((current) => ({
+      ...current,
+      title: current.title || template?.title || '',
+      theme: current.theme || template?.theme || '',
+      description: current.description || template?.description || '',
+      activities,
+    }))
+    setIsAutoFilled(true)
+  }, [currentStep])
 
   const handleLevelSelect = (level: LessonLevel) => {
     setLessonDraft({
@@ -1176,6 +1900,25 @@ export function LessonsPage() {
       activities: [],
     }))
     setIsAutoFilled(false)
+  }
+
+  const handleClassSelect = (id: number, name: string) => {
+    setLessonDraft((current) => ({
+      ...current,
+      class_id: id,
+      class_name: name,
+    }))
+  }
+
+  const approveActivity = (index: number) => {
+    setLessonDraft((current) => {
+      const nextActivities = [...current.activities]
+      if (!nextActivities[index]) return current
+      nextActivities[index] = { ...nextActivities[index], is_approved: true }
+      return { ...current, activities: nextActivities }
+    })
+    if (index === 0) setCurrentStep(3)
+    else setCurrentStep(4)
   }
 
   const handleInfoChange = (field: keyof Pick<LessonDraft, 'title' | 'theme' | 'description'>, value: string) => {
@@ -1256,7 +1999,7 @@ export function LessonsPage() {
   const handleSave = async () => {
     if (!accessToken || !lessonDraft.subject_id || !lessonDraft.difficulty_level || !lessonDraft.title.trim()) return
 
-    if (lessonDraft.difficulty_level === 'trung_binh') {
+    if (isStructuredLessonLevel(lessonDraft.difficulty_level)) {
       const validationError = lessonDraft.activities.map(getStructuredActivityValidationError).find(Boolean)
       if (validationError) {
         alert(validationError)
@@ -1265,14 +2008,18 @@ export function LessonsPage() {
     }
 
     try {
-      const lesson = await createLesson(accessToken, {
+      const lessonPayload = {
         title: lessonDraft.title.trim(),
         subject_id: lessonDraft.subject_id,
+        class_id: lessonDraft.class_id,
         primary_level: lessonDraft.difficulty_level,
         description: lessonDraft.description?.trim() || undefined,
-      })
+      }
+      const lesson = editingLessonId
+        ? await updateLesson(accessToken, editingLessonId, lessonPayload)
+        : await createLesson(accessToken, lessonPayload)
 
-      for (const activity of lessonDraft.activities) {
+      for (const [activityIndex, activity] of lessonDraft.activities.entries()) {
         const activityPayload = isTeacherActivityType(activity.activity_type)
           ? {
               activity_type: activity.activity_type,
@@ -1280,38 +2027,59 @@ export function LessonsPage() {
             }
           : buildLegacyActivityPayload(activity)
 
-        await createLessonActivity(accessToken, lesson.id, {
+        const savedActivityPayload = {
           title: activity.title.trim(),
           activity_type: activityPayload.activity_type,
           instruction_text: activity.objective.trim() || activity.prompt.trim() || activity.title.trim(),
           is_required: activity.is_mandatory,
+          sort_order: activityIndex + 1,
           difficulty_stage: lessonDraft.difficulty_level === 'nhe' ? 1 : lessonDraft.difficulty_level === 'trung_binh' ? 2 : lessonDraft.difficulty_level === 'nang' ? 3 : 1,
           config_json: JSON.stringify(activityPayload.config),
-        })
+        }
+
+        if (editingLessonId && activity.id) {
+          await updateLessonActivity(accessToken, activity.id, savedActivityPayload)
+        } else {
+          await createLessonActivity(accessToken, lesson.id, savedActivityPayload)
+        }
       }
 
-      alert('🎉 Lưu bài học thành công!')
+      alert(editingLessonId ? '✅ Cập nhật bài học thành công!' : '🎉 Lưu bài học thành công!')
       queryClient.invalidateQueries({ queryKey: ['lessons'] })
       setViewMode('list')
-      setCurrentStep(1)
-      setLessonDraft({
-        title: '',
-        theme: '',
-        description: '',
-        difficulty_level: undefined,
-        subject_id: undefined,
-        subject_name: undefined,
-        activities: [],
-      })
-      setIsAutoFilled(false)
+      setEditingLessonId(null)
+      resetWizardDraft()
     } catch (error) {
-      alert('Lỗi lưu bài học: ' + (error as Error).message)
+      alert((editingLessonId ? 'Lỗi cập nhật bài học: ' : 'Lỗi lưu bài học: ') + (error as Error).message)
     }
   }
 
-  const openAssignModal = (lesson: LessonItem) => {
-    setLessonToAssign(lesson)
-    setShowAssignModal(true)
+  const handleQuickAssign = async (lesson: LessonItem) => {
+    if (!accessToken) return
+    const fallbackClass = classesQuery.data?.[0]
+    const classId = lesson.class_id ?? fallbackClass?.id
+
+    if (!classId) {
+      alert('Bạn cần tạo lớp trước khi giao bài.')
+      return
+    }
+
+    setAssigningLessonId(lesson.id)
+    try {
+      await createAssignment(accessToken, {
+        lesson_id: lesson.id,
+        class_id: classId,
+        subject_id: lesson.subject_id,
+        target_type: 'class',
+        required_completion_percent: 80,
+      })
+      alert('Giao bài thành công!')
+      queryClient.invalidateQueries({ queryKey: ['assignments'] })
+    } catch (error) {
+      alert('Lỗi giao bài: ' + (error as Error).message)
+    } finally {
+      setAssigningLessonId(null)
+    }
   }
 
   if (viewMode === 'list') {
@@ -1321,7 +2089,7 @@ export function LessonsPage() {
           <div className={styles.header}>
             <div className={styles.headerTop}>
               <h1>📚 Thư Viện Bài Học Của Tôi</h1>
-              <button className={styles.btnPrimary} onClick={() => setViewMode('create')}>+ Tạo bài mới</button>
+              <button className={styles.btnPrimary} onClick={startCreateLesson}>+ Tạo bài mới</button>
             </div>
             <p style={{ color: '#636e72' }}>Quản lý nội dung bài giảng và giao bài cho các lớp của bạn ngay tại đây.</p>
           </div>
@@ -1343,7 +2111,14 @@ export function LessonsPage() {
                       <span className={styles.badgeSecondary}>{lesson.activity_count} Hoạt động</span>
                     </div>
                     <div className={styles.lessonCardActions}>
-                      <button className={`${styles.btnAction} ${styles.btnAssign}`} onClick={() => openAssignModal(lesson)}>🚀 Giao bài</button>
+                      <button
+                        className={`${styles.btnAction} ${styles.btnAssign}`}
+                        onClick={() => handleQuickAssign(lesson)}
+                        disabled={assigningLessonId === lesson.id}
+                      >
+                        {assigningLessonId === lesson.id ? 'Đang giao...' : 'Giao bài'}
+                      </button>
+                      <button className={`${styles.btnAction} ${styles.btnEdit}`} onClick={() => openEditLesson(lesson)} disabled={isLoadingEdit}>Chỉnh sửa</button>
                       <button className={`${styles.btnAction} ${styles.btnSecondary}`} onClick={() => { if (confirm('Xóa bài học này?')) deleteMutation.mutate(lesson.id) }}>Xóa</button>
                     </div>
                   </div>
@@ -1354,15 +2129,6 @@ export function LessonsPage() {
             </div>
           </div>
         </div>
-
-        {showAssignModal && lessonToAssign ? (
-          <AssignModal
-            lesson={lessonToAssign}
-            classes={classesQuery.data || []}
-            onClose={() => setShowAssignModal(false)}
-            token={accessToken!}
-          />
-        ) : null}
       </RequireAuth>
     )
   }
@@ -1373,11 +2139,21 @@ export function LessonsPage() {
         <div className={styles.header}>
           <div className={styles.headerTop}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <button className={styles.btnSecondary} onClick={() => setViewMode('list')} style={{ padding: '0.5rem 1rem' }}>← Quay lại</button>
-              <h1>🛠️ Xây Dựng Bài Học Thông Minh</h1>
+              <button
+                className={styles.btnSecondary}
+                onClick={() => {
+                  setViewMode('list')
+                  setEditingLessonId(null)
+                  resetWizardDraft()
+                }}
+                style={{ padding: '0.5rem 1rem' }}
+              >
+                ← Quay lại
+              </button>
+              <h1>{editingLessonId ? '✏️ Chỉnh Sửa Bài Học' : '🛠️ Xây Dựng Bài Học Thông Minh'}</h1>
             </div>
             <div className={styles.autoFillBadge}>
-              {isAutoFilled ? '✨ Đã nạp mẫu theo môn đã chọn' : '💡 Chọn môn để nạp khung bài'}
+              {editingLessonId ? 'Đang sửa bài đã lưu' : isAutoFilled ? '✨ Đã nạp mẫu theo môn đã chọn' : '💡 Chọn môn để nạp khung bài'}
             </div>
           </div>
           <div className={styles.stepIndicator}>
@@ -1399,38 +2175,74 @@ export function LessonsPage() {
               <StepOne
                 draft={lessonDraft}
                 subjects={mergedSubjects}
+                classes={classesQuery.data || []}
                 onLevelSelect={handleLevelSelect}
                 onSubSelect={handleSubjectSelect}
+                onClassSelect={handleClassSelect}
                 onInfoChange={handleInfoChange}
               />
             ) : null}
 
-            {(currentStep === 2 || currentStep === 3) && lessonDraft.activities[currentStep - 2] ? (
-              <StepBuilder
-                level={lessonDraft.difficulty_level}
-                activity={lessonDraft.activities[currentStep - 2]}
-                onChange={(nextActivity) => updateActivityDraft(currentStep - 2, () => nextActivity)}
-                onLegacyStepChange={(stepIndex, field, value) => handleLegacyStepChange(currentStep - 2, stepIndex, field, value)}
-                onLegacyUpload={(stepIndex, file) => handleLegacyStepUpload(currentStep - 2, stepIndex, file)}
-                onStructuredMediaUpload={(file) => handleStructuredMediaUpload(currentStep - 2, file)}
-                onStructuredAudioUpload={(file) => handleStructuredAudioUpload(currentStep - 2, file)}
-                onChoiceCardUpload={(field, cardIndex, file) => handleChoiceCardUpload(currentStep - 2, field, cardIndex, file)}
-                isH1={currentStep === 2}
-              />
+            {(currentStep === 2 || currentStep === 3) ? (
+              lessonDraft.activities[currentStep - 2] ? (
+                <StepBuilder
+                  level={lessonDraft.difficulty_level}
+                  activity={lessonDraft.activities[currentStep - 2]}
+                  onChange={(nextActivity) => updateActivityDraft(currentStep - 2, () => nextActivity)}
+                  onLegacyStepChange={(stepIndex, field, value) => handleLegacyStepChange(currentStep - 2, stepIndex, field, value)}
+                  onLegacyUpload={(stepIndex, file) => handleLegacyStepUpload(currentStep - 2, stepIndex, file)}
+                  onStructuredMediaUpload={(file) => handleStructuredMediaUpload(currentStep - 2, file)}
+                  onStructuredAudioUpload={(file) => handleStructuredAudioUpload(currentStep - 2, file)}
+                  onChoiceCardUpload={(field, cardIndex, file) => handleChoiceCardUpload(currentStep - 2, field, cardIndex, file)}
+                  isH1={currentStep === 2}
+                  token={accessToken!}
+                  lessonTitle={lessonDraft.title}
+                  subjectName={lessonDraft.subject_name}
+                  onApprove={() => approveActivity(currentStep - 2)}
+                />
+              ) : (
+                <div className={styles.stepContent}>
+                  <div className={styles.sectionHeader}>
+                    <h2>✨ Hoạt động trống</h2>
+                    <p>Chưa có hoạt động cho bước này. Vui lòng quay lại Bước 1 hoàn tất: chọn lớp, chọn mức độ, chọn môn và điền tiêu đề bài học để hệ thống nạp khung hoạt động tự động.</p>
+                  </div>
+                </div>
+              )
             ) : null}
 
-            {currentStep === 4 ? <StepReview draft={lessonDraft} /> : null}
+            {currentStep === 4 ? <StepReview draft={lessonDraft} onApproveActivity={approveActivity} /> : null}
           </div>
         </div>
 
         <div className={styles.footer}>
-          <button type="button" className={styles.btnSecondary} onClick={() => setCurrentStep((prev) => prev - 1)} disabled={currentStep === 1}>← Quay lại</button>
+          <button type="button" className={styles.btnSecondary} onClick={() => setCurrentStep((prev) => prev - 1)} disabled={editingLessonId ? currentStep <= 2 : currentStep === 1}>← Quay lại</button>
           <div className={styles.spacer}></div>
           {currentStep < 4 ? (
-            <button type="button" className={styles.btnPrimary} onClick={() => setCurrentStep((prev) => prev + 1)} disabled={!lessonDraft.subject_id}>Tiếp theo →</button>
+            (() => {
+              const canProceed = () => {
+                if (currentStep === 1) {
+                  return Boolean(lessonDraft.class_id && lessonDraft.difficulty_level && lessonDraft.subject_id && lessonDraft.title && lessonDraft.title.trim())
+                }
+
+                if (currentStep === 2 || currentStep === 3) {
+                  const activity = lessonDraft.activities[currentStep - 2]
+                  if (!activity) return false
+                  if (isStructuredLessonLevel(lessonDraft.difficulty_level)) {
+                    return getStructuredActivityValidationError(activity) === null
+                  }
+                  return Boolean(activity.title && activity.title.trim())
+                }
+
+                return true
+              }
+
+              return (
+                <button type="button" className={styles.btnPrimary} onClick={() => setCurrentStep((prev) => prev + 1)} disabled={!canProceed()}>Tiếp theo →</button>
+              )
+            })()
           ) : (
             <button type="button" className={styles.btnSuccess} onClick={handleSave} disabled={isUploading}>
-              {isUploading ? '⌛ Đang tải file...' : '🚀 Hoàn thành & Lưu bài học'}
+              {isUploading ? '⌛ Đang tải file...' : editingLessonId ? '✅ Cập nhật bài học' : '🚀 Hoàn thành & Lưu bài học'}
             </button>
           )}
         </div>
@@ -1439,7 +2251,7 @@ export function LessonsPage() {
   )
 }
 
-function AssignModal({ lesson, classes, onClose, token }: { lesson: LessonItem; classes: ClassItem[]; onClose: () => void; token: string }) {
+export function AssignModal({ lesson, classes, onClose, token }: { lesson: LessonItem; classes: ClassItem[]; onClose: () => void; token: string }) {
   const [classId, setClassId] = useState('')
   const [percent, setPercent] = useState('80')
   const [dueAt, setDueAt] = useState('')
@@ -1503,14 +2315,18 @@ function AssignModal({ lesson, classes, onClose, token }: { lesson: LessonItem; 
 function StepOne({
   draft,
   subjects,
+  classes,
   onLevelSelect,
   onSubSelect,
+  onClassSelect,
   onInfoChange,
 }: {
   draft: LessonDraft
   subjects: Array<{ id: number; name: string; icon: string }>
+  classes: Array<{ id: number; name: string }>
   onLevelSelect: (level: LessonLevel) => void
   onSubSelect: (id: number, name: string) => void
+  onClassSelect: (id: number, name: string) => void
   onInfoChange: (field: keyof Pick<LessonDraft, 'title' | 'theme' | 'description'>, value: string) => void
 }) {
   return (
@@ -1518,7 +2334,7 @@ function StepOne({
       <div className={styles.sectionHeader}>
         <h2>🎯 Thiết lập cơ bản</h2>
         <p>
-          Chọn mức độ và môn học để hệ thống nạp khung bài. Riêng <strong>mức trung bình</strong> sẽ có form tạo câu hỏi theo hình thức như trong
+          Chọn mức độ và môn học để hệ thống nạp khung bài. <strong>Mức nhẹ</strong> và <strong>mức trung bình</strong> sẽ có form tạo câu hỏi theo hình thức như trong
           <code style={{ marginLeft: '0.35rem' }}>kehoach.html</code>.
         </p>
       </div>
@@ -1538,6 +2354,23 @@ function StepOne({
               <span>{level.label}</span>
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className={styles.formSection}>
+        <label className={styles.label}>Chọn lớp</label>
+        <div className={styles.subjectGrid}>
+          {classes && classes.length ? classes.map((cls) => (
+            <button
+              key={`class-${cls.id}`}
+              type="button"
+              className={`${styles.subjectCard} ${draft.class_id === cls.id ? styles.selected : ''}`}
+              onClick={() => onClassSelect(cls.id, cls.name)}
+            >
+              <span className={styles.subjectIcon}>🏫</span>
+              <span>{cls.name}</span>
+            </button>
+          )) : <p>Đang tải danh sách lớp...</p>}
         </div>
       </div>
 
@@ -1594,6 +2427,10 @@ function StepBuilder({
   onStructuredAudioUpload,
   onChoiceCardUpload,
   isH1,
+  token,
+  lessonTitle,
+  subjectName,
+  onApprove,
 }: {
   level?: LessonLevel
   activity: ActivityDraft
@@ -1604,8 +2441,12 @@ function StepBuilder({
   onStructuredAudioUpload: (file: File) => void
   onChoiceCardUpload: (field: 'choice_cards' | 'aac_image_cards', cardIndex: number, file: File) => void
   isH1: boolean
+  token: string
+  lessonTitle: string
+  subjectName?: string
+  onApprove: () => void
 }) {
-  if (level === 'trung_binh') {
+  if (isStructuredLessonLevel(level)) {
     return (
       <MediumActivityBuilder
         activity={activity}
@@ -1614,7 +2455,11 @@ function StepBuilder({
         onStructuredAudioUpload={onStructuredAudioUpload}
         onChoiceCardUpload={onChoiceCardUpload}
         isH1={isH1}
+        token={token}
+        lessonTitle={lessonTitle}
+        subjectName={subjectName}
         level={level}
+        onApprove={onApprove}
       />
     )
   }
@@ -1716,7 +2561,11 @@ function MediumActivityBuilder({
   onStructuredAudioUpload,
   onChoiceCardUpload,
   isH1,
+  token,
+  lessonTitle,
+  subjectName,
   level,
+  onApprove,
 }: {
   activity: ActivityDraft
   onChange: (activity: ActivityDraft) => void
@@ -1724,11 +2573,20 @@ function MediumActivityBuilder({
   onStructuredAudioUpload: (file: File) => void
   onChoiceCardUpload: (field: 'choice_cards' | 'aac_image_cards', cardIndex: number, file: File) => void
   isH1: boolean
+  token: string
+  lessonTitle: string
+  subjectName?: string
   level?: LessonLevel
+  onApprove: () => void
 }) {
   const activityType = isTeacherActivityType(activity.activity_type) ? activity.activity_type : 'image_choice'
-  const showSharedMedia = activityType === 'multiple_choice' || activityType === 'image_choice' || activityType === 'image_puzzle' || activityType === 'listen_choose' || activityType === 'watch_answer' || activityType === 'step_by_step'
+  const showSharedMedia = activityType === 'image_puzzle' || Boolean(activity.media_url.trim())
   const showPromptAudio = activityType === 'multiple_choice' || activityType === 'image_choice' || activityType === 'listen_choose'
+  const [isAIOpen, setIsAIOpen] = useState(false)
+  const [aiSuggestion, setAISuggestion] = useState<LessonQuestionDraftSuggestion | null>(null)
+  const [aiError, setAIError] = useState('')
+  const [isAILoading, setIsAILoading] = useState(false)
+  const levelLabel = level === 'nhe' ? 'mức nhẹ' : 'mức trung bình'
 
   const updateField = <K extends keyof ActivityDraft>(field: K, value: ActivityDraft[K]) => {
     onChange({ ...activity, [field]: value })
@@ -1793,13 +2651,49 @@ function MediumActivityBuilder({
     updateChoiceCards(field, nextCards)
   }
 
+  const requestAISuggestion = async () => {
+    setIsAIOpen(true)
+    setAIError('')
+    setIsAILoading(true)
+    try {
+      const response = await generateLessonQuestionDraft(token, {
+        subject_name: subjectName,
+        lesson_title: lessonTitle,
+        difficulty_level: level,
+        activity_slot: isH1 ? 'H1' : 'H2',
+        activity_title: activity.title,
+        activity_type: activityType,
+        current_prompt: activity.prompt,
+        objective: activity.objective,
+      })
+      setAISuggestion(response.suggestion)
+    } catch (error) {
+      const message = (error as Error).message || ''
+      setAIError(
+        message.toLowerCase().includes('high demand')
+          ? 'Gemini đang quá tải tạm thời. Bạn bấm tạo lại sau vài giây, hoặc dùng bản nháp hiện có để sửa tiếp.'
+          : message.includes('Unterminated string') || message.includes('JSON')
+          ? 'AI trả nội dung chưa đúng định dạng. Bạn bấm tạo lại giúp mình, hoặc thử đổi loại câu hỏi.'
+          : message || 'AI chưa tạo được gợi ý.',
+      )
+    } finally {
+      setIsAILoading(false)
+    }
+  }
+
+  const applyAISuggestionToPreview = () => {
+    if (!aiSuggestion) return
+    onChange(applyLessonQuestionSuggestion(activity, aiSuggestion))
+    setAIError('')
+  }
+
   return (
     <div className={`${styles.stepContent} ${styles.mediumStepContent}`}>
       <div className={styles.mediumBuilderLayout}>
         <div className={styles.mediumFormColumn}>
           <div className={styles.sectionHeader}>
             <span className={isH1 ? styles.badge : styles.badgeSecondary}>{isH1 ? 'H1 - BÀI TẬP' : 'H2 - HOẠT ĐỘNG'}</span>
-            <h2>{isH1 ? '🧩 Form câu hỏi mức trung bình' : '🧭 Form hoạt động mức trung bình'}</h2>
+            <h2>{isH1 ? `Form câu hỏi ${levelLabel}` : `Form hoạt động ${levelLabel}`}</h2>
             <p>
               Giáo viên đang nhập theo <strong>hình thức câu hỏi</strong> để hệ thống lưu đúng cấu trúc mà màn học sinh đã render được sẵn.
             </p>
@@ -1812,15 +2706,10 @@ function MediumActivityBuilder({
             </div>
             <div className={styles.formSection}>
               <label className={styles.label}>Loại câu hỏi</label>
-              <select
-                className={styles.select}
-                value={activityType}
-                onChange={(event) => updateField('activity_type', event.target.value as TeacherActivityType)}
-              >
-                {TEACHER_ACTIVITY_TYPE_OPTIONS.map((item) => (
-                  <option key={item.value} value={item.value}>{item.label}</option>
-                ))}
-              </select>
+              <div className={styles.lockedTypeBox}>
+                <strong>{TEACHER_ACTIVITY_TYPE_LABEL_MAP[activityType]}</strong>
+                <span>Form này đã khóa theo môn, mức độ và H{isH1 ? '1' : '2'}.</span>
+              </div>
               <p className={styles.helperText}>{mediumActivityTypeDescription(activityType)}</p>
             </div>
           </div>
@@ -1937,7 +2826,7 @@ function MediumActivityBuilder({
             />
           ) : null}
 
-          {(activityType === 'image_choice' || activityType === 'listen_choose') ? (
+          {(activityType === 'image_choice' || activityType === 'listen_choose' || (activityType === 'multiple_choice' && activity.choice_cards.some((card) => card.media_url.trim()))) ? (
             <ChoiceCardEditor
               label="Các lựa chọn bằng ảnh"
               cards={activity.choice_cards}
@@ -2104,7 +2993,82 @@ function MediumActivityBuilder({
             level={level}
             title={isH1 ? 'Preview hoạt động H1' : 'Preview hoạt động H2'}
             description="Khung này bám theo giao diện học sinh thật. Audio chỉ phát khi bấm nghe lại để tránh làm phiền lúc giáo viên nhập liệu."
+            extraActions={
+              <button type="button" className={styles.aiOpenButton} onClick={() => setIsAIOpen((current) => !current)}>
+                AI
+              </button>
+            }
+            onApprove={onApprove}
           />
+          {isAIOpen ? (
+            <div className={styles.aiAssistantPanel}>
+              <div className={styles.aiAssistantHeader}>
+                <div>
+                  <span className={styles.previewEyebrow}>AI trợ lý</span>
+                  <h3>{isH1 ? 'Gợi ý câu hỏi H1' : 'Gợi ý hoạt động H2'}</h3>
+                  <p>AI dùng đúng loại câu hỏi đang chọn, đúng môn và bài học hiện tại.</p>
+                </div>
+                <button type="button" className={styles.previewCloseButton} onClick={() => setIsAIOpen(false)}>Đóng</button>
+              </div>
+              <div className={styles.aiChoiceGrid}>
+                <button type="button" className={styles.aiPrimaryButton} onClick={requestAISuggestion} disabled={isAILoading}>
+                  {isAILoading ? 'Đang tạo...' : '1. Tạo cho tôi câu hỏi đó'}
+                </button>
+                <button type="button" className={styles.aiApplyButton} onClick={applyAISuggestionToPreview} disabled={!aiSuggestion || isAILoading}>
+                  2. Add câu hỏi vào Preview
+                </button>
+              </div>
+              {aiError ? <p className={styles.aiErrorText}>{aiError}</p> : null}
+              {aiSuggestion ? (
+                <div className={styles.aiSuggestionBox}>
+                  <div className={styles.aiSuggestionMeta}>
+                    <span>{TEACHER_ACTIVITY_TYPE_LABEL_MAP[(isTeacherActivityType(cleanAIString(aiSuggestion.activity_type)) ? cleanAIString(aiSuggestion.activity_type) : activityType) as TeacherActivityType]}</span>
+                    {aiSuggestion.media_sources?.length ? <span>Đã tìm media: {aiSuggestion.media_sources.length}</span> : null}
+                  </div>
+                  <h4>{aiSuggestion.title || activity.title}</h4>
+                  <p>{aiSuggestion.teacher_note || aiSuggestion.objective || 'AI đã tạo một bản nháp phù hợp để giáo viên xem thử.'}</p>
+                  {getAISuggestionCards(aiSuggestion).some((card) => card.media_url) ? (
+                    <div className={styles.aiCardPreviewGrid}>
+                      {getAISuggestionCards(aiSuggestion).filter((card) => card.media_url).slice(0, 4).map((card) => (
+                        <figure key={`${card.id}-${card.media_url}`} className={styles.aiCardPreview}>
+                          <img src={card.media_url} alt={card.label} />
+                          <figcaption>{card.label}</figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  ) : null}
+                  <div className={styles.aiPreviewSnippet}>
+                    <strong>Câu hỏi</strong>
+                    <span>{aiSuggestion.prompt || activity.prompt}</span>
+                  </div>
+                  {aiSuggestion.example ? (
+                    <div className={styles.aiPreviewSnippet}>
+                      <strong>Ví dụ</strong>
+                      <span>{aiSuggestion.example}</span>
+                    </div>
+                  ) : null}
+                  {aiSuggestion.correct_choice ? (
+                    <div className={styles.aiPreviewSnippet}>
+                      <strong>Đáp án</strong>
+                      <span>{getAISuggestionAnswerText(aiSuggestion)}</span>
+                    </div>
+                  ) : null}
+                  {(aiSuggestion.media_url || aiSuggestion.media_sources?.[0]?.media_url) ? (
+                    <a
+                      className={styles.aiMediaLink}
+                      href={aiSuggestion.media_url || aiSuggestion.media_sources?.[0]?.media_url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Mở media AI tìm được
+                    </a>
+                  ) : null}
+                </div>
+              ) : (
+                <div className={styles.aiEmptyBox}>Chọn loại câu hỏi trước, rồi bấm lựa chọn 1 để AI tư vấn nội dung và đáp án.</div>
+              )}
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
@@ -2117,12 +3081,16 @@ function StudentActivityPreview({
   level,
   title,
   description,
+  extraActions,
+  onApprove,
 }: {
   activity: ActivityDraft
   sortOrder: number
   level?: LessonLevel
   title?: string
   description?: string
+  extraActions?: ReactNode
+  onApprove?: () => void
 }) {
   const previewActivity = useMemo(() => buildPreviewActivityItem(activity, sortOrder, level), [activity, sortOrder, level])
   const previewKey = `${previewActivity.activity_type}:${previewActivity.title}:${previewActivity.config_json ?? ''}`
@@ -2133,6 +3101,7 @@ function StudentActivityPreview({
   const [textAnswers, setTextAnswers] = useState<Record<number, string>>({})
   const [aacSelections, setAacSelections] = useState<Record<number, string>>({})
   const [previewVersion, setPreviewVersion] = useState(0)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
   const resetPreviewAnswers = () => {
     setChoiceAnswers({})
@@ -2147,53 +3116,88 @@ function StudentActivityPreview({
     resetPreviewAnswers()
   }, [previewKey])
 
+  useEffect(() => {
+    if (!isPreviewOpen) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isPreviewOpen])
+
   return (
-    <aside className={styles.previewPanel}>
-      <div className={styles.previewHeader}>
-        <div>
-          <span className={styles.previewEyebrow}>Xem như học sinh</span>
-          <h3>{title || 'Preview bài học'}</h3>
-          <p>{description || 'Kiểm tra nhanh bố cục, audio và cách tương tác trước khi lưu.'}</p>
-        </div>
-        <button
-          type="button"
-          className={styles.previewResetButton}
-          onClick={() => {
-            resetPreviewAnswers()
-            setPreviewVersion((current) => current + 1)
-          }}
-        >
-          Làm lại
+    <aside className={styles.previewLauncherPanel}>
+      <div>
+        <span className={styles.previewEyebrow}>Xem như học sinh</span>
+        <h3>{title || 'Preview bài học'}</h3>
+        <p>{description || 'Kiểm tra nhanh bố cục, audio và cách tương tác trước khi lưu.'}</p>
+      </div>
+      <div className={styles.previewLauncherActions}>
+        {extraActions}
+        <button type="button" className={styles.previewOpenButton} onClick={() => setIsPreviewOpen(true)}>
+          Preview
         </button>
       </div>
-      <div className={styles.previewCanvas}>
-        <ActivityCard
-          key={`${previewKey}-${previewVersion}`}
-          activity={previewActivity}
-          answers={{
-            choiceAnswers,
-            matchingAnswers,
-            dragAnswers,
-            stepAnswers,
-            textAnswers,
-            aacSelections,
-          }}
-          setAnswers={{
-            setChoiceAnswers,
-            setMatchingAnswers,
-            setDragAnswers,
-            setStepAnswers,
-            setTextAnswers,
-            setAacSelections,
-          }}
-          presentationMode="immersive_square"
-        />
-      </div>
+
+      {isPreviewOpen ? (
+        <div className={styles.previewPageOverlay} role="dialog" aria-modal="true" onClick={() => setIsPreviewOpen(false)}>
+          <section className={styles.previewPage} onClick={(event) => event.stopPropagation()}>
+            <div className={styles.previewHeader}>
+              <div>
+                <span className={styles.previewEyebrow}>Xem như học sinh</span>
+                <h3>{title || 'Preview bài học'}</h3>
+                <p>{description || 'Kiểm tra nhanh bố cục, audio và cách tương tác trước khi lưu.'}</p>
+              </div>
+              <div className={styles.previewPageActions}>
+                {onApprove ? (
+                  <button type="button" className={styles.btnSuccess} onClick={onApprove}>Duyệt</button>
+                ) : null}
+                <button
+                  type="button"
+                  className={styles.previewResetButton}
+                  onClick={() => {
+                    resetPreviewAnswers()
+                    setPreviewVersion((current) => current + 1)
+                  }}
+                >
+                  Làm lại
+                </button>
+                <button type="button" className={styles.previewCloseButton} onClick={() => setIsPreviewOpen(false)}>
+                  Đóng
+                </button>
+              </div>
+            </div>
+            <div className={styles.previewCanvas}>
+              <ActivityCard
+                key={`${previewKey}-${previewVersion}`}
+                activity={previewActivity}
+                answers={{
+                  choiceAnswers,
+                  matchingAnswers,
+                  dragAnswers,
+                  stepAnswers,
+                  textAnswers,
+                  aacSelections,
+                }}
+                setAnswers={{
+                  setChoiceAnswers,
+                  setMatchingAnswers,
+                  setDragAnswers,
+                  setStepAnswers,
+                  setTextAnswers,
+                  setAacSelections,
+                }}
+                presentationMode="immersive_square"
+              />
+            </div>
+          </section>
+        </div>
+      ) : null}
     </aside>
   )
 }
 
-function StepReview({ draft }: { draft: LessonDraft }) {
+function StepReview({ draft, onApproveActivity }: { draft: LessonDraft; onApproveActivity: (index: number) => void }) {
   return (
     <div className={styles.stepContent}>
       <div className={styles.sectionHeader}>
@@ -2220,7 +3224,7 @@ function StepReview({ draft }: { draft: LessonDraft }) {
           ))}
         </div>
       </div>
-      {draft.difficulty_level === 'trung_binh' ? (
+      {isStructuredLessonLevel(draft.difficulty_level) ? (
         <div className={styles.reviewPreviewGrid}>
           {draft.activities.map((activity, index) => (
             <StudentActivityPreview
@@ -2228,7 +3232,8 @@ function StepReview({ draft }: { draft: LessonDraft }) {
               activity={activity}
               sortOrder={index + 1}
               level={draft.difficulty_level}
-              title={index === 0 ? 'Preview H1 trước khi lưu' : 'Preview H2 trước khi lưu'}
+                  title={index === 0 ? 'Preview H1 trước khi lưu' : 'Preview H2 trước khi lưu'}
+                  onApprove={() => onApproveActivity(index)}
               description="Đây là mô phỏng cuối cùng để giáo viên kiểm tra câu hỏi, media và cách tương tác."
             />
           ))}

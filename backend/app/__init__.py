@@ -59,6 +59,12 @@ def _apply_schema_patches(app: Flask) -> None:
                 with db.engine.begin() as connection:
                     connection.execute(text("ALTER TABLE classes ADD COLUMN background_image_url VARCHAR(1000)"))
 
+        if 'lessons' in table_names:
+            lesson_columns = {column['name'] for column in inspector.get_columns('lessons')}
+            if 'class_id' not in lesson_columns:
+                with db.engine.begin() as connection:
+                    connection.execute(text("ALTER TABLE lessons ADD COLUMN class_id INTEGER"))
+
 
 def _register_request_hooks(app: Flask) -> None:
     @app.before_request

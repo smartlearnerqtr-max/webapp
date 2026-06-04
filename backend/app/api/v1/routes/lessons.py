@@ -4,7 +4,7 @@ from flask import request
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from ....extensions import db
-from ....models import Lesson, LessonActivity, Subject, User
+from ....models import Classroom, Lesson, LessonActivity, Subject, User
 from ....services.logger import log_server_event
 from ....utils.responses import error_response, success_response
 from .. import api_v1
@@ -105,9 +105,17 @@ def create_lesson():
     if not subject:
         return error_response('Không tìm thấy môn học', 'SUBJECT_NOT_FOUND', 404)
 
+    class_id = payload.get('class_id')
+    classroom = None
+    if class_id:
+        classroom = Classroom.query.get(int(class_id))
+        if not classroom or classroom.teacher_id != user.teacher_profile.id:
+            return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
+
     lesson = Lesson(
         created_by_teacher_id=user.teacher_profile.id,
         subject_id=subject.id,
+        class_id=classroom.id if classroom else None,
         title=title,
         description=payload.get('description'),
         primary_level=primary_level,
@@ -155,6 +163,15 @@ def update_lesson(lesson_id: int):
         if not subject:
             return error_response('Không tìm thấy môn học', 'SUBJECT_NOT_FOUND', 404)
         lesson.subject_id = subject.id
+    if 'class_id' in payload:
+        class_id = payload.get('class_id')
+        if class_id:
+            classroom = Classroom.query.get(int(class_id))
+            if not classroom or classroom.teacher_id != user.teacher_profile.id:
+                return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
+            lesson.class_id = classroom.id
+        else:
+            lesson.class_id = None
     db.session.commit()
     return success_response(lesson.to_dict(), 'Cập nhật bài học thành công')
 

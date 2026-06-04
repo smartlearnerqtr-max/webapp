@@ -452,6 +452,38 @@
     const params = new URLSearchParams(window.location.search);
     const activity = params.get('activity') || 'festival-card';
 
+    function getPositiveIntParam(name, fallback) {
+      const value = Number.parseInt(params.get(name) || '', 10);
+      return Number.isFinite(value) && value > 0 ? value : fallback;
+    }
+
+    function getSafeLabelParam(name, fallback) {
+      const value = (params.get(name) || '').trim();
+      return value || fallback;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function dynamicLessonPromptPanel(defaultTitle, defaultPrompt) {
+      const title = getSafeLabelParam('title', '');
+      const prompt = getSafeLabelParam('prompt', '');
+      if (!title && !prompt) return '';
+      return `
+        <div style="border:1px solid var(--line);border-radius:18px;padding:14px;background:#fffdf7;margin-bottom:12px;">
+          <p class="slot-label">De AI</p>
+          <h2 style="margin-top:6px;">${escapeHtml(title || defaultTitle)}</h2>
+          <p class="hint" style="margin-top:8px;">${escapeHtml(prompt || defaultPrompt)}</p>
+        </div>
+      `;
+    }
+
     function setHTML(html) {
       app.innerHTML = html;
       requestAnimationFrame(reportHeight);
@@ -479,6 +511,7 @@
             <h1>${title}</h1>
           </div>
         </div>
+        ${dynamicLessonPromptPanel(title, subtitle)}
         ${body}
       `;
     }
@@ -677,8 +710,28 @@
       let selectedOperation = '';
       let answer = '';
       let checked = false;
-      const correctOperation = 'x';
-      const correctAnswer = '12';
+      const left = getPositiveIntParam('left', 3);
+      const right = getPositiveIntParam('right', 4);
+      const rawOperation = params.get('operation') || 'x';
+      const correctOperation = ['+', '-', 'x', ':'].includes(rawOperation) ? rawOperation : 'x';
+      const groupLabel = escapeHtml(getSafeLabelParam('groupLabel', 'tui'));
+      const itemLabel = escapeHtml(getSafeLabelParam('itemLabel', 'vien keo'));
+      const correctAnswerValue = correctOperation === '+'
+        ? left + right
+        : correctOperation === '-'
+        ? left - right
+        : correctOperation === ':'
+        ? Math.floor(left / right)
+        : left * right;
+      const correctAnswer = String(correctAnswerValue);
+      const operationText = correctOperation === 'x' ? 'nhan' : correctOperation === ':' ? 'chia' : correctOperation === '+' ? 'cong' : 'tru';
+      const problemText = correctOperation === '+'
+        ? `C&oacute; <mark style="background:#fff3b5;padding:0 6px;border-radius:8px;">${left} ${itemLabel}</mark>, th&ecirc;m <mark style="background:#daf4ed;padding:0 6px;border-radius:8px;">${right} ${itemLabel}</mark>. H&#7887;i c&oacute; t&#7845;t c&#7843; bao nhi&ecirc;u ${itemLabel}?`
+        : correctOperation === '-'
+        ? `C&oacute; <mark style="background:#fff3b5;padding:0 6px;border-radius:8px;">${left} ${itemLabel}</mark>, b&#7899;t &#273;i <mark style="background:#daf4ed;padding:0 6px;border-radius:8px;">${right} ${itemLabel}</mark>. C&ograve;n l&#7841;i bao nhi&ecirc;u ${itemLabel}?`
+        : correctOperation === ':'
+        ? `C&oacute; <mark style="background:#fff3b5;padding:0 6px;border-radius:8px;">${left} ${itemLabel}</mark> chia &#273;&#7873;u v&agrave;o <mark style="background:#daf4ed;padding:0 6px;border-radius:8px;">${right} ${groupLabel}</mark>. M&#7895;i ${groupLabel} c&oacute; bao nhi&ecirc;u ${itemLabel}?`
+        : `C&oacute; <mark style="background:#fff3b5;padding:0 6px;border-radius:8px;">${left} ${groupLabel}</mark>, m&#7895;i ${groupLabel} c&oacute; <mark style="background:#daf4ed;padding:0 6px;border-radius:8px;">${right} ${itemLabel}</mark>. H&#7887;i c&oacute; t&#7845;t c&#7843; bao nhi&ecirc;u ${itemLabel}?`;
       function redraw() {
         const isOperationCorrect = selectedOperation === correctOperation;
         const isAnswerCorrect = answer.trim() === correctAnswer;
@@ -707,6 +760,16 @@
             </p>
           </div>
         `, 'Giảm tải tư duy'));
+        const dynamicProblemNode = app.querySelector('.config-card h2');
+        if (dynamicProblemNode) dynamicProblemNode.innerHTML = problemText;
+        const dynamicFeedbackNode = app.querySelector('.grid > p.success, .grid > p.warn, .grid > p.hint');
+        if (dynamicFeedbackNode) {
+          dynamicFeedbackNode.innerHTML = isDone
+            ? `&#272;&uacute;ng r&#7891;i. Ph&eacute;p t&iacute;nh l&agrave; ${left} ${correctOperation} ${right} = ${correctAnswer}.`
+            : checked
+            ? `Th&#7917; l&#7841;i nh&eacute;. G&#7907;i &yacute;: b&agrave;i n&agrave;y c&#7847;n ph&eacute;p ${operationText}.`
+            : 'B&#432;&#7899;c 1: &#273;&#7885;c t&#7915; kh&oacute;a. B&#432;&#7899;c 2: ch&#7885;n ph&eacute;p t&iacute;nh. B&#432;&#7899;c 3: &#273;i&#7873;n k&#7871;t qu&#7843;.';
+        }
         app.querySelectorAll('[data-op]').forEach((node) => {
           node.addEventListener('click', () => {
             selectedOperation = node.getAttribute('data-op');

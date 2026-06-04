@@ -26,6 +26,7 @@ class Lesson(TimestampMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     created_by_teacher_id: Mapped[int] = mapped_column(ForeignKey("teacher_profiles.id"), nullable=False, index=True)
     subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"), nullable=False, index=True)
+    class_id: Mapped[int | None] = mapped_column(ForeignKey("classes.id"), nullable=True, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     primary_level: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
@@ -35,6 +36,7 @@ class Lesson(TimestampMixin, db.Model):
     is_archived: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     subject = relationship("Subject")
+    classroom = relationship("Classroom")
     activities = relationship("LessonActivity", back_populates="lesson", cascade="all, delete-orphan")
     assignments = relationship("LessonAssignment", back_populates="lesson", cascade="all, delete-orphan")
 
@@ -43,6 +45,7 @@ class Lesson(TimestampMixin, db.Model):
             "id": self.id,
             "created_by_teacher_id": self.created_by_teacher_id,
             "subject_id": self.subject_id,
+            "class_id": self.class_id,
             "title": self.title,
             "description": self.description,
             "primary_level": self.primary_level,
@@ -52,6 +55,7 @@ class Lesson(TimestampMixin, db.Model):
             "is_archived": self.is_archived,
             "activity_count": len(self.activities),
             "subject": self.subject.to_dict() if self.subject else None,
+            "classroom": self.classroom.to_dict() if self.classroom else None,
             "created_at": _serialize_datetime(self.created_at),
             "updated_at": _serialize_datetime(self.updated_at),
         }

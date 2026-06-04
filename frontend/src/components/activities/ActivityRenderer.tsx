@@ -366,12 +366,12 @@ function normalizeTikTokEmbedUrl(rawUrl: string) {
 }
 
 function inferMediaKind(mediaUrl: string, mediaKind: string | null) {
-  if (mediaKind === 'image' || mediaKind === 'video') return mediaKind
   const normalizedUrl = mediaUrl.trim().toLowerCase()
-  if (/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/.test(normalizedUrl)) return 'image'
-  if (/\.(mp4|webm|ogg|mov)(\?.*)?$/.test(normalizedUrl)) return 'video'
   if (/\.(html)(\?.*)?$/.test(normalizedUrl)) return 'embed'
   if (normalizeYouTubeEmbedUrl(mediaUrl) || normalizeGoogleDriveEmbedUrl(mediaUrl) || normalizeTikTokEmbedUrl(mediaUrl)) return 'embed'
+  if (mediaKind === 'image' || mediaKind === 'video') return mediaKind
+  if (/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/.test(normalizedUrl)) return 'image'
+  if (/\.(mp4|webm|ogg|mov)(\?.*)?$/.test(normalizedUrl)) return 'video'
   return 'external'
 }
 

@@ -65,6 +65,46 @@ def _parse_gemini_api_keys() -> list[str]:
     return merged_keys
 
 
+def _parse_pexels_api_keys() -> list[str]:
+    configured_keys = _parse_env_list(os.getenv('PEXELS_API_KEYS'))
+    indexed_keys = [
+        os.getenv(f'PEXELS_API_KEY_{index}', '').strip()
+        for index in range(1, 21)
+    ]
+    legacy_key = os.getenv('PEXELS_API_KEY', '').strip()
+
+    merged_keys: list[str] = []
+    seen: set[str] = set()
+    for key in [legacy_key, *configured_keys, *indexed_keys]:
+        normalized_key = key.strip()
+        if not normalized_key or normalized_key in seen:
+            continue
+        seen.add(normalized_key)
+        merged_keys.append(normalized_key)
+
+    return merged_keys
+
+
+def _parse_youtube_api_keys() -> list[str]:
+    configured_keys = _parse_env_list(os.getenv('YOUTUBE_API_KEYS'))
+    indexed_keys = [
+        os.getenv(f'YOUTUBE_API_KEY_{index}', '').strip()
+        for index in range(1, 21)
+    ]
+    legacy_key = os.getenv('YOUTUBE_API_KEY', '').strip()
+
+    merged_keys: list[str] = []
+    seen: set[str] = set()
+    for key in [legacy_key, *configured_keys, *indexed_keys]:
+        normalized_key = key.strip()
+        if not normalized_key or normalized_key in seen:
+            continue
+        seen.add(normalized_key)
+        merged_keys.append(normalized_key)
+
+    return merged_keys
+
+
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'change-me-to-a-very-long-secret-string')
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'change-me-to-a-very-long-jwt-secret')
@@ -81,6 +121,9 @@ class Config:
     EDGE_TTS_RATE = (os.getenv('EDGE_TTS_RATE') or '+8%').strip() or '+8%'
     EDGE_TTS_PITCH = (os.getenv('EDGE_TTS_PITCH') or '+0Hz').strip() or '+0Hz'
     GEMINI_API_KEYS = _parse_gemini_api_keys()
+    YOUTUBE_API_KEYS = _parse_youtube_api_keys()
+    YOUTUBE_API_KEY = YOUTUBE_API_KEYS[0] if YOUTUBE_API_KEYS else ''
+    PEXELS_API_KEYS = _parse_pexels_api_keys()
 
 
 class DevelopmentConfig(Config):

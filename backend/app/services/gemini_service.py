@@ -199,7 +199,21 @@ def _should_retry_same_model(exc: GeminiServiceError) -> bool:
     return exc.status_code in {408, 409, 425, 429, 500, 502, 503, 504}
 
 
-def _build_payload(*, system_prompt: str, user_prompt: str, temperature: float = 0.4, max_output_tokens: int = 512) -> dict[str, Any]:
+def _build_payload(
+    *,
+    system_prompt: str,
+    user_prompt: str,
+    temperature: float = 0.4,
+    max_output_tokens: int = 512,
+    response_mime_type: str | None = None,
+) -> dict[str, Any]:
+    generation_config: dict[str, Any] = {
+        'temperature': temperature,
+        'maxOutputTokens': max_output_tokens,
+    }
+    if response_mime_type:
+        generation_config['responseMimeType'] = response_mime_type
+
     return {
         'system_instruction': {
             'parts': [{'text': system_prompt}],
@@ -210,10 +224,7 @@ def _build_payload(*, system_prompt: str, user_prompt: str, temperature: float =
                 'parts': [{'text': user_prompt}],
             }
         ],
-        'generationConfig': {
-            'temperature': temperature,
-            'maxOutputTokens': max_output_tokens,
-        },
+        'generationConfig': generation_config,
     }
 
 
@@ -358,6 +369,7 @@ def generate_text_with_prompts(
     timeout: int = DEFAULT_TIMEOUT_SECONDS,
     temperature: float = 0.2,
     max_output_tokens: int = 512,
+    response_mime_type: str | None = None,
 ) -> GeminiResult:
     if not system_prompt.strip() or not user_prompt.strip():
         raise GeminiServiceError('Prompt gửi Gemini không hợp lệ', 'VALIDATION_ERROR', 422)
@@ -367,6 +379,7 @@ def generate_text_with_prompts(
         user_prompt=user_prompt,
         temperature=temperature,
         max_output_tokens=max_output_tokens,
+        response_mime_type=response_mime_type,
     )
     return _generate_payload(
         api_key=api_key,

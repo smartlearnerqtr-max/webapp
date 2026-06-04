@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tuong tac 3D hinh khoi</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #153047;
+      --muted: #607184;
+      --line: #d8e2ea;
+      --panel: #ffffff;
+      --accent: #0f9f8f;
+      --accent-2: #356ed8;
+      --gold: #e2a43a;
+      --shadow: 0 22px 50px rgba(21, 48, 71, 0.16);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #eef6fb; color: var(--ink); overflow-x: hidden; }
+    body { padding: 16px; }
+    .shell {
+      width: min(920px, 100%);
+      margin: 0 auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px;
+      background: linear-gradient(135deg, #ffffff, #eff9ff 58%, #fff7e8);
+      border-bottom: 1px solid var(--line);
+    }
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 0; font-size: clamp(22px, 3vw, 32px); line-height: 1.12; }
+    p { margin: 0; }
+    .sub { margin-top: 8px; color: var(--muted); line-height: 1.5; }
+    .badge {
+      align-self: flex-start;
+      border-radius: 999px;
+      padding: 9px 13px;
+      background: #e8f8f5;
+      color: #08796c;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(240px, .8fr);
+      gap: 18px;
+      padding: 20px;
+    }
+    .stage {
+      min-height: 430px;
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255,255,255,.95), rgba(255,255,255,0) 38%),
+        linear-gradient(180deg, #dbf0ff 0%, #f7fbff 58%, #fff3dc 100%);
+      border: 1px solid #cfe0ed;
+      display: grid;
+      place-items: center;
+      perspective: 960px;
+      overflow: hidden;
+      position: relative;
+    }
+    .stage::after {
+      content: "";
+      position: absolute;
+      width: 70%;
+      height: 52px;
+      bottom: 48px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(21,48,71,.22), rgba(21,48,71,0) 68%);
+      filter: blur(4px);
+    }
+    .model-wrap {
+      width: 300px;
+      height: 260px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(var(--rx, -16deg)) rotateY(var(--ry, 34deg));
+      transition: transform .35s ease;
+      z-index: 1;
+    }
+    .prism, .cube {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      transform-style: preserve-3d;
+    }
+    .prism { width: 220px; height: 180px; top: 22px; }
+    .cube { width: 170px; height: 170px; top: 20px; display: none; }
+    .face {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(21,48,71,.32);
+      color: rgba(21,48,71,.84);
+      font-weight: 900;
+      font-size: 18px;
+      box-shadow: inset 0 0 30px rgba(255,255,255,.34);
+      backface-visibility: visible;
+    }
+    .prism .front, .prism .back {
+      width: 120px;
+      height: 120px;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      left: 50px;
+      top: 18px;
+      background: rgba(15,159,143,.38);
+    }
+    .prism .front { transform: translateZ(76px); }
+    .prism .back { transform: rotateY(180deg) translateZ(76px); background: rgba(53,110,216,.24); }
+    .prism .side-a {
+      width: 154px;
+      height: 120px;
+      left: 109px;
+      top: 18px;
+      transform: rotateY(62deg) translateZ(14px);
+      background: rgba(226,164,58,.30);
+    }
+    .prism .side-b {
+      width: 154px;
+      height: 120px;
+      left: -43px;
+      top: 18px;
+      transform: rotateY(-62deg) translateZ(14px);
+      background: rgba(53,110,216,.22);
+    }
+    .prism .bottom {
+      width: 120px;
+      height: 152px;
+      left: 50px;
+      top: 73px;
+      transform: rotateX(90deg) translateZ(-76px);
+      background: rgba(15,159,143,.20);
+    }
+    .cube .face { width: 170px; height: 170px; border-radius: 8px; }
+    .cube .front { transform: translateZ(85px); background: rgba(15,159,143,.34); }
+    .cube .back { transform: rotateY(180deg) translateZ(85px); background: rgba(53,110,216,.20); }
+    .cube .right { transform: rotateY(90deg) translateZ(85px); background: rgba(226,164,58,.28); }
+    .cube .left { transform: rotateY(-90deg) translateZ(85px); background: rgba(53,110,216,.26); }
+    .cube .top { transform: rotateX(90deg) translateZ(85px); background: rgba(255,255,255,.36); }
+    .cube .bottom { transform: rotateX(-90deg) translateZ(85px); background: rgba(21,48,71,.12); }
+    .model-wrap[data-shape="cube"] .prism { display: none; }
+    .model-wrap[data-shape="cube"] .cube { display: block; }
+    .panel {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 16px;
+      padding: 12px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+    }
+    button:hover { transform: translateY(-1px); border-color: #9fc7d9; box-shadow: 0 10px 20px rgba(21,48,71,.08); }
+    button.active { border-color: var(--accent); background: #e8f8f5; color: #08796c; }
+    .readout {
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: #fbfdff;
+      padding: 16px;
+      min-height: 112px;
+    }
+    .readout strong { display: block; margin-bottom: 6px; font-size: 18px; }
+    .hint { color: var(--muted); line-height: 1.45; }
+    .facts { display: grid; gap: 8px; }
+    .fact {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-radius: 14px;
+      background: #f5f9fc;
+      padding: 10px 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .fact b { color: var(--ink); }
+    @media (max-width: 760px) {
+      body { padding: 10px; }
+      .header, .layout { padding: 14px; }
+      .layout { grid-template-columns: 1fr; }
+      .stage { min-height: 360px; }
+      .model-wrap { width: 240px; height: 220px; transform: scale(.84) rotateX(var(--rx, -16deg)) rotateY(var(--ry, 34deg)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="header">
+      <div>
+        <p class="eyebrow">Hinh hoc khong gian</p>
+        <h1>Tuong tac 3D hinh khoi</h1>
+        <p class="sub">Xoay mo hinh, doi hinh khoi, cham vao dinh - canh - mat de xem cach dem.</p>
+      </div>
+      <span class="badge">3D model</span>
+    </section>
+
+    <section class="layout">
+      <div class="stage">
+        <div class="model-wrap" id="model" data-shape="prism" style="--rx:-16deg;--ry:34deg;">
+          <div class="prism" aria-label="Lang tru tam giac 3D">
+            <div class="face front">Mat</div>
+            <div class="face back">Mat</div>
+            <div class="face side-a">Canh</div>
+            <div class="face side-b">Canh</div>
+            <div class="face bottom">Day</div>
+          </div>
+          <div class="cube" aria-label="Hinh hop chu nhat 3D">
+            <div class="face front">Mat</div>
+            <div class="face back">Mat</div>
+            <div class="face right">Canh</div>
+            <div class="face left">Canh</div>
+            <div class="face top">Mat</div>
+            <div class="face bottom">Day</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="tool-grid">
+          <button type="button" id="shape-prism" class="active">Lang tru tam giac</button>
+          <button type="button" id="shape-cube">Hinh hop</button>
+          <button type="button" id="turn-left">Xoay trai</button>
+          <button type="button" id="turn-right">Xoay phai</button>
+          <button type="button" id="tilt-up">Ngua len</button>
+          <button type="button" id="tilt-down">Cui xuong</button>
+        </div>
+
+        <div class="tool-grid">
+          <button type="button" id="count-vertices">Cham dinh</button>
+          <button type="button" id="count-edges">Cham canh</button>
+          <button type="button" id="count-faces">Cham mat</button>
+          <button type="button" id="reset">Lam lai</button>
+        </div>
+
+        <div class="readout" id="readout">
+          <strong>Hay xoay mo hinh truoc</strong>
+          <p class="hint">Sau do cham vao nut dinh, canh hoac mat de App dem tung thanh phan cua hinh khoi.</p>
+        </div>
+
+        <div class="facts" id="facts"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const requestedShape = params.get('shape') === 'cube' ? 'cube' : 'prism';
+    const requestedFocus = ['vertices', 'edges', 'faces'].includes(params.get('focus') || '') ? params.get('focus') : '';
+    const titleParam = (params.get('title') || '').trim();
+    const promptParam = (params.get('prompt') || '').trim();
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    const model = document.querySelector('#model');
+    const readout = document.querySelector('#readout');
+    const facts = document.querySelector('#facts');
+    const prismButton = document.querySelector('#shape-prism');
+    const cubeButton = document.querySelector('#shape-cube');
+    const titleNode = document.querySelector('h1');
+    const subNode = document.querySelector('.sub');
+    let shape = requestedShape;
+    let ry = 34;
+    let rx = -16;
+
+    const data = {
+      prism: { name: 'Lang tru tam giac', vertices: 6, edges: 9, faces: 5 },
+      cube: { name: 'Hinh hop', vertices: 8, edges: 12, faces: 6 },
+    };
+    const labels = { vertices: 'dinh', edges: 'canh', faces: 'mat' };
+
+    function showIntro() {
+      const item = data[shape];
+      const focusText = requestedFocus ? `Yeu cau: cham vao nut ${labels[requestedFocus]} de dem ${labels[requestedFocus]} cua ${item.name}.` : 'Sau do cham vao nut dinh, canh hoac mat de App dem tung thanh phan cua hinh khoi.';
+      readout.innerHTML = `
+        <strong>${escapeHtml(titleParam || `Quan sat ${item.name}`)}</strong>
+        <p class="hint">${escapeHtml(promptParam || focusText)}</p>
+      `;
+    }
+
+    function sync() {
+      model.dataset.shape = shape;
+      model.style.setProperty('--ry', `${ry}deg`);
+      model.style.setProperty('--rx', `${rx}deg`);
+      prismButton.classList.toggle('active', shape === 'prism');
+      cubeButton.classList.toggle('active', shape === 'cube');
+      const item = data[shape];
+      facts.innerHTML = `
+        <div class="fact"><span>Dinh</span><b>${item.vertices}</b></div>
+        <div class="fact"><span>Canh</span><b>${item.edges}</b></div>
+        <div class="fact"><span>Mat</span><b>${item.faces}</b></div>
+      `;
+    }
+
+    function say(kind) {
+      const item = data[shape];
+      readout.innerHTML = `
+        <strong>${item.name} co ${item[kind]} ${labels[kind]}</strong>
+        <p class="hint">Em co the xoay tiep de nhin thay cac ${labels[kind]} bi che o mat sau cua mo hinh.</p>
+      `;
+    }
+
+    document.querySelector('#turn-left').addEventListener('click', () => { ry -= 24; sync(); });
+    document.querySelector('#turn-right').addEventListener('click', () => { ry += 24; sync(); });
+    document.querySelector('#tilt-up').addEventListener('click', () => { rx -= 10; sync(); });
+    document.querySelector('#tilt-down').addEventListener('click', () => { rx += 10; sync(); });
+    prismButton.addEventListener('click', () => { shape = 'prism'; sync(); });
+    cubeButton.addEventListener('click', () => { shape = 'cube'; sync(); });
+    document.querySelector('#count-vertices').addEventListener('click', () => say('vertices'));
+    document.querySelector('#count-edges').addEventListener('click', () => say('edges'));
+    document.querySelector('#count-faces').addEventListener('click', () => say('faces'));
+    document.querySelector('#reset').addEventListener('click', () => {
+      shape = requestedShape;
+      ry = 34;
+      rx = -16;
+      showIntro();
+      sync();
+    });
+    if (titleParam) titleNode.textContent = titleParam;
+    if (promptParam) subNode.textContent = promptParam;
+    showIntro();
+    sync();
+  </script>
+</body>
+</html>

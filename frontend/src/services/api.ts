@@ -243,6 +243,7 @@ export type LessonActivityItem = {
 export type LessonItem = {
   id: number
   subject_id: number
+  class_id?: number | null
   title: string
   description: string | null
   primary_level: string
@@ -252,6 +253,7 @@ export type LessonItem = {
   is_archived: boolean
   activity_count: number
   subject: SubjectItem | null
+  classroom?: ClassItem | null
   activities?: LessonActivityItem[]
   created_at?: string | null
 }
@@ -487,6 +489,62 @@ export type AIGradeAnswerResponse = {
   matched_answer: string
   source: 'gemini' | 'fallback'
   model_name: string | null
+}
+
+export type LessonQuestionDraftCard = {
+  id?: string
+  label?: string
+  media_url?: string
+  media_kind?: 'image' | 'video' | ''
+}
+
+export type LessonQuestionDraftSuggestion = {
+  teacher_note?: string
+  activity_type?: string
+  title?: string
+  objective?: string
+  prompt?: string
+  example?: string
+  text_choices?: string[]
+  correct_choice?: string
+  choice_cards?: LessonQuestionDraftCard[]
+  matching_pairs?: Array<{ left?: string; right?: string }>
+  drag_items?: string[]
+  drag_targets?: string[]
+  visual_style?: string
+  step_items?: string[]
+  media_url?: string
+  media_kind?: 'image' | 'video' | ''
+  audio_text?: string
+  audio_url?: string
+  audio_lang?: string
+  answer_mode?: 'text' | 'voice_ai_grade' | 'none'
+  expected_answer?: string
+  accepted_answers?: string[]
+  aac_cards?: string[]
+  aac_image_cards?: LessonQuestionDraftCard[]
+  puzzle_rows?: number
+  puzzle_cols?: number
+  math_left?: number
+  math_right?: number
+  math_operation?: '+' | '-' | 'x' | ':'
+  math_group_label?: string
+  math_item_label?: string
+  shape_model?: 'prism' | 'cube'
+  shape_focus?: 'vertices' | 'edges' | 'faces'
+  youtube_query?: string
+  pexels_query?: string
+  media_sources?: Array<{ media_url?: string; media_kind?: string; source?: string; title?: string; credit?: string; source_url?: string }>
+}
+
+export type LessonQuestionDraftResponse = {
+  suggestion: LessonQuestionDraftSuggestion
+  model_name: string
+  usage_metadata?: unknown
+  media_capability?: {
+    youtube?: boolean
+    pexels?: boolean
+  }
 }
 
 export type UploadedMediaItem = {
@@ -832,6 +890,7 @@ export async function fetchLesson(token: string, lessonId: number): Promise<Less
 export async function createLesson(token: string, payload: {
   title: string
   subject_id: number
+  class_id?: number
   primary_level: string
   description?: string
   estimated_minutes?: number
@@ -848,6 +907,7 @@ export async function createLesson(token: string, payload: {
 export async function updateLesson(token: string, lessonId: number, payload: {
   title?: string
   subject_id?: number
+  class_id?: number | null
   primary_level?: string
   description?: string
   estimated_minutes?: number
@@ -1068,6 +1128,23 @@ export async function sendAIChat(token: string, payload: {
   }
 }): Promise<AIChatResponse> {
   return request<AIChatResponse>('/api/v1/ai/chat', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function generateLessonQuestionDraft(token: string, payload: {
+  subject_name?: string
+  lesson_title?: string
+  difficulty_level?: string
+  activity_slot?: 'H1' | 'H2'
+  activity_title?: string
+  activity_type: string
+  current_prompt?: string
+  objective?: string
+}): Promise<LessonQuestionDraftResponse> {
+  return request<LessonQuestionDraftResponse>('/api/v1/ai/lesson-question-draft', {
     method: 'POST',
     token,
     body: payload,
