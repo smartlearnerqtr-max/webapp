@@ -12,7 +12,7 @@ from .api.v1 import api_v1
 from .config import _normalize_database_url, get_config
 from .extensions import cors, db, jwt, migrate
 from .services.logger import log_exception
-from .services.seed_service import seed_admin_user, seed_subjects, seed_test_scenario, seed_visual_support_demo_bundle
+from .services.seed_service import seed_admin_user, seed_career_cards_for_teachers, seed_subjects, seed_test_scenario, seed_visual_support_demo_bundle
 from .utils.responses import error_response
 
 
@@ -134,3 +134,13 @@ def _register_cli_commands(app: Flask) -> None:
         print(f"Teacher demo: {payload['teacher_email']} / {payload['teacher_password']}")
         print(f"Student demo: {payload['student_email']} / {payload['student_password']}")
         print(f"Class: {payload['class_name']} / join password: {payload['class_password']}")
+
+    @app.cli.command('seed-careers')
+    def seed_careers_command() -> None:
+        db.create_all()
+        result = seed_career_cards_for_teachers()
+        print(
+            'Career cards seeded: '
+            f"{result['created']} created, {result['updated']} updated, "
+            f"{result['reactivated']} reactivated, {result['skipped']} skipped"
+        )

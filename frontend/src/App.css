@@ -6813,6 +6813,10 @@ body:has(.student-visual-page-lesson-focus) .content > * {
   background: #0d1724;
 }
 
+.teacher-career-preview-video {
+  height: clamp(220px, 42vw, 320px);
+}
+
 .ichan-communication-grid {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }

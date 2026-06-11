@@ -6,6 +6,7 @@ import { LazyActivityCard } from '../components/activities/LazyActivityCard'
 import { RequireAuth } from '../components/RequireAuth'
 import {
   fetchMyCareerCards,
+  fetchMySimulationQuizQuestions,
   completeMyAssignment,
   fetchMyAssignment,
   fetchMyAssignments,
@@ -22,6 +23,7 @@ import {
   type LessonActivityItem,
   type MyAssignmentDetail,
   type MyAssignmentItem,
+  type SimulationQuizQuestionItem,
   type StudentTeacherLinkItem,
 } from '../services/api'
 import {
@@ -40,6 +42,46 @@ import { syncStudentFeed, type StudentFeedItem } from '../utils/studentFeedStore
 import type { CommunicationCard } from './studentHomeDeferredContent'
 
 const studentBackgroundImageUrl = '/student-ui/anh4.jpg'
+const LEARNING_CELL_SIMULATION_URL = '/simulations/learning-cell/index.html'
+
+const KHTN_SIMULATION_MODELS = [
+  { id: 'plant-cell', label: 'Tế bào thực vật' },
+  { id: 'animal-cell', label: 'Tế bào động vật' },
+  { id: 'white-blood-cell', label: 'Bạch cầu' },
+  { id: 'neuron', label: 'Nơ-ron thần kinh' },
+  { id: 'dna', label: 'DNA xoắn kép' },
+  { id: 'human-heart', label: 'Tim người' },
+  { id: 'human-lungs', label: 'Phổi người' },
+  { id: 'human-liver', label: 'Gan người' },
+  { id: 'human-kidney', label: 'Thận người' },
+  { id: 'human-stomach', label: 'Dạ dày' },
+] as const
+
+type SimulationModelId = typeof KHTN_SIMULATION_MODELS[number]['id']
+
+function buildSimulationQuizUrl(modelId: string, questions: SimulationQuizQuestionItem[] = []) {
+  const params = new URLSearchParams({ model: modelId })
+  if (questions.length) {
+    params.set(
+      'quiz',
+      JSON.stringify(
+        questions.map((question) => ({
+          modelId: question.simulation_key,
+          question: question.question_text,
+          options: [
+            { key: 'A', text: question.option_a },
+            { key: 'B', text: question.option_b },
+            { key: 'C', text: question.option_c },
+            { key: 'D', text: question.option_d },
+          ],
+          correct: question.correct_option,
+          explanation: question.explanation ?? '',
+        })),
+      ),
+    )
+  }
+  return `${LEARNING_CELL_SIMULATION_URL}?${params.toString()}`
+}
 
 const visualThemePresetMap = {
   garden: {
@@ -321,9 +363,11 @@ function assignmentMatchesStudentLevel(assignment: MyAssignmentItem | null | und
 function normalizeCareerEmbedUrl(rawUrl: string) {
   const trimmedUrl = rawUrl.trim()
   if (!trimmedUrl) return ''
+  if (/^\/.+\.html(?:$|\?)/i.test(trimmedUrl)) return trimmedUrl
   try {
     const url = new URL(trimmedUrl)
     const host = url.hostname.toLowerCase()
+    if (url.pathname.endsWith('.html')) return trimmedUrl
     if (host.includes('youtu.be')) {
       const videoId = url.pathname.split('/').filter(Boolean)[0]
       return videoId ? `https://www.youtube.com/embed/${videoId}` : ''
@@ -1114,6 +1158,7 @@ export function StudentHomePage() {
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null)
   const [selectedSubjectKey, setSelectedSubjectKey] = useState<string | null>(null)
   const [showSimulationModal, setShowSimulationModal] = useState(false)
+  const selectedSimulationModelId: SimulationModelId = 'plant-cell'
   useEffect(() => {
     if (showSimulationModal) {
       document.body.style.overflow = 'hidden'
@@ -1265,6 +1310,12 @@ export function StudentHomePage() {
       const cards = await fetchMyCareerCards(token!)
       return cards.map(mapCareerCardItemToMeta)
     },
+    enabled: Boolean(token && user?.role === 'student'),
+  })
+
+  const simulationQuizQuestionsQuery = useQuery({
+    queryKey: ['my-simulation-quiz-questions', token],
+    queryFn: () => fetchMySimulationQuizQuestions(token!),
     enabled: Boolean(token && user?.role === 'student'),
   })
 
@@ -1723,6 +1774,8 @@ export function StudentHomePage() {
     () => (careerCardsQuery.data ?? []).filter((item) => contentMatchesStudentLevel(item.levels, currentStudentLevel)),
     [careerCardsQuery.data, currentStudentLevel],
   )
+
+  const selectedSimulationFrameUrl = buildSimulationQuizUrl(selectedSimulationModelId, simulationQuizQuestionsQuery.data ?? [])
 
   const subjectCards = useMemo(
     () =>
@@ -2681,9 +2734,10 @@ export function StudentHomePage() {
           </header>
           <div className="visual-simulation-frame-wrap">
             <iframe
+              key={selectedSimulationFrameUrl}
               className="visual-simulation-frame"
               title="Mô phỏng trực quan"
-              src="https://tuanminh7.github.io/hoctapmophong/"
+              src={selectedSimulationFrameUrl}
               allow="fullscreen; autoplay; encrypted-media; clipboard-write; picture-in-picture; microphone; camera"
               allowFullScreen
             />

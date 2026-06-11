@@ -646,6 +646,25 @@ export type CareerCardItem = {
   teacher: TeacherContactItem | null
 }
 
+export type SimulationQuizQuestionItem = {
+  id: number
+  teacher_id: number
+  subject_code: 'KHTN'
+  simulation_key: string
+  simulation_title: string
+  question_text: string
+  option_a: string
+  option_b: string
+  option_c: string
+  option_d: string
+  correct_option: 'A' | 'B' | 'C' | 'D'
+  explanation: string | null
+  status: string
+  sort_order: number
+  created_at: string | null
+  updated_at: string | null
+}
+
 export async function fetchHealth(): Promise<HealthResponse> {
   return request<HealthResponse>('/api/v1/health')
 }
@@ -810,6 +829,61 @@ export async function deleteTeacherCareerCard(token: string, cardId: number) {
 
 export async function fetchMyCareerCards(token: string): Promise<CareerCardItem[]> {
   return request<CareerCardItem[]>('/api/v1/my/career-cards', { token })
+}
+
+export async function fetchTeacherSimulationQuizQuestions(token: string, simulationKey?: string): Promise<SimulationQuizQuestionItem[]> {
+  const query = simulationKey ? `?simulation_key=${encodeURIComponent(simulationKey)}` : ''
+  return request<SimulationQuizQuestionItem[]>(`/api/v1/teacher/simulation-quiz-questions${query}`, { token })
+}
+
+export async function fetchMySimulationQuizQuestions(token: string, simulationKey?: string): Promise<SimulationQuizQuestionItem[]> {
+  const query = simulationKey ? `?simulation_key=${encodeURIComponent(simulationKey)}` : ''
+  return request<SimulationQuizQuestionItem[]>(`/api/v1/my/simulation-quiz-questions${query}`, { token })
+}
+
+export async function createTeacherSimulationQuizQuestion(token: string, payload: {
+  simulation_key: string
+  simulation_title: string
+  question_text: string
+  option_a: string
+  option_b: string
+  option_c: string
+  option_d: string
+  correct_option: 'A' | 'B' | 'C' | 'D'
+  explanation?: string
+  sort_order?: number
+}) {
+  return request<SimulationQuizQuestionItem>('/api/v1/teacher/simulation-quiz-questions', {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function updateTeacherSimulationQuizQuestion(token: string, questionId: number, payload: {
+  simulation_key: string
+  simulation_title: string
+  question_text: string
+  option_a: string
+  option_b: string
+  option_c: string
+  option_d: string
+  correct_option: 'A' | 'B' | 'C' | 'D'
+  explanation?: string
+  sort_order?: number
+}) {
+  return request<SimulationQuizQuestionItem>(`/api/v1/teacher/simulation-quiz-questions/${questionId}`, {
+    method: 'PUT',
+    token,
+    body: payload,
+  })
+}
+
+export async function deleteTeacherSimulationQuizQuestion(token: string, questionId: number) {
+  return request<null>(`/api/v1/teacher/simulation-quiz-questions/${questionId}`, {
+    method: 'DELETE',
+    token,
+  })
 }
 
 export async function createStudent(token: string, payload: { full_name: string; disability_level: string }) {

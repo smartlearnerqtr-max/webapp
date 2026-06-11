@@ -8,6 +8,7 @@ from .parent_student import ParentDailyReport, ParentStudentLink
 from .parent_teacher_message import ParentTeacherMessage
 from .profiles import ParentProfile, StudentProfile, TeacherProfile
 from .realtime import RealtimeEvent
+from .simulation import TeacherSimulationQuizQuestion
 from .subject import ClassSubject, Subject
 from .teacher_relationships import TeacherParentStudentLink, TeacherStudentLink
 from .user import User
@@ -37,4 +38,5 @@ __all__ = [
     "ParentDailyReport",
     "ParentTeacherMessage",
     "RealtimeEvent",
+    "TeacherSimulationQuizQuestion",
 ]

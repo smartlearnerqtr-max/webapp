@@ -103,18 +103,12 @@ def _parse_sort_order(raw_value: object) -> int:
 def _validate_career_payload(
     *,
     title: str,
-    cover_image_url: str | None,
     meaning_text: str,
-    video_url: str | None,
     steps: list[dict[str, str]],
     skills: list[str],
 ):
     if not title or not meaning_text:
         return error_response("Cần nhập tiêu đề và ý nghĩa công việc", "VALIDATION_ERROR", 422)
-    if not cover_image_url:
-        return error_response("Cần thêm ảnh bìa nghề nghiệp", "VALIDATION_ERROR", 422)
-    if not video_url:
-        return error_response("Cần thêm video nghề nghiệp", "VALIDATION_ERROR", 422)
     if not steps:
         return error_response("Cần nhập ít nhất 1 bước thực hiện", "VALIDATION_ERROR", 422)
     if not skills:
@@ -125,9 +119,7 @@ def _validate_career_payload(
 def _career_payload_is_complete(payload: dict[str, object]) -> bool:
     return _validate_career_payload(
         title=_normalize_text(payload.get("title")),
-        cover_image_url=_normalize_text(payload.get("cover_image_url")) or None,
         meaning_text=_normalize_text(payload.get("meaning_text")),
-        video_url=_normalize_text(payload.get("video_url")) or None,
         steps=_normalize_steps(payload.get("steps")),
         skills=_normalize_skills(payload.get("skills")),
     ) is None
@@ -175,9 +167,7 @@ def create_teacher_career_card():
 
     validation_error = _validate_career_payload(
         title=title,
-        cover_image_url=cover_image_url,
         meaning_text=meaning_text,
-        video_url=video_url,
         steps=steps,
         skills=skills,
     )
@@ -267,9 +257,7 @@ def update_teacher_career_card(card_id: int):
 
     validation_error = _validate_career_payload(
         title=next_title,
-        cover_image_url=next_cover_image_url,
         meaning_text=next_meaning_text,
-        video_url=next_video_url,
         steps=next_steps,
         skills=next_skills,
     )

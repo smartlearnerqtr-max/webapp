@@ -11,6 +11,7 @@ from ..models import (
     Classroom, ClassJoinCredential, ClassStudent, Subject, ClassSubject,
     Lesson, LessonActivity, LessonAssignment, LessonAssignmentStudent,
     StudentLessonProgress, ParentDailyReport, ParentStudentLink, TeacherStudentLink,
+    TeacherCareerCard,
 )
 from ..utils.security import hash_password
 
@@ -22,6 +23,72 @@ DEFAULT_VISUAL_DEMO_TEACHER_PASSWORD = 'Teacher123!'
 DEFAULT_VISUAL_DEMO_STUDENT_EMAIL = 'visual.student.demo@example.com'
 DEFAULT_VISUAL_DEMO_STUDENT_PASSWORD = 'Student123!'
 DEFAULT_VISUAL_DEMO_CLASS_PASSWORD = 'VISUAL08'
+
+DEFAULT_CAREER_CARDS = [
+    {
+        'title': 'Làm vườn cơ bản',
+        'description': 'Làm quen với việc tưới cây, quan sát lá và giữ khu vườn gọn gàng.',
+        'cover_image_url': 'https://commons.wikimedia.org/wiki/Special:FilePath/Gardening.jpg',
+        'meaning_title': 'Ý nghĩa công việc',
+        'meaning_text': (
+            'Làm vườn giúp học sinh rèn sự kiên nhẫn, biết chăm sóc cây xanh và nhận ra '
+            'mỗi hành động nhỏ đều có thể làm môi trường đẹp hơn.'
+        ),
+        'video_url': 'https://www.youtube.com/watch?v=MJMO7LjWMFQ',
+        'video_note': 'Video thật về làm vườn sinh thái, giúp học sinh quan sát công việc chăm cây và khu vườn.',
+        'skills': ['Quan sát', 'Tưới cây', 'Kiên nhẫn', 'Giữ khu vực sạch'],
+        'steps': [
+            {'title': 'Chuẩn bị bình tưới', 'description': 'Lấy bình tưới vừa tay và đổ nước vừa đủ.'},
+            {'title': 'Tưới quanh gốc', 'description': 'Tưới nhẹ vào gốc cây, tránh làm đất bắn ra ngoài.'},
+            {'title': 'Cất dụng cụ', 'description': 'Đặt bình tưới về đúng chỗ và lau phần nước rơi nếu có.'},
+        ],
+        'levels': ['nhe', 'trung_binh', 'nang'],
+        'sort_order': 10,
+        'aliases': [],
+    },
+    {
+        'title': 'Làm bánh cơ bản',
+        'description': 'Làm quen với việc chuẩn bị nguyên liệu, giữ vệ sinh và làm theo công thức đơn giản.',
+        'cover_image_url': 'https://commons.wikimedia.org/wiki/Special:FilePath/The%20Bakery%20%28Unsplash%29.jpg',
+        'meaning_title': 'Ý nghĩa công việc',
+        'meaning_text': (
+            'Làm bánh giúp học sinh rèn sự cẩn thận, biết giữ vệ sinh khi làm việc và học cách '
+            'hoàn thành từng bước theo hướng dẫn.'
+        ),
+        'video_url': 'https://www.youtube.com/watch?v=ijbUDFk6fE0',
+        'video_note': 'Video thật về lớp học làm bánh, giúp học sinh thấy môi trường và thao tác nghề bánh.',
+        'skills': ['Vệ sinh', 'Đong đếm', 'Làm theo công thức', 'Cẩn thận'],
+        'steps': [
+            {'title': 'Rửa tay và chuẩn bị', 'description': 'Rửa tay sạch, lấy tạp dề và đặt nguyên liệu lên bàn.'},
+            {'title': 'Làm theo công thức', 'description': 'Đong từng nguyên liệu và làm đúng thứ tự giáo viên hướng dẫn.'},
+            {'title': 'Dọn khu vực làm bánh', 'description': 'Cất dụng cụ, lau bàn và bỏ rác đúng nơi.'},
+        ],
+        'levels': ['nhe', 'trung_binh', 'nang'],
+        'sort_order': 20,
+        'aliases': ['Sắp xếp đồ dùng lớp học'],
+    },
+    {
+        'title': 'Nhân viên bán hàng',
+        'description': 'Làm quen với chào hỏi, sắp xếp sản phẩm và hỗ trợ khách theo câu ngắn rõ ràng.',
+        'cover_image_url': 'https://commons.wikimedia.org/wiki/Special:FilePath/Cashier%20at%20her%20register.jpg',
+        'meaning_title': 'Ý nghĩa công việc',
+        'meaning_text': (
+            'Bán hàng giúp học sinh luyện giao tiếp lịch sự, nhận biết đồ vật, giữ quầy gọn gàng '
+            'và biết hỗ trợ người khác trong tình huống quen thuộc.'
+        ),
+        'video_url': 'https://www.youtube.com/watch?v=m0h_gcAubUQ',
+        'video_note': 'Video hướng nghiệp thật về tiếp thị - bán hàng, giúp học sinh hình dung nhóm nghề dịch vụ.',
+        'skills': ['Chào hỏi', 'Sắp xếp hàng', 'Quan sát nhu cầu', 'Giao tiếp lịch sự'],
+        'steps': [
+            {'title': 'Chào khách', 'description': 'Nhìn về phía khách và nói một câu chào ngắn, lịch sự.'},
+            {'title': 'Sắp xếp sản phẩm', 'description': 'Đặt sản phẩm cùng loại gần nhau và quay nhãn ra ngoài.'},
+            {'title': 'Nhờ hỗ trợ khi cần', 'description': 'Nếu khách hỏi khó, gọi giáo viên hoặc người phụ trách.'},
+        ],
+        'levels': ['nhe', 'trung_binh', 'nang'],
+        'sort_order': 30,
+        'aliases': ['Chăm sóc cây xanh'],
+    },
+]
 
 
 def seed_subjects() -> int:
@@ -61,6 +128,77 @@ def seed_admin_user(email: str | None = None, password: str | None = None) -> Us
     db.session.add(user)
     db.session.commit()
     return user
+
+
+def seed_career_cards_for_teachers(teacher_ids: list[int] | None = None) -> dict[str, int]:
+    query = TeacherProfile.query
+    if teacher_ids:
+        query = query.filter(TeacherProfile.id.in_(teacher_ids))
+
+    created = 0
+    reactivated = 0
+    updated = 0
+    skipped = 0
+    for teacher in query.order_by(TeacherProfile.id.asc()).all():
+        for item in DEFAULT_CAREER_CARDS:
+            candidate_titles = [item['title'], *item.get('aliases', [])]
+            existing = (
+                TeacherCareerCard.query
+                .filter(
+                    TeacherCareerCard.teacher_id == teacher.id,
+                    TeacherCareerCard.title.in_(candidate_titles),
+                )
+                .first()
+            )
+            if existing:
+                changed = False
+                for column_name, value in {
+                    'title': item['title'],
+                    'description': item['description'],
+                    'cover_image_url': item['cover_image_url'],
+                    'meaning_title': item['meaning_title'],
+                    'meaning_text': item['meaning_text'],
+                    'video_url': item['video_url'],
+                    'video_note': item['video_note'],
+                    'steps_json': json.dumps(item['steps'], ensure_ascii=False),
+                    'skills_json': json.dumps(item['skills'], ensure_ascii=False),
+                    'levels_json': json.dumps(item['levels'], ensure_ascii=False),
+                    'sort_order': item['sort_order'],
+                }.items():
+                    if getattr(existing, column_name) != value:
+                        setattr(existing, column_name, value)
+                        changed = True
+                if existing.status != 'active':
+                    existing.status = 'active'
+                    changed = True
+                    reactivated += 1
+                if changed:
+                    updated += 1
+                else:
+                    skipped += 1
+                continue
+
+            db.session.add(
+                TeacherCareerCard(
+                    teacher_id=teacher.id,
+                    title=item['title'],
+                    description=item['description'],
+                    cover_image_url=item['cover_image_url'],
+                    meaning_title=item['meaning_title'],
+                    meaning_text=item['meaning_text'],
+                    video_url=item['video_url'],
+                    video_note=item['video_note'],
+                    steps_json=json.dumps(item['steps'], ensure_ascii=False),
+                    skills_json=json.dumps(item['skills'], ensure_ascii=False),
+                    levels_json=json.dumps(item['levels'], ensure_ascii=False),
+                    status='active',
+                    sort_order=item['sort_order'],
+                )
+            )
+            created += 1
+
+    db.session.commit()
+    return {'created': created, 'updated': updated, 'reactivated': reactivated, 'skipped': skipped}
 
 
 def seed_visual_support_demo_bundle() -> dict[str, object]:

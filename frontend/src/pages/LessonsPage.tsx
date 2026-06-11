@@ -175,6 +175,69 @@ function createPresetChoiceCard(id: string, label: string, mediaUrl: string, med
   }
 }
 
+const LEARNING_CELL_SIMULATION_URL = '/simulations/learning-cell/index.html'
+
+const BIOLOGY_3D_MODELS = [
+  { id: 'plant-cell', label: 'Tế bào thực vật' },
+  { id: 'animal-cell', label: 'Tế bào động vật' },
+  { id: 'white-blood-cell', label: 'Bạch cầu' },
+  { id: 'neuron', label: 'Nơ-ron thần kinh' },
+  { id: 'dna', label: 'DNA xoắn kép' },
+  { id: 'human-heart', label: 'Tim người' },
+  { id: 'human-lungs', label: 'Phổi người' },
+  { id: 'human-liver', label: 'Gan người' },
+  { id: 'human-kidney', label: 'Thận người' },
+  { id: 'human-stomach', label: 'Dạ dày' },
+] as const
+
+type Biology3DModelId = typeof BIOLOGY_3D_MODELS[number]['id']
+
+function isBiology3DModelId(value: string): value is Biology3DModelId {
+  return BIOLOGY_3D_MODELS.some((model) => model.id === value)
+}
+
+function getBiology3DModel(modelId: string) {
+  return BIOLOGY_3D_MODELS.find((model) => model.id === modelId)
+}
+
+function buildLearningCellQuizUrl(modelId: string) {
+  const params = new URLSearchParams({ mode: 'quiz', model: modelId })
+  return `${LEARNING_CELL_SIMULATION_URL}?${params.toString()}`
+}
+
+function getLearningCellModelId(mediaUrl: string) {
+  const value = mediaUrl.trim()
+  if (!value) return ''
+  try {
+    const url = new URL(value, window.location.origin)
+    if (!url.pathname.endsWith(LEARNING_CELL_SIMULATION_URL)) return ''
+    const modelId = url.searchParams.get('model') ?? ''
+    return isBiology3DModelId(modelId) ? modelId : ''
+  } catch {
+    const match = value.match(/[?&]model=([^&]+)/)
+    const modelId = match?.[1] ? decodeURIComponent(match[1]) : ''
+    return isBiology3DModelId(modelId) ? modelId : ''
+  }
+}
+
+function buildBiology3DQuizChoices(modelId: string) {
+  const modelIndex = BIOLOGY_3D_MODELS.findIndex((model) => model.id === modelId)
+  const selectedModel = modelIndex >= 0 ? BIOLOGY_3D_MODELS[modelIndex] : BIOLOGY_3D_MODELS[0]
+  const distractors = BIOLOGY_3D_MODELS
+    .slice(modelIndex + 1)
+    .concat(BIOLOGY_3D_MODELS.slice(0, Math.max(modelIndex, 0)))
+    .filter((model) => model.id !== selectedModel.id)
+    .slice(0, 3)
+  const correctIndex = Math.max(0, modelIndex) % 4
+  const orderedChoices = [...distractors]
+  orderedChoices.splice(correctIndex, 0, selectedModel)
+  const choices = orderedChoices.slice(0, 4).map((model, index) => `${String.fromCharCode(65 + index)}. ${model.label}`)
+  return {
+    choices,
+    correctChoice: choices[correctIndex] ?? choices[0] ?? selectedModel.label,
+  }
+}
+
 function cleanAIString(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
@@ -1371,7 +1434,9 @@ function isTeacherActivityType(value: string): value is TeacherActivityType {
 function buildStructuredActivityConfig(activity: ActivityDraft) {
   const prompt = activity.prompt.trim()
   switch (activity.activity_type) {
-    case 'multiple_choice':
+    case 'multiple_choice': {
+      const model3DId = getLearningCellModelId(activity.media_url)
+      const model3D = model3DId ? getBiology3DModel(model3DId) : null
       return {
         prompt,
         choices: activity.text_choices.map((item) => item.trim()).filter(Boolean),
@@ -1390,7 +1455,10 @@ function buildStructuredActivityConfig(activity: ActivityDraft) {
         audio_lang: activity.audio_lang.trim() || undefined,
         media_url: activity.media_url.trim() || undefined,
         media_kind: activity.media_kind || undefined,
+        model_3d_id: model3DId || undefined,
+        model_3d_label: model3D?.label || undefined,
       }
+    }
     case 'image_choice':
       return {
         prompt,
@@ -1526,6 +1594,7 @@ function getStructuredActivityValidationError(activity: ActivityDraft) {
     case 'multiple_choice': {
       const choices = activity.text_choices.map((item) => item.trim()).filter(Boolean)
       if (choices.length < 2) return `Hoạt động "${activity.title}" cần ít nhất 2 đáp án chữ.`
+      if (getLearningCellModelId(activity.media_url) && choices.length !== 4) return `Hoạt động "${activity.title}" đang dùng mô hình 3D nên cần đúng 4 đáp án A/B/C/D.`
       if (!activity.correct_choice.trim()) return `Hoạt động "${activity.title}" chưa chọn đáp án đúng.`
       return null
     }
@@ -2580,7 +2649,8 @@ function MediumActivityBuilder({
   onApprove: () => void
 }) {
   const activityType = isTeacherActivityType(activity.activity_type) ? activity.activity_type : 'image_choice'
-  const showSharedMedia = activityType === 'image_puzzle' || Boolean(activity.media_url.trim())
+  const selectedLearningCellModelId = getLearningCellModelId(activity.media_url)
+  const showSharedMedia = activityType === 'image_puzzle' || (Boolean(activity.media_url.trim()) && !selectedLearningCellModelId)
   const showPromptAudio = activityType === 'multiple_choice' || activityType === 'image_choice' || activityType === 'listen_choose'
   const [isAIOpen, setIsAIOpen] = useState(false)
   const [aiSuggestion, setAISuggestion] = useState<LessonQuestionDraftSuggestion | null>(null)
@@ -2590,6 +2660,41 @@ function MediumActivityBuilder({
 
   const updateField = <K extends keyof ActivityDraft>(field: K, value: ActivityDraft[K]) => {
     onChange({ ...activity, [field]: value })
+  }
+
+  const updateLearningCellModel = (modelId: string) => {
+    if (!modelId) {
+      onChange({
+        ...activity,
+        media_url: selectedLearningCellModelId ? '' : activity.media_url,
+        media_kind: '',
+      })
+      return
+    }
+
+    onChange({
+      ...activity,
+      media_url: buildLearningCellQuizUrl(modelId),
+      media_kind: '',
+    })
+  }
+
+  const applyLearningCellABCDQuiz = (modelId: string) => {
+    const selectedModel = getBiology3DModel(modelId) ?? BIOLOGY_3D_MODELS[0]
+    const quizChoices = buildBiology3DQuizChoices(selectedModel.id)
+    onChange({
+      ...activity,
+      activity_type: 'multiple_choice',
+      title: activity.title.trim() || `Câu hỏi 3D: ${selectedModel.label}`,
+      objective: activity.objective.trim() || 'Học sinh quan sát mô hình 3D rồi chọn đáp án đúng.',
+      prompt: 'Quan sát mô hình 3D. Đây là mô hình nào?',
+      media_url: buildLearningCellQuizUrl(selectedModel.id),
+      media_kind: '',
+      text_choices: quizChoices.choices,
+      correct_choice: quizChoices.correctChoice,
+      choice_cards: [createChoiceCardDraft('Lựa chọn 1'), createChoiceCardDraft('Lựa chọn 2')],
+      is_approved: false,
+    })
   }
 
   const updateStringList = (field: 'text_choices' | 'drag_items' | 'drag_targets' | 'step_items' | 'accepted_answers' | 'aac_cards', index: number, value: string) => {
@@ -2805,6 +2910,40 @@ function MediumActivityBuilder({
           ) : null}
 
           {activityType === 'multiple_choice' ? (
+            <>
+            <div className={styles.builderPanel}>
+              <div className={styles.builderSectionHeader}>
+                <h3>Mô hình 3D cho câu ABCD</h3>
+                <span className={styles.helperBadge}>Dùng app mô phỏng nội bộ, chế độ quiz không lộ tên model</span>
+              </div>
+              <div className={styles.inlineBuilderRow}>
+                <select
+                  className={styles.select}
+                  value={selectedLearningCellModelId}
+                  onChange={(event) => updateLearningCellModel(event.target.value)}
+                >
+                  <option value="">Không dùng mô hình 3D</option>
+                  {BIOLOGY_3D_MODELS.map((model) => (
+                    <option key={model.id} value={model.id}>{model.label}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className={styles.smallUploadBtn}
+                  onClick={() => applyLearningCellABCDQuiz(selectedLearningCellModelId || BIOLOGY_3D_MODELS[0].id)}
+                >
+                  Tạo ABCD nhanh
+                </button>
+                {selectedLearningCellModelId ? (
+                  <button type="button" className={styles.smallUploadBtn} onClick={() => updateLearningCellModel('')}>
+                    Bỏ mô hình
+                  </button>
+                ) : null}
+              </div>
+              <p className={styles.helperText}>
+                Khi lưu, mô hình sẽ hiện phía trên câu hỏi; học sinh xoay/phóng to để quan sát rồi chọn A, B, C hoặc D.
+              </p>
+            </div>
             <StringListEditor
               label="Danh sách đáp án chữ"
               values={activity.text_choices}
@@ -2824,6 +2963,7 @@ function MediumActivityBuilder({
                 </div>
               }
             />
+            </>
           ) : null}
 
           {(activityType === 'image_choice' || activityType === 'listen_choose' || (activityType === 'multiple_choice' && activity.choice_cards.some((card) => card.media_url.trim()))) ? (

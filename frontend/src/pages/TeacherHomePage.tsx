@@ -1,5 +1,6 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { BarChartCard } from '../components/BarChartCard'
 import { ChatDock } from '../components/ChatDock'
@@ -112,20 +113,111 @@ function canPreviewCareerVideoInline(videoUrl: string) {
   return /\.(mp4|webm|ogg|mov)(?:$|\?)/i.test(trimmedUrl) || trimmedUrl.includes('/api/v1/media/files/')
 }
 
+function canEmbedCareerPreviewInline(videoUrl: string) {
+  const trimmedUrl = videoUrl.trim()
+  return /^\/.+\.html(?:$|\?)/i.test(trimmedUrl) || /^https?:\/\/.+\.html(?:$|\?)/i.test(trimmedUrl)
+}
+
+function getCareerPreviewEmbedUrl(videoUrl: string) {
+  const trimmedUrl = videoUrl.trim()
+  if (!trimmedUrl) return ''
+  if (canEmbedCareerPreviewInline(trimmedUrl)) return trimmedUrl
+  try {
+    const url = new URL(trimmedUrl)
+    const host = url.hostname.toLowerCase()
+    if (host.includes('youtu.be')) {
+      const videoId = url.pathname.split('/').filter(Boolean)[0]
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : ''
+    }
+    if (host.includes('youtube.com')) {
+      if (url.pathname.startsWith('/embed/')) return trimmedUrl
+      const videoId = url.searchParams.get('v')
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : ''
+    }
+    if (host.includes('drive.google.com')) {
+      const fileMatch = url.pathname.match(/\/file\/d\/([^/]+)/)
+      if (fileMatch?.[1]) return `https://drive.google.com/file/d/${fileMatch[1]}/preview`
+      const fileId = url.searchParams.get('id')
+      return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : ''
+    }
+  } catch {
+    return ''
+  }
+  return ''
+}
+
 function validateCareerForm(careerForm: TeacherCareerFormState) {
   if (!careerForm.title.trim()) return 'Cần nhập tiêu đề nghề nghiệp.'
-  if (!careerForm.coverImageUrl.trim()) return 'Cần thêm ảnh bìa cho nghề nghiệp.'
-  if (!careerForm.videoUrl.trim()) return 'Cần thêm video nghề nghiệp.'
   if (!careerForm.meaningText.trim()) return 'Cần nhập ý nghĩa công việc để học sinh nghe audio.'
   if (!parseCareerSkills(careerForm.skillsText).length) return 'Cần nhập ít nhất 1 kỹ năng học được.'
   if (!normalizeCareerSteps(careerForm.steps).length) return 'Cần nhập ít nhất 1 bước thực hiện.'
   return null
 }
 
+const teacherCareerSampleTemplates: TeacherCareerFormState[] = [
+  {
+    title: 'Làm vườn cơ bản',
+    description: 'Làm quen với việc tưới cây, quan sát lá và giữ khu vườn gọn gàng.',
+    coverImageUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Gardening.jpg',
+    videoUrl: 'https://www.youtube.com/watch?v=MJMO7LjWMFQ',
+    meaningTitle: 'Ý nghĩa công việc',
+    meaningText:
+      'Làm vườn giúp học sinh rèn sự kiên nhẫn, biết chăm sóc cây xanh và nhận ra mỗi hành động nhỏ đều có thể làm môi trường đẹp hơn.',
+    videoNote: 'Video thật về làm vườn sinh thái, giúp học sinh quan sát công việc chăm cây và khu vườn.',
+    sortOrder: '10',
+    skillsText: 'Quan sát, Tưới cây, Kiên nhẫn, Giữ khu vực sạch',
+    levels: ['nhe', 'trung_binh', 'nang'],
+    steps: [
+      { title: 'Chuẩn bị bình tưới', description: 'Lấy bình tưới vừa tay và đổ nước vừa đủ.' },
+      { title: 'Tưới quanh gốc', description: 'Tưới nhẹ vào gốc cây, tránh làm đất bắn ra ngoài.' },
+      { title: 'Cất dụng cụ', description: 'Đặt bình tưới về đúng chỗ và lau phần nước rơi nếu có.' },
+    ],
+  },
+  {
+    title: 'Làm bánh cơ bản',
+    description: 'Làm quen với việc chuẩn bị nguyên liệu, giữ vệ sinh và làm theo công thức đơn giản.',
+    coverImageUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/The%20Bakery%20%28Unsplash%29.jpg',
+    videoUrl: 'https://www.youtube.com/watch?v=ijbUDFk6fE0',
+    meaningTitle: 'Ý nghĩa công việc',
+    meaningText:
+      'Làm bánh giúp học sinh rèn sự cẩn thận, biết giữ vệ sinh khi làm việc và học cách hoàn thành từng bước theo hướng dẫn.',
+    videoNote: 'Video thật về lớp học làm bánh, giúp học sinh thấy môi trường và thao tác nghề bánh.',
+    sortOrder: '20',
+    skillsText: 'Vệ sinh, Đong đếm, Làm theo công thức, Cẩn thận',
+    levels: ['nhe', 'trung_binh', 'nang'],
+    steps: [
+      { title: 'Rửa tay và chuẩn bị', description: 'Rửa tay sạch, lấy tạp dề và đặt nguyên liệu lên bàn.' },
+      { title: 'Làm theo công thức', description: 'Đong từng nguyên liệu và làm đúng thứ tự giáo viên hướng dẫn.' },
+      { title: 'Dọn khu vực làm bánh', description: 'Cất dụng cụ, lau bàn và bỏ rác đúng nơi.' },
+    ],
+  },
+  {
+    title: 'Nhân viên bán hàng',
+    description: 'Làm quen với chào hỏi, sắp xếp sản phẩm và hỗ trợ khách theo câu ngắn rõ ràng.',
+    coverImageUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Cashier%20at%20her%20register.jpg',
+    videoUrl: 'https://www.youtube.com/watch?v=m0h_gcAubUQ',
+    meaningTitle: 'Ý nghĩa công việc',
+    meaningText:
+      'Bán hàng giúp học sinh luyện giao tiếp lịch sự, nhận biết đồ vật, giữ quầy gọn gàng và biết hỗ trợ người khác trong tình huống quen thuộc.',
+    videoNote: 'Video hướng nghiệp thật về tiếp thị - bán hàng, giúp học sinh hình dung nhóm nghề dịch vụ.',
+    sortOrder: '30',
+    skillsText: 'Chào hỏi, Sắp xếp hàng, Quan sát nhu cầu, Giao tiếp lịch sự',
+    levels: ['nhe', 'trung_binh', 'nang'],
+    steps: [
+      { title: 'Chào khách', description: 'Nhìn về phía khách và nói một câu chào ngắn, lịch sự.' },
+      { title: 'Sắp xếp sản phẩm', description: 'Đặt sản phẩm cùng loại gần nhau và quay nhãn ra ngoài.' },
+      { title: 'Nhờ hỗ trợ khi cần', description: 'Nếu khách hỏi khó, gọi giáo viên hoặc người phụ trách.' },
+    ],
+  },
+]
+
 export function TeacherHomePage() {
   const token = useAuthStore((state) => state.accessToken)
   const profile = useAuthStore((state) => state.profile)
   const queryClient = useQueryClient()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const careerEditorRef = useRef<HTMLElement | null>(null)
 
   const [selectedStudentId, setSelectedStudentId] = useState('')
   const [selectedParentId, setSelectedParentId] = useState('')
@@ -144,6 +236,27 @@ export function TeacherHomePage() {
   const [isCareerUploading, setIsCareerUploading] = useState(false)
   const [careerUploadError, setCareerUploadError] = useState<string | null>(null)
   const [careerFormError, setCareerFormError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const view = new URLSearchParams(location.search).get('view')
+    if (view === 'career_cards') {
+      setActiveWorkspaceView('career_cards')
+    } else if (!view) {
+      setActiveWorkspaceView('home')
+    }
+  }, [location.search])
+
+  function openWorkspaceView(view: TeacherWorkspaceView) {
+    setActiveWorkspaceView(view)
+    const nextSearch = view === 'career_cards' ? '?view=career_cards' : ''
+    navigate(`/giao-vien${nextSearch}`, { replace: false })
+  }
+
+  function scrollCareerEditorIntoView() {
+    window.requestAnimationFrame(() => {
+      careerEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
 
   const deferredSearchTerm = useDeferredValue(conversationSearchTerm)
   const deferredParentLookup = useDeferredValue(parentLookup)
@@ -367,7 +480,7 @@ export function TeacherHomePage() {
   ]
 
   function openConversation(conversation: ParentTeacherConversationItem) {
-    setActiveWorkspaceView('messages')
+    openWorkspaceView('messages')
     setSelectedConversationKey(conversation.conversation_key)
     setIsChatOpen(true)
   }
@@ -437,7 +550,8 @@ export function TeacherHomePage() {
     setCareerForm(buildCareerFormFromCard(card))
     setCareerFormError(null)
     setCareerUploadError(null)
-    setActiveWorkspaceView('career_cards')
+    openWorkspaceView('career_cards')
+    scrollCareerEditorIntoView()
   }
 
   function resetCareerEditor() {
@@ -445,7 +559,22 @@ export function TeacherHomePage() {
     setCareerForm(createEmptyCareerForm())
     setCareerFormError(null)
     setCareerUploadError(null)
+    scrollCareerEditorIntoView()
   }
+
+  function applyCareerSampleTemplate(template: TeacherCareerFormState) {
+    setEditingCareerCardId(null)
+    setCareerForm({
+      ...template,
+      levels: [...template.levels],
+      steps: template.steps.map((step) => ({ ...step })),
+    })
+    setCareerFormError(null)
+    setCareerUploadError(null)
+    openWorkspaceView('career_cards')
+    scrollCareerEditorIntoView()
+  }
+
   function renderParentOnboarding() {
     if (!showTeacherParentOnboarding) return null
     return (
@@ -473,7 +602,7 @@ export function TeacherHomePage() {
     return (
       <section className="roadmap-panel teacher-clean-hero">
         <div>
-          <button type="button" className="ghost-button" onClick={() => setActiveWorkspaceView('home')}>
+          <button type="button" className="ghost-button" onClick={() => openWorkspaceView('home')}>
             Quay lại
           </button>
 
@@ -497,6 +626,14 @@ export function TeacherHomePage() {
 
             <h2>Bảng điều khiển</h2>
             <p className="helper-text">Chọn đúng mục để vào một màn hình làm việc riêng, không còn bị bó trong các khung nhỏ.</p>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+              <button type="button" className="action-button" onClick={() => openWorkspaceView('career_cards')}>
+                Tạo thẻ nghề nghiệp
+              </button>
+              <button type="button" className="ghost-button" onClick={() => applyCareerSampleTemplate(teacherCareerSampleTemplates[0])}>
+                Dùng mẫu nghề
+              </button>
+            </div>
           </div>
           <div className="teacher-clean-hero-badges">
             <span>ID {teacherId ?? '---'}</span>
@@ -511,6 +648,7 @@ export function TeacherHomePage() {
             { label: 'Phụ huynh', value: parentGroupCount, tone: 'green' },
             { label: 'Báo cáo', value: reportCount, tone: 'gold' },
             { label: 'Chat mới', value: unreadConversationCount, tone: 'coral' },
+            { label: 'Nghề nghiệp', value: careerCardsQuery.data?.length ?? 0, tone: 'green' },
           ].map((item) => (
             <article key={item.label} className={`mini-card teacher-clean-metric teacher-clean-metric-${item.tone}`}>
               <span>{item.label}</span>
@@ -526,7 +664,7 @@ export function TeacherHomePage() {
               type="button"
               className="roadmap-panel"
               style={{ width: '100%', textAlign: 'left', background: 'var(--color-background-primary)' }}
-              onClick={() => setActiveWorkspaceView(item.key)}
+              onClick={() => openWorkspaceView(item.key)}
             >
               <div className="teacher-clean-section-head">
                 <div>
@@ -852,17 +990,25 @@ export function TeacherHomePage() {
             </div>
           </article>
 
-          <article className="roadmap-panel">
+          <article className="roadmap-panel" ref={careerEditorRef}>
             <div className="teacher-clean-section-head">
               <div>
                 <p className="eyebrow">Biên tập</p>
                 <h3>{editingCareerCardId ? 'Cập nhật thẻ nghề nghiệp' : 'Tạo thẻ nghề nghiệp mới'}</h3>
+                {editingCareerCardId ? <p className="helper-text">Form bên dưới đang lấy dữ liệu từ thẻ đã chọn. Sửa nội dung rồi bấm cập nhật để lưu.</p> : null}
               </div>
               {editingCareerCardId ? <span className="subject-pill muted-pill">Đang sửa #{editingCareerCardId}</span> : null}
             </div>
 
             <div className="form-stack">
-              <p className="helper-text">Bắt buộc: tiêu đề, ảnh bìa, video, ý nghĩa công việc, ít nhất 1 bước và 1 kỹ năng.</p>
+              <p className="helper-text">Bắt buộc: tiêu đề, ý nghĩa công việc, ít nhất 1 bước và 1 kỹ năng. Ảnh bìa và video có thể bổ sung sau.</p>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                {teacherCareerSampleTemplates.map((template) => (
+                  <button key={template.title} type="button" className="ghost-button" onClick={() => applyCareerSampleTemplate(template)}>
+                    Mẫu: {template.title}
+                  </button>
+                ))}
+              </div>
               <label>
                 Tiêu đề nghề nghiệp
                 <input value={careerForm.title} onChange={(event) => updateCareerFormField('title', event.target.value)} placeholder="Ví dụ: Làm vườn" />
@@ -927,6 +1073,13 @@ export function TeacherHomePage() {
                   <strong>Xem trước video</strong>
                   {canPreviewCareerVideoInline(careerForm.videoUrl) ? (
                     <video src={careerForm.videoUrl} controls preload="metadata" className="teacher-career-preview-video" />
+                  ) : getCareerPreviewEmbedUrl(careerForm.videoUrl) ? (
+                    <iframe
+                      src={getCareerPreviewEmbedUrl(careerForm.videoUrl)}
+                      title={`Xem trước ${careerForm.title || 'nghề nghiệp'}`}
+                      className="teacher-career-preview-video"
+                      style={{ border: 0 }}
+                    />
                   ) : (
                     <a href={careerForm.videoUrl} target="_blank" rel="noreferrer" className="ghost-button" style={{ width: 'fit-content' }}>
                       Mở link video để kiểm tra

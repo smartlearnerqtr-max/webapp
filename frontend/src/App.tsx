@@ -15,6 +15,7 @@ const loadStudentHomePage = () => import('./pages/StudentHomePage')
 const loadStudentsPage = () => import('./pages/StudentsPage')
 const loadClassesPage = () => import('./pages/ClassesPage')
 const loadLessonsPage = () => import('./pages/LessonsPage')
+const loadSimulationsPage = () => import('./pages/SimulationsPage')
 const loadProgressPage = () => import('./pages/ProgressPage')
 const loadParentPage = () => import('./pages/ParentPage')
 const loadAISettingsPage = () => import('./pages/AISettingsPage')
@@ -26,6 +27,7 @@ const StudentHomePage = lazy(() => loadStudentHomePage().then((module) => ({ def
 const StudentsPage = lazy(() => loadStudentsPage().then((module) => ({ default: module.StudentsPage })))
 const ClassesPage = lazy(() => loadClassesPage().then((module) => ({ default: module.ClassesPage })))
 const LessonsPage = lazy(() => loadLessonsPage().then((module) => ({ default: module.LessonsPage })))
+const SimulationsPage = lazy(() => loadSimulationsPage().then((module) => ({ default: module.SimulationsPage })))
 const ProgressPage = lazy(() => loadProgressPage().then((module) => ({ default: module.ProgressPage })))
 const ParentPage = lazy(() => loadParentPage().then((module) => ({ default: module.ParentPage })))
 const AISettingsPage = lazy(() => loadAISettingsPage().then((module) => ({ default: module.AISettingsPage })))
@@ -38,21 +40,24 @@ const routeChunkPreloadMap: Record<string, () => Promise<unknown>> = {
   '/hoc-sinh': loadStudentsPage,
   '/lop-hoc': loadClassesPage,
   '/bai-hoc': loadLessonsPage,
+  '/mo-phong': loadSimulationsPage,
   '/tien-do': loadProgressPage,
   '/phu-huynh': loadParentPage,
   '/cai-dat-ai': loadAISettingsPage,
 }
 
-const navItemsByRole: Record<string, Array<{ to: string; label: string; matchTab?: string }>> = {
+const navItemsByRole: Record<string, Array<{ to: string; label: string; matchTab?: string; matchQuery?: { key: string; value: string } }>> = {
   admin: [
     { to: '/admin', label: 'Admin' },
     { to: '/cai-dat-ai', label: 'AI' },
   ],
   teacher: [
-    { to: '/giao-vien', label: 'Nhà' },
+    { to: '/giao-vien', label: 'Nhà', matchQuery: { key: 'view', value: '' } },
     { to: '/hoc-sinh', label: 'HS' },
     { to: '/lop-hoc', label: 'Lớp' },
     { to: '/bai-hoc', label: 'Bài' },
+    { to: '/mo-phong', label: 'Mô phỏng' },
+    { to: '/giao-vien?view=career_cards', label: 'Nghề', matchQuery: { key: 'view', value: 'career_cards' } },
     { to: '/tien-do', label: 'Tiến độ' },
   ],
   student: [
@@ -125,9 +130,13 @@ function App() {
     void prefetchRouteData(queryClient, routePath, accessToken)
   }
 
-  function isNavItemActive(targetRoute: string, matchTab?: string) {
+  function isNavItemActive(targetRoute: string, matchTab?: string, matchQuery?: { key: string; value: string }) {
     const [pathname] = targetRoute.split('?')
     if (location.pathname !== pathname) return false
+    if (matchQuery) {
+      const currentValue = new URLSearchParams(location.search).get(matchQuery.key) ?? ''
+      return currentValue === matchQuery.value
+    }
     if (matchTab === undefined) return true
     const currentTab = new URLSearchParams(location.search).get('tab') ?? ''
     return currentTab === matchTab
@@ -166,7 +175,7 @@ function App() {
             <NavLink
               key={item.to}
               to={item.to}
-              className={isNavItemActive(item.to, item.matchTab) ? 'nav-item nav-item-active' : 'nav-item'}
+              className={isNavItemActive(item.to, item.matchTab, item.matchQuery) ? 'nav-item nav-item-active' : 'nav-item'}
               onClick={() => setIsMenuOpen(false)}
               onMouseEnter={() => handleNavPrefetch(item.to)}
               onFocus={() => handleNavPrefetch(item.to)}
@@ -204,6 +213,7 @@ function App() {
             <Route path="/hoc-sinh" element={<StudentsPage />} />
             <Route path="/lop-hoc" element={<ClassesPage />} />
             <Route path="/bai-hoc" element={<LessonsPage />} />
+            <Route path="/mo-phong" element={<SimulationsPage />} />
             <Route path="/tien-do" element={<ProgressPage />} />
             <Route path="/phu-huynh" element={<ParentPage />} />
             <Route path="/cai-dat-ai" element={<AISettingsPage />} />
