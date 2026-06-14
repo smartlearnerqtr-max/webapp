@@ -47,46 +47,46 @@ export const studentTabCopyMap: Record<StudentPanelKey, { title: string; descrip
 }
 
 export const studentSubjectCatalog: StudentSubjectMeta[] = [
-  { key: 'toan-hoc', label: 'Toán học', artworkUrl: '/ichan/subjects/toan-hoc.png', aliases: ['toan hoc', 'so hoc', 'toan'] },
-  { key: 'ngu-van', label: 'Ngữ văn', artworkUrl: '/ichan/subjects/ngu-van.png', aliases: ['ngu van', 'van hoc', 'van'] },
-  { key: 'tieng-anh', label: 'Tiếng Anh', artworkUrl: '/ichan/subjects/tieng-anh.png', aliases: ['tieng anh', 'english', 'anh van'] },
+  { key: 'toan-hoc', label: 'Toán học', artworkUrl: '/ichan/subjects/toan-hoc.jpg', aliases: ['toan hoc', 'so hoc', 'toan'] },
+  { key: 'ngu-van', label: 'Ngữ văn', artworkUrl: '/ichan/subjects/ngu-van.jpg', aliases: ['ngu van', 'van hoc', 'van'] },
+  { key: 'tieng-anh', label: 'Tiếng Anh', artworkUrl: '/ichan/subjects/tieng-anh.jpg', aliases: ['tieng anh', 'english', 'anh van'] },
   {
     key: 'khoa-hoc-tu-nhien',
     label: 'Khoa học tự nhiên',
-    artworkUrl: '/ichan/subjects/khoa-hoc-tu-nhien.png',
+    artworkUrl: '/ichan/subjects/khoa-hoc-tu-nhien.jpg',
     aliases: ['khoa hoc tu nhien', 'khtn', 'dong vat', 'thuc vat'],
   },
-  { key: 'cong-nghe', label: 'Công nghệ', artworkUrl: '/ichan/subjects/cong-nghe.png', aliases: ['cong nghe', 'ky thuat'] },
-  { key: 'tin-hoc', label: 'Tin học', artworkUrl: '/ichan/subjects/tin-hoc.png', aliases: ['tin hoc', 'may tinh'], comingSoon: true },
+  { key: 'cong-nghe', label: 'Công nghệ', artworkUrl: '/ichan/subjects/cong-nghe.jpg', aliases: ['cong nghe', 'ky thuat'] },
+  { key: 'tin-hoc', label: 'Tin học', artworkUrl: '/ichan/subjects/tin-hoc.jpg', aliases: ['tin hoc', 'may tinh'], comingSoon: true },
   {
     key: 'lich-su-dia-ly',
     label: 'Lịch sử - Địa lý',
-    artworkUrl: '/ichan/subjects/lich-su-dia-ly.png',
+    artworkUrl: '/ichan/subjects/lich-su-dia-ly.jpg',
     aliases: ['lich su dia ly', 'lich su', 'dia ly', 'viet nam'],
   },
   {
     key: 'giao-duc-cong-dan',
     label: 'Giáo dục công dân',
-    artworkUrl: '/ichan/subjects/giao-duc-cong-dan.png',
+    artworkUrl: '/ichan/subjects/giao-duc-cong-dan.jpg',
     aliases: ['giao duc cong dan', 'gdcd', 'cong dan'],
   },
   {
     key: 'giao-duc-dia-phuong',
     label: 'Giáo dục địa phương',
-    artworkUrl: '/ichan/subjects/giao-duc-dia-phuong.png',
+    artworkUrl: '/ichan/subjects/giao-duc-dia-phuong.jpg',
     aliases: ['giao duc dia phuong', 'dia phuong'],
     comingSoon: true,
   },
   {
     key: 'hoat-dong-trai-nghiem',
     label: 'Hoạt động trải nghiệm',
-    artworkUrl: '/ichan/subjects/hoat-dong-trai-nghiem.png',
+    artworkUrl: '/ichan/subjects/hoat-dong-trai-nghiem.jpg',
     aliases: ['hoat dong trai nghiem', 'trai nghiem'],
     comingSoon: true,
   },
-  { key: 'ky-nang-song', label: 'Kỹ năng sống', artworkUrl: '/ichan/subjects/ky-nang-song.png', aliases: ['ky nang song', 'tu phuc vu', 'giao tiep lich su'] },
-  { key: 'my-thuat', label: 'Mỹ thuật', artworkUrl: '/ichan/subjects/my-thuat.png', aliases: ['my thuat', 've', 've tranh'] },
-  { key: 'am-nhac', label: 'Âm nhạc', artworkUrl: '/ichan/subjects/am-nhac.png', aliases: ['am nhac', 'hat'], comingSoon: true },
+  { key: 'ky-nang-song', label: 'Kỹ năng sống', artworkUrl: '/ichan/subjects/ky-nang-song.jpg', aliases: ['ky nang song', 'tu phuc vu', 'giao tiep lich su'] },
+  { key: 'my-thuat', label: 'Mỹ thuật', artworkUrl: '/ichan/subjects/my-thuat.jpg', aliases: ['my thuat', 've', 've tranh'] },
+  { key: 'am-nhac', label: 'Âm nhạc', artworkUrl: '/ichan/subjects/am-nhac.jpg', aliases: ['am nhac', 'hat'], comingSoon: true },
 ]
 
 export const studentGameCatalog: StudentGameMeta[] = [
@@ -119,7 +119,7 @@ export const studentGameCatalog: StudentGameMeta[] = [
     label: 'Xếp hình di tích',
     description: 'Ghép 4 mảnh để hoàn thành bức ảnh di tích.',
     activityType: 'image_puzzle',
-    artworkUrl: '/ichan/subjects/lich-su-dia-ly.png',
+    artworkUrl: '/ichan/subjects/lich-su-dia-ly.jpg',
     levels: ['trung_binh'],
   },
   {
