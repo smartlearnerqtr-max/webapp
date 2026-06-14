@@ -10,7 +10,7 @@ type AuthMode = 'login' | 'register'
 type RegisterRole = 'student' | 'parent'
 
 function resolvePostRegisterRoute(role: RegisterRole) {
-  if (role === 'student') return '/hoc-tap?tab=settings&setup=1'
+  if (role === 'student') return '/hoc-tap'
   return '/phu-huynh?setup=1'
 }
 

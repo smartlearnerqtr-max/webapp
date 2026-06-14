@@ -43,6 +43,7 @@ import type { CommunicationCard } from './studentHomeDeferredContent'
 
 const studentBackgroundImageUrl = '/student-ui/anh4.jpg'
 const LEARNING_CELL_SIMULATION_URL = '/simulations/learning-cell/index.html'
+const SETTINGS_PANEL_DISABLED = false
 
 const KHTN_SIMULATION_MODELS = [
   { id: 'plant-cell', label: 'Tế bào thực vật' },
@@ -1170,7 +1171,12 @@ export function StudentHomePage() {
     }
   }, [showSimulationModal])
   const [selectedCareerKey, setSelectedCareerKey] = useState<string | null>(null)
-  const [activePanel, setActivePanel] = useState<StudentPanelKey>('learning')
+  const [activePanel, setActivePanel] = useState<StudentPanelKey>(() => {
+    const requestedPanel = searchParams.get('tab')
+    return requestedPanel === 'ai' || requestedPanel === 'communication' || requestedPanel === 'settings' || requestedPanel === 'learning'
+      ? requestedPanel
+      : 'learning'
+  })
   const [joinClassId, setJoinClassId] = useState('')
   const [joinClassPassword, setJoinClassPassword] = useState('')
   const [completedLessonTitle, setCompletedLessonTitle] = useState('')
@@ -1617,7 +1623,6 @@ export function StudentHomePage() {
   )
   const heroLessonTitle = sanitizeStudentFacingText(detail?.lesson?.title ?? completedLessonTitle, 'Hôm nay học gì?')
   const requestedPanel = searchParams.get('tab')
-  const setupIntent = searchParams.get('setup') === '1'
   const resolvedPanel: StudentPanelKey =
     requestedPanel === 'ai' || requestedPanel === 'communication' || requestedPanel === 'settings' || requestedPanel === 'learning'
       ? requestedPanel
@@ -1673,13 +1678,6 @@ export function StudentHomePage() {
       setActivePanel(resolvedPanel)
     }
   }, [activePanel, resolvedPanel])
-
-  useEffect(() => {
-    if (!hasCompletedEntryGate || !isStudentSetupPending) return
-    if (!setupIntent && requestedPanel) return
-    if (activePanel === 'settings') return
-    handleStudentPanelChange('settings')
-  }, [activePanel, hasCompletedEntryGate, isStudentSetupPending, requestedPanel, setupIntent])
 
   const answers = useMemo<StudentAnswerState>(() => ({
     choiceAnswers,
@@ -1996,6 +1994,7 @@ export function StudentHomePage() {
   }, [token])
 
   useEffect(() => {
+    if (SETTINGS_PANEL_DISABLED) return
     if (!user?.id || user.role !== 'student') return
 
     const nextFeedItems = buildStudentFeedItems({
@@ -3156,7 +3155,24 @@ export function StudentHomePage() {
     </section>
   )
 
-  const renderIchanSettingsPanel = () => (
+  const renderIchanSettingsPanel = () => {
+    if (SETTINGS_PANEL_DISABLED) {
+      return (
+        <section className="ichan-layout">
+          <article className="student-visual-panel ichan-section">
+            <div className="student-visual-section-head">
+              <div>
+                <p className="eyebrow">Cai dat</p>
+                <h3 className="ichan-section-title">Tam tat giao dien cai dat</h3>
+              </div>
+            </div>
+            <p className="helper-text">Panel settings dang duoc tat o frontend de kiem tra hien tuong giat lag.</p>
+          </article>
+        </section>
+      )
+    }
+
+    return (
     <section className="ichan-layout">
       <section className="ichan-summary-grid" aria-label="Tổng quan học sinh">
         <article className="student-visual-glass-card">
@@ -3227,6 +3243,7 @@ export function StudentHomePage() {
       </article>
     </section>
   )
+  }
 
   const renderStudentEntryGate = () => (
     <section className="student-entry-gate" aria-label="Chọn mức độ hỗ trợ">
@@ -3261,6 +3278,19 @@ export function StudentHomePage() {
       </div>
     </section>
   )
+
+  const renderActivePanel = () => {
+    if (activePanel === 'ai') return renderIchanAiPanel()
+    if (activePanel === 'communication') return renderIchanCommunicationPanel()
+    if (activePanel === 'settings') return renderIchanSettingsPanel()
+    if (activePanel !== 'learning') return null
+
+    if (selectedCareerCard) return renderIchanCareerDetailPage()
+    if (activeStandaloneGameType) return renderIchanStandaloneGamePage()
+    if (detail) return renderIchanLessonStage()
+    if (selectedSubjectCard) return renderIchanSubjectAssignmentsPage()
+    return renderIchanLearningHub()
+  }
 
   return (
     <RequireAuth allowedRoles={['student']}>
@@ -3336,23 +3366,7 @@ export function StudentHomePage() {
           </section>
         ) : null}
 
-        {activePanel === 'learning'
-          ? selectedCareerCard
-            ? null
-            : activeStandaloneGameType
-            ? null
-            : detail
-            ? null
-            : selectedSubjectCard
-              ? renderIchanSubjectAssignmentsPage()
-              : renderIchanLearningHub()
-          : null}
-        {activePanel === 'ai' ? renderIchanAiPanel() : null}
-        {activePanel === 'communication' ? renderIchanCommunicationPanel() : null}
-        {activePanel === 'settings' ? renderIchanSettingsPanel() : null}
-        {activePanel === 'learning' && selectedCareerCard ? renderIchanCareerDetailPage() : null}
-        {activePanel === 'learning' && activeStandaloneGameType ? renderIchanStandaloneGamePage() : null}
-        {activePanel === 'learning' && !selectedCareerCard && !activeStandaloneGameType ? renderIchanLessonStage() : null}
+        {renderActivePanel()}
 
         {(startMutation.error || completeMutation.error) ? (
           <p className="error-text student-visual-floating-error">
