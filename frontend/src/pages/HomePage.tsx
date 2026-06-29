@@ -2,12 +2,19 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { login, registerAccount } from '../services/api'
+import { fetchHealth, login, registerAccount } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { getDefaultRouteForRole } from '../utils/roleRoutes'
 
 type AuthMode = 'login' | 'register'
 type RegisterRole = 'student' | 'parent'
+
+const postAuthRoutePreloaders = [
+  () => import('./AdminPage'),
+  () => import('./TeacherHomePage'),
+  () => import('./StudentHomePage'),
+  () => import('./ParentPage'),
+]
 
 function resolvePostRegisterRoute(role: RegisterRole) {
   if (role === 'student') return '/hoc-tap'
@@ -41,6 +48,28 @@ export function HomePage() {
       navigate(getDefaultRouteForRole(user.role), { replace: true })
     }
   }, [navigate, user])
+
+  useEffect(() => {
+    void fetchHealth().catch(() => undefined)
+
+    const warmRoutes = () => {
+      for (const preloadRoute of postAuthRoutePreloaders) {
+        void preloadRoute().catch(() => undefined)
+      }
+    }
+
+    const windowWithIdleCallback = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number
+      cancelIdleCallback?: (handle: number) => void
+    }
+    if (windowWithIdleCallback.requestIdleCallback) {
+      const idleHandle = windowWithIdleCallback.requestIdleCallback(warmRoutes, { timeout: 2000 })
+      return () => windowWithIdleCallback.cancelIdleCallback?.(idleHandle)
+    }
+
+    const timeoutHandle = window.setTimeout(warmRoutes, 1200)
+    return () => window.clearTimeout(timeoutHandle)
+  }, [])
 
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

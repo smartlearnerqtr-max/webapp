@@ -599,6 +599,20 @@ export type AdminRelationshipOverview = {
   }>
 }
 
+export type AdminRecoverableAccountItem = {
+  user: AuthUser
+  profile: Record<string, unknown> | null
+  full_name: string | null
+  username: string | null
+  can_login: boolean
+}
+
+export type AdminRecoverAccountResponse = {
+  account: AdminRecoverableAccountItem
+  username: string
+  temporary_password: string
+}
+
 export type TeacherSharedStudentItem = {
   student: StudentItem
   teachers: Array<{
@@ -689,6 +703,18 @@ export async function fetchAdminTeachers(token: string): Promise<AdminTeacherIte
 
 export async function fetchAdminRelationshipOverview(token: string): Promise<AdminRelationshipOverview> {
   return request<AdminRelationshipOverview>('/api/v1/admin/relationships/overview', { token })
+}
+
+export async function fetchAdminRecoverableAccounts(token: string): Promise<AdminRecoverableAccountItem[]> {
+  return request<AdminRecoverableAccountItem[]>('/api/v1/admin/account-recovery', { token })
+}
+
+export async function recoverAdminAccount(token: string, userId: number, payload: { temporary_password?: string }) {
+  return request<AdminRecoverAccountResponse>(`/api/v1/admin/users/${userId}/recover`, {
+    method: 'POST',
+    token,
+    body: payload,
+  })
 }
 
 export async function createTeacherByAdmin(token: string, payload: {

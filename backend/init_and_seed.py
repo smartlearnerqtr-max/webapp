@@ -4,17 +4,21 @@ import os
 import subprocess
 import sys
 import time
+import hashlib
 from pathlib import Path
 
+from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from app import create_app
 from app.extensions import db
 from app.services.seed_service import seed_admin_user, seed_subjects, seed_visual_support_demo_bundle
+from json_snapshot import DEFAULT_SNAPSHOT_PATH, restore_snapshot
 from sync_local_db import DEFAULT_SOURCE_URL, sync_databases
 
 app = create_app()
 BASE_DIR = Path(__file__).resolve().parent
+SNAPSHOT_MARKER_PATH = BASE_DIR / 'instance' / 'demo_snapshot.sha256'
 
 
 def _int_env(name: str, default: int) -> int:
@@ -83,6 +87,42 @@ def _maybe_sync_deploy_snapshot() -> None:
         print("Continuing startup without deploy snapshot because SYNC_DEPLOY_SNAPSHOT_REQUIRED is false.")
 
 
+def _maybe_restore_json_snapshot() -> None:
+    if not _bool_env("JSON_SNAPSHOT_RESTORE", False):
+        return
+
+    snapshot_path = Path(os.getenv("JSON_SNAPSHOT_PATH", str(DEFAULT_SNAPSHOT_PATH)))
+    if not snapshot_path.is_absolute():
+        snapshot_path = BASE_DIR / snapshot_path
+
+    if not snapshot_path.exists():
+        message = f"JSON snapshot restore is enabled but snapshot is missing: {snapshot_path}"
+        if _bool_env("JSON_SNAPSHOT_REQUIRED", True):
+            raise FileNotFoundError(message)
+        print(message)
+        print("Continuing startup without JSON snapshot because JSON_SNAPSHOT_REQUIRED is false.")
+        return
+
+    snapshot_hash = hashlib.sha256(snapshot_path.read_bytes()).hexdigest()
+    previous_hash = SNAPSHOT_MARKER_PATH.read_text(encoding="utf-8").strip() if SNAPSHOT_MARKER_PATH.exists() else ""
+    force_restore = _bool_env("JSON_SNAPSHOT_FORCE_RESTORE", False)
+    try:
+        user_count = db.session.execute(text("SELECT COUNT(*) FROM users")).scalar_one()
+    except Exception:
+        user_count = 0
+
+    if not force_restore and previous_hash == snapshot_hash and user_count:
+        print("JSON snapshot is already restored. Skipping restore.")
+        return
+
+    print(f"JSON snapshot restore is enabled. Restoring {snapshot_path}...")
+    row_counts = restore_snapshot(snapshot_path)
+    total_rows = sum(row_counts.values())
+    SNAPSHOT_MARKER_PATH.parent.mkdir(parents=True, exist_ok=True)
+    SNAPSHOT_MARKER_PATH.write_text(snapshot_hash, encoding="utf-8")
+    print(f"JSON snapshot restore completed. Total rows restored: {total_rows}")
+
+
 def run_init_and_seed() -> None:
     max_attempts = _int_env("DB_INIT_MAX_ATTEMPTS", 10)
     retry_delay = _int_env("DB_INIT_RETRY_DELAY_SECONDS", 3)
@@ -93,6 +133,7 @@ def run_init_and_seed() -> None:
                 print(f"Preparing database (attempt {attempt}/{max_attempts})...")
                 db.create_all()
                 _maybe_sync_deploy_snapshot()
+                _maybe_restore_json_snapshot()
                 subjects_created = seed_subjects()
                 admin = seed_admin_user()
                 print("Database ready.")

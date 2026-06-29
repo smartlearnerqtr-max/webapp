@@ -3,9 +3,11 @@ from __future__ import annotations
 from flask import request
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
+from ....extensions import db
 from ....models import TeacherParentStudentLink, TeacherStudentLink, User
 from ....services.auth_service import create_teacher_user
 from ....services.logger import log_server_event
+from ....utils.security import hash_password
 from ....utils.responses import error_response, success_response
 from .. import api_v1
 
@@ -26,6 +28,22 @@ def _build_teacher_payload(teacher_user: User) -> dict[str, object]:
     }
 
 
+def _account_username(user: User) -> str | None:
+    return user.email or user.phone
+
+
+def _build_recovery_account_payload(user: User) -> dict[str, object]:
+    profile = user.teacher_profile if user.role == 'teacher' else user.student_profile
+    profile_payload = profile.to_dict() if profile else None
+    return {
+        'user': user.to_dict(),
+        'profile': profile_payload,
+        'full_name': profile_payload.get('full_name') if profile_payload else None,
+        'username': _account_username(user),
+        'can_login': bool(_account_username(user)),
+    }
+
+
 @api_v1.get('/admin/teachers')
 @jwt_required()
 def list_teachers():
@@ -38,6 +56,25 @@ def list_teachers():
     teachers = query.order_by(User.created_at.desc()).all()
     payload = [_build_teacher_payload(teacher) for teacher in teachers]
     return success_response(payload)
+
+
+@api_v1.get('/admin/account-recovery')
+@jwt_required()
+def list_recoverable_accounts():
+    _user, error = _require_admin_user()
+    if error:
+        return error
+
+    query = User.query.filter(User.role.in_(('teacher', 'student')))
+    role = (request.args.get('role') or '').strip()
+    status = (request.args.get('status') or '').strip()
+    if role in {'teacher', 'student'}:
+        query = query.filter_by(role=role)
+    if status:
+        query = query.filter_by(status=status)
+
+    accounts = query.order_by(User.role.asc(), User.created_at.desc()).all()
+    return success_response([_build_recovery_account_payload(account) for account in accounts])
 
 
 @api_v1.get('/admin/relationships/overview')
@@ -112,3 +149,42 @@ def create_teacher():
 
     log_server_event(level='info', module='admin', message='Admin tạo tài khoản giáo viên', action_name='admin_create_teacher', user_id=user.id, metadata={'teacher_user_id': created_payload['user']['id']})
     return success_response(created_payload, 'Tạo tài khoản giáo viên thành công', 201)
+
+
+@api_v1.post('/admin/users/<int:user_id>/recover')
+@jwt_required()
+def recover_account(user_id: int):
+    admin_user, error = _require_admin_user()
+    if error:
+        return error
+
+    target_user = User.query.get(user_id)
+    if not target_user or target_user.role not in {'teacher', 'student'}:
+        return error_response('Không tìm thấy tài khoản giáo viên hoặc học sinh', 'USER_NOT_FOUND', 404)
+
+    username = _account_username(target_user)
+    if not username:
+        return error_response('Tài khoản này chưa có email hoặc số điện thoại để đăng nhập', 'USERNAME_MISSING', 422)
+
+    payload = request.get_json(silent=True) or {}
+    temporary_password = (payload.get('temporary_password') or 'Demo123456').strip()
+    if len(temporary_password) < 6:
+        return error_response('Mật khẩu tạm thời cần tối thiểu 6 ký tự', 'VALIDATION_ERROR', 422)
+
+    target_user.password_hash = hash_password(temporary_password)
+    target_user.status = 'active'
+    db.session.commit()
+
+    log_server_event(
+        level='warning',
+        module='admin',
+        message='Admin khôi phục mật khẩu tài khoản',
+        action_name='admin_recover_account',
+        user_id=admin_user.id,
+        metadata={'target_user_id': target_user.id, 'target_role': target_user.role},
+    )
+    return success_response({
+        'account': _build_recovery_account_payload(target_user),
+        'username': username,
+        'temporary_password': temporary_password,
+    }, 'Khôi phục tài khoản thành công')
