@@ -308,7 +308,7 @@
       {
         "id": 22,
         "email": "tranphuonguyen@gmail.com",
-        "phone": null,
+        "phone": "2026006",
         "password_hash": "pbkdf2:sha256:1000000$p30SjD3Umzq3hH61$37787850540fc898110f4a9ae58cc5153380a3fea1ca8ddd9d094540549725d0",
         "role": "student",
         "status": "active",
@@ -338,7 +338,7 @@
       {
         "id": 25,
         "email": "phanphilong@gmail.com",
-        "phone": null,
+        "phone": "2026007",
         "password_hash": "pbkdf2:sha256:1000000$MEeLvys0vxNwrX8V$9ae22954ddc794af7399a2698cee60dbb2fadee0f6e4c6ad436301e9d8d7a067",
         "role": "student",
         "status": "active",
@@ -368,7 +368,7 @@
       {
         "id": 28,
         "email": "tranthanhquy@gmail.com",
-        "phone": null,
+        "phone": "2026008",
         "password_hash": "pbkdf2:sha256:1000000$lcgrTlAjkkwsrxt5$307a2d199c95f9b196edd2426a5c309ff0d355e5245c473ef90397975dbd7d6c",
         "role": "student",
         "status": "active",
@@ -398,7 +398,7 @@
       {
         "id": 31,
         "email": "trancongminh@gmail.com",
-        "phone": null,
+        "phone": "2026009",
         "password_hash": "pbkdf2:sha256:1000000$9DTqgeBh7qyFxBp3$06c886ca544f4d1e4f0f7373c356a5d431b9442a798b381b3b7d7f7875e34991",
         "role": "student",
         "status": "active",
@@ -418,7 +418,7 @@
       {
         "id": 33,
         "email": "nguyendangkhoi@gmail.com",
-        "phone": null,
+        "phone": "2026010",
         "password_hash": "pbkdf2:sha256:1000000$rruWbYw1AR6tQRkN$aa57d4bbfaaeb314245005a5378853ec961965b646c4c418a4bd556f7c2729c0",
         "role": "student",
         "status": "active",
@@ -438,7 +438,7 @@
       {
         "id": 35,
         "email": "lenguyenhoanganh@gmail.com",
-        "phone": null,
+        "phone": "2026011",
         "password_hash": "pbkdf2:sha256:1000000$49vPNjZqS2W8FMcW$c93db28fb3b5429185f04d60b2ca9a067d386f008ef643ccd43af6de8237d184",
         "role": "student",
         "status": "active",
@@ -458,7 +458,7 @@
       {
         "id": 37,
         "email": "vuducanh@gmail.com",
-        "phone": null,
+        "phone": "2026012",
         "password_hash": "pbkdf2:sha256:1000000$ivHl7jE3dqxXikuK$8f634085618fddd48ba4687a4883902f0eff14c2bf5e9f540c90a2009b21361e",
         "role": "student",
         "status": "active",
@@ -478,7 +478,7 @@
       {
         "id": 39,
         "email": "nguyenthiminhanh@gmail.com",
-        "phone": null,
+        "phone": "2026013",
         "password_hash": "pbkdf2:sha256:1000000$3jh0d6nu9mvRNIvp$aa4b74b3248f91839225a4d2d1d52d5d9245b5b32f81ab4a3130e37e8bce0056",
         "role": "student",
         "status": "active",
@@ -498,7 +498,7 @@
       {
         "id": 41,
         "email": "trannguyenthienphuc@gmail.com",
-        "phone": null,
+        "phone": "2026014",
         "password_hash": "pbkdf2:sha256:1000000$U4R4U6p5Wv2mRsxS$4ac9f90b7dc42b943d973dfe5ae1260b71287b74f2501e255e98866309445432",
         "role": "student",
         "status": "active",
@@ -518,7 +518,7 @@
       {
         "id": 43,
         "email": "lengocnhuy.qtr@gmail.com",
-        "phone": null,
+        "phone": "2026015",
         "password_hash": "pbkdf2:sha256:1000000$9zAmZJXwUaM8jVr2$40a982a9301f996706ae6d7427df9682a2152cd3cb992a1f4e55aa9b8b5f40f5",
         "role": "student",
         "status": "active",
@@ -538,7 +538,7 @@
       {
         "id": 45,
         "email": "phongngocthienngan.qtr@gmail.com",
-        "phone": null,
+        "phone": "2026016",
         "password_hash": "pbkdf2:sha256:1000000$nd91mbhgkNIMUK0K$5145c9210df982843c34abf789ac7d86b13fe6343474e29da7e36a613d79b220",
         "role": "student",
         "status": "active",
@@ -558,7 +558,7 @@
       {
         "id": 47,
         "email": "nguyenngockimngan.qtr@gmail.com",
-        "phone": null,
+        "phone": "2026017",
         "password_hash": "pbkdf2:sha256:1000000$Lw5XSF8ZMCSQahda$b6a320ca34b38dea97a5b97fff7b1598d4d6a3b2ffbd3e6d0c30001926ffa369",
         "role": "student",
         "status": "active",

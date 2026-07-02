@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import {
   addStudentsToClass,
+  addStudentBatchToClass,
   addSubjectToClass,
   createClass,
   fetchClasses,
@@ -49,6 +50,7 @@ export function ClassesPage() {
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null)
   const [selectedStudentId, setSelectedStudentId] = useState('')
   const [selectedSubjectId, setSelectedSubjectId] = useState('')
+  const [studentBatchCode, setStudentBatchCode] = useState('')
 
   const classesQuery = useQuery({
     queryKey: ['classes', token],
@@ -133,6 +135,18 @@ export function ClassesPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['classes', token] }),
         queryClient.invalidateQueries({ queryKey: ['class-subjects', token, resolvedSelectedClassId] }),
+      ])
+    },
+  })
+
+  const addStudentBatchMutation = useMutation({
+    mutationFn: () => addStudentBatchToClass(token!, resolvedSelectedClassId!, { batch_code: studentBatchCode.trim().toUpperCase() }),
+    onSuccess: async () => {
+      setStudentBatchCode('')
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['classes', token] }),
+        queryClient.invalidateQueries({ queryKey: ['class-students', token, resolvedSelectedClassId] }),
+        queryClient.invalidateQueries({ queryKey: ['students', token] }),
       ])
     },
   })
@@ -308,6 +322,33 @@ export function ClassesPage() {
                 </div>
               ))}
               {!classStudentsQuery.data?.length && !classStudentsQuery.isLoading && <p className="helper-text">Lớp chưa có học sinh.</p>}
+            </div>
+
+            <div className="config-card" style={{ marginTop: '1.5rem', border: '1px solid #dbeafe', background: '#eff6ff' }}>
+              <strong>Thêm cả danh sách từ admin</strong>
+              <p className="helper-text">Nhập mã lô 9 ký tự do admin cấp, ví dụ ABXCG12AF. Toàn bộ học sinh trong danh sách sẽ được thêm vào lớp này.</p>
+              <div className="form-stack" style={{ marginTop: '1rem' }}>
+                <input
+                  value={studentBatchCode}
+                  onChange={(event) => setStudentBatchCode(event.target.value.toUpperCase())}
+                  placeholder="Nhập mã danh sách..."
+                  maxLength={9}
+                />
+                <button
+                  className="action-button"
+                  type="button"
+                  onClick={() => addStudentBatchMutation.mutate()}
+                  disabled={!resolvedSelectedClassId || studentBatchCode.trim().length !== 9 || addStudentBatchMutation.isPending}
+                >
+                  {addStudentBatchMutation.isPending ? 'Đang thêm danh sách...' : 'Thêm danh sách vào lớp'}
+                </button>
+                {addStudentBatchMutation.data ? (
+                  <p className="helper-text">
+                    Đã thêm mới {addStudentBatchMutation.data.added_count} học sinh, {addStudentBatchMutation.data.existing_count} học sinh đã có sẵn trong lớp.
+                  </p>
+                ) : null}
+                {addStudentBatchMutation.error ? <p className="error-text">{(addStudentBatchMutation.error as Error).message}</p> : null}
+              </div>
             </div>
 
             <details className="config-card" style={{ marginTop: '1.5rem', border: 'none', background: '#f8f9fa' }}>

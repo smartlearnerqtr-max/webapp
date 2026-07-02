@@ -7,7 +7,7 @@ from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 from sqlalchemy.orm import joinedload
 
 from ....extensions import db
-from ....models import ClassJoinCredential, ClassStudent, Classroom, StudentProfile, User
+from ....models import ClassJoinCredential, ClassStudent, Classroom, StudentAccountBatch, StudentProfile, User
 from ....services.assignment_delivery_service import ensure_student_has_active_assignments
 from ....services.logger import log_server_event
 from ....services.realtime_service import publish_realtime_event
@@ -307,6 +307,14 @@ def add_students_to_class(class_id: int):
             {'student_ids': invalid_student_ids},
         )
 
+    student_levels = {student.disability_level for student in students_by_id.values() if student.disability_level}
+    if len(student_levels) > 1:
+        return error_response('Chỉ được thêm học sinh cùng một mức độ vào một lớp.', 'MIXED_LEVEL_CLASS_STUDENTS', 422)
+    if classroom.default_disability_level and student_levels and classroom.default_disability_level not in student_levels:
+        return error_response('Mức độ của học sinh không khớp với mức độ của lớp.', 'CLASS_LEVEL_MISMATCH', 422)
+    if not classroom.default_disability_level and len(student_levels) == 1:
+        classroom.default_disability_level = next(iter(student_levels))
+
     auto_assignment_count = 0
     for sid in unique_student_ids:
         student = students_by_id[sid]
@@ -333,6 +341,79 @@ def add_students_to_class(class_id: int):
     db.session.commit()
     log_server_event(level='info', module='classes', message='Thêm học sinh vào lớp', action_name='add_students_to_class', user_id=user.id, metadata={'class_id': class_id, 'student_ids': unique_student_ids})
     return success_response([link.to_dict() for link in links], 'Thêm học sinh vào lớp thành công', 201)
+
+
+@api_v1.post('/classes/<int:class_id>/student-batches/join')
+@jwt_required()
+def add_student_batch_to_class(class_id: int):
+    user, error = _require_teacher_user()
+    if error:
+        return error
+
+    classroom = Classroom.query.get(class_id)
+    if not classroom or classroom.teacher_id != user.teacher_profile.id:
+        return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
+
+    payload = request.get_json(silent=True) or {}
+    batch_code = (payload.get('batch_code') or '').strip().upper()
+    if not batch_code:
+        return error_response('Vui lòng nhập mã danh sách học sinh', 'VALIDATION_ERROR', 422)
+
+    batch = StudentAccountBatch.query.filter_by(code=batch_code, status='active').first()
+    if not batch:
+        return error_response('Mã danh sách học sinh không tồn tại hoặc đã bị khóa', 'STUDENT_BATCH_NOT_FOUND', 404)
+
+    active_members = [member for member in batch.members if member.status == 'active' and member.student]
+    batch_levels = {member.student.disability_level for member in active_members if member.student.disability_level}
+    if len(batch_levels) > 1:
+        return error_response('Danh sách học sinh này có nhiều mức độ. Vui lòng tách thành từng danh sách nhẹ, trung bình hoặc nặng.', 'MIXED_LEVEL_BATCH', 422)
+    if classroom.default_disability_level and batch_levels and classroom.default_disability_level not in batch_levels:
+        return error_response('Mức độ của danh sách học sinh không khớp với mức độ của lớp.', 'CLASS_LEVEL_MISMATCH', 422)
+    if not classroom.default_disability_level and len(batch_levels) == 1:
+        classroom.default_disability_level = next(iter(batch_levels))
+
+    links = []
+    added_student_ids = []
+    existing_count = 0
+    for member in active_members:
+        student = member.student
+        class_link = ClassStudent.query.filter_by(class_id=classroom.id, student_id=student.id).first()
+        if not class_link:
+            class_link = ClassStudent(class_id=classroom.id, student_id=student.id, status='active')
+            db.session.add(class_link)
+            added_student_ids.append(student.id)
+        else:
+            if class_link.status == 'active':
+                existing_count += 1
+            class_link.status = 'active'
+        ensure_teacher_student_link(user.teacher_profile.id, student.id, source='admin_student_batch')
+        links.append(class_link)
+
+    db.session.commit()
+
+    publish_realtime_event(
+        'class_membership_updated',
+        f'Lớp {classroom.name} vừa được thêm danh sách học sinh từ mã {batch.code}.',
+        title='Cập nhật lớp học',
+        recipient_user_ids=[user.id, *_get_student_user_ids(added_student_ids)],
+        payload={'class_id': class_id, 'class_name': classroom.name, 'student_ids': added_student_ids, 'batch_code': batch.code},
+    )
+    log_server_event(
+        level='info',
+        module='classes',
+        message='Giáo viên thêm danh sách học sinh bằng mã admin',
+        action_name='add_student_batch_to_class',
+        user_id=user.id,
+        metadata={'class_id': class_id, 'batch_code': batch.code, 'added_count': len(added_student_ids), 'existing_count': existing_count},
+    )
+
+    return success_response({
+        'classroom': _serialize_teacher_classroom(classroom),
+        'batch': batch.to_dict(),
+        'links': [link.to_dict() for link in links],
+        'added_count': len(added_student_ids),
+        'existing_count': existing_count,
+    }, 'Đã thêm danh sách học sinh vào lớp')
 
 
 @api_v1.delete('/classes/<int:class_id>/students/<int:student_id>')

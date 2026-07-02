@@ -39,6 +39,7 @@ class DemoStudent:
     parent_name: str | None = None
     parent_email: str | None = None
     parent_relationship: str | None = None
+    student_code: str | None = None
 
 
 TEST_ACCOUNTS = [
@@ -112,6 +113,7 @@ COMPETITION_STUDENTS = [
         parent_name="Trần Xuân Ninh",
         parent_email="tranxuanninh@gmail.com",
         parent_relationship="Cha",
+        student_code="2026006",
     ),
     DemoStudent(
         full_name="Phan Phi Long",
@@ -125,6 +127,7 @@ COMPETITION_STUDENTS = [
         parent_name="Nguyễn Thanh Hà",
         parent_email="nguyenthanhha.qtr@gmail.com",
         parent_relationship="Me",
+        student_code="2026007",
     ),
     DemoStudent(
         full_name="Trần Thanh Quý",
@@ -135,6 +138,7 @@ COMPETITION_STUDENTS = [
         class_password="S8R3BE7G",
         teacher_name="Trịnh Thị Tường Vi",
         teacher_email="trinhthituongvi.qtr@gmail.com",
+        student_code="2026008",
         parent_name="Nguyễn Thị Bình",
         parent_email="nguyenthibinh@gmail.com",
         parent_relationship="Me",
@@ -148,6 +152,7 @@ COMPETITION_STUDENTS = [
         class_password="PHD9VGZ8",
         teacher_name="Nguyễn Quang Đạo",
         teacher_email="nguyenquangdao.qtr@gmail.com",
+        student_code="2026009",
     ),
     DemoStudent(
         full_name="Nguyễn Đăng Khôi",
@@ -158,6 +163,7 @@ COMPETITION_STUDENTS = [
         class_password="7YT3MS7P",
         teacher_name="Trần Thịnh Phú",
         teacher_email="tranthinhphu.qtr@gmail.com",
+        student_code="2026010",
     ),
     DemoStudent(
         full_name="Lê Nguyễn Hoàng Anh",
@@ -168,6 +174,7 @@ COMPETITION_STUDENTS = [
         class_password="B5EN84WD",
         teacher_name="Nguyễn Thị Hồng",
         teacher_email="nguyenthihong.qtr@gmail.com",
+        student_code="2026011",
     ),
     DemoStudent(
         full_name="Vũ Đức Anh",
@@ -178,6 +185,7 @@ COMPETITION_STUDENTS = [
         class_password="T3ARPUJH",
         teacher_name="Lê Thị Ngọc Mai",
         teacher_email="lethingocmai.qtr@gmail.com",
+        student_code="2026012",
     ),
     DemoStudent(
         full_name="Nguyễn Thị Minh Anh",
@@ -188,6 +196,7 @@ COMPETITION_STUDENTS = [
         class_password="CGANUE9J",
         teacher_name="Võ Văn Thà",
         teacher_email="vovantha.qtr@gmail.com",
+        student_code="2026013",
     ),
     DemoStudent(
         full_name="Trần Nguyễn Thiên Phúc",
@@ -198,6 +207,7 @@ COMPETITION_STUDENTS = [
         class_password="8PUTFQB6",
         teacher_name="Nguyễn Đức Quân",
         teacher_email="nguyenducquan.qtr@gmail.com",
+        student_code="2026014",
     ),
     DemoStudent(
         full_name="Lê Ngọc Như Ý",
@@ -208,6 +218,7 @@ COMPETITION_STUDENTS = [
         class_password="89VEWHFJ",
         teacher_name="Hoàng Thị Khôi",
         teacher_email="hoangthikhoi.qtr@gmail.com",
+        student_code="2026015",
     ),
     DemoStudent(
         full_name="Phồng Ngọc Thiên Ngân",
@@ -218,6 +229,7 @@ COMPETITION_STUDENTS = [
         class_password="K9WG9DKN",
         teacher_name="Lê Phương Đông",
         teacher_email="lephuongdong.qtr@gmail.com",
+        student_code="2026016",
     ),
     DemoStudent(
         full_name="Nguyễn Ngọc Kim Ngân",
@@ -228,6 +240,7 @@ COMPETITION_STUDENTS = [
         class_password="X338XT9B",
         teacher_name="Đặng Thị Thảo",
         teacher_email="dangthithao.qtr@gmail.com",
+        student_code="2026017",
     ),
 ]
 
@@ -273,8 +286,13 @@ def _ensure_teacher(email: str, full_name: str, password: str = DEFAULT_PASSWORD
     return profile, created_user or created_profile
 
 
-def _ensure_student(email: str, full_name: str, level: str, password: str = DEFAULT_PASSWORD, created_by_teacher_id: int | None = None) -> tuple[StudentProfile, bool]:
+def _ensure_student(email: str, full_name: str, level: str, password: str = DEFAULT_PASSWORD, created_by_teacher_id: int | None = None, student_code: str | None = None) -> tuple[StudentProfile, bool]:
     user, created_user = _get_or_create_user(email, "student", password)
+    if student_code and user.phone != student_code:
+        existing_code_user = User.query.filter_by(phone=student_code).first()
+        if existing_code_user and existing_code_user.id != user.id:
+            raise ValueError(f"Student code {student_code} already belongs to user {existing_code_user.id}")
+        user.phone = student_code
     profile = user.student_profile
     created_profile = False
     if not profile:
@@ -446,7 +464,7 @@ def _seed_competition_students() -> dict[str, int]:
         if created_teacher:
             created["teachers"] += 1
 
-        student, created_student = _ensure_student(item.email, item.full_name, item.level, created_by_teacher_id=teacher.id)
+        student, created_student = _ensure_student(item.email, item.full_name, item.level, created_by_teacher_id=teacher.id, student_code=item.student_code)
         if created_student:
             created["students"] += 1
 

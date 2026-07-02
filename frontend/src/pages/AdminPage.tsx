@@ -7,13 +7,15 @@ import {
   createTeacherByAdmin,
   fetchAdminRecoverableAccounts,
   fetchAdminRelationshipOverview,
+  fetchAdminStudentAccountBatches,
   fetchAdminTeachers,
+  importAdminStudentAccountBatch,
   recoverAdminAccount,
 } from '../services/api'
-import type { AdminRecoverAccountResponse } from '../services/api'
+import type { AdminRecoverAccountResponse, AdminStudentAccountBatchImportResponse } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
-type AdminSection = 'overview' | 'create-teacher' | 'teachers' | 'relationships' | 'recovery'
+type AdminSection = 'overview' | 'create-teacher' | 'student-batches' | 'teachers' | 'relationships' | 'recovery'
 
 const ROLE_LABELS: Record<string, string> = {
   teacher: 'Giáo viên',
@@ -23,6 +25,7 @@ const ROLE_LABELS: Record<string, string> = {
 const SECTION_ITEMS: Array<{ key: AdminSection; label: string }> = [
   { key: 'overview', label: 'Tổng quan' },
   { key: 'create-teacher', label: 'Tạo giáo viên' },
+  { key: 'student-batches', label: 'Cấp học sinh' },
   { key: 'teachers', label: 'Danh sách giáo viên' },
   { key: 'relationships', label: 'Liên kết' },
   { key: 'recovery', label: 'Khôi phục tài khoản' },
@@ -53,6 +56,9 @@ export function AdminPage() {
   const [recoveryRole, setRecoveryRole] = useState<'all' | 'teacher' | 'student'>('all')
   const [temporaryPassword, setTemporaryPassword] = useState('Demo123456')
   const [recoveredAccount, setRecoveredAccount] = useState<AdminRecoverAccountResponse | null>(null)
+  const [studentBatchTitle, setStudentBatchTitle] = useState('')
+  const [studentBatchFile, setStudentBatchFile] = useState<File | null>(null)
+  const [importedStudentBatch, setImportedStudentBatch] = useState<AdminStudentAccountBatchImportResponse | null>(null)
 
   const teachersQuery = useQuery({
     queryKey: ['admin-teachers', token],
@@ -72,11 +78,18 @@ export function AdminPage() {
     enabled: Boolean(token),
   })
 
+  const studentBatchesQuery = useQuery({
+    queryKey: ['admin-student-account-batches', token],
+    queryFn: () => fetchAdminStudentAccountBatches(token!),
+    enabled: Boolean(token),
+  })
+
   const filteredRecoveryAccounts = useMemo(() => {
     const needle = recoverySearch.trim().toLowerCase()
     return (recoveryAccountsQuery.data ?? []).filter((account) => {
       const matchesRole = recoveryRole === 'all' || account.user.role === recoveryRole
       const searchableText = [
+        account.login_id,
         account.full_name,
         account.username,
         account.user.email,
@@ -125,18 +138,41 @@ export function AdminPage() {
     },
   })
 
+  const importStudentBatchMutation = useMutation({
+    mutationFn: () => importAdminStudentAccountBatch(token!, {
+      file: studentBatchFile!,
+      title: studentBatchTitle.trim() || undefined,
+    }),
+    onSuccess: async (payload) => {
+      setImportedStudentBatch(payload)
+      setStudentBatchTitle('')
+      setStudentBatchFile(null)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-student-account-batches', token] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-account-recovery', token] }),
+      ])
+    },
+  })
+
   const summary = relationshipsQuery.data?.summary
   const teacherCount = summary?.teacher_count ?? teachersQuery.data?.length ?? 0
   const accountCount = recoveryAccountsQuery.data?.length ?? 0
   const loadingCurrentSection =
     (activeSection === 'teachers' && teachersQuery.isLoading) ||
     (activeSection === 'relationships' && relationshipsQuery.isLoading) ||
+    (activeSection === 'student-batches' && studentBatchesQuery.isLoading) ||
     (activeSection === 'recovery' && recoveryAccountsQuery.isLoading)
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!fullName.trim() || !password.trim() || (!email.trim() && !phone.trim())) return
     createMutation.mutate()
+  }
+
+  function handleImportStudentBatch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!studentBatchFile) return
+    importStudentBatchMutation.mutate()
   }
 
   return (
@@ -210,6 +246,10 @@ export function AdminPage() {
                     <strong>Khôi phục tài khoản</strong>
                     <span>Đặt lại mật khẩu cho giáo viên hoặc học sinh.</span>
                   </button>
+                  <button type="button" className="admin-overview-action" onClick={() => setActiveSection('student-batches')}>
+                    <strong>Cấp tài khoản học sinh</strong>
+                    <span>Import Excel/CSV để tạo ID đăng nhập và mã lô cho giáo viên.</span>
+                  </button>
                   <button type="button" className="admin-overview-action" onClick={() => setActiveSection('relationships')}>
                     <strong>Kiểm tra liên kết</strong>
                     <span>Xem học sinh, phụ huynh và giáo viên đang liên kết.</span>
@@ -266,6 +306,114 @@ export function AdminPage() {
                   </form>
                 </div>
               </article>
+            </section>
+          ) : null}
+
+          {activeSection === 'student-batches' ? (
+            <section className="admin-section">
+              <article className="admin-panel-card admin-form-panel">
+                <div className="admin-panel-header">
+                  <h2>Cấp tài khoản học sinh từ Excel/CSV</h2>
+                </div>
+                <div className="admin-panel-body">
+                  <form className="admin-form-grid" onSubmit={handleImportStudentBatch}>
+                    <label>
+                      Tên danh sách
+                      <input value={studentBatchTitle} onChange={(event) => setStudentBatchTitle(event.target.value)} placeholder="Ví dụ: Lớp 9A3 - Đợt thi" />
+                    </label>
+                    <label>
+                      File Excel/CSV
+                      <input
+                        type="file"
+                        accept=".xlsx,.csv"
+                        onChange={(event) => setStudentBatchFile(event.target.files?.[0] ?? null)}
+                      />
+                    </label>
+                    <div className="admin-form-actions admin-form-wide">
+                      <button className="action-button" type="submit" disabled={!studentBatchFile || importStudentBatchMutation.isPending}>
+                        {importStudentBatchMutation.isPending ? 'Đang import...' : 'Import và tạo mã lô'}
+                      </button>
+                      {importStudentBatchMutation.error ? <p className="error-text">{(importStudentBatchMutation.error as Error).message}</p> : null}
+                    </div>
+                  </form>
+
+                  <div className="feedback-note admin-import-note">
+                    <span>
+                      File cần có cột <strong>ID</strong> 7 chữ số như <strong>2026001</strong>, <strong>Họ tên</strong>, <strong>Tên tài khoản</strong>, <strong>Mật khẩu</strong>. Mỗi file chỉ chứa một mức độ. Học sinh đăng nhập bằng ID và mật khẩu.
+                    </span>
+                    <a className="admin-sample-file-link" href="/mau_tai_khoan_hoc_sinh.xlsx" download>
+                      Tải file Excel mẫu
+                    </a>
+                  </div>
+
+                  {importedStudentBatch ? (
+                    <div className="feedback-note feedback-note-success">
+                      Mã lô cho giáo viên: <strong>{importedStudentBatch.batch.code}</strong>. Đã tạo {importedStudentBatch.created_count} tài khoản, cập nhật {importedStudentBatch.updated_count} tài khoản.
+                    </div>
+                  ) : null}
+                </div>
+              </article>
+
+              <article className="admin-panel-card">
+                <div className="admin-panel-header">
+                  <h2>Cấp danh sách học sinh</h2>
+                  <span>{studentBatchesQuery.data?.length ?? 0} danh sách</span>
+                </div>
+                <div className="admin-table-wrap">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Mã code</th>
+                        <th>Tên danh sách</th>
+                        <th>Số học sinh</th>
+                        <th>Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studentBatchesQuery.data?.map((batch) => (
+                        <tr key={batch.id}>
+                          <td><strong>{batch.code}</strong></td>
+                          <td>{batch.title ?? 'Danh sách học sinh'}</td>
+                          <td>{batch.student_count}</td>
+                          <td><span className="admin-badge">{readableStatus(batch.status)}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {!studentBatchesQuery.data?.length && !studentBatchesQuery.isLoading ? <p className="admin-empty-state">Chưa có danh sách học sinh nào.</p> : null}
+                </div>
+              </article>
+
+              {importedStudentBatch?.batch.members?.length ? (
+                <article className="admin-panel-card">
+                  <div className="admin-panel-header">
+                    <h2>Tài khoản vừa import</h2>
+                    <span>{importedStudentBatch.batch.members.length} học sinh</span>
+                  </div>
+                  <div className="admin-table-wrap">
+                    <table className="admin-table admin-recovery-table">
+                      <thead>
+                        <tr>
+                          <th>ID đăng nhập</th>
+                          <th>Họ tên</th>
+                          <th>Tên tài khoản</th>
+                          <th>Mật khẩu</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {importedStudentBatch.batch.members.map((member) => (
+                          <tr key={member.id}>
+                            <td><strong>{member.student_code}</strong></td>
+                            <td>{member.student?.full_name ?? 'Học sinh'}</td>
+                            <td>{member.username ?? member.student_code}</td>
+                            <td>{member.temporary_password ?? 'Student123!'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+              ) : null}
             </section>
           ) : null}
 
@@ -417,6 +565,7 @@ export function AdminPage() {
                   <table className="admin-table admin-recovery-table">
                     <thead>
                       <tr>
+                        <th>ID</th>
                         <th>Tên tài khoản</th>
                         <th>Vai trò</th>
                         <th>Tên đăng nhập</th>
@@ -429,6 +578,7 @@ export function AdminPage() {
                         const isRecovering = recoverMutation.isPending && recoverMutation.variables === account.user.id
                         return (
                           <tr key={account.user.id}>
+                            <td><strong>{account.login_id}</strong></td>
                             <td><strong>{account.full_name ?? `User #${account.user.id}`}</strong></td>
                             <td>{ROLE_LABELS[account.user.role] ?? account.user.role}</td>
                             <td>{account.username ?? 'Chưa có tên đăng nhập'}</td>

@@ -603,6 +603,7 @@ export type AdminRecoverableAccountItem = {
   user: AuthUser
   profile: Record<string, unknown> | null
   full_name: string | null
+  login_id: string
   username: string | null
   can_login: boolean
 }
@@ -611,6 +612,38 @@ export type AdminRecoverAccountResponse = {
   account: AdminRecoverableAccountItem
   username: string
   temporary_password: string
+}
+
+export type AdminStudentAccountBatchMember = {
+  id: number
+  batch_id: number
+  student_id: number
+  user_id: number
+  student_code: string
+  username: string | null
+  temporary_password: string | null
+  status: string
+  student: StudentItem | null
+  user: AuthUser | null
+}
+
+export type AdminStudentAccountBatch = {
+  id: number
+  code: string
+  title: string | null
+  created_by_admin_id: number | null
+  status: string
+  student_count: number
+  members?: AdminStudentAccountBatchMember[]
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+export type AdminStudentAccountBatchImportResponse = {
+  batch: AdminStudentAccountBatch
+  created_count: number
+  updated_count: number
+  skipped_rows: Array<{ row: number; reason: string }>
 }
 
 export type TeacherSharedStudentItem = {
@@ -717,6 +750,26 @@ export async function recoverAdminAccount(token: string, userId: number, payload
   })
 }
 
+export async function fetchAdminStudentAccountBatches(token: string): Promise<AdminStudentAccountBatch[]> {
+  return request<AdminStudentAccountBatch[]>('/api/v1/admin/student-account-batches', { token })
+}
+
+export async function importAdminStudentAccountBatch(token: string, payload: { file: File; title?: string }) {
+  const formData = new FormData()
+  formData.append('file', payload.file)
+  if (payload.title) formData.append('title', payload.title)
+
+  const response = await fetchWithAccessTokenRetry('/api/v1/admin/student-account-batches/import', {
+    method: 'POST',
+    body: formData,
+  }, token)
+  const json = await parseJsonResponse(response)
+  if (!response.ok || !json?.success) {
+    throw new Error(json?.message ?? 'Không thể import danh sách học sinh')
+  }
+  return json.data as AdminStudentAccountBatchImportResponse
+}
+
 export async function createTeacherByAdmin(token: string, payload: {
   full_name: string
   email?: string
@@ -768,6 +821,20 @@ export async function fetchClassStudents(token: string, classId: number): Promis
 
 export async function addStudentsToClass(token: string, classId: number, payload: { student_ids: number[] }) {
   return request<ClassStudentLink[]>(`/api/v1/classes/${classId}/students`, {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export async function addStudentBatchToClass(token: string, classId: number, payload: { batch_code: string }) {
+  return request<{
+    classroom: ClassItem
+    batch: AdminStudentAccountBatch
+    links: ClassStudentLink[]
+    added_count: number
+    existing_count: number
+  }>(`/api/v1/classes/${classId}/student-batches/join`, {
     method: 'POST',
     token,
     body: payload,

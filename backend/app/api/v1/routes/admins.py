@@ -1,10 +1,16 @@
 from __future__ import annotations
 
+import csv
+import io
+import secrets
+import string
+import unicodedata
+
 from flask import request
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from ....extensions import db
-from ....models import TeacherParentStudentLink, TeacherStudentLink, User
+from ....models import StudentAccountBatch, StudentAccountBatchMember, StudentProfile, TeacherParentStudentLink, TeacherStudentLink, User
 from ....services.auth_service import create_teacher_user
 from ....services.logger import log_server_event
 from ....utils.security import hash_password
@@ -35,13 +41,84 @@ def _account_username(user: User) -> str | None:
 def _build_recovery_account_payload(user: User) -> dict[str, object]:
     profile = user.teacher_profile if user.role == 'teacher' else user.student_profile
     profile_payload = profile.to_dict() if profile else None
+    login_id = user.phone or str(user.id)
     return {
         'user': user.to_dict(),
         'profile': profile_payload,
         'full_name': profile_payload.get('full_name') if profile_payload else None,
+        'login_id': login_id,
         'username': _account_username(user),
         'can_login': bool(_account_username(user)),
     }
+
+
+def _normalize_column_name(value: object) -> str:
+    raw = str(value or '').strip().lower().replace('đ', 'd').replace('Đ', 'D')
+    without_accents = ''.join(
+        char for char in unicodedata.normalize('NFKD', raw)
+        if not unicodedata.combining(char)
+    )
+    return ''.join(char for char in without_accents if char.isalnum())
+
+
+def _pick(row: dict[str, object], aliases: set[str]) -> str:
+    for key, value in row.items():
+        if _normalize_column_name(key) in aliases:
+            return str(value or '').strip()
+    return ''
+
+
+def _pick_by_index(row: dict[str, object], index: int) -> str:
+    values = list(row.values())
+    if index >= len(values):
+        return ''
+    return str(values[index] or '').strip()
+
+
+def _generate_batch_code() -> str:
+    alphabet = string.ascii_uppercase + string.digits
+    while True:
+        code = ''.join(secrets.choice(alphabet) for _ in range(9))
+        if not StudentAccountBatch.query.filter_by(code=code).first():
+            return code
+
+
+def _is_valid_student_code(value: str) -> bool:
+    return value.isdigit() and len(value) == 7
+
+
+def _parse_student_account_file(uploaded_file) -> list[dict[str, object]]:
+    filename = (uploaded_file.filename or '').lower()
+    raw_bytes = uploaded_file.read()
+    if filename.endswith('.csv'):
+        text = raw_bytes.decode('utf-8-sig')
+        return [dict(row) for row in csv.DictReader(io.StringIO(text))]
+
+    if filename.endswith('.xlsx'):
+        try:
+            from openpyxl import load_workbook
+        except ImportError as error:
+            raise RuntimeError('Server chưa cài openpyxl để đọc file Excel .xlsx') from error
+
+        workbook = load_workbook(io.BytesIO(raw_bytes), data_only=True, read_only=True)
+        worksheet = workbook.active
+        rows = list(worksheet.iter_rows(values_only=True))
+        if not rows:
+            return []
+        headers = [str(header or '').strip() for header in rows[0]]
+        records: list[dict[str, object]] = []
+        for values in rows[1:]:
+            records.append({headers[index]: values[index] if index < len(values) else None for index in range(len(headers))})
+        return records
+
+    raise ValueError('Chỉ hỗ trợ file .xlsx hoặc .csv')
+
+
+def _build_batch_payload(batch: StudentAccountBatch, include_members: bool = False) -> dict[str, object]:
+    payload = batch.to_dict()
+    if include_members:
+        payload['members'] = [member.to_dict() for member in batch.members if member.status == 'active']
+    return payload
 
 
 @api_v1.get('/admin/teachers')
@@ -75,6 +152,150 @@ def list_recoverable_accounts():
 
     accounts = query.order_by(User.role.asc(), User.created_at.desc()).all()
     return success_response([_build_recovery_account_payload(account) for account in accounts])
+
+
+@api_v1.get('/admin/student-account-batches')
+@jwt_required()
+def list_student_account_batches():
+    _user, error = _require_admin_user()
+    if error:
+        return error
+
+    batches = StudentAccountBatch.query.order_by(StudentAccountBatch.created_at.desc()).all()
+    return success_response([_build_batch_payload(batch) for batch in batches])
+
+
+@api_v1.post('/admin/student-account-batches/import')
+@jwt_required()
+def import_student_account_batch():
+    admin_user, error = _require_admin_user()
+    if error:
+        return error
+
+    uploaded_file = request.files.get('file')
+    if not uploaded_file:
+        return error_response('Vui lòng chọn file Excel hoặc CSV', 'VALIDATION_ERROR', 422)
+
+    batch_title = (request.form.get('title') or uploaded_file.filename or 'Danh sách học sinh').strip()
+    try:
+        records = _parse_student_account_file(uploaded_file)
+    except (ValueError, RuntimeError) as parse_error:
+        return error_response(str(parse_error), 'VALIDATION_ERROR', 422)
+
+    student_code_aliases = {'id', 'ma', 'mahocsinh', 'studentid', 'studentcode', 'code', 'madangnhap', 'mshs'}
+    full_name_aliases = {'ten', 'hoten', 'hovaten', 'tenhocsinh', 'hotenhocsinh', 'fullname', 'name', 'studentname'}
+    username_aliases = {'tentaikhoan', 'taikhoan', 'username', 'account', 'email'}
+    password_aliases = {'matkhau', 'password', 'pass'}
+    level_aliases = {'mucdo', 'mucdohotro', 'disabilitylevel', 'level'}
+
+    batch = StudentAccountBatch(
+        code=_generate_batch_code(),
+        title=batch_title,
+        created_by_admin_id=admin_user.id,
+        status='active',
+    )
+    db.session.add(batch)
+    db.session.flush()
+
+    created_count = 0
+    updated_count = 0
+    skipped_rows: list[dict[str, object]] = []
+    imported_levels: set[str] = set()
+
+    for row_index, row in enumerate(records, start=2):
+        student_code = (_pick(row, student_code_aliases) or _pick_by_index(row, 0)).upper()
+        full_name = _pick(row, full_name_aliases) or _pick_by_index(row, 1)
+        username = _pick(row, username_aliases) or _pick_by_index(row, 2)
+        password = _pick(row, password_aliases) or _pick_by_index(row, 3) or 'Student123!'
+        level = _pick(row, level_aliases) or _pick_by_index(row, 4) or 'trung_binh'
+        if level not in {'nhe', 'trung_binh', 'nang'}:
+            level = 'trung_binh'
+
+        if not student_code or not full_name:
+            skipped_rows.append({'row': row_index, 'reason': 'Thiếu mã học sinh hoặc họ tên'})
+            continue
+        if not _is_valid_student_code(student_code):
+            skipped_rows.append({'row': row_index, 'reason': 'Mã học sinh phải gồm đúng 7 chữ số, ví dụ 2026001'})
+            continue
+        imported_levels.add(level)
+
+        user = User.query.filter_by(phone=student_code).first()
+        if not user:
+            email = username.lower() if '@' in username else None
+            if email and User.query.filter_by(email=email).first():
+                email = None
+            user = User(
+                email=email,
+                phone=student_code,
+                password_hash=hash_password(password),
+                role='student',
+                status='active',
+            )
+            db.session.add(user)
+            db.session.flush()
+            created_count += 1
+        else:
+            user.role = 'student'
+            user.status = 'active'
+            user.password_hash = hash_password(password)
+            updated_count += 1
+
+        student_profile = user.student_profile
+        if not student_profile:
+            student_profile = StudentProfile(
+                user_id=user.id,
+                full_name=full_name,
+                disability_level=level,
+                support_note=f'Tài khoản import từ lô {batch.code}',
+                preferred_input='touch',
+            )
+            db.session.add(student_profile)
+            db.session.flush()
+        else:
+            student_profile.full_name = full_name
+            student_profile.disability_level = level
+
+        member = StudentAccountBatchMember.query.filter_by(batch_id=batch.id, student_id=student_profile.id).first()
+        if not member:
+            member = StudentAccountBatchMember(
+                batch_id=batch.id,
+                student_id=student_profile.id,
+                user_id=user.id,
+                student_code=student_code,
+                username=username or student_code,
+                temporary_password=password,
+                status='active',
+            )
+            db.session.add(member)
+        else:
+            member.status = 'active'
+            member.student_code = student_code
+            member.username = username or student_code
+            member.temporary_password = password
+
+    if len(imported_levels) > 1:
+        db.session.rollback()
+        return error_response('Một danh sách học sinh chỉ được có một mức độ: nhẹ, trung bình hoặc nặng. Vui lòng tách file theo từng mức độ.', 'MIXED_LEVEL_BATCH', 422)
+
+    db.session.commit()
+
+    log_server_event(
+        level='info',
+        module='admin',
+        message='Admin import danh sách tài khoản học sinh',
+        action_name='admin_import_student_batch',
+        user_id=admin_user.id,
+        metadata={'batch_id': batch.id, 'batch_code': batch.code, 'created_count': created_count, 'updated_count': updated_count},
+    )
+
+    refreshed_batch = StudentAccountBatch.query.get(batch.id)
+
+    return success_response({
+        'batch': _build_batch_payload(refreshed_batch or batch, include_members=True),
+        'created_count': created_count,
+        'updated_count': updated_count,
+        'skipped_rows': skipped_rows,
+    }, 'Import danh sách học sinh thành công', 201)
 
 
 @api_v1.get('/admin/relationships/overview')
