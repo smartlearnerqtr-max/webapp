@@ -188,19 +188,12 @@ def import_student_account_batch():
     password_aliases = {'matkhau', 'password', 'pass'}
     level_aliases = {'mucdo', 'mucdohotro', 'disabilitylevel', 'level'}
 
-    batch = StudentAccountBatch(
-        code=_generate_batch_code(),
-        title=batch_title,
-        created_by_admin_id=admin_user.id,
-        status='active',
-    )
-    db.session.add(batch)
-    db.session.flush()
-
     created_count = 0
-    updated_count = 0
     skipped_rows: list[dict[str, object]] = []
     imported_levels: set[str] = set()
+    parsed_rows: list[dict[str, str]] = []
+    seen_student_codes: set[str] = set()
+    duplicate_file_ids: set[str] = set()
 
     for row_index, row in enumerate(records, start=2):
         student_code = (_pick(row, student_code_aliases) or _pick_by_index(row, 0)).upper()
@@ -217,65 +210,90 @@ def import_student_account_batch():
         if not _is_valid_student_code(student_code):
             skipped_rows.append({'row': row_index, 'reason': 'Mã học sinh phải gồm đúng 7 chữ số, ví dụ 2026001'})
             continue
+        if student_code in seen_student_codes:
+            duplicate_file_ids.add(student_code)
+        seen_student_codes.add(student_code)
         imported_levels.add(level)
+        parsed_rows.append({
+            'student_code': student_code,
+            'full_name': full_name,
+            'username': username,
+            'password': password,
+            'level': level,
+        })
 
-        user = User.query.filter_by(phone=student_code).first()
-        if not user:
-            email = username.lower() if '@' in username else None
-            if email and User.query.filter_by(email=email).first():
-                email = None
-            user = User(
-                email=email,
-                phone=student_code,
-                password_hash=hash_password(password),
-                role='student',
-                status='active',
-            )
-            db.session.add(user)
-            db.session.flush()
-            created_count += 1
-        else:
-            user.role = 'student'
-            user.status = 'active'
-            user.password_hash = hash_password(password)
-            updated_count += 1
+    if duplicate_file_ids:
+        return error_response(
+            'File có ID bị trùng. Vui lòng cấp ID khác cho các học sinh này.',
+            'DUPLICATE_STUDENT_IDS_IN_FILE',
+            422,
+            {'conflicting_ids': sorted(duplicate_file_ids)},
+        )
 
-        student_profile = user.student_profile
-        if not student_profile:
-            student_profile = StudentProfile(
-                user_id=user.id,
-                full_name=full_name,
-                disability_level=level,
-                support_note=f'Tài khoản import từ lô {batch.code}',
-                preferred_input='touch',
-            )
-            db.session.add(student_profile)
-            db.session.flush()
-        else:
-            student_profile.full_name = full_name
-            student_profile.disability_level = level
-
-        member = StudentAccountBatchMember.query.filter_by(batch_id=batch.id, student_id=student_profile.id).first()
-        if not member:
-            member = StudentAccountBatchMember(
-                batch_id=batch.id,
-                student_id=student_profile.id,
-                user_id=user.id,
-                student_code=student_code,
-                username=username or student_code,
-                temporary_password=password,
-                status='active',
-            )
-            db.session.add(member)
-        else:
-            member.status = 'active'
-            member.student_code = student_code
-            member.username = username or student_code
-            member.temporary_password = password
+    existing_student_codes = {
+        code
+        for (code,) in db.session.query(User.phone)
+        .filter(User.phone.in_([row['student_code'] for row in parsed_rows]))
+        .all()
+        if code
+    }
+    if existing_student_codes:
+        return error_response(
+            'ID đã tồn tại. Vui lòng cấp ID khác.',
+            'STUDENT_ID_ALREADY_EXISTS',
+            409,
+            {'conflicting_ids': sorted(existing_student_codes)},
+        )
 
     if len(imported_levels) > 1:
-        db.session.rollback()
         return error_response('Một danh sách học sinh chỉ được có một mức độ: nhẹ, trung bình hoặc nặng. Vui lòng tách file theo từng mức độ.', 'MIXED_LEVEL_BATCH', 422)
+
+    batch = StudentAccountBatch(
+        code=_generate_batch_code(),
+        title=batch_title,
+        created_by_admin_id=admin_user.id,
+        status='active',
+    )
+    db.session.add(batch)
+    db.session.flush()
+
+    for row in parsed_rows:
+        student_code = row['student_code']
+        username = row['username']
+        password = row['password']
+        email = username.lower() if '@' in username else None
+        if email and User.query.filter_by(email=email).first():
+            email = None
+        user = User(
+            email=email,
+            phone=student_code,
+            password_hash=hash_password(password),
+            role='student',
+            status='active',
+        )
+        db.session.add(user)
+        db.session.flush()
+        created_count += 1
+
+        student_profile = StudentProfile(
+            user_id=user.id,
+            full_name=row['full_name'],
+            disability_level=row['level'],
+            support_note=f'Tài khoản import từ lô {batch.code}',
+            preferred_input='touch',
+        )
+        db.session.add(student_profile)
+        db.session.flush()
+
+        db.session.add(StudentAccountBatchMember(
+            batch_id=batch.id,
+            student_id=student_profile.id,
+            user_id=user.id,
+            student_code=student_code,
+            username=username or student_code,
+            temporary_password=password,
+            status='active',
+        ))
 
     db.session.commit()
 
@@ -285,7 +303,7 @@ def import_student_account_batch():
         message='Admin import danh sách tài khoản học sinh',
         action_name='admin_import_student_batch',
         user_id=admin_user.id,
-        metadata={'batch_id': batch.id, 'batch_code': batch.code, 'created_count': created_count, 'updated_count': updated_count},
+        metadata={'batch_id': batch.id, 'batch_code': batch.code, 'created_count': created_count, 'updated_count': 0},
     )
 
     refreshed_batch = StudentAccountBatch.query.get(batch.id)
@@ -293,7 +311,7 @@ def import_student_account_batch():
     return success_response({
         'batch': _build_batch_payload(refreshed_batch or batch, include_members=True),
         'created_count': created_count,
-        'updated_count': updated_count,
+        'updated_count': 0,
         'skipped_rows': skipped_rows,
     }, 'Import danh sách học sinh thành công', 201)
 

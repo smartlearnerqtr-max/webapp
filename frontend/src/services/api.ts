@@ -765,7 +765,9 @@ export async function importAdminStudentAccountBatch(token: string, payload: { f
   }, token)
   const json = await parseJsonResponse(response)
   if (!response.ok || !json?.success) {
-    throw new Error(json?.message ?? 'Không thể import danh sách học sinh')
+    const conflictingIds = Array.isArray(json?.details?.conflicting_ids) ? json.details.conflicting_ids : []
+    const conflictMessage = conflictingIds.length ? ` ID trùng: ${conflictingIds.join(', ')}` : ''
+    throw new Error(`${json?.message ?? 'Không thể import danh sách học sinh'}${conflictMessage}`)
   }
   return json.data as AdminStudentAccountBatchImportResponse
 }
