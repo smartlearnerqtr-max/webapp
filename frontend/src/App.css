@@ -349,6 +349,15 @@ button {
   margin: 0 auto;
 }
 
+.content:has(.admin-shell) {
+  padding: 0;
+}
+
+.content:has(.admin-shell) > * {
+  width: 100%;
+  margin: 0;
+}
+
 .page-stack {
   display: grid;
   gap: 1.5rem;
@@ -9081,7 +9090,8 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .action-b
 .admin-shell {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
-  min-height: calc(100vh - 80px);
+  width: 100%;
+  min-height: 100vh;
   background: #f5f7fb;
   color: var(--text);
 }
@@ -9156,6 +9166,7 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .action-b
 }
 
 .admin-main {
+  width: 100%;
   min-width: 0;
   padding: 1.5rem;
 }
@@ -9383,6 +9394,22 @@ body:has(.student-visual-page-lesson-focus) .student-visual-action-bar .action-b
 .admin-password-field button:hover,
 .admin-table-action:hover {
   background: #f9fafb;
+}
+
+.admin-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-table-action-danger {
+  border-color: #fecdca;
+  color: #b42318;
+}
+
+.admin-table-action-danger:hover {
+  background: #fff1f3;
 }
 
 .admin-table-action:disabled,

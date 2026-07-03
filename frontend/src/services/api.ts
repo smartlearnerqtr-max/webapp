@@ -750,6 +750,16 @@ export async function recoverAdminAccount(token: string, userId: number, payload
   })
 }
 
+export async function deleteAdminStudentAccount(token: string, userId: number) {
+  return request<{
+    account: AdminRecoverableAccountItem
+    deleted_counts: Record<string, number>
+  }>(`/api/v1/admin/users/${userId}`, {
+    method: 'DELETE',
+    token,
+  })
+}
+
 export async function fetchAdminStudentAccountBatches(token: string): Promise<AdminStudentAccountBatch[]> {
   return request<AdminStudentAccountBatch[]>('/api/v1/admin/student-account-batches', { token })
 }

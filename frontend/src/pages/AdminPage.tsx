@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { RequireAuth } from '../components/RequireAuth'
 import {
   createTeacherByAdmin,
+  deleteAdminStudentAccount,
   fetchAdminRecoverableAccounts,
   fetchAdminRelationshipOverview,
   fetchAdminStudentAccountBatches,
@@ -56,6 +57,7 @@ export function AdminPage() {
   const [recoveryRole, setRecoveryRole] = useState<'all' | 'teacher' | 'student'>('all')
   const [temporaryPassword, setTemporaryPassword] = useState('Demo123456')
   const [recoveredAccount, setRecoveredAccount] = useState<AdminRecoverAccountResponse | null>(null)
+  const [deletedStudentName, setDeletedStudentName] = useState('')
   const [studentBatchTitle, setStudentBatchTitle] = useState('')
   const [studentBatchFile, setStudentBatchFile] = useState<File | null>(null)
   const [importedStudentBatch, setImportedStudentBatch] = useState<AdminStudentAccountBatchImportResponse | null>(null)
@@ -138,6 +140,19 @@ export function AdminPage() {
     },
   })
 
+  const deleteStudentMutation = useMutation({
+    mutationFn: (payload: { userId: number; displayName: string }) => deleteAdminStudentAccount(token!, payload.userId),
+    onSuccess: async (_payload, variables) => {
+      setDeletedStudentName(variables.displayName)
+      setRecoveredAccount(null)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-account-recovery', token] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-student-account-batches', token] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-relationships-overview', token] }),
+      ])
+    },
+  })
+
   const importStudentBatchMutation = useMutation({
     mutationFn: () => importAdminStudentAccountBatch(token!, {
       file: studentBatchFile!,
@@ -175,6 +190,12 @@ export function AdminPage() {
     importStudentBatchMutation.mutate()
   }
 
+  function handleDeleteStudentAccount(userId: number, displayName: string) {
+    const confirmed = window.confirm(`Xóa vĩnh viễn tài khoản học sinh "${displayName}" và toàn bộ dữ liệu liên quan? Thao tác này không thể hoàn tác.`)
+    if (!confirmed) return
+    deleteStudentMutation.mutate({ userId, displayName })
+  }
+
   return (
     <RequireAuth allowedRoles={['admin']}>
       <div className="admin-shell">
@@ -183,7 +204,7 @@ export function AdminPage() {
             <span className="admin-brand-mark">A</span>
             <div>
               <strong>Admin</strong>
-              <span>Bàn học thông minh</span>
+              <span>Bạn học thông minh</span>
             </div>
           </div>
 
@@ -558,7 +579,13 @@ export function AdminPage() {
                       Đã khôi phục: <strong>{recoveredAccount.username}</strong> / mật khẩu tạm: <strong>{recoveredAccount.temporary_password}</strong>
                     </div>
                   ) : null}
+                  {deletedStudentName ? (
+                    <div className="feedback-note feedback-note-warning">
+                      Đã xóa tài khoản học sinh: <strong>{deletedStudentName}</strong>
+                    </div>
+                  ) : null}
                   {recoverMutation.error ? <p className="error-text">{(recoverMutation.error as Error).message}</p> : null}
+                  {deleteStudentMutation.error ? <p className="error-text">{(deleteStudentMutation.error as Error).message}</p> : null}
                 </div>
 
                 <div className="admin-table-wrap">
@@ -576,22 +603,36 @@ export function AdminPage() {
                     <tbody>
                       {filteredRecoveryAccounts.map((account) => {
                         const isRecovering = recoverMutation.isPending && recoverMutation.variables === account.user.id
+                        const displayName = account.full_name ?? account.username ?? `User #${account.user.id}`
+                        const isDeleting = deleteStudentMutation.isPending && deleteStudentMutation.variables?.userId === account.user.id
                         return (
                           <tr key={account.user.id}>
                             <td><strong>{account.login_id}</strong></td>
-                            <td><strong>{account.full_name ?? `User #${account.user.id}`}</strong></td>
+                            <td><strong>{displayName}</strong></td>
                             <td>{ROLE_LABELS[account.user.role] ?? account.user.role}</td>
                             <td>{account.username ?? 'Chưa có tên đăng nhập'}</td>
                             <td><span className="admin-badge">{readableStatus(account.user.status)}</span></td>
                             <td>
-                              <button
-                                type="button"
-                                className="admin-table-action"
-                                disabled={!account.can_login || isRecovering || !temporaryPassword.trim()}
-                                onClick={() => recoverMutation.mutate(account.user.id)}
-                              >
-                                {isRecovering ? 'Đang khôi phục...' : 'Khôi phục mật khẩu'}
-                              </button>
+                              <div className="admin-table-actions">
+                                <button
+                                  type="button"
+                                  className="admin-table-action"
+                                  disabled={!account.can_login || isRecovering || isDeleting || !temporaryPassword.trim()}
+                                  onClick={() => recoverMutation.mutate(account.user.id)}
+                                >
+                                  {isRecovering ? 'Đang khôi phục...' : 'Khôi phục mật khẩu'}
+                                </button>
+                                {account.user.role === 'student' ? (
+                                  <button
+                                    type="button"
+                                    className="admin-table-action admin-table-action-danger"
+                                    disabled={isDeleting || isRecovering}
+                                    onClick={() => handleDeleteStudentAccount(account.user.id, displayName)}
+                                  >
+                                    {isDeleting ? 'Đang xóa...' : 'Xóa tài khoản'}
+                                  </button>
+                                ) : null}
+                              </div>
                             </td>
                           </tr>
                         )

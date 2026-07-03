@@ -10,7 +10,23 @@ from flask import request
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from ....extensions import db
-from ....models import StudentAccountBatch, StudentAccountBatchMember, StudentProfile, TeacherParentStudentLink, TeacherStudentLink, User
+from ....models import (
+    ClassStudent,
+    LessonAssignmentStudent,
+    ParentDailyReport,
+    ParentStudentLink,
+    ParentTeacherMessage,
+    RealtimeEvent,
+    ServerLog,
+    StudentAccountBatch,
+    StudentAccountBatchMember,
+    StudentLessonProgress,
+    StudentProfile,
+    TeacherParentStudentLink,
+    TeacherStudentLink,
+    User,
+    UserAISetting,
+)
 from ....services.auth_service import create_teacher_user
 from ....services.logger import log_server_event
 from ....utils.security import hash_password
@@ -427,3 +443,60 @@ def recover_account(user_id: int):
         'username': username,
         'temporary_password': temporary_password,
     }, 'Khôi phục tài khoản thành công')
+
+
+@api_v1.delete('/admin/users/<int:user_id>')
+@jwt_required()
+def delete_student_account(user_id: int):
+    admin_user, error = _require_admin_user()
+    if error:
+        return error
+
+    target_user = User.query.get(user_id)
+    if not target_user or target_user.role != 'student':
+        return error_response('Chỉ có thể xóa tài khoản học sinh ở màn hình này', 'STUDENT_USER_NOT_FOUND', 404)
+
+    deleted_account = _build_recovery_account_payload(target_user)
+    student_profile = target_user.student_profile
+    deleted_counts: dict[str, int] = {}
+
+    deleted_counts['realtime_events'] = RealtimeEvent.query.filter_by(recipient_user_id=target_user.id).delete(synchronize_session=False)
+    deleted_counts['server_logs'] = ServerLog.query.filter_by(user_id=target_user.id).delete(synchronize_session=False)
+    deleted_counts['ai_settings'] = UserAISetting.query.filter_by(user_id=target_user.id).delete(synchronize_session=False)
+
+    if student_profile:
+        student_id = student_profile.id
+        deleted_counts['parent_teacher_messages'] = ParentTeacherMessage.query.filter(
+            (ParentTeacherMessage.student_id == student_id) | (ParentTeacherMessage.sender_user_id == target_user.id)
+        ).delete(synchronize_session=False)
+        deleted_counts['lesson_progress'] = StudentLessonProgress.query.filter_by(student_id=student_id).delete(synchronize_session=False)
+        deleted_counts['lesson_assignment_students'] = LessonAssignmentStudent.query.filter_by(student_id=student_id).delete(synchronize_session=False)
+        deleted_counts['student_batch_members'] = StudentAccountBatchMember.query.filter(
+            (StudentAccountBatchMember.student_id == student_id) | (StudentAccountBatchMember.user_id == target_user.id)
+        ).delete(synchronize_session=False)
+        deleted_counts['class_students'] = ClassStudent.query.filter_by(student_id=student_id).delete(synchronize_session=False)
+        deleted_counts['teacher_student_links'] = TeacherStudentLink.query.filter_by(student_id=student_id).delete(synchronize_session=False)
+        deleted_counts['parent_student_links'] = ParentStudentLink.query.filter_by(student_id=student_id).delete(synchronize_session=False)
+        deleted_counts['teacher_parent_student_links'] = TeacherParentStudentLink.query.filter_by(student_id=student_id).delete(synchronize_session=False)
+        deleted_counts['parent_daily_reports'] = ParentDailyReport.query.filter_by(student_id=student_id).delete(synchronize_session=False)
+        db.session.delete(student_profile)
+    else:
+        deleted_counts['student_batch_members'] = StudentAccountBatchMember.query.filter_by(user_id=target_user.id).delete(synchronize_session=False)
+
+    db.session.delete(target_user)
+    db.session.flush()
+
+    log_server_event(
+        level='warning',
+        module='admin',
+        message='Admin xóa vĩnh viễn tài khoản học sinh',
+        action_name='admin_delete_student_account',
+        user_id=admin_user.id,
+        metadata={'target_user_id': user_id, 'deleted_counts': deleted_counts},
+    )
+    db.session.commit()
+
+    return success_response({
+        'account': deleted_account,
+        'deleted_counts': deleted_counts,
+    }, 'Đã xóa tài khoản học sinh và toàn bộ dữ liệu liên quan')
