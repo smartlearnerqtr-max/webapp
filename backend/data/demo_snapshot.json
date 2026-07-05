@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-05T12:38:54+00:00",
+  "exported_at": "2026-07-05T12:41:29+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$PinIo1YNpJ17lGjq$208dd58fed56e5a68126a5b6a81a45c40fd62b080e3293b39061bb3da7a8c73d",
+        "password_hash": "pbkdf2:sha256:1000000$avkxi56LbVk6LUKO$52da4d5017d9c00bb9a6ac22b11a4b7098677eda652c2ffd8619a145f54563a9",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-05T12:23:38.597335"
+        "updated_at": "2026-07-05T12:40:36.158684"
       },
       {
         "id": 18,
@@ -664,6 +664,56 @@
         "status": "active",
         "created_at": "2026-07-05T12:38:54",
         "updated_at": "2026-07-05T12:38:54"
+      },
+      {
+        "id": 58,
+        "email": null,
+        "phone": "2026020",
+        "password_hash": "pbkdf2:sha256:1000000$uR7tMdUadxwSbtsg$b823f881f9cf1b7760891011ec9593d8086412bacefa109b6781c6cf2ef6b547",
+        "role": "student",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:19",
+        "updated_at": "2026-07-05T12:41:19"
+      },
+      {
+        "id": 59,
+        "email": null,
+        "phone": "2026021",
+        "password_hash": "pbkdf2:sha256:1000000$tfxVnnZ8Njb8kDzl$a5e85d8853c7fc571e87e3a7017b7c195af4ac8de8f231fc605010836bfa9f1d",
+        "role": "student",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:22",
+        "updated_at": "2026-07-05T12:41:22"
+      },
+      {
+        "id": 60,
+        "email": null,
+        "phone": "2026029",
+        "password_hash": "pbkdf2:sha256:1000000$AQRRQMiX1YuEfUJZ$afc1ffafd5611942d30812f692318543ba80a7dc5fe06cf2e9904d032222833b",
+        "role": "student",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:24",
+        "updated_at": "2026-07-05T12:41:24"
+      },
+      {
+        "id": 61,
+        "email": null,
+        "phone": "2026030",
+        "password_hash": "pbkdf2:sha256:1000000$xaXaFY8DFyDZeUpB$8a2c2b5a2f93d1c5b92b75883faaac63e4de261a3cbc8fec010f8eb31e36139e",
+        "role": "student",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:26",
+        "updated_at": "2026-07-05T12:41:26"
+      },
+      {
+        "id": 62,
+        "email": null,
+        "phone": "2026031",
+        "password_hash": "pbkdf2:sha256:1000000$Ztt5dXEV3kvw2tMA$3aa70c7aa4bc7354f1576e457bd92399be466334cd026645400543e10a69f06f",
+        "role": "student",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:29",
+        "updated_at": "2026-07-05T12:41:29"
       }
     ],
     "parent_profiles": [
@@ -736,6 +786,15 @@
         "status": "active",
         "created_at": "2026-07-05T12:38:43",
         "updated_at": "2026-07-05T12:38:43"
+      },
+      {
+        "id": 3,
+        "code": "FZTF6Y38T",
+        "title": "tai_khoan_hoc_sinh_3_7_2026 - Nhe.xlsx",
+        "created_by_admin_id": 16,
+        "status": "active",
+        "created_at": "2026-07-05T12:41:17",
+        "updated_at": "2026-07-05T12:41:17"
       }
     ],
     "teacher_profiles": [
@@ -1521,6 +1580,81 @@
         "created_by_teacher_id": null,
         "created_at": "2026-07-05T12:38:54",
         "updated_at": "2026-07-05T12:38:54"
+      },
+      {
+        "id": 33,
+        "user_id": 58,
+        "full_name": "Trần Phương Uyên",
+        "disability_level": "trung_binh",
+        "support_note": "Tài khoản import từ lô FZTF6Y38T",
+        "preferred_input": "touch",
+        "preferred_read_speed": null,
+        "preferred_font_size": null,
+        "preferred_bg_color": null,
+        "avatar_url": null,
+        "created_by_teacher_id": null,
+        "created_at": "2026-07-05T12:41:19",
+        "updated_at": "2026-07-05T12:41:19"
+      },
+      {
+        "id": 34,
+        "user_id": 59,
+        "full_name": "Phan Phi Long",
+        "disability_level": "trung_binh",
+        "support_note": "Tài khoản import từ lô FZTF6Y38T",
+        "preferred_input": "touch",
+        "preferred_read_speed": null,
+        "preferred_font_size": null,
+        "preferred_bg_color": null,
+        "avatar_url": null,
+        "created_by_teacher_id": null,
+        "created_at": "2026-07-05T12:41:22",
+        "updated_at": "2026-07-05T12:41:22"
+      },
+      {
+        "id": 35,
+        "user_id": 60,
+        "full_name": "Lê Ngọc Như Ý",
+        "disability_level": "trung_binh",
+        "support_note": "Tài khoản import từ lô FZTF6Y38T",
+        "preferred_input": "touch",
+        "preferred_read_speed": null,
+        "preferred_font_size": null,
+        "preferred_bg_color": null,
+        "avatar_url": null,
+        "created_by_teacher_id": null,
+        "created_at": "2026-07-05T12:41:24",
+        "updated_at": "2026-07-05T12:41:24"
+      },
+      {
+        "id": 36,
+        "user_id": 61,
+        "full_name": "Phồng Ngọc Thiên Ngân",
+        "disability_level": "trung_binh",
+        "support_note": "Tài khoản import từ lô FZTF6Y38T",
+        "preferred_input": "touch",
+        "preferred_read_speed": null,
+        "preferred_font_size": null,
+        "preferred_bg_color": null,
+        "avatar_url": null,
+        "created_by_teacher_id": null,
+        "created_at": "2026-07-05T12:41:26",
+        "updated_at": "2026-07-05T12:41:26"
+      },
+      {
+        "id": 37,
+        "user_id": 62,
+        "full_name": "Nguyễn Ngọc Kim Ngân",
+        "disability_level": "trung_binh",
+        "support_note": "Tài khoản import từ lô FZTF6Y38T",
+        "preferred_input": "touch",
+        "preferred_read_speed": null,
+        "preferred_font_size": null,
+        "preferred_bg_color": null,
+        "avatar_url": null,
+        "created_by_teacher_id": null,
+        "created_at": "2026-07-05T12:41:29",
+        "updated_at": "2026-07-05T12:41:29"
       }
     ],
     "teacher_career_cards": [
@@ -3488,6 +3622,66 @@
         "status": "active",
         "created_at": "2026-07-05T12:38:54",
         "updated_at": "2026-07-05T12:38:54"
+      },
+      {
+        "id": 11,
+        "batch_id": 3,
+        "student_id": 33,
+        "user_id": 58,
+        "student_code": "2026020",
+        "username": "2026020",
+        "temporary_password": "App@123",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:22",
+        "updated_at": "2026-07-05T12:41:22"
+      },
+      {
+        "id": 12,
+        "batch_id": 3,
+        "student_id": 34,
+        "user_id": 59,
+        "student_code": "2026021",
+        "username": "2026021",
+        "temporary_password": "App@123",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:24",
+        "updated_at": "2026-07-05T12:41:24"
+      },
+      {
+        "id": 13,
+        "batch_id": 3,
+        "student_id": 35,
+        "user_id": 60,
+        "student_code": "2026029",
+        "username": "2026029",
+        "temporary_password": "App@123",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:26",
+        "updated_at": "2026-07-05T12:41:26"
+      },
+      {
+        "id": 14,
+        "batch_id": 3,
+        "student_id": 36,
+        "user_id": 61,
+        "student_code": "2026030",
+        "username": "2026030",
+        "temporary_password": "App@123",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:29",
+        "updated_at": "2026-07-05T12:41:29"
+      },
+      {
+        "id": 15,
+        "batch_id": 3,
+        "student_id": 37,
+        "user_id": 62,
+        "student_code": "2026031",
+        "username": "2026031",
+        "temporary_password": "App@123",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:29",
+        "updated_at": "2026-07-05T12:41:29"
       }
     ],
     "teacher_parent_student_links": [
