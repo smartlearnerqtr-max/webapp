@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-05T12:41:29+00:00",
+  "exported_at": "2026-07-05T12:41:49+00:00",
   "tables": {
     "subjects": [
       {
@@ -714,6 +714,26 @@
         "status": "active",
         "created_at": "2026-07-05T12:41:29",
         "updated_at": "2026-07-05T12:41:29"
+      },
+      {
+        "id": 63,
+        "email": null,
+        "phone": "2026027",
+        "password_hash": "pbkdf2:sha256:1000000$Iak9ryahIMEgbRZT$09dcd9d509718a1bcfad841939c209d67cf682ef9ca498cef7140f52d443475c",
+        "role": "student",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:47",
+        "updated_at": "2026-07-05T12:41:47"
+      },
+      {
+        "id": 64,
+        "email": null,
+        "phone": "2026028",
+        "password_hash": "pbkdf2:sha256:1000000$VlIwy1zT0VbCRbr5$035dd77dcf9cdc3acee3f6b9b3d016999a15bbf0112796736658f0865bec740c",
+        "role": "student",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:49",
+        "updated_at": "2026-07-05T12:41:49"
       }
     ],
     "parent_profiles": [
@@ -795,6 +815,15 @@
         "status": "active",
         "created_at": "2026-07-05T12:41:17",
         "updated_at": "2026-07-05T12:41:17"
+      },
+      {
+        "id": 4,
+        "code": "N6JCB82VT",
+        "title": "tai_khoan_hoc_sinh_3_7_2026 - TB.xlsx",
+        "created_by_admin_id": 16,
+        "status": "active",
+        "created_at": "2026-07-05T12:41:45",
+        "updated_at": "2026-07-05T12:41:45"
       }
     ],
     "teacher_profiles": [
@@ -1655,6 +1684,36 @@
         "created_by_teacher_id": null,
         "created_at": "2026-07-05T12:41:29",
         "updated_at": "2026-07-05T12:41:29"
+      },
+      {
+        "id": 38,
+        "user_id": 63,
+        "full_name": "Nguyễn Thị Minh Anh",
+        "disability_level": "trung_binh",
+        "support_note": "Tài khoản import từ lô N6JCB82VT",
+        "preferred_input": "touch",
+        "preferred_read_speed": null,
+        "preferred_font_size": null,
+        "preferred_bg_color": null,
+        "avatar_url": null,
+        "created_by_teacher_id": null,
+        "created_at": "2026-07-05T12:41:47",
+        "updated_at": "2026-07-05T12:41:47"
+      },
+      {
+        "id": 39,
+        "user_id": 64,
+        "full_name": "Trần Nguyễn Thiên Phúc",
+        "disability_level": "trung_binh",
+        "support_note": "Tài khoản import từ lô N6JCB82VT",
+        "preferred_input": "touch",
+        "preferred_read_speed": null,
+        "preferred_font_size": null,
+        "preferred_bg_color": null,
+        "avatar_url": null,
+        "created_by_teacher_id": null,
+        "created_at": "2026-07-05T12:41:49",
+        "updated_at": "2026-07-05T12:41:49"
       }
     ],
     "teacher_career_cards": [
@@ -3682,6 +3741,30 @@
         "status": "active",
         "created_at": "2026-07-05T12:41:29",
         "updated_at": "2026-07-05T12:41:29"
+      },
+      {
+        "id": 16,
+        "batch_id": 4,
+        "student_id": 38,
+        "user_id": 63,
+        "student_code": "2026027",
+        "username": "2026027",
+        "temporary_password": "App@123",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:49",
+        "updated_at": "2026-07-05T12:41:49"
+      },
+      {
+        "id": 17,
+        "batch_id": 4,
+        "student_id": 39,
+        "user_id": 64,
+        "student_code": "2026028",
+        "username": "2026028",
+        "temporary_password": "App@123",
+        "status": "active",
+        "created_at": "2026-07-05T12:41:49",
+        "updated_at": "2026-07-05T12:41:49"
       }
     ],
     "teacher_parent_student_links": [
