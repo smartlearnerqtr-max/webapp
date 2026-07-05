@@ -28,6 +28,7 @@ from ....models import (
     UserAISetting,
 )
 from ....services.auth_service import create_teacher_user
+from ....services.github_snapshot_service import JsonSnapshotPersistError, persist_json_snapshot
 from ....services.logger import log_server_event
 from ....utils.security import hash_password
 from ....utils.responses import error_response, success_response
@@ -41,6 +42,15 @@ def _require_admin_user():
     if not user or user.role != 'admin':
         return None, error_response('Không tìm thấy admin', 'ADMIN_NOT_FOUND', 404)
     return user, None
+
+
+def _persist_json_snapshot_or_error(action_name: str):
+    try:
+        persist_json_snapshot(action_name)
+    except JsonSnapshotPersistError as error:
+        db.session.rollback()
+        return error_response(str(error), 'JSON_SNAPSHOT_PERSIST_FAILED', 502, error.details)
+    return None
 
 
 def _build_teacher_payload(teacher_user: User) -> dict[str, object]:
@@ -311,6 +321,10 @@ def import_student_account_batch():
             status='active',
         ))
 
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('admin_import_student_batch')
+    if persist_error:
+        return persist_error
     db.session.commit()
 
     log_server_event(
@@ -400,7 +414,10 @@ def create_teacher():
     payload = request.get_json(silent=True) or {}
     created_payload, error_message, error_code = create_teacher_user(payload)
     if error_message or not created_payload:
-        return error_response(error_message or 'Không tạo được tài khoản giáo viên', error_code or 'VALIDATION_ERROR', 422 if error_code == 'VALIDATION_ERROR' else 409)
+        status_code = 422 if error_code == 'VALIDATION_ERROR' else 409
+        if error_code == 'JSON_SNAPSHOT_PERSIST_FAILED':
+            status_code = 502
+        return error_response(error_message or 'Không tạo được tài khoản giáo viên', error_code or 'VALIDATION_ERROR', status_code)
 
     log_server_event(level='info', module='admin', message='Admin tạo tài khoản giáo viên', action_name='admin_create_teacher', user_id=user.id, metadata={'teacher_user_id': created_payload['user']['id']})
     return success_response(created_payload, 'Tạo tài khoản giáo viên thành công', 201)
@@ -428,6 +445,10 @@ def recover_account(user_id: int):
 
     target_user.password_hash = hash_password(temporary_password)
     target_user.status = 'active'
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('admin_recover_account')
+    if persist_error:
+        return persist_error
     db.session.commit()
 
     log_server_event(
@@ -494,6 +515,10 @@ def delete_student_account(user_id: int):
         user_id=admin_user.id,
         metadata={'target_user_id': user_id, 'deleted_counts': deleted_counts},
     )
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('admin_delete_student_account')
+    if persist_error:
+        return persist_error
     db.session.commit()
 
     return success_response({

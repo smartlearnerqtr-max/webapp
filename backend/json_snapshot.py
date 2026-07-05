@@ -55,9 +55,8 @@ def _json_to_row(table, row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def export_snapshot(snapshot_path: Path = DEFAULT_SNAPSHOT_PATH) -> dict[str, int]:
+def build_snapshot() -> tuple[dict[str, Any], dict[str, int]]:
     database = _get_db()
-    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
     tables_payload: dict[str, list[dict[str, Any]]] = {}
     row_counts: dict[str, int] = {}
 
@@ -74,7 +73,17 @@ def export_snapshot(snapshot_path: Path = DEFAULT_SNAPSHOT_PATH) -> dict[str, in
         "exported_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "tables": tables_payload,
     }
-    snapshot_path.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
+    return snapshot, row_counts
+
+
+def snapshot_to_json(snapshot: dict[str, Any]) -> str:
+    return json.dumps(snapshot, ensure_ascii=False, indent=2)
+
+
+def export_snapshot(snapshot_path: Path = DEFAULT_SNAPSHOT_PATH) -> dict[str, int]:
+    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+    snapshot, row_counts = build_snapshot()
+    snapshot_path.write_text(snapshot_to_json(snapshot), encoding="utf-8")
     return row_counts
 
 

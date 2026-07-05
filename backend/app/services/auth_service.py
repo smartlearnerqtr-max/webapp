@@ -5,10 +5,20 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 
 from ..extensions import db
 from ..models import ParentProfile, StudentProfile, TeacherProfile, User
+from .github_snapshot_service import JsonSnapshotPersistError, persist_json_snapshot
 from ..utils.security import hash_password, verify_password
 
 VALID_SELF_REGISTER_ROLES = {'student', 'parent'}
 VALID_STUDENT_LEVELS = {'nang', 'trung_binh', 'nhe'}
+
+
+def _persist_auth_snapshot(action_name: str) -> tuple[str | None, str | None]:
+    try:
+        persist_json_snapshot(action_name)
+    except JsonSnapshotPersistError as error:
+        db.session.rollback()
+        return str(error), 'JSON_SNAPSHOT_PERSIST_FAILED'
+    return None, None
 
 
 def normalize_identity(email: str | None = None, phone: str | None = None) -> tuple[str | None, str | None]:
@@ -109,6 +119,11 @@ def register_self_service_user(payload: dict[str, object]) -> tuple[dict[str, ob
             )
         )
 
+    db.session.flush()
+    persist_error, persist_error_code = _persist_auth_snapshot('register_self_service_user')
+    if persist_error:
+        return None, persist_error, persist_error_code
+
     db.session.commit()
     return build_auth_payload(user), None, None
 
@@ -140,5 +155,10 @@ def create_teacher_user(payload: dict[str, object]) -> tuple[dict[str, object] |
             school_name=school_name,
         )
     )
+    db.session.flush()
+    persist_error, persist_error_code = _persist_auth_snapshot('admin_create_teacher')
+    if persist_error:
+        return None, persist_error, persist_error_code
+
     db.session.commit()
     return build_user_payload(user), None, None

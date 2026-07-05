@@ -9,6 +9,7 @@ from sqlalchemy.orm import joinedload
 from ....extensions import db
 from ....models import ClassJoinCredential, ClassStudent, Classroom, StudentAccountBatch, StudentProfile, User
 from ....services.assignment_delivery_service import ensure_student_has_active_assignments
+from ....services.github_snapshot_service import JsonSnapshotPersistError, persist_json_snapshot
 from ....services.logger import log_server_event
 from ....services.realtime_service import publish_realtime_event
 from ....services.relationship_service import ensure_teacher_student_link, sync_legacy_teacher_student_links, teacher_has_student_access
@@ -35,6 +36,15 @@ def _require_teacher_user():
     if not user or not user.teacher_profile:
         return None, error_response('Không tìm thấy giáo viên', 'TEACHER_NOT_FOUND', 404)
     return user, None
+
+
+def _persist_json_snapshot_or_error(action_name: str):
+    try:
+        persist_json_snapshot(action_name)
+    except JsonSnapshotPersistError as error:
+        db.session.rollback()
+        return error_response(str(error), 'JSON_SNAPSHOT_PERSIST_FAILED', 502, error.details)
+    return None
 
 
 def _require_student_user():
@@ -190,6 +200,10 @@ def create_class():
     db.session.add(classroom)
     db.session.flush()
     _ensure_join_credential(classroom)
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('create_class')
+    if persist_error:
+        return persist_error
     db.session.commit()
     log_server_event(level='info', module='classes', message='Tạo lớp học mới', action_name='create_class', user_id=user.id, metadata={'class_id': classroom.id})
     return success_response(_serialize_teacher_classroom(classroom), 'Tạo lớp thành công', 201)
@@ -229,6 +243,10 @@ def update_class(class_id: int):
     if 'background_image_url' in payload:
         classroom.background_image_url = _resolve_background_image_url(payload.get('background_image_url'))
     _ensure_join_credential(classroom)
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('update_class')
+    if persist_error:
+        return persist_error
     db.session.commit()
     return success_response(_serialize_teacher_classroom(classroom), 'Cập nhật lớp thành công')
 
@@ -244,6 +262,10 @@ def archive_class(class_id: int):
         return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
     classroom.status = 'archived'
     _ensure_join_credential(classroom)
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('archive_class')
+    if persist_error:
+        return persist_error
     db.session.commit()
     return success_response(_serialize_teacher_classroom(classroom), 'Đã lưu trữ lớp')
 
@@ -338,6 +360,10 @@ def add_students_to_class(class_id: int):
         payload={'class_id': class_id, 'class_name': classroom.name, 'student_ids': unique_student_ids, 'auto_assignment_count': auto_assignment_count},
     )
 
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('add_students_to_class')
+    if persist_error:
+        return persist_error
     db.session.commit()
     log_server_event(level='info', module='classes', message='Thêm học sinh vào lớp', action_name='add_students_to_class', user_id=user.id, metadata={'class_id': class_id, 'student_ids': unique_student_ids})
     return success_response([link.to_dict() for link in links], 'Thêm học sinh vào lớp thành công', 201)
@@ -389,6 +415,10 @@ def add_student_batch_to_class(class_id: int):
         ensure_teacher_student_link(user.teacher_profile.id, student.id, source='admin_student_batch')
         links.append(class_link)
 
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('add_student_batch_to_class')
+    if persist_error:
+        return persist_error
     db.session.commit()
 
     publish_realtime_event(
@@ -429,6 +459,10 @@ def remove_student_from_class(class_id: int, student_id: int):
     if not link:
         return error_response('Học sinh không nằm trong lớp', 'CLASS_STUDENT_NOT_FOUND', 404)
     link.status = 'inactive'
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('remove_student_from_class')
+    if persist_error:
+        return persist_error
     db.session.commit()
     return success_response(None, 'Đã xóa học sinh khỏi lớp')
 
@@ -514,6 +548,10 @@ def join_class_by_credentials():
         recipient_user_ids=[uid for uid in [user.id, *parent_user_ids] if uid],
     )
 
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('student_join_class')
+    if persist_error:
+        return persist_error
     db.session.commit()
     log_server_event(
         level='info',

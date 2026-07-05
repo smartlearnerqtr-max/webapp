@@ -42,6 +42,16 @@ services:
         value: data/demo_snapshot.json
       - key: JSON_SNAPSHOT_REQUIRED
         value: "true"
+      - key: PERSIST_JSON_TO_GITHUB
+        value: "true"
+      - key: GITHUB_REPO
+        value: smartlearnerqtr-max/webapp
+      - key: GITHUB_BRANCH
+        value: main
+      - key: GITHUB_SNAPSHOT_PATH
+        value: backend/data/demo_snapshot.json
+      - key: GITHUB_TOKEN
+        sync: false
       - key: CORS_ORIGINS
         fromService:
           type: web

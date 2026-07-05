@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload, selectinload
 
 from ....extensions import db
 from ....models import Classroom, ClassStudent, Lesson, LessonAssignment, LessonAssignmentStudent, ParentStudentLink, StudentLessonProgress, StudentProfile, Subject, TeacherProfile, User
+from ....services.github_snapshot_service import JsonSnapshotPersistError, persist_json_snapshot
 from ....services.logger import log_server_event
 from ....services.realtime_service import publish_realtime_event
 from ....utils.responses import error_response, success_response
@@ -37,6 +38,15 @@ def _require_teacher_user():
     if not user or not user.teacher_profile:
         return None, error_response("Không tìm thấy giáo viên", "TEACHER_NOT_FOUND", 404)
     return user, None
+
+
+def _persist_json_snapshot_or_error(action_name: str):
+    try:
+        persist_json_snapshot(action_name)
+    except JsonSnapshotPersistError as error:
+        db.session.rollback()
+        return error_response(str(error), 'JSON_SNAPSHOT_PERSIST_FAILED', 502, error.details)
+    return None
 
 
 def _require_student_user():
@@ -274,6 +284,10 @@ def create_assignment():
             payload={'assignment_id': assignment.id, 'class_id': classroom.id, 'class_name': classroom.name, 'lesson_id': lesson.id, 'lesson_title': lesson.title, 'student_count': len(final_student_ids), 'source': 'manual'},
         )
 
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('create_assignment')
+    if persist_error:
+        return persist_error
     db.session.commit()
     log_server_event(
         level='info',
@@ -321,6 +335,10 @@ def update_assignment(assignment_id: int):
         recipient_user_ids=_get_assignment_recipient_user_ids(assignment),
         payload={'assignment_id': assignment.id, 'status': assignment.status},
     )
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('update_assignment')
+    if persist_error:
+        return persist_error
     db.session.commit()
     return success_response(assignment.to_dict(), 'Cập nhật assignment thành công')
 
@@ -342,6 +360,10 @@ def close_assignment(assignment_id: int):
         recipient_user_ids=_get_assignment_recipient_user_ids(assignment),
         payload={'assignment_id': assignment.id, 'status': assignment.status},
     )
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('close_assignment')
+    if persist_error:
+        return persist_error
     db.session.commit()
     return success_response(assignment.to_dict(), 'Đã đóng assignment')
 
