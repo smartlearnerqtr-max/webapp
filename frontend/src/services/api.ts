@@ -646,6 +646,44 @@ export type AdminStudentAccountBatchImportResponse = {
   skipped_rows: Array<{ row: number; reason: string }>
 }
 
+export type AdminClassStudentItem = {
+  link_id: number
+  student_profile_id: number | null
+  user_id: number | null
+  login_id: string | null
+  full_name: string | null
+  disability_level: string | null
+  disability_level_label: string
+  username: string | null
+  email: string | null
+  phone: string | null
+  account_status: string
+  class_link_status: string
+  support_note: string | null
+  preferred_input: string | null
+}
+
+export type AdminClassOverviewItem = ClassItem & {
+  teacher: {
+    id: number | null
+    user_id: number | null
+    full_name: string | null
+    school_name: string | null
+    email: string | null
+    phone: string | null
+  } | null
+  level_counts: Record<string, number>
+  students: AdminClassStudentItem[]
+}
+
+export type AdminClassesOverview = {
+  summary: {
+    class_count: number
+    student_count: number
+  }
+  classes: AdminClassOverviewItem[]
+}
+
 export type TeacherSharedStudentItem = {
   student: StudentItem
   teachers: Array<{
@@ -762,6 +800,22 @@ export async function deleteAdminStudentAccount(token: string, userId: number) {
 
 export async function fetchAdminStudentAccountBatches(token: string): Promise<AdminStudentAccountBatch[]> {
   return request<AdminStudentAccountBatch[]>('/api/v1/admin/student-account-batches', { token })
+}
+
+export async function fetchAdminClassesOverview(token: string): Promise<AdminClassesOverview> {
+  return request<AdminClassesOverview>('/api/v1/admin/classes/overview', { token })
+}
+
+export async function exportAdminClassesOverviewExcel(token: string, classId?: number): Promise<Blob> {
+  const query = classId ? `?class_id=${encodeURIComponent(String(classId))}` : ''
+  const response = await fetchWithAccessTokenRetry(`/api/v1/admin/classes/overview/export${query}`, {
+    method: 'GET',
+  }, token)
+  if (!response.ok) {
+    const json = await parseJsonResponse(response)
+    throw new Error(json?.message ?? 'Không thể xuất file Excel')
+  }
+  return response.blob()
 }
 
 export async function importAdminStudentAccountBatch(token: string, payload: { file: File; title?: string }) {

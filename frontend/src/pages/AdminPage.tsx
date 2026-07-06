@@ -6,6 +6,8 @@ import { RequireAuth } from '../components/RequireAuth'
 import {
   createTeacherByAdmin,
   deleteAdminStudentAccount,
+  exportAdminClassesOverviewExcel,
+  fetchAdminClassesOverview,
   fetchAdminRecoverableAccounts,
   fetchAdminRelationshipOverview,
   fetchAdminStudentAccountBatches,
@@ -16,7 +18,7 @@ import {
 import type { AdminRecoverAccountResponse, AdminStudentAccountBatchImportResponse } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
-type AdminSection = 'overview' | 'create-teacher' | 'student-batches' | 'teachers' | 'relationships' | 'recovery'
+type AdminSection = 'overview' | 'create-teacher' | 'student-batches' | 'classes' | 'teachers' | 'relationships' | 'recovery'
 
 const ROLE_LABELS: Record<string, string> = {
   teacher: 'Giáo viên',
@@ -27,10 +29,17 @@ const SECTION_ITEMS: Array<{ key: AdminSection; label: string }> = [
   { key: 'overview', label: 'Tổng quan' },
   { key: 'create-teacher', label: 'Tạo giáo viên' },
   { key: 'student-batches', label: 'Cấp học sinh' },
+  { key: 'classes', label: 'Quản lý lớp' },
   { key: 'teachers', label: 'Danh sách giáo viên' },
   { key: 'relationships', label: 'Liên kết' },
   { key: 'recovery', label: 'Khôi phục tài khoản' },
 ]
+
+const LEVEL_LABELS: Record<string, string> = {
+  nhe: 'Nhẹ',
+  trung_binh: 'Trung bình',
+  nang: 'Nặng',
+}
 
 function getSectionTitle(section: AdminSection) {
   return SECTION_ITEMS.find((item) => item.key === section)?.label ?? 'Admin'
@@ -41,6 +50,22 @@ function readableStatus(status: string | null | undefined) {
   if (status === 'inactive') return 'Tạm khóa'
   if (status === 'archived') return 'Lưu trữ'
   return status || 'Chưa rõ'
+}
+
+function readableLevel(level: string | null | undefined, fallback?: string | null) {
+  if (!level) return fallback || 'Chưa rõ'
+  return LEVEL_LABELS[level] ?? fallback ?? level
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
 }
 
 export function AdminPage() {
@@ -61,6 +86,9 @@ export function AdminPage() {
   const [studentBatchTitle, setStudentBatchTitle] = useState('')
   const [studentBatchFile, setStudentBatchFile] = useState<File | null>(null)
   const [importedStudentBatch, setImportedStudentBatch] = useState<AdminStudentAccountBatchImportResponse | null>(null)
+  const [classSearch, setClassSearch] = useState('')
+  const [classLevelFilter, setClassLevelFilter] = useState<'all' | 'nhe' | 'trung_binh' | 'nang'>('all')
+  const [exportingClassId, setExportingClassId] = useState<number | 'all' | null>(null)
 
   const teachersQuery = useQuery({
     queryKey: ['admin-teachers', token],
@@ -86,6 +114,12 @@ export function AdminPage() {
     enabled: Boolean(token),
   })
 
+  const adminClassesQuery = useQuery({
+    queryKey: ['admin-classes-overview', token],
+    queryFn: () => fetchAdminClassesOverview(token!),
+    enabled: Boolean(token),
+  })
+
   const filteredRecoveryAccounts = useMemo(() => {
     const needle = recoverySearch.trim().toLowerCase()
     return (recoveryAccountsQuery.data ?? []).filter((account) => {
@@ -102,6 +136,41 @@ export function AdminPage() {
       return matchesRole && (!needle || searchableText.includes(needle))
     })
   }, [recoveryAccountsQuery.data, recoveryRole, recoverySearch])
+
+  const filteredAdminClasses = useMemo(() => {
+    const needle = classSearch.trim().toLowerCase()
+    return (adminClassesQuery.data?.classes ?? []).map((classroom) => {
+      const students = classroom.students.filter((student) => {
+        const matchesLevel = classLevelFilter === 'all' || student.disability_level === classLevelFilter
+        const searchableText = [
+          classroom.name,
+          classroom.grade_label,
+          classroom.teacher?.full_name,
+          classroom.teacher?.email,
+          classroom.teacher?.phone,
+          student.login_id,
+          student.full_name,
+          student.username,
+          student.email,
+          student.phone,
+          student.disability_level_label,
+          student.account_status,
+        ].filter(Boolean).join(' ').toLowerCase()
+        return matchesLevel && (!needle || searchableText.includes(needle))
+      })
+      const classMatchesSearch = !needle || [
+        classroom.name,
+        classroom.grade_label,
+        classroom.teacher?.full_name,
+        classroom.teacher?.email,
+        classroom.teacher?.phone,
+        classroom.status,
+        readableLevel(classroom.default_disability_level),
+      ].filter(Boolean).join(' ').toLowerCase().includes(needle)
+      const classMatchesLevel = classLevelFilter === 'all' || classroom.default_disability_level === classLevelFilter || students.length > 0
+      return { ...classroom, students, student_count: students.length, _classMatchesSearch: classMatchesSearch, _classMatchesLevel: classMatchesLevel }
+    }).filter((classroom) => classroom._classMatchesLevel && (classroom._classMatchesSearch || classroom.students.length > 0))
+  }, [adminClassesQuery.data, classLevelFilter, classSearch])
 
   const createMutation = useMutation({
     mutationFn: () => createTeacherByAdmin(token!, {
@@ -136,6 +205,7 @@ export function AdminPage() {
         queryClient.invalidateQueries({ queryKey: ['admin-account-recovery', token] }),
         queryClient.invalidateQueries({ queryKey: ['admin-teachers', token] }),
         queryClient.invalidateQueries({ queryKey: ['admin-relationships-overview', token] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-classes-overview', token] }),
       ])
     },
   })
@@ -149,6 +219,7 @@ export function AdminPage() {
         queryClient.invalidateQueries({ queryKey: ['admin-account-recovery', token] }),
         queryClient.invalidateQueries({ queryKey: ['admin-student-account-batches', token] }),
         queryClient.invalidateQueries({ queryKey: ['admin-relationships-overview', token] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-classes-overview', token] }),
       ])
     },
   })
@@ -172,10 +243,13 @@ export function AdminPage() {
   const summary = relationshipsQuery.data?.summary
   const teacherCount = summary?.teacher_count ?? teachersQuery.data?.length ?? 0
   const accountCount = recoveryAccountsQuery.data?.length ?? 0
+  const classCount = adminClassesQuery.data?.summary.class_count ?? 0
+  const classStudentCount = adminClassesQuery.data?.summary.student_count ?? 0
   const loadingCurrentSection =
     (activeSection === 'teachers' && teachersQuery.isLoading) ||
     (activeSection === 'relationships' && relationshipsQuery.isLoading) ||
     (activeSection === 'student-batches' && studentBatchesQuery.isLoading) ||
+    (activeSection === 'classes' && adminClassesQuery.isLoading) ||
     (activeSection === 'recovery' && recoveryAccountsQuery.isLoading)
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -194,6 +268,23 @@ export function AdminPage() {
     const confirmed = window.confirm(`Xóa vĩnh viễn tài khoản học sinh "${displayName}" và toàn bộ dữ liệu liên quan? Thao tác này không thể hoàn tác.`)
     if (!confirmed) return
     deleteStudentMutation.mutate({ userId, displayName })
+  }
+
+  async function handleExportClassesExcel(classId?: number) {
+    const exportKey = classId ?? 'all'
+    if (!token || exportingClassId) return
+    setExportingClassId(exportKey)
+    try {
+      const blob = await exportAdminClassesOverviewExcel(token, classId)
+      const filename = classId
+        ? `danh-sach-lop-${classId}-${new Date().toISOString().slice(0, 10)}.xlsx`
+        : `danh-sach-lop-hoc-${new Date().toISOString().slice(0, 10)}.xlsx`
+      downloadBlob(blob, filename)
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Không thể xuất file Excel')
+    } finally {
+      setExportingClassId(null)
+    }
   }
 
   return (
@@ -241,6 +332,14 @@ export function AdminPage() {
                   <strong>{teacherCount}</strong>
                 </article>
                 <article className="admin-stat-card">
+                  <span>Tổng lớp</span>
+                  <strong>{classCount}</strong>
+                </article>
+                <article className="admin-stat-card">
+                  <span>Học sinh trong lớp</span>
+                  <strong>{classStudentCount}</strong>
+                </article>
+                <article className="admin-stat-card">
                   <span>Liên kết GV-HS</span>
                   <strong>{summary?.teacher_student_link_count ?? 0}</strong>
                 </article>
@@ -270,6 +369,10 @@ export function AdminPage() {
                   <button type="button" className="admin-overview-action" onClick={() => setActiveSection('student-batches')}>
                     <strong>Cấp tài khoản học sinh</strong>
                     <span>Import Excel/CSV để tạo ID đăng nhập và mã lô cho giáo viên.</span>
+                  </button>
+                  <button type="button" className="admin-overview-action" onClick={() => setActiveSection('classes')}>
+                    <strong>Quản lý lớp</strong>
+                    <span>Xem số lớp, danh sách học sinh, ID, tài khoản và mức độ.</span>
                   </button>
                   <button type="button" className="admin-overview-action" onClick={() => setActiveSection('relationships')}>
                     <strong>Kiểm tra liên kết</strong>
@@ -435,6 +538,111 @@ export function AdminPage() {
                   </div>
                 </article>
               ) : null}
+            </section>
+          ) : null}
+
+          {activeSection === 'classes' ? (
+            <section className="admin-section">
+              <article className="admin-panel-card">
+                <div className="admin-panel-header">
+                  <h2>Tổng quan lớp học</h2>
+                  <span>{filteredAdminClasses.length} / {adminClassesQuery.data?.summary.class_count ?? 0} lớp</span>
+                </div>
+                <div className="admin-panel-body">
+                  <div className="admin-recovery-toolbar admin-class-toolbar">
+                    <label>
+                      Tìm lớp / học sinh
+                      <input
+                        value={classSearch}
+                        onChange={(event) => setClassSearch(event.target.value)}
+                        placeholder="Tên lớp, giáo viên, ID, học sinh..."
+                      />
+                    </label>
+                    <label>
+                      Mức độ
+                      <select
+                        value={classLevelFilter}
+                        onChange={(event) => setClassLevelFilter(event.target.value as 'all' | 'nhe' | 'trung_binh' | 'nang')}
+                      >
+                        <option value="all">Tất cả</option>
+                        <option value="nhe">Nhẹ</option>
+                        <option value="trung_binh">Trung bình</option>
+                        <option value="nang">Nặng</option>
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      className="action-button admin-export-button"
+                      disabled={!filteredAdminClasses.length || Boolean(exportingClassId)}
+                      onClick={() => handleExportClassesExcel()}
+                    >
+                      {exportingClassId === 'all' ? 'Đang xuất...' : 'Xuất Excel'}
+                    </button>
+                  </div>
+                  {adminClassesQuery.error ? <p className="error-text">{(adminClassesQuery.error as Error).message}</p> : null}
+                </div>
+              </article>
+
+              <div className="admin-class-list">
+                {filteredAdminClasses.map((classroom) => (
+                  <article className="admin-panel-card admin-class-card" key={classroom.id}>
+                    <div className="admin-panel-header admin-class-header">
+                      <div>
+                        <h2>{classroom.name}</h2>
+                        <p>
+                          {classroom.grade_label || 'Chưa có khối'} · {classroom.teacher?.full_name || 'Chưa có giáo viên'} · Mã lớp: <strong>{classroom.join_credential?.class_password || 'Chưa có'}</strong>
+                        </p>
+                      </div>
+                      <div className="admin-class-header-actions">
+                        <span>{classroom.student_count} học sinh</span>
+                        <button
+                          type="button"
+                          className="admin-table-action"
+                          disabled={Boolean(exportingClassId)}
+                          onClick={() => handleExportClassesExcel(classroom.id)}
+                        >
+                          {exportingClassId === classroom.id ? 'Đang xuất...' : 'Xuất Excel'}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="admin-class-meta">
+                      <span className="admin-badge">{readableStatus(classroom.status)}</span>
+                      <span className="admin-badge">{readableLevel(classroom.default_disability_level)}</span>
+                      {Object.entries(classroom.level_counts).map(([level, count]) => (
+                        <span className="admin-badge" key={level}>{level}: {count}</span>
+                      ))}
+                    </div>
+                    <div className="admin-table-wrap">
+                      <table className="admin-table admin-class-student-table">
+                        <thead>
+                          <tr>
+                            <th>ID đăng nhập</th>
+                            <th>Họ tên</th>
+                            <th>Tên tài khoản</th>
+                            <th>Email</th>
+                            <th>Mức độ</th>
+                            <th>Trạng thái</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {classroom.students.map((student) => (
+                            <tr key={`${classroom.id}-${student.link_id}`}>
+                              <td><strong>{student.login_id || student.user_id || 'Chưa có'}</strong></td>
+                              <td>{student.full_name || 'Chưa có tên'}</td>
+                              <td>{student.username || student.phone || 'Chưa có'}</td>
+                              <td>{student.email || 'Chưa có'}</td>
+                              <td>{readableLevel(student.disability_level, student.disability_level_label)}</td>
+                              <td><span className="admin-badge">{readableStatus(student.account_status)}</span></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {!classroom.students.length ? <p className="admin-empty-state">Lớp này chưa có học sinh phù hợp với bộ lọc.</p> : null}
+                    </div>
+                  </article>
+                ))}
+                {!filteredAdminClasses.length && !adminClassesQuery.isLoading ? <p className="admin-empty-state">Không tìm thấy lớp hoặc học sinh phù hợp.</p> : null}
+              </div>
             </section>
           ) : null}
 

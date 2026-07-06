@@ -6,11 +6,12 @@ import secrets
 import string
 import unicodedata
 
-from flask import request
+from flask import request, send_file
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from ....extensions import db
 from ....models import (
+    Classroom,
     ClassStudent,
     LessonAssignmentStudent,
     ParentDailyReport,
@@ -147,6 +148,190 @@ def _build_batch_payload(batch: StudentAccountBatch, include_members: bool = Fal
     return payload
 
 
+def _level_label(level: str | None) -> str:
+    if level == 'nhe':
+        return 'Nhẹ'
+    if level == 'trung_binh':
+        return 'Trung bình'
+    if level == 'nang':
+        return 'Nặng'
+    return level or 'Chưa rõ'
+
+
+def _build_admin_class_student_payload(class_link: ClassStudent) -> dict[str, object]:
+    student = class_link.student
+    user = student.user if student and student.user else None
+    return {
+        'link_id': class_link.id,
+        'student_profile_id': student.id if student else None,
+        'user_id': user.id if user else None,
+        'login_id': user.phone if user and user.phone else str(user.id) if user else None,
+        'full_name': student.full_name if student else None,
+        'disability_level': student.disability_level if student else None,
+        'disability_level_label': _level_label(student.disability_level if student else None),
+        'username': user.email or user.phone if user else None,
+        'email': user.email if user else None,
+        'phone': user.phone if user else None,
+        'account_status': user.status if user else 'missing',
+        'class_link_status': class_link.status,
+        'support_note': student.support_note if student else None,
+        'preferred_input': student.preferred_input if student else None,
+    }
+
+
+def _build_admin_class_payload(classroom: Classroom) -> dict[str, object]:
+    active_student_links = [link for link in classroom.students if link.status == 'active']
+    level_counts: dict[str, int] = {}
+    for link in active_student_links:
+        level = link.student.disability_level if link.student else None
+        level_counts[_level_label(level)] = level_counts.get(_level_label(level), 0) + 1
+
+    teacher = classroom.teacher
+    teacher_user = teacher.user if teacher and teacher.user else None
+    payload = classroom.to_dict(include_join_credentials=True)
+    payload.update({
+        'teacher': {
+            'id': teacher.id if teacher else None,
+            'user_id': teacher_user.id if teacher_user else None,
+            'full_name': teacher.full_name if teacher else None,
+            'school_name': teacher.school_name if teacher else None,
+            'email': teacher_user.email if teacher_user else None,
+            'phone': teacher_user.phone if teacher_user else None,
+        } if teacher else None,
+        'student_count': len(active_student_links),
+        'level_counts': level_counts,
+        'students': [_build_admin_class_student_payload(link) for link in active_student_links],
+    })
+    return payload
+
+
+def _excel_filename(value: str) -> str:
+    normalized = unicodedata.normalize('NFKD', value or 'lop-hoc')
+    ascii_text = ''.join(char for char in normalized if not unicodedata.combining(char)).lower()
+    cleaned = ''.join(char if char.isalnum() else '-' for char in ascii_text)
+    cleaned = '-'.join(part for part in cleaned.split('-') if part)
+    return cleaned or 'lop-hoc'
+
+
+def _build_classes_excel(classrooms: list[Classroom]) -> io.BytesIO:
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.utils import get_column_letter
+
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = 'Danh sách lớp'
+
+    title_fill = PatternFill('solid', fgColor='1F4E79')
+    title_font = Font(color='FFFFFF', bold=True, size=15)
+    section_fill = PatternFill('solid', fgColor='D9EAF7')
+    header_fill = PatternFill('solid', fgColor='EAF2F8')
+    header_font = Font(bold=True, color='1F2937')
+    thin_border = Border(
+        left=Side(style='thin', color='D9E2EC'),
+        right=Side(style='thin', color='D9E2EC'),
+        top=Side(style='thin', color='D9E2EC'),
+        bottom=Side(style='thin', color='D9E2EC'),
+    )
+
+    columns = [
+        ('STT', 7),
+        ('ID đăng nhập', 16),
+        ('Họ tên học sinh', 28),
+        ('Tên tài khoản', 30),
+        ('Email', 32),
+        ('Mức độ', 16),
+        ('Trạng thái', 18),
+    ]
+    for index, (_header, width) in enumerate(columns, start=1):
+        worksheet.column_dimensions[get_column_letter(index)].width = width
+
+    row_index = 1
+    for class_index, classroom in enumerate(classrooms, start=1):
+        active_links = [link for link in classroom.students if link.status == 'active']
+        teacher = classroom.teacher
+        teacher_user = teacher.user if teacher and teacher.user else None
+
+        worksheet.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=len(columns))
+        title_cell = worksheet.cell(row=row_index, column=1, value=f'{class_index}. {classroom.name}')
+        title_cell.fill = title_fill
+        title_cell.font = title_font
+        title_cell.alignment = Alignment(vertical='center')
+        worksheet.row_dimensions[row_index].height = 26
+        row_index += 1
+
+        meta_rows = [
+            ('Khối/Lớp', classroom.grade_label or 'Chưa có'),
+            ('Giáo viên', teacher.full_name if teacher else 'Chưa có giáo viên'),
+            ('Email giáo viên', teacher_user.email if teacher_user and teacher_user.email else ''),
+            ('SĐT giáo viên', teacher_user.phone if teacher_user and teacher_user.phone else ''),
+            ('Mã lớp', classroom.join_credential.join_password if classroom.join_credential else ''),
+            ('Mức độ lớp', _level_label(classroom.default_disability_level)),
+            ('Số học sinh', len(active_links)),
+        ]
+        for label, value in meta_rows:
+            worksheet.cell(row=row_index, column=1, value=label)
+            worksheet.cell(row=row_index, column=2, value=value)
+            worksheet.cell(row=row_index, column=1).font = Font(bold=True)
+            worksheet.cell(row=row_index, column=1).fill = section_fill
+            worksheet.cell(row=row_index, column=2).alignment = Alignment(wrap_text=True)
+            row_index += 1
+
+        row_index += 1
+        for column_index, (header, _width) in enumerate(columns, start=1):
+            cell = worksheet.cell(row=row_index, column=column_index, value=header)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+        row_index += 1
+
+        if active_links:
+            for student_index, class_link in enumerate(active_links, start=1):
+                student = class_link.student
+                user = student.user if student and student.user else None
+                values = [
+                    student_index,
+                    user.phone if user and user.phone else user.id if user else '',
+                    student.full_name if student else '',
+                    user.email or user.phone if user else '',
+                    user.email if user and user.email else '',
+                    _level_label(student.disability_level if student else None),
+                    readable_status_for_excel(user.status if user else 'missing'),
+                ]
+                for column_index, value in enumerate(values, start=1):
+                    cell = worksheet.cell(row=row_index, column=column_index, value=value)
+                    cell.border = thin_border
+                    cell.alignment = Alignment(vertical='top', wrap_text=True)
+                row_index += 1
+        else:
+            worksheet.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=len(columns))
+            cell = worksheet.cell(row=row_index, column=1, value='Lớp này chưa có học sinh.')
+            cell.alignment = Alignment(horizontal='center')
+            cell.border = thin_border
+            row_index += 1
+
+        row_index += 2
+
+    worksheet.freeze_panes = 'A10'
+    output = io.BytesIO()
+    workbook.save(output)
+    output.seek(0)
+    return output
+
+
+def readable_status_for_excel(status: str | None) -> str:
+    if status == 'active':
+        return 'Đang hoạt động'
+    if status == 'inactive':
+        return 'Tạm khóa'
+    if status == 'archived':
+        return 'Lưu trữ'
+    if status == 'missing':
+        return 'Thiếu tài khoản'
+    return status or 'Chưa rõ'
+
+
 @api_v1.get('/admin/teachers')
 @jwt_required()
 def list_teachers():
@@ -159,6 +344,62 @@ def list_teachers():
     teachers = query.order_by(User.created_at.desc()).all()
     payload = [_build_teacher_payload(teacher) for teacher in teachers]
     return success_response(payload)
+
+
+@api_v1.get('/admin/classes/overview')
+@jwt_required()
+def list_admin_classes_overview():
+    _user, error = _require_admin_user()
+    if error:
+        return error
+
+    classrooms = Classroom.query.order_by(Classroom.created_at.desc()).all()
+    payload = [_build_admin_class_payload(classroom) for classroom in classrooms]
+    for classroom in payload:
+        classroom['students'] = sorted(
+            classroom['students'],
+            key=lambda student: str(student.get('full_name') or '').lower(),
+        )
+    return success_response({
+        'summary': {
+            'class_count': len(payload),
+            'student_count': sum(int(classroom['student_count']) for classroom in payload),
+        },
+        'classes': payload,
+    })
+
+
+@api_v1.get('/admin/classes/overview/export')
+@jwt_required()
+def export_admin_classes_overview():
+    _user, error = _require_admin_user()
+    if error:
+        return error
+
+    class_id = request.args.get('class_id')
+    query = Classroom.query.order_by(Classroom.created_at.desc())
+    filename = 'danh-sach-lop-hoc'
+    if class_id:
+        try:
+            class_id_value = int(class_id)
+        except (TypeError, ValueError):
+            return error_response('class_id không hợp lệ', 'VALIDATION_ERROR', 422)
+        query = query.filter_by(id=class_id_value)
+
+    classrooms = query.all()
+    if class_id and not classrooms:
+        return error_response('Không tìm thấy lớp', 'CLASS_NOT_FOUND', 404)
+    if len(classrooms) == 1:
+        filename = f"danh-sach-{_excel_filename(classrooms[0].name)}"
+
+    output = _build_classes_excel(classrooms)
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=f'{filename}.xlsx',
+        max_age=0,
+    )
 
 
 @api_v1.get('/admin/account-recovery')
