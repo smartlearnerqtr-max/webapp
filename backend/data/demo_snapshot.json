@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-05T12:41:49+00:00",
+  "exported_at": "2026-07-10T06:44:42+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$avkxi56LbVk6LUKO$52da4d5017d9c00bb9a6ac22b11a4b7098677eda652c2ffd8619a145f54563a9",
+        "password_hash": "pbkdf2:sha256:1000000$mJL3xI0B0lwfCIZ2$f0a9f8d362be07805bbadc879ca4dc25d8d8194bf1d85e541cba33c796ee1329",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-05T12:40:36.158684"
+        "updated_at": "2026-07-10T06:38:56.761299"
       },
       {
         "id": 18,
@@ -1614,7 +1614,7 @@
         "id": 33,
         "user_id": 58,
         "full_name": "Trần Phương Uyên",
-        "disability_level": "trung_binh",
+        "disability_level": "nhe",
         "support_note": "Tài khoản import từ lô FZTF6Y38T",
         "preferred_input": "touch",
         "preferred_read_speed": null,
@@ -1623,7 +1623,7 @@
         "avatar_url": null,
         "created_by_teacher_id": null,
         "created_at": "2026-07-05T12:41:19",
-        "updated_at": "2026-07-05T12:41:19"
+        "updated_at": "2026-07-10T06:43:39.376336"
       },
       {
         "id": 34,
@@ -2714,6 +2714,14 @@
         "status": "active",
         "created_at": "2026-06-29T14:12:14",
         "updated_at": "2026-06-29T14:12:14"
+      },
+      {
+        "id": 27,
+        "class_id": 7,
+        "student_id": 33,
+        "status": "active",
+        "created_at": "2026-07-10T06:44:42",
+        "updated_at": "2026-07-10T06:44:42"
       }
     ],
     "class_subjects": [
@@ -3953,6 +3961,15 @@
         "source": "competition_seed",
         "created_at": "2026-06-29T14:12:14",
         "updated_at": "2026-06-29T14:12:14"
+      },
+      {
+        "id": 19,
+        "teacher_id": 5,
+        "student_id": 33,
+        "status": "active",
+        "source": "class_join",
+        "created_at": "2026-07-10T06:44:42",
+        "updated_at": "2026-07-10T06:44:42"
       }
     ],
     "lesson_activities": [
