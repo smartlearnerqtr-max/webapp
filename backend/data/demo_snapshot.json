@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-10T06:50:59+00:00",
+  "exported_at": "2026-07-10T06:51:31+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$biPtW9gyJXONlzbY$1340658616be1f590f9e2f4e31d72c9c76fb97f8debb0536a9c81010e65d5911",
+        "password_hash": "pbkdf2:sha256:1000000$08pSlVCgqowJ19s1$0287f6c2758a06780b1ca6e5f39bb4625c409f8e4e69f4e5ba290ec454a9f83c",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-10T06:48:55.358466"
+        "updated_at": "2026-07-10T06:51:11.137307"
       },
       {
         "id": 18,
@@ -3531,17 +3531,17 @@
       {
         "id": 75,
         "created_by_teacher_id": 5,
-        "subject_id": 6,
+        "subject_id": 7,
         "class_id": 7,
-        "title": "Mức nhẹ - Số hữu tỉ, tỉ lệ và Lăng trụ đứng",
-        "description": "Giải quyết các bài toán phức tạp hơn qua hướng dẫn từng bước và mô hình 3D.",
+        "title": "Mức nhẹ - Health, Traffic and Festival",
+        "description": "Luyện tập giao tiếp tiếng Anh cơ bản và nghe hiểu trong các tình huống thực tế.",
         "primary_level": "nhe",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-10T06:45:52",
-        "updated_at": "2026-07-10T06:46:10.096573"
+        "is_archived": false,
+        "created_at": "2026-07-10T06:47:28",
+        "updated_at": "2026-07-10T06:47:28"
       },
       {
         "id": 76,
@@ -3554,42 +3554,12 @@
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-10T06:45:52",
-        "updated_at": "2026-07-10T06:46:07.226716"
+        "is_archived": false,
+        "created_at": "2026-07-10T06:48:27",
+        "updated_at": "2026-07-10T06:48:27"
       },
       {
         "id": 77,
-        "created_by_teacher_id": 5,
-        "subject_id": 6,
-        "class_id": 7,
-        "title": "Mức nhẹ - Số hữu tỉ, tỉ lệ và Lăng trụ đứng",
-        "description": "Giải quyết các bài toán phức tạp hơn qua hướng dẫn từng bước và mô hình 3D.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-10T06:45:52",
-        "updated_at": "2026-07-10T06:46:03.984911"
-      },
-      {
-        "id": 78,
-        "created_by_teacher_id": 5,
-        "subject_id": 6,
-        "class_id": 7,
-        "title": "Mức nhẹ - Số hữu tỉ, tỉ lệ và Lăng trụ đứng",
-        "description": "Giải quyết các bài toán phức tạp hơn qua hướng dẫn từng bước và mô hình 3D.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-10T06:45:52",
-        "updated_at": "2026-07-10T06:45:52"
-      },
-      {
-        "id": 79,
         "created_by_teacher_id": 5,
         "subject_id": 5,
         "class_id": 7,
@@ -3600,68 +3570,8 @@
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-10T06:46:30",
-        "updated_at": "2026-07-10T06:46:30"
-      },
-      {
-        "id": 80,
-        "created_by_teacher_id": 5,
-        "subject_id": 3,
-        "class_id": 7,
-        "title": "Mức nhẹ - Nguyên tử, Ánh sáng và Từ tính",
-        "description": "Tìm hiểu cấu tạo nguyên tử và các tính chất vật lý qua mô phỏng 3D.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-10T06:46:55",
-        "updated_at": "2026-07-10T06:46:55"
-      },
-      {
-        "id": 81,
-        "created_by_teacher_id": 5,
-        "subject_id": 3,
-        "class_id": 7,
-        "title": "Mức nhẹ - Nguyên tử, Ánh sáng và Từ tính",
-        "description": "Tìm hiểu cấu tạo nguyên tử và các tính chất vật lý qua mô phỏng 3D.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-10T06:49:10",
-        "updated_at": "2026-07-10T06:50:05.793136"
-      },
-      {
-        "id": 82,
-        "created_by_teacher_id": 5,
-        "subject_id": 7,
-        "class_id": 7,
-        "title": "Mức nhẹ - Health, Traffic and Festival",
-        "description": "Luyện tập giao tiếp tiếng Anh cơ bản và nghe hiểu trong các tình huống thực tế.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-10T06:50:24",
-        "updated_at": "2026-07-10T06:50:24"
-      },
-      {
-        "id": 83,
-        "created_by_teacher_id": 5,
-        "subject_id": 9,
-        "class_id": 7,
-        "title": "Mức nhẹ - Châu lục và Phát kiến địa lí",
-        "description": "Định vị địa lý trên bản đồ 3D và tìm hiểu các mốc lịch sử thám hiểm.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-10T06:50:50",
-        "updated_at": "2026-07-10T06:50:50"
+        "created_at": "2026-07-10T06:48:49",
+        "updated_at": "2026-07-10T06:48:49"
       }
     ],
     "parent_daily_reports": [],
@@ -5371,202 +5281,6 @@
       {
         "id": 149,
         "lesson_id": 75,
-        "title": "Bài toán Step-by-step",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực giải quyết vấn đề",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Làm bài toán theo từng bước: đọc đề, chọn phép tính, rồi điền kết quả.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=toan-step\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:45:52",
-        "updated_at": "2026-07-10T06:45:52"
-      },
-      {
-        "id": 150,
-        "lesson_id": 76,
-        "title": "Bài toán Step-by-step",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực giải quyết vấn đề",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Làm bài toán theo từng bước: đọc đề, chọn phép tính, rồi điền kết quả.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=toan-step\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:45:52",
-        "updated_at": "2026-07-10T06:45:52"
-      },
-      {
-        "id": 151,
-        "lesson_id": 77,
-        "title": "Bài toán Step-by-step",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực giải quyết vấn đề",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Làm bài toán theo từng bước: đọc đề, chọn phép tính, rồi điền kết quả.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=toan-step\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:45:52",
-        "updated_at": "2026-07-10T06:45:52"
-      },
-      {
-        "id": 152,
-        "lesson_id": 75,
-        "title": "Tương tác 3D hình khối",
-        "activity_type": "watch_answer",
-        "instruction_text": "Phát triển tư duy không gian 3D",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:45:52",
-        "updated_at": "2026-07-10T06:45:52"
-      },
-      {
-        "id": 153,
-        "lesson_id": 78,
-        "title": "Bài toán Step-by-step",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực giải quyết vấn đề",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Làm bài toán theo từng bước: đọc đề, chọn phép tính, rồi điền kết quả.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=toan-step\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:45:52",
-        "updated_at": "2026-07-10T06:45:52"
-      },
-      {
-        "id": 154,
-        "lesson_id": 76,
-        "title": "Tương tác 3D hình khối",
-        "activity_type": "watch_answer",
-        "instruction_text": "Phát triển tư duy không gian 3D",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:45:53",
-        "updated_at": "2026-07-10T06:45:53"
-      },
-      {
-        "id": 155,
-        "lesson_id": 77,
-        "title": "Tương tác 3D hình khối",
-        "activity_type": "watch_answer",
-        "instruction_text": "Phát triển tư duy không gian 3D",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:45:53",
-        "updated_at": "2026-07-10T06:45:53"
-      },
-      {
-        "id": 156,
-        "lesson_id": 78,
-        "title": "Tương tác 3D hình khối",
-        "activity_type": "watch_answer",
-        "instruction_text": "Phát triển tư duy không gian 3D",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:45:54",
-        "updated_at": "2026-07-10T06:45:54"
-      },
-      {
-        "id": 157,
-        "lesson_id": 79,
-        "title": "Sơ đồ tư duy điền khuyết",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực tổng hợp thông tin",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Kéo các từ khóa vào đúng nhánh sơ đồ tư duy.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=ngu-van-mindmap\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:46:31",
-        "updated_at": "2026-07-10T06:46:31"
-      },
-      {
-        "id": 158,
-        "lesson_id": 79,
-        "title": "Kể chuyện qua Voice-to-Text",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng diễn đạt và rút ra bài học",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Bấm micro và kể lại bài học rút ra từ câu chuyện.\",\"answer_mode\":\"voice_ai_grade\",\"expected_answer\":\"Kiên trì sẽ thành công\",\"accepted_answers\":[\"Kiên trì\",\"Cố gắng sẽ thành công\",\"Không bỏ cuộc\"]}",
-        "created_at": "2026-07-10T06:46:31",
-        "updated_at": "2026-07-10T06:46:31"
-      },
-      {
-        "id": 159,
-        "lesson_id": 80,
-        "title": "Thực nghiệm ảo nam châm",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực tìm tòi, khám phá thế giới tự nhiên",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Kéo nam châm lại gần vật và quan sát vật nào bị hút.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=khtn-magnet\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:46:55",
-        "updated_at": "2026-07-10T06:46:55"
-      },
-      {
-        "id": 160,
-        "lesson_id": 80,
-        "title": "Sắp xếp vòng nguyên tử",
-        "activity_type": "watch_answer",
-        "instruction_text": "Tư duy trừu tượng hóa mô hình",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Chạm từng electron để xếp vào đúng vòng nguyên tử.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=khtn-atom\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:46:56",
-        "updated_at": "2026-07-10T06:46:56"
-      },
-      {
-        "id": 161,
-        "lesson_id": 81,
-        "title": "Thực nghiệm ảo nam châm",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực tìm tòi, khám phá thế giới tự nhiên",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Kéo nam châm lại gần vật và quan sát vật nào bị hút.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=khtn-magnet\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:49:11",
-        "updated_at": "2026-07-10T06:49:11"
-      },
-      {
-        "id": 162,
-        "lesson_id": 81,
-        "title": "Sắp xếp vòng nguyên tử",
-        "activity_type": "watch_answer",
-        "instruction_text": "Tư duy trừu tượng hóa mô hình",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Chạm từng electron để xếp vào đúng vòng nguyên tử.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=khtn-atom\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:49:11",
-        "updated_at": "2026-07-10T06:49:11"
-      },
-      {
-        "id": 163,
-        "lesson_id": 82,
         "title": "Listen and Choose - Festival",
         "activity_type": "listen_choose",
         "instruction_text": "Năng lực nghe hiểu nâng cao",
@@ -5575,12 +5289,12 @@
         "sort_order": 1,
         "difficulty_stage": 1,
         "config_json": "{\"prompt\":\"Listen and choose the Festival picture.\",\"correct\":\"festival\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"festival\",\"label\":\"Festival\",\"media_url\":\"/lesson-media/nhe/photos/festival-viet-nam.jpg\",\"media_kind\":\"image\"},{\"id\":\"hospital\",\"label\":\"Hospital\",\"media_url\":\"/lesson-media/nhe/photos/hospital-building.jpg\",\"media_kind\":\"image\"},{\"id\":\"traffic\",\"label\":\"Traffic\",\"media_url\":\"/lesson-media/nhe/photos/traffic-viet-nam.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Festival\",\"audio_lang\":\"en-US\"}",
-        "created_at": "2026-07-10T06:50:25",
-        "updated_at": "2026-07-10T06:50:25"
+        "created_at": "2026-07-10T06:47:29",
+        "updated_at": "2026-07-10T06:47:29"
       },
       {
-        "id": 164,
-        "lesson_id": 82,
+        "id": 150,
+        "lesson_id": 75,
         "title": "Đóng vai hội thoại (Role-play AI)",
         "activity_type": "watch_answer",
         "instruction_text": "Kỹ năng giao tiếp và phản xạ ngôn ngữ",
@@ -5589,36 +5303,64 @@
         "sort_order": 2,
         "difficulty_stage": 1,
         "config_json": "{\"prompt\":\"AI hỏi: How are you? Em bấm micro và trả lời.\",\"answer_mode\":\"voice_ai_grade\",\"expected_answer\":\"I am fine\",\"accepted_answers\":[\"I am fine\",\"Fine\",\"I am good\",\"I am OK\"]}",
-        "created_at": "2026-07-10T06:50:25",
-        "updated_at": "2026-07-10T06:50:25"
+        "created_at": "2026-07-10T06:47:29",
+        "updated_at": "2026-07-10T06:47:29"
       },
       {
-        "id": 165,
-        "lesson_id": 83,
-        "title": "Định vị bản đồ",
+        "id": 151,
+        "lesson_id": 76,
+        "title": "Bài toán Step-by-step",
         "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng sử dụng bản đồ số",
+        "instruction_text": "Năng lực giải quyết vấn đề",
         "voice_answer_enabled": false,
         "is_required": true,
         "sort_order": 1,
         "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:50:50",
-        "updated_at": "2026-07-10T06:50:50"
+        "config_json": "{\"prompt\":\"Làm bài toán theo từng bước: đọc đề, chọn phép tính, rồi điền kết quả.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=toan-step\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:48:27",
+        "updated_at": "2026-07-10T06:48:27"
       },
       {
-        "id": 166,
-        "lesson_id": 83,
-        "title": "Dòng thời gian (Timeline)",
+        "id": 152,
+        "lesson_id": 76,
+        "title": "Tương tác 3D hình khối",
         "activity_type": "watch_answer",
-        "instruction_text": "Năng lực tư duy lịch sử theo trình tự",
+        "instruction_text": "Phát triển tư duy không gian 3D",
         "voice_answer_enabled": false,
         "is_required": false,
         "sort_order": 2,
         "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-timeline\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-10T06:50:51",
-        "updated_at": "2026-07-10T06:50:51"
+        "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:48:27",
+        "updated_at": "2026-07-10T06:48:27"
+      },
+      {
+        "id": 153,
+        "lesson_id": 77,
+        "title": "Sơ đồ tư duy điền khuyết",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực tổng hợp thông tin",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Kéo các từ khóa vào đúng nhánh sơ đồ tư duy.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=ngu-van-mindmap\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:48:50",
+        "updated_at": "2026-07-10T06:48:50"
+      },
+      {
+        "id": 154,
+        "lesson_id": 77,
+        "title": "Kể chuyện qua Voice-to-Text",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng diễn đạt và rút ra bài học",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Bấm micro và kể lại bài học rút ra từ câu chuyện.\",\"answer_mode\":\"voice_ai_grade\",\"expected_answer\":\"Kiên trì sẽ thành công\",\"accepted_answers\":[\"Kiên trì\",\"Cố gắng sẽ thành công\",\"Không bỏ cuộc\"]}",
+        "created_at": "2026-07-10T06:48:50",
+        "updated_at": "2026-07-10T06:48:50"
       }
     ],
     "lesson_assignments": [
@@ -6183,46 +5925,7 @@
       },
       {
         "id": 119,
-        "lesson_id": 78,
-        "class_id": 7,
-        "subject_id": 6,
-        "assigned_by_teacher_id": 5,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-10T06:46:13",
-        "updated_at": "2026-07-10T06:46:13"
-      },
-      {
-        "id": 120,
-        "lesson_id": 79,
-        "class_id": 7,
-        "subject_id": 5,
-        "assigned_by_teacher_id": 5,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-10T06:46:37",
-        "updated_at": "2026-07-10T06:46:37"
-      },
-      {
-        "id": 121,
-        "lesson_id": 80,
-        "class_id": 7,
-        "subject_id": 3,
-        "assigned_by_teacher_id": 5,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-10T06:46:59",
-        "updated_at": "2026-07-10T06:46:59"
-      },
-      {
-        "id": 122,
-        "lesson_id": 82,
+        "lesson_id": 75,
         "class_id": 7,
         "subject_id": 7,
         "assigned_by_teacher_id": 5,
@@ -6230,21 +5933,47 @@
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-10T06:50:30",
-        "updated_at": "2026-07-10T06:50:30"
+        "created_at": "2026-07-10T06:47:38",
+        "updated_at": "2026-07-10T06:47:38"
       },
       {
-        "id": 123,
-        "lesson_id": 83,
+        "id": 120,
+        "lesson_id": 76,
         "class_id": 7,
-        "subject_id": 9,
+        "subject_id": 6,
         "assigned_by_teacher_id": 5,
         "target_type": "class",
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-10T06:50:59",
-        "updated_at": "2026-07-10T06:50:59"
+        "created_at": "2026-07-10T06:48:31",
+        "updated_at": "2026-07-10T06:48:31"
+      },
+      {
+        "id": 121,
+        "lesson_id": 77,
+        "class_id": 7,
+        "subject_id": 5,
+        "assigned_by_teacher_id": 5,
+        "target_type": "class",
+        "due_at": null,
+        "required_completion_percent": 80,
+        "status": "active",
+        "created_at": "2026-07-10T06:48:54",
+        "updated_at": "2026-07-10T06:48:54"
+      },
+      {
+        "id": 122,
+        "lesson_id": 75,
+        "class_id": 7,
+        "subject_id": 7,
+        "assigned_by_teacher_id": 5,
+        "target_type": "class",
+        "due_at": null,
+        "required_completion_percent": 80,
+        "status": "active",
+        "created_at": "2026-07-10T06:51:31",
+        "updated_at": "2026-07-10T06:51:31"
       }
     ],
     "lesson_assignment_students": [
@@ -6553,71 +6282,57 @@
         "id": 196,
         "assignment_id": 119,
         "student_id": 11,
-        "created_at": "2026-07-10T06:46:13",
-        "updated_at": "2026-07-10T06:46:13"
+        "created_at": "2026-07-10T06:47:38",
+        "updated_at": "2026-07-10T06:47:38"
       },
       {
         "id": 197,
         "assignment_id": 119,
         "student_id": 33,
-        "created_at": "2026-07-10T06:46:13",
-        "updated_at": "2026-07-10T06:46:13"
+        "created_at": "2026-07-10T06:47:38",
+        "updated_at": "2026-07-10T06:47:38"
       },
       {
         "id": 198,
         "assignment_id": 120,
         "student_id": 11,
-        "created_at": "2026-07-10T06:46:37",
-        "updated_at": "2026-07-10T06:46:37"
+        "created_at": "2026-07-10T06:48:31",
+        "updated_at": "2026-07-10T06:48:31"
       },
       {
         "id": 199,
         "assignment_id": 120,
         "student_id": 33,
-        "created_at": "2026-07-10T06:46:37",
-        "updated_at": "2026-07-10T06:46:37"
+        "created_at": "2026-07-10T06:48:31",
+        "updated_at": "2026-07-10T06:48:31"
       },
       {
         "id": 200,
         "assignment_id": 121,
         "student_id": 11,
-        "created_at": "2026-07-10T06:46:59",
-        "updated_at": "2026-07-10T06:46:59"
+        "created_at": "2026-07-10T06:48:54",
+        "updated_at": "2026-07-10T06:48:54"
       },
       {
         "id": 201,
         "assignment_id": 121,
         "student_id": 33,
-        "created_at": "2026-07-10T06:46:59",
-        "updated_at": "2026-07-10T06:46:59"
+        "created_at": "2026-07-10T06:48:54",
+        "updated_at": "2026-07-10T06:48:54"
       },
       {
         "id": 202,
         "assignment_id": 122,
         "student_id": 11,
-        "created_at": "2026-07-10T06:50:30",
-        "updated_at": "2026-07-10T06:50:30"
+        "created_at": "2026-07-10T06:51:31",
+        "updated_at": "2026-07-10T06:51:31"
       },
       {
         "id": 203,
         "assignment_id": 122,
         "student_id": 33,
-        "created_at": "2026-07-10T06:50:30",
-        "updated_at": "2026-07-10T06:50:30"
-      },
-      {
-        "id": 204,
-        "assignment_id": 123,
-        "student_id": 11,
-        "created_at": "2026-07-10T06:50:59",
-        "updated_at": "2026-07-10T06:50:59"
-      },
-      {
-        "id": 205,
-        "assignment_id": 123,
-        "student_id": 33,
-        "created_at": "2026-07-10T06:50:59",
-        "updated_at": "2026-07-10T06:50:59"
+        "created_at": "2026-07-10T06:51:31",
+        "updated_at": "2026-07-10T06:51:31"
       }
     ],
     "student_lesson_progress": [
@@ -7278,8 +6993,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-10T06:46:13",
-        "updated_at": "2026-07-10T06:46:13"
+        "created_at": "2026-07-10T06:47:38",
+        "updated_at": "2026-07-10T06:47:38"
       },
       {
         "id": 197,
@@ -7293,8 +7008,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-10T06:46:13",
-        "updated_at": "2026-07-10T06:46:13"
+        "created_at": "2026-07-10T06:47:38",
+        "updated_at": "2026-07-10T06:47:38"
       },
       {
         "id": 198,
@@ -7308,8 +7023,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-10T06:46:37",
-        "updated_at": "2026-07-10T06:46:37"
+        "created_at": "2026-07-10T06:48:31",
+        "updated_at": "2026-07-10T06:48:31"
       },
       {
         "id": 199,
@@ -7323,8 +7038,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-10T06:46:37",
-        "updated_at": "2026-07-10T06:46:37"
+        "created_at": "2026-07-10T06:48:31",
+        "updated_at": "2026-07-10T06:48:31"
       },
       {
         "id": 200,
@@ -7338,8 +7053,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-10T06:46:59",
-        "updated_at": "2026-07-10T06:46:59"
+        "created_at": "2026-07-10T06:48:54",
+        "updated_at": "2026-07-10T06:48:54"
       },
       {
         "id": 201,
@@ -7353,8 +7068,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-10T06:46:59",
-        "updated_at": "2026-07-10T06:46:59"
+        "created_at": "2026-07-10T06:48:54",
+        "updated_at": "2026-07-10T06:48:54"
       },
       {
         "id": 202,
@@ -7368,8 +7083,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-10T06:50:30",
-        "updated_at": "2026-07-10T06:50:30"
+        "created_at": "2026-07-10T06:51:31",
+        "updated_at": "2026-07-10T06:51:31"
       },
       {
         "id": 203,
@@ -7383,38 +7098,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-10T06:50:30",
-        "updated_at": "2026-07-10T06:50:30"
-      },
-      {
-        "id": 204,
-        "assignment_id": 123,
-        "student_id": 11,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-10T06:50:59",
-        "updated_at": "2026-07-10T06:50:59"
-      },
-      {
-        "id": 205,
-        "assignment_id": 123,
-        "student_id": 33,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-10T06:50:59",
-        "updated_at": "2026-07-10T06:50:59"
+        "created_at": "2026-07-10T06:51:31",
+        "updated_at": "2026-07-10T06:51:31"
       }
     ]
   }
