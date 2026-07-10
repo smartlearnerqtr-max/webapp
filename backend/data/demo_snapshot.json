@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-10T06:48:31+00:00",
+  "exported_at": "2026-07-10T06:48:54+00:00",
   "tables": {
     "subjects": [
       {
@@ -3557,6 +3557,21 @@
         "is_archived": false,
         "created_at": "2026-07-10T06:48:27",
         "updated_at": "2026-07-10T06:48:27"
+      },
+      {
+        "id": 77,
+        "created_by_teacher_id": 5,
+        "subject_id": 5,
+        "class_id": 7,
+        "title": "Mức nhẹ - Truyện ngụ ngôn và Tục ngữ",
+        "description": "Tiếp cận sâu hơn vào nội dung truyện qua sơ đồ tư duy và luyện nói với AI.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-10T06:48:49",
+        "updated_at": "2026-07-10T06:48:49"
       }
     ],
     "parent_daily_reports": [],
@@ -5318,6 +5333,34 @@
         "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-10T06:48:27",
         "updated_at": "2026-07-10T06:48:27"
+      },
+      {
+        "id": 153,
+        "lesson_id": 77,
+        "title": "Sơ đồ tư duy điền khuyết",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực tổng hợp thông tin",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Kéo các từ khóa vào đúng nhánh sơ đồ tư duy.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=ngu-van-mindmap\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:48:50",
+        "updated_at": "2026-07-10T06:48:50"
+      },
+      {
+        "id": 154,
+        "lesson_id": 77,
+        "title": "Kể chuyện qua Voice-to-Text",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng diễn đạt và rút ra bài học",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Bấm micro và kể lại bài học rút ra từ câu chuyện.\",\"answer_mode\":\"voice_ai_grade\",\"expected_answer\":\"Kiên trì sẽ thành công\",\"accepted_answers\":[\"Kiên trì\",\"Cố gắng sẽ thành công\",\"Không bỏ cuộc\"]}",
+        "created_at": "2026-07-10T06:48:50",
+        "updated_at": "2026-07-10T06:48:50"
       }
     ],
     "lesson_assignments": [
@@ -5905,6 +5948,19 @@
         "status": "active",
         "created_at": "2026-07-10T06:48:31",
         "updated_at": "2026-07-10T06:48:31"
+      },
+      {
+        "id": 121,
+        "lesson_id": 77,
+        "class_id": 7,
+        "subject_id": 5,
+        "assigned_by_teacher_id": 5,
+        "target_type": "class",
+        "due_at": null,
+        "required_completion_percent": 80,
+        "status": "active",
+        "created_at": "2026-07-10T06:48:54",
+        "updated_at": "2026-07-10T06:48:54"
       }
     ],
     "lesson_assignment_students": [
@@ -6236,6 +6292,20 @@
         "student_id": 33,
         "created_at": "2026-07-10T06:48:31",
         "updated_at": "2026-07-10T06:48:31"
+      },
+      {
+        "id": 200,
+        "assignment_id": 121,
+        "student_id": 11,
+        "created_at": "2026-07-10T06:48:54",
+        "updated_at": "2026-07-10T06:48:54"
+      },
+      {
+        "id": 201,
+        "assignment_id": 121,
+        "student_id": 33,
+        "created_at": "2026-07-10T06:48:54",
+        "updated_at": "2026-07-10T06:48:54"
       }
     ],
     "student_lesson_progress": [
@@ -6943,6 +7013,36 @@
         "completed_at": null,
         "created_at": "2026-07-10T06:48:31",
         "updated_at": "2026-07-10T06:48:31"
+      },
+      {
+        "id": 200,
+        "assignment_id": 121,
+        "student_id": 11,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-10T06:48:54",
+        "updated_at": "2026-07-10T06:48:54"
+      },
+      {
+        "id": 201,
+        "assignment_id": 121,
+        "student_id": 33,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-10T06:48:54",
+        "updated_at": "2026-07-10T06:48:54"
       }
     ]
   }
