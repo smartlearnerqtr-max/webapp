@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-10T06:44:42+00:00",
+  "exported_at": "2026-07-10T06:46:14+00:00",
   "tables": {
     "subjects": [
       {
@@ -3527,6 +3527,66 @@
         "is_archived": false,
         "created_at": "2026-06-04T18:21:34",
         "updated_at": "2026-06-04T18:21:34"
+      },
+      {
+        "id": 75,
+        "created_by_teacher_id": 5,
+        "subject_id": 6,
+        "class_id": 7,
+        "title": "Mức nhẹ - Số hữu tỉ, tỉ lệ và Lăng trụ đứng",
+        "description": "Giải quyết các bài toán phức tạp hơn qua hướng dẫn từng bước và mô hình 3D.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": true,
+        "created_at": "2026-07-10T06:45:52",
+        "updated_at": "2026-07-10T06:46:10.096573"
+      },
+      {
+        "id": 76,
+        "created_by_teacher_id": 5,
+        "subject_id": 6,
+        "class_id": 7,
+        "title": "Mức nhẹ - Số hữu tỉ, tỉ lệ và Lăng trụ đứng",
+        "description": "Giải quyết các bài toán phức tạp hơn qua hướng dẫn từng bước và mô hình 3D.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": true,
+        "created_at": "2026-07-10T06:45:52",
+        "updated_at": "2026-07-10T06:46:07.226716"
+      },
+      {
+        "id": 77,
+        "created_by_teacher_id": 5,
+        "subject_id": 6,
+        "class_id": 7,
+        "title": "Mức nhẹ - Số hữu tỉ, tỉ lệ và Lăng trụ đứng",
+        "description": "Giải quyết các bài toán phức tạp hơn qua hướng dẫn từng bước và mô hình 3D.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": true,
+        "created_at": "2026-07-10T06:45:52",
+        "updated_at": "2026-07-10T06:46:03.984911"
+      },
+      {
+        "id": 78,
+        "created_by_teacher_id": 5,
+        "subject_id": 6,
+        "class_id": 7,
+        "title": "Mức nhẹ - Số hữu tỉ, tỉ lệ và Lăng trụ đứng",
+        "description": "Giải quyết các bài toán phức tạp hơn qua hướng dẫn từng bước và mô hình 3D.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-10T06:45:52",
+        "updated_at": "2026-07-10T06:45:52"
       }
     ],
     "parent_daily_reports": [],
@@ -5232,6 +5292,118 @@
         "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=toan-prism\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-06-04T18:21:36",
         "updated_at": "2026-06-04T18:21:36"
+      },
+      {
+        "id": 149,
+        "lesson_id": 75,
+        "title": "Bài toán Step-by-step",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực giải quyết vấn đề",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Làm bài toán theo từng bước: đọc đề, chọn phép tính, rồi điền kết quả.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=toan-step\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:45:52",
+        "updated_at": "2026-07-10T06:45:52"
+      },
+      {
+        "id": 150,
+        "lesson_id": 76,
+        "title": "Bài toán Step-by-step",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực giải quyết vấn đề",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Làm bài toán theo từng bước: đọc đề, chọn phép tính, rồi điền kết quả.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=toan-step\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:45:52",
+        "updated_at": "2026-07-10T06:45:52"
+      },
+      {
+        "id": 151,
+        "lesson_id": 77,
+        "title": "Bài toán Step-by-step",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực giải quyết vấn đề",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Làm bài toán theo từng bước: đọc đề, chọn phép tính, rồi điền kết quả.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=toan-step\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:45:52",
+        "updated_at": "2026-07-10T06:45:52"
+      },
+      {
+        "id": 152,
+        "lesson_id": 75,
+        "title": "Tương tác 3D hình khối",
+        "activity_type": "watch_answer",
+        "instruction_text": "Phát triển tư duy không gian 3D",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:45:52",
+        "updated_at": "2026-07-10T06:45:52"
+      },
+      {
+        "id": 153,
+        "lesson_id": 78,
+        "title": "Bài toán Step-by-step",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực giải quyết vấn đề",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Làm bài toán theo từng bước: đọc đề, chọn phép tính, rồi điền kết quả.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=toan-step\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:45:52",
+        "updated_at": "2026-07-10T06:45:52"
+      },
+      {
+        "id": 154,
+        "lesson_id": 76,
+        "title": "Tương tác 3D hình khối",
+        "activity_type": "watch_answer",
+        "instruction_text": "Phát triển tư duy không gian 3D",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:45:53",
+        "updated_at": "2026-07-10T06:45:53"
+      },
+      {
+        "id": 155,
+        "lesson_id": 77,
+        "title": "Tương tác 3D hình khối",
+        "activity_type": "watch_answer",
+        "instruction_text": "Phát triển tư duy không gian 3D",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:45:53",
+        "updated_at": "2026-07-10T06:45:53"
+      },
+      {
+        "id": 156,
+        "lesson_id": 78,
+        "title": "Tương tác 3D hình khối",
+        "activity_type": "watch_answer",
+        "instruction_text": "Phát triển tư duy không gian 3D",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Xoay mô hình 3D, chạm vào đỉnh/cạnh/mặt để quan sát hình khối.\",\"media_url\":\"/lesson-media/nhe/shape-prism-3d.html?shape=prism&focus=vertices\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-10T06:45:54",
+        "updated_at": "2026-07-10T06:45:54"
       }
     ],
     "lesson_assignments": [
@@ -5793,6 +5965,19 @@
         "status": "active",
         "created_at": "2026-06-04T18:01:47",
         "updated_at": "2026-06-04T18:01:47"
+      },
+      {
+        "id": 119,
+        "lesson_id": 78,
+        "class_id": 7,
+        "subject_id": 6,
+        "assigned_by_teacher_id": 5,
+        "target_type": "class",
+        "due_at": null,
+        "required_completion_percent": 80,
+        "status": "active",
+        "created_at": "2026-07-10T06:46:13",
+        "updated_at": "2026-07-10T06:46:13"
       }
     ],
     "lesson_assignment_students": [
@@ -6096,6 +6281,20 @@
         "student_id": 10,
         "created_at": "2026-06-04T18:01:47",
         "updated_at": "2026-06-04T18:01:47"
+      },
+      {
+        "id": 196,
+        "assignment_id": 119,
+        "student_id": 11,
+        "created_at": "2026-07-10T06:46:13",
+        "updated_at": "2026-07-10T06:46:13"
+      },
+      {
+        "id": 197,
+        "assignment_id": 119,
+        "student_id": 33,
+        "created_at": "2026-07-10T06:46:13",
+        "updated_at": "2026-07-10T06:46:13"
       }
     ],
     "student_lesson_progress": [
@@ -6743,6 +6942,36 @@
         "completed_at": null,
         "created_at": "2026-06-04T18:01:47",
         "updated_at": "2026-06-04T18:01:47"
+      },
+      {
+        "id": 196,
+        "assignment_id": 119,
+        "student_id": 11,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-10T06:46:13",
+        "updated_at": "2026-07-10T06:46:13"
+      },
+      {
+        "id": 197,
+        "assignment_id": 119,
+        "student_id": 33,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-10T06:46:13",
+        "updated_at": "2026-07-10T06:46:13"
       }
     ]
   }
