@@ -5,6 +5,7 @@ from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from ....extensions import db
 from ....models import Classroom, Lesson, LessonActivity, Subject, User
+from ....services.github_snapshot_service import JsonSnapshotPersistError, persist_json_snapshot
 from ....services.logger import log_server_event
 from ....utils.responses import error_response, success_response
 from .. import api_v1
@@ -39,6 +40,15 @@ def _require_teacher_user():
     if not user or not user.teacher_profile:
         return None, error_response("Không tìm thấy giáo viên", "TEACHER_NOT_FOUND", 404)
     return user, None
+
+
+def _persist_json_snapshot_or_error(action_name: str):
+    try:
+        persist_json_snapshot(action_name)
+    except JsonSnapshotPersistError as error:
+        db.session.rollback()
+        return error_response(str(error), 'JSON_SNAPSHOT_PERSIST_FAILED', 502, error.details)
+    return None
 
 
 def _get_teacher_lesson(lesson_id: int, teacher_id: int) -> Lesson | None:
@@ -125,6 +135,10 @@ def create_lesson():
         is_archived=False,
     )
     db.session.add(lesson)
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('create_lesson')
+    if persist_error:
+        return persist_error
     db.session.commit()
     log_server_event(level='info', module='lessons', message='Tạo bài học mới', action_name='create_lesson', user_id=user.id, metadata={'lesson_id': lesson.id})
     return success_response(lesson.to_dict(), 'Tạo bài học thành công', 201)
@@ -172,6 +186,10 @@ def update_lesson(lesson_id: int):
             lesson.class_id = classroom.id
         else:
             lesson.class_id = None
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('update_lesson')
+    if persist_error:
+        return persist_error
     db.session.commit()
     return success_response(lesson.to_dict(), 'Cập nhật bài học thành công')
 
@@ -186,6 +204,10 @@ def archive_lesson(lesson_id: int):
     if not lesson:
         return error_response('Không tìm thấy bài học', 'LESSON_NOT_FOUND', 404)
     lesson.is_archived = True
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('archive_lesson')
+    if persist_error:
+        return persist_error
     db.session.commit()
     return success_response(lesson.to_dict(), 'Đã lưu trữ bài học')
 
@@ -230,6 +252,10 @@ def create_activity(lesson_id: int):
     db.session.add(activity)
     db.session.flush()
     _place_activity_at_sort_order(lesson, activity, payload.get('sort_order'))
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('create_activity')
+    if persist_error:
+        return persist_error
     db.session.commit()
     log_server_event(level='info', module='lessons', message='Tao hoat dong bai hoc', action_name='create_activity', user_id=user.id, metadata={'lesson_id': lesson.id, 'activity_id': activity.id})
     return success_response(activity.to_dict(), 'Tạo hoạt động thành công', 201)
@@ -265,6 +291,10 @@ def update_activity(activity_id: int):
         activity.activity_type = payload['activity_type']
     if requested_sort_order is not None:
         _place_activity_at_sort_order(activity.lesson, activity, requested_sort_order)
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('update_activity')
+    if persist_error:
+        return persist_error
     db.session.commit()
     return success_response(activity.to_dict(), 'Cập nhật hoạt động thành công')
 
@@ -283,6 +313,10 @@ def delete_activity(activity_id: int):
     db.session.flush()
     if lesson:
         _normalize_lesson_activity_sort_orders(lesson)
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('delete_activity')
+    if persist_error:
+        return persist_error
     db.session.commit()
     return success_response(None, 'Đã xóa hoạt động')
 
@@ -304,5 +338,9 @@ def reorder_activities(lesson_id: int):
         if activity:
             activity.sort_order = int(item['sort_order'])
     _normalize_lesson_activity_sort_orders(lesson)
+    db.session.flush()
+    persist_error = _persist_json_snapshot_or_error('reorder_activities')
+    if persist_error:
+        return persist_error
     db.session.commit()
     return success_response([activity.to_dict() for activity in sorted(lesson.activities, key=lambda row: row.sort_order)], 'Da sap xep lai hoat dong')
