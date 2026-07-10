@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-10T06:51:57+00:00",
+  "exported_at": "2026-07-10T12:40:13+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$08pSlVCgqowJ19s1$0287f6c2758a06780b1ca6e5f39bb4625c409f8e4e69f4e5ba290ec454a9f83c",
+        "password_hash": "pbkdf2:sha256:1000000$UtwNm6CCQBmyVixm$40bba56bfb031778b487ffbf2496997678b5870467326663da2de1b9f5db171f",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-10T06:51:11.137307"
+        "updated_at": "2026-07-10T12:31:46.514974"
       },
       {
         "id": 18,
@@ -6030,6 +6030,19 @@
         "status": "active",
         "created_at": "2026-07-10T06:51:57",
         "updated_at": "2026-07-10T06:51:57"
+      },
+      {
+        "id": 124,
+        "lesson_id": 75,
+        "class_id": 7,
+        "subject_id": 7,
+        "assigned_by_teacher_id": 5,
+        "target_type": "class",
+        "due_at": null,
+        "required_completion_percent": 80,
+        "status": "active",
+        "created_at": "2026-07-10T12:40:13",
+        "updated_at": "2026-07-10T12:40:13"
       }
     ],
     "lesson_assignment_students": [
@@ -6403,6 +6416,20 @@
         "student_id": 33,
         "created_at": "2026-07-10T06:51:57",
         "updated_at": "2026-07-10T06:51:57"
+      },
+      {
+        "id": 206,
+        "assignment_id": 124,
+        "student_id": 11,
+        "created_at": "2026-07-10T12:40:13",
+        "updated_at": "2026-07-10T12:40:13"
+      },
+      {
+        "id": 207,
+        "assignment_id": 124,
+        "student_id": 33,
+        "created_at": "2026-07-10T12:40:13",
+        "updated_at": "2026-07-10T12:40:13"
       }
     ],
     "student_lesson_progress": [
@@ -7200,6 +7227,36 @@
         "completed_at": null,
         "created_at": "2026-07-10T06:51:57",
         "updated_at": "2026-07-10T06:51:57"
+      },
+      {
+        "id": 206,
+        "assignment_id": 124,
+        "student_id": 11,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-10T12:40:13",
+        "updated_at": "2026-07-10T12:40:13"
+      },
+      {
+        "id": 207,
+        "assignment_id": 124,
+        "student_id": 33,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-10T12:40:13",
+        "updated_at": "2026-07-10T12:40:13"
       }
     ]
   }
