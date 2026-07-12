@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:32:54+00:00",
+  "exported_at": "2026-07-12T07:32:56+00:00",
   "tables": {
     "subjects": [
       {
@@ -5448,6 +5448,20 @@
         "config_json": "{\"prompt\":\"Sắp xếp đúng quy trình trồng trọt.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=congnghe-steps\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:32:54",
         "updated_at": "2026-07-12T07:32:54"
+      },
+      {
+        "id": 158,
+        "lesson_id": 80,
+        "title": "Phân loại nông nghiệp",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng phân tích và nhóm sự vật",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Phân loại vật nuôi vào đúng nhóm nông nghiệp.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=congnghe-animals\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:32:56",
+        "updated_at": "2026-07-12T07:32:56"
       }
     ],
     "lesson_assignments": [
