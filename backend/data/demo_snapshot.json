@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:47:58+00:00",
+  "exported_at": "2026-07-12T07:52:16+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$WiGR6asGGc0m3OkC$87770c6a5192396e92d1148236e6c388d05ea5fa53ef2d55b588a69b98abf32b",
+        "password_hash": "pbkdf2:sha256:1000000$i2PbPwWdvmFnywM5$f981f9e83110a859fc28c9c60cc7a06164aebbf937abcf9568a766f6b9660bdd",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-12T07:46:17.388186"
+        "updated_at": "2026-07-12T07:49:48.096365"
       },
       {
         "id": 18,
