@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:30:12+00:00",
+  "exported_at": "2026-07-12T07:30:14+00:00",
   "tables": {
     "subjects": [
       {
@@ -5520,6 +5520,20 @@
         "config_json": "{\"prompt\":\"Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-timeline\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:30:12",
         "updated_at": "2026-07-12T07:30:12"
+      },
+      {
+        "id": 161,
+        "lesson_id": 82,
+        "title": "Định vị bản đồ",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng sử dụng bản đồ số",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:30:14",
+        "updated_at": "2026-07-12T07:30:14"
       }
     ],
     "lesson_assignments": [
