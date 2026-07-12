@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:41:18+00:00",
+  "exported_at": "2026-07-12T07:44:21+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$u82QHIcHYVF7JCEi$31720a7eeb53091100c37bf45ad24c6ae1559718d631a5ec282d1b84bf332bb7",
+        "password_hash": "pbkdf2:sha256:1000000$bNezv2foRM8VysZN$d9e8ada9cce1e18fb3622aea084ebb2f665fe5e1e4a89572735864239a9d86ef",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-12T07:39:05.915024"
+        "updated_at": "2026-07-12T07:42:35.636743"
       },
       {
         "id": 18,
@@ -3689,24 +3689,24 @@
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
-        "is_archived": true,
+        "is_archived": false,
         "created_at": "2026-07-12T07:40:44",
-        "updated_at": "2026-07-12T07:41:18.454067"
+        "updated_at": "2026-07-12T07:40:44"
       },
       {
         "id": 86,
         "created_by_teacher_id": 5,
-        "subject_id": 4,
+        "subject_id": 12,
         "class_id": 7,
-        "title": "Thẻ Kỹ Năng Đọc Hiểu Đoạn Văn Ngắn",
-        "description": "Bài học giúp học sinh khuyết tật trí tuệ nhẹ lớp 7 rèn luyện kỹ năng đọc thành tiếng trôi chảy, ngắt nghỉ đúng dấu câu và trả lời các câu hỏi nhận biết đơn giản (Ai? Làm gì?).",
+        "title": "Mức nhẹ - Phần mềm Bảng tính và Trình chiếu",
+        "description": "Làm quen với các thao tác cơ bản trong Excel và PowerPoint qua mô phỏng.",
         "primary_level": "nhe",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-12T07:40:57",
-        "updated_at": "2026-07-12T07:40:57"
+        "created_at": "2026-07-12T07:44:21",
+        "updated_at": "2026-07-12T07:44:21"
       }
     ],
     "parent_daily_reports": [],
@@ -5664,48 +5664,6 @@
         "config_json": "{\"prompt\":\"Chia tiền vào nhóm tiết kiệm và chi tiêu.\",\"items\":[\"10 xu\",\"5 xu\",\"Kẹo\",\"Heo đất\"],\"targets\":[\"Tiết kiệm\",\"Chi tiêu\"]}",
         "created_at": "2026-07-12T07:36:55",
         "updated_at": "2026-07-12T07:36:55"
-      },
-      {
-        "id": 167,
-        "lesson_id": 85,
-        "title": "Tìm hình ảnh phù hợp với đoạn văn",
-        "activity_type": "image_choice",
-        "instruction_text": "Học sinh luyện tập kỹ năng đọc hiểu đoạn văn ngắn và chọn hình ảnh minh họa đúng.",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Đọc đoạn văn sau và chọn hình ảnh phù hợp nhất:\\n\\n\\\"Mỗi sáng, bạn Mai giúp mẹ dọn bàn ăn. Sau đó, bạn Mai và mẹ cùng nhau ăn sáng với bánh mì và sữa. Bữa sáng thật ngon và vui vẻ!\\\"\",\"correct\":\"card1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"card1\",\"label\":\"Ăn sáng\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"card2\",\"label\":\"Chơi đồ chơi\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"card3\",\"label\":\"Đọc sách\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi\"}",
-        "created_at": "2026-07-12T07:40:47",
-        "updated_at": "2026-07-12T07:40:47"
-      },
-      {
-        "id": 168,
-        "lesson_id": 86,
-        "title": "Tìm hình ảnh phù hợp với đoạn văn",
-        "activity_type": "image_choice",
-        "instruction_text": "Học sinh luyện tập kỹ năng đọc hiểu đoạn văn ngắn và chọn hình ảnh minh họa đúng.",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Đọc đoạn văn sau và chọn hình ảnh phù hợp nhất:\\n\\n\\\"Mỗi sáng, bạn Mai giúp mẹ dọn bàn ăn. Sau đó, bạn Mai và mẹ cùng nhau ăn sáng với bánh mì và sữa. Bữa sáng thật ngon và vui vẻ!\\\"\",\"correct\":\"card1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"card1\",\"label\":\"Ăn sáng\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"card2\",\"label\":\"Chơi đồ chơi\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"card3\",\"label\":\"Đọc sách\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi\"}",
-        "created_at": "2026-07-12T07:41:00",
-        "updated_at": "2026-07-12T07:41:00"
-      },
-      {
-        "id": 169,
-        "lesson_id": 86,
-        "title": "Xem và Trả lời: Giúp đỡ bạn bè",
-        "activity_type": "watch_answer",
-        "instruction_text": "Học sinh xem video và trả lời câu hỏi về cách thể hiện sự giúp đỡ và chia sẻ với bạn bè.",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Con hãy xem video về bạn nhỏ này và cho cô biết bạn ấy đã làm gì để giúp đỡ bạn của mình nhé!\",\"answer_mode\":\"text\",\"expected_answer\":\"Bạn nhỏ đã chia sẻ đồ chơi với bạn.\",\"accepted_answers\":[\"Bạn ấy chia sẻ đồ chơi.\",\"Chia sẻ đồ chơi.\",\"Bạn ấy cho bạn mượn đồ chơi.\",\"Bạn ấy chơi chung đồ chơi với bạn.\",\"Bạn nhỏ đã chia sẻ đồ chơi với bạn khác.\"]}",
-        "created_at": "2026-07-12T07:41:02",
-        "updated_at": "2026-07-12T07:41:02"
       }
     ],
     "lesson_assignments": [
@@ -6410,19 +6368,6 @@
         "status": "active",
         "created_at": "2026-07-12T07:37:14",
         "updated_at": "2026-07-12T07:37:14"
-      },
-      {
-        "id": 130,
-        "lesson_id": 86,
-        "class_id": 7,
-        "subject_id": 4,
-        "assigned_by_teacher_id": 5,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-12T07:41:11",
-        "updated_at": "2026-07-12T07:41:11"
       }
     ],
     "lesson_assignment_students": [
@@ -6880,20 +6825,6 @@
         "student_id": 33,
         "created_at": "2026-07-12T07:37:14",
         "updated_at": "2026-07-12T07:37:14"
-      },
-      {
-        "id": 218,
-        "assignment_id": 130,
-        "student_id": 11,
-        "created_at": "2026-07-12T07:41:11",
-        "updated_at": "2026-07-12T07:41:11"
-      },
-      {
-        "id": 219,
-        "assignment_id": 130,
-        "student_id": 33,
-        "created_at": "2026-07-12T07:41:11",
-        "updated_at": "2026-07-12T07:41:11"
       }
     ],
     "student_lesson_progress": [
@@ -7871,36 +7802,6 @@
         "completed_at": null,
         "created_at": "2026-07-12T07:37:14",
         "updated_at": "2026-07-12T07:37:14"
-      },
-      {
-        "id": 218,
-        "assignment_id": 130,
-        "student_id": 11,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-12T07:41:11",
-        "updated_at": "2026-07-12T07:41:11"
-      },
-      {
-        "id": 219,
-        "assignment_id": 130,
-        "student_id": 33,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-12T07:41:11",
-        "updated_at": "2026-07-12T07:41:11"
       }
     ]
   }
