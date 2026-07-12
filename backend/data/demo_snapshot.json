@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:36:24+00:00",
+  "exported_at": "2026-07-12T07:36:26+00:00",
   "tables": {
     "subjects": [
       {
@@ -5577,6 +5577,20 @@
         "config_json": "{\"prompt\":\"Chạm để lật flashcard địa danh và đặc sản Đồng Nai.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=dia-phuong-flashcard\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:36:24",
         "updated_at": "2026-07-12T07:36:24"
+      },
+      {
+        "id": 164,
+        "lesson_id": 83,
+        "title": "Video tương tác địa phương",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng quan sát và trả lời câu hỏi",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Xem video rồi bấm micro trả lời: Đây là đâu?\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=dia-phuong-video\",\"answer_mode\":\"voice_ai_grade\",\"expected_answer\":\"Văn miếu Trấn Biên\",\"accepted_answers\":[\"Văn miếu Trấn Biên\",\"Trấn Biên\",\"Văn miếu\"]}",
+        "created_at": "2026-07-12T07:36:26",
+        "updated_at": "2026-07-12T07:36:26"
       }
     ],
     "lesson_assignments": [
