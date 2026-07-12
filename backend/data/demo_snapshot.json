@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T14:55:02+00:00",
+  "exported_at": "2026-07-12T14:55:04+00:00",
   "tables": {
     "subjects": [
       {
@@ -6128,6 +6128,20 @@
         "config_json": "{\"prompt\":\"Kéo các ý chính vào sơ đồ để hoàn thành cốt truyện.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=ngu-van-mindmap\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T14:54:21",
         "updated_at": "2026-07-12T14:54:21"
+      },
+      {
+        "id": 188,
+        "lesson_id": 95,
+        "title": "Listen and Choose",
+        "activity_type": "listen_choose",
+        "instruction_text": "Năng lực nghe hiểu từ vựng",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Nghe thật kỹ rồi chọn đúng phương tiện.\",\"correct\":\"bus\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"bus\",\"label\":\"Bus\",\"media_url\":\"/lesson-media/trung-binh/bus-card.svg\",\"media_kind\":\"image\"},{\"id\":\"bicycle\",\"label\":\"Bicycle\",\"media_url\":\"/lesson-media/trung-binh/bicycle-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Bus\",\"audio_lang\":\"en-US\"}",
+        "created_at": "2026-07-12T14:55:04",
+        "updated_at": "2026-07-12T14:55:04"
       }
     ],
     "lesson_assignments": [
