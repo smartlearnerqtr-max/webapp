@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:34:04+00:00",
+  "exported_at": "2026-07-12T07:34:07+00:00",
   "tables": {
     "subjects": [
       {
@@ -5649,6 +5649,20 @@
         "config_json": "{\"prompt\":\"Phân bổ tiền vào tiết kiệm và mua sắm sao cho hợp lí.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdcd-budget\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:31:54",
         "updated_at": "2026-07-12T07:31:54"
+      },
+      {
+        "id": 167,
+        "lesson_id": 85,
+        "title": "Mô phỏng Excel",
+        "activity_type": "watch_answer",
+        "instruction_text": "Làm quen với dữ liệu số",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Kéo hàm SUM vào bảng tính để tính tổng tiền.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=tinhoc-excel\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:34:06",
+        "updated_at": "2026-07-12T07:34:06"
       }
     ],
     "lesson_assignments": [
