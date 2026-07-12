@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:33:06+00:00",
+  "exported_at": "2026-07-12T07:33:28+00:00",
   "tables": {
     "subjects": [
       {
@@ -3617,6 +3617,21 @@
         "is_archived": false,
         "created_at": "2026-07-12T07:32:51",
         "updated_at": "2026-07-12T07:32:51"
+      },
+      {
+        "id": 81,
+        "created_by_teacher_id": 5,
+        "subject_id": 11,
+        "class_id": 7,
+        "title": "Mức nhẹ - Tự hào truyền thống và Bạo lực học đường",
+        "description": "Học cách xử lý tình huống thực tế và quản lý tài chính cá nhân đơn giản.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T07:33:28",
+        "updated_at": "2026-07-12T07:33:28"
       }
     ],
     "parent_daily_reports": [],
