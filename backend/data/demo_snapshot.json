@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:41:11+00:00",
+  "exported_at": "2026-07-12T07:41:18+00:00",
   "tables": {
     "subjects": [
       {
@@ -3689,9 +3689,9 @@
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
-        "is_archived": false,
+        "is_archived": true,
         "created_at": "2026-07-12T07:40:44",
-        "updated_at": "2026-07-12T07:40:44"
+        "updated_at": "2026-07-12T07:41:18.454067"
       },
       {
         "id": 86,
