@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:36:49+00:00",
+  "exported_at": "2026-07-12T07:36:52+00:00",
   "tables": {
     "subjects": [
       {
@@ -5606,6 +5606,20 @@
         "config_json": "{\"prompt\":\"Xem video rồi bấm micro trả lời: Đây là đâu?\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=dia-phuong-video\",\"answer_mode\":\"voice_ai_grade\",\"expected_answer\":\"Văn miếu Trấn Biên\",\"accepted_answers\":[\"Văn miếu Trấn Biên\",\"Trấn Biên\",\"Văn miếu\"]}",
         "created_at": "2026-07-12T07:36:26",
         "updated_at": "2026-07-12T07:36:26"
+      },
+      {
+        "id": 165,
+        "lesson_id": 84,
+        "title": "Soạn cặp sách (Time management)",
+        "activity_type": "drag_drop",
+        "instruction_text": "Kỹ năng quản lý thời gian và đồ dùng",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Kéo đúng đồ dùng vào nhóm cần cho ngày đi học.\",\"items\":[\"Sách Toán\",\"Vở ghi\",\"Bút chì\",\"Đồ chơi\"],\"targets\":[\"Cho vào cặp\",\"Để ở nhà\"]}",
+        "created_at": "2026-07-12T07:36:52",
+        "updated_at": "2026-07-12T07:36:52"
       }
     ],
     "lesson_assignments": [
