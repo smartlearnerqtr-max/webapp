@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:57:16+00:00",
+  "exported_at": "2026-07-12T14:50:02+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$Zcmx3QJP8ZjaU7RD$48ee3b4acea54f7d7e7565b5d1b21d425a83a80d4b7d9ddcf8d6dba4f8f61dec",
+        "password_hash": "pbkdf2:sha256:1000000$WKbUvASjUV6z4Gil$beda2f42acb827883ce4341b6e3f77c8243b7186ab60a3ebfd09bfb86f5c31e4",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-12T07:55:42.376099"
+        "updated_at": "2026-07-12T14:42:50.806601"
       },
       {
         "id": 18,
@@ -1896,6 +1896,24 @@
         "sort_order": 30,
         "created_at": "2026-06-10T18:30:35",
         "updated_at": "2026-06-10T18:42:28.462838"
+      },
+      {
+        "id": 11,
+        "teacher_id": 5,
+        "title": "Nhân viên bán hàng",
+        "description": "Làm quen với chào hỏi, sắp xếp sản phẩm và hỗ trợ khách theo câu ngắn rõ ràng.",
+        "cover_image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Cashier%20at%20her%20register.jpg",
+        "meaning_title": "Ý nghĩa công việc",
+        "meaning_text": "Bán hàng giúp học sinh luyện giao tiếp lịch sự, nhận biết đồ vật, giữ quầy gọn gàng và biết hỗ trợ người khác trong tình huống quen thuộc.",
+        "video_url": "https://www.youtube.com/watch?v=m0h_gcAubUQ",
+        "video_note": "Video hướng nghiệp thật về tiếp thị - bán hàng, giúp học sinh hình dung nhóm nghề dịch vụ.",
+        "steps_json": "[{\"title\": \"Chào khách\", \"description\": \"Nhìn về phía khách và nói một câu chào ngắn, lịch sự.\"}, {\"title\": \"Sắp xếp sản phẩm\", \"description\": \"Đặt sản phẩm cùng loại gần nhau và quay nhãn ra ngoài.\"}, {\"title\": \"Nhờ hỗ trợ khi cần\", \"description\": \"Nếu khách hỏi khó, gọi giáo viên hoặc người phụ trách.\"}]",
+        "skills_json": "[\"Chào hỏi\", \"Sắp xếp hàng\", \"Quan sát nhu cầu\", \"Giao tiếp lịch sự\"]",
+        "levels_json": "[\"nhe\", \"trung_binh\", \"nang\"]",
+        "status": "active",
+        "sort_order": 30,
+        "created_at": "2026-07-12T14:46:11",
+        "updated_at": "2026-07-12T14:46:11"
       }
     ],
     "teacher_simulation_quiz_questions": [
@@ -2722,6 +2740,14 @@
         "status": "active",
         "created_at": "2026-07-10T06:44:42",
         "updated_at": "2026-07-10T06:44:42"
+      },
+      {
+        "id": 28,
+        "class_id": 8,
+        "student_id": 34,
+        "status": "active",
+        "created_at": "2026-07-12T14:50:01",
+        "updated_at": "2026-07-12T14:50:01"
       }
     ],
     "class_subjects": [
@@ -4225,6 +4251,15 @@
         "source": "class_join",
         "created_at": "2026-07-10T06:44:42",
         "updated_at": "2026-07-10T06:44:42"
+      },
+      {
+        "id": 20,
+        "teacher_id": 6,
+        "student_id": 34,
+        "status": "active",
+        "source": "class_join",
+        "created_at": "2026-07-12T14:50:01",
+        "updated_at": "2026-07-12T14:50:01"
       }
     ],
     "lesson_activities": [
