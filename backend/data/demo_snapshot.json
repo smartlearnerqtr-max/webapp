@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:31:48+00:00",
+  "exported_at": "2026-07-12T07:31:54+00:00",
   "tables": {
     "subjects": [
       {
@@ -5620,6 +5620,20 @@
         "config_json": "{\"prompt\":\"Nếu thấy bạn bị bắt nạt, em nên làm gì?\",\"choices\":[\"Báo cô giáo\",\"Đứng xem\"],\"correct\":\"Báo cô giáo\",\"image_cards\":[{\"id\":\"card-fih8o0\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-7opizp\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdcd-bullying\"}",
         "created_at": "2026-07-12T07:31:48",
         "updated_at": "2026-07-12T07:31:48"
+      },
+      {
+        "id": 166,
+        "lesson_id": 84,
+        "title": "Quản lý tài chính ảo",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực quản lý bản thân và tài chính",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Phân bổ tiền vào tiết kiệm và mua sắm sao cho hợp lí.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdcd-budget\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:31:54",
+        "updated_at": "2026-07-12T07:31:54"
       }
     ],
     "lesson_assignments": [
