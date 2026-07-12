@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:47:18+00:00",
+  "exported_at": "2026-07-12T07:47:21+00:00",
   "tables": {
     "subjects": [
       {
@@ -3722,6 +3722,21 @@
         "is_archived": false,
         "created_at": "2026-07-12T07:47:18",
         "updated_at": "2026-07-12T07:47:18"
+      },
+      {
+        "id": 88,
+        "created_by_teacher_id": 5,
+        "subject_id": 12,
+        "class_id": 7,
+        "title": "Mức nhẹ - Phần mềm Bảng tính và Trình chiếu",
+        "description": "Làm quen với các thao tác cơ bản trong Excel và PowerPoint qua mô phỏng.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T07:47:20",
+        "updated_at": "2026-07-12T07:47:20"
       }
     ],
     "parent_daily_reports": [],
