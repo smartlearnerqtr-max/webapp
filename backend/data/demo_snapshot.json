@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:34:26+00:00",
+  "exported_at": "2026-07-12T07:34:42+00:00",
   "tables": {
     "subjects": [
       {
@@ -3707,6 +3707,21 @@
         "is_archived": true,
         "created_at": "2026-07-12T07:34:08",
         "updated_at": "2026-07-12T07:34:26.192967"
+      },
+      {
+        "id": 87,
+        "created_by_teacher_id": 5,
+        "subject_id": 13,
+        "class_id": 7,
+        "title": "Mức nhẹ - Thể dục nhịp điệu và Chạy cự li ngắn",
+        "description": "Luyện tập các động tác thể dục theo nhịp điệu và tư thế chạy chuyên nghiệp.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T07:34:42",
+        "updated_at": "2026-07-12T07:34:42"
       }
     ],
     "parent_daily_reports": [],
