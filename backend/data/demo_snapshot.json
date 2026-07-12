@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T14:53:55+00:00",
+  "exported_at": "2026-07-12T14:54:17+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$4hYctEOxu7VwF40Z$243d874af4bbfb825e2509ee25f3f9e29fed46f85e4dc13f50bc6fcd7d741b37",
+        "password_hash": "pbkdf2:sha256:1000000$t92XPd7Y19VhtEVi$a8839d3cc878c95b436887eddd5a0a115084b5690e8494a020a02864568aaf19",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-12T14:52:13.484176"
+        "updated_at": "2026-07-12T14:54:03.105312"
       },
       {
         "id": 18,
@@ -3812,21 +3812,6 @@
       {
         "id": 92,
         "created_by_teacher_id": 6,
-        "subject_id": 7,
-        "class_id": 8,
-        "title": "Health, Traffic and Festival",
-        "description": "Mở rộng vốn từ vựng về các chủ đề quen thuộc và luyện nghe cơ bản.",
-        "primary_level": "trung_binh",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-12T14:52:40",
-        "updated_at": "2026-07-12T14:52:40"
-      },
-      {
-        "id": 93,
-        "created_by_teacher_id": 6,
         "subject_id": 6,
         "class_id": 8,
         "title": "Hình khối và mua bán đơn giản",
@@ -3836,8 +3821,38 @@
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-12T14:53:43",
-        "updated_at": "2026-07-12T14:53:43"
+        "created_at": "2026-07-12T14:51:40",
+        "updated_at": "2026-07-12T14:51:40"
+      },
+      {
+        "id": 93,
+        "created_by_teacher_id": 6,
+        "subject_id": 5,
+        "class_id": 8,
+        "title": "Truyện ngụ ngôn và Tục ngữ",
+        "description": "Tiếp cận các câu chuyện đạo lý và tục ngữ qua hình ảnh minh họa và sơ đồ tư duy.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T14:52:10",
+        "updated_at": "2026-07-12T14:52:10"
+      },
+      {
+        "id": 94,
+        "created_by_teacher_id": 6,
+        "subject_id": 5,
+        "class_id": 8,
+        "title": "Truyện ngụ ngôn và Tục ngữ",
+        "description": "Tiếp cận các câu chuyện đạo lý và tục ngữ qua hình ảnh minh họa và sơ đồ tư duy.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T14:54:17",
+        "updated_at": "2026-07-12T14:54:17"
       }
     ],
     "parent_daily_reports": [],
@@ -6018,34 +6033,6 @@
       {
         "id": 182,
         "lesson_id": 92,
-        "title": "Listen and Choose",
-        "activity_type": "listen_choose",
-        "instruction_text": "Năng lực nghe hiểu từ vựng",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Nghe thật kỹ rồi chọn đúng phương tiện.\",\"correct\":\"bus\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"bus\",\"label\":\"Bus\",\"media_url\":\"/lesson-media/trung-binh/bus-card.svg\",\"media_kind\":\"image\"},{\"id\":\"bicycle\",\"label\":\"Bicycle\",\"media_url\":\"/lesson-media/trung-binh/bicycle-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Bus\",\"audio_lang\":\"en-US\"}",
-        "created_at": "2026-07-12T14:52:43",
-        "updated_at": "2026-07-12T14:52:43"
-      },
-      {
-        "id": 183,
-        "lesson_id": 92,
-        "title": "Flashcard lật mở (Lễ hội)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Ghi nhớ hình ảnh và âm thanh",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Xem thẻ Festival rồi đọc lại từ mới.\",\"media_url\":\"/lesson-media/nhe/photos/festival-viet-nam.jpg\",\"media_kind\":\"image\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T14:52:45",
-        "updated_at": "2026-07-12T14:52:45"
-      },
-      {
-        "id": 184,
-        "lesson_id": 93,
         "title": "Phân loại hình học",
         "activity_type": "drag_drop",
         "instruction_text": "Năng lực nhận diện hình học không gian",
@@ -6054,12 +6041,12 @@
         "sort_order": 1,
         "difficulty_stage": 2,
         "config_json": "{\"prompt\":\"Kéo từng đồ vật vào đúng nhóm hình học của nó.\",\"items\":[\"Kim tự tháp\",\"Cái lều\",\"Tủ lạnh\",\"Hộp sữa\"],\"targets\":[\"Hình chóp\",\"Hình lăng trụ\"],\"visual_style\":\"shape_3d\"}",
-        "created_at": "2026-07-12T14:53:46",
-        "updated_at": "2026-07-12T14:53:46"
+        "created_at": "2026-07-12T14:51:43",
+        "updated_at": "2026-07-12T14:51:43"
       },
       {
-        "id": 185,
-        "lesson_id": 93,
+        "id": 183,
+        "lesson_id": 92,
         "title": "Mô phỏng mua bán",
         "activity_type": "watch_answer",
         "instruction_text": "Vận dụng toán học vào đời sống",
@@ -6068,8 +6055,36 @@
         "sort_order": 2,
         "difficulty_stage": 2,
         "config_json": "{\"prompt\":\"Đưa đủ 4 xu vào máy tính tiền để mua 2 cái kẹo.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=toan-coins\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T14:53:49",
-        "updated_at": "2026-07-12T14:53:49"
+        "created_at": "2026-07-12T14:51:45",
+        "updated_at": "2026-07-12T14:51:45"
+      },
+      {
+        "id": 184,
+        "lesson_id": 93,
+        "title": "Trắc nghiệm hình ảnh",
+        "activity_type": "image_choice",
+        "instruction_text": "Năng lực nhận diện nhân vật",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Ai đang ngồi ở đáy giếng?\",\"correct\":\"frog\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"frog\",\"label\":\"Con ếch\",\"media_url\":\"/lesson-media/trung-binh/frog-card.svg\",\"media_kind\":\"image\"},{\"id\":\"turtle\",\"label\":\"Con rùa\",\"media_url\":\"/lesson-media/trung-binh/turtle-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Ai là người ngồi ở đáy giếng?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-12T14:52:13",
+        "updated_at": "2026-07-12T14:52:13"
+      },
+      {
+        "id": 185,
+        "lesson_id": 93,
+        "title": "Hoàn thành sơ đồ tư duy",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực tư duy logic, hệ thống cốt truyện",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Kéo các ý chính vào sơ đồ để hoàn thành cốt truyện.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=ngu-van-mindmap\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T14:52:18",
+        "updated_at": "2026-07-12T14:52:18"
       }
     ],
     "lesson_assignments": [
@@ -6831,27 +6846,14 @@
         "id": 134,
         "lesson_id": 92,
         "class_id": 8,
-        "subject_id": 7,
-        "assigned_by_teacher_id": 6,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-12T14:53:27",
-        "updated_at": "2026-07-12T14:53:27"
-      },
-      {
-        "id": 135,
-        "lesson_id": 93,
-        "class_id": 8,
         "subject_id": 6,
         "assigned_by_teacher_id": 6,
         "target_type": "class",
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-12T14:53:55",
-        "updated_at": "2026-07-12T14:53:55"
+        "created_at": "2026-07-12T14:51:51",
+        "updated_at": "2026-07-12T14:51:51"
       }
     ],
     "lesson_assignment_students": [
@@ -7370,29 +7372,15 @@
         "id": 226,
         "assignment_id": 134,
         "student_id": 12,
-        "created_at": "2026-07-12T14:53:27",
-        "updated_at": "2026-07-12T14:53:27"
+        "created_at": "2026-07-12T14:51:51",
+        "updated_at": "2026-07-12T14:51:51"
       },
       {
         "id": 227,
         "assignment_id": 134,
         "student_id": 34,
-        "created_at": "2026-07-12T14:53:27",
-        "updated_at": "2026-07-12T14:53:27"
-      },
-      {
-        "id": 228,
-        "assignment_id": 135,
-        "student_id": 12,
-        "created_at": "2026-07-12T14:53:55",
-        "updated_at": "2026-07-12T14:53:55"
-      },
-      {
-        "id": 229,
-        "assignment_id": 135,
-        "student_id": 34,
-        "created_at": "2026-07-12T14:53:55",
-        "updated_at": "2026-07-12T14:53:55"
+        "created_at": "2026-07-12T14:51:51",
+        "updated_at": "2026-07-12T14:51:51"
       }
     ],
     "student_lesson_progress": [
@@ -8503,8 +8491,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-12T14:53:27",
-        "updated_at": "2026-07-12T14:53:27"
+        "created_at": "2026-07-12T14:51:51",
+        "updated_at": "2026-07-12T14:51:51"
       },
       {
         "id": 227,
@@ -8518,38 +8506,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-12T14:53:27",
-        "updated_at": "2026-07-12T14:53:27"
-      },
-      {
-        "id": 228,
-        "assignment_id": 135,
-        "student_id": 12,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-12T14:53:55",
-        "updated_at": "2026-07-12T14:53:55"
-      },
-      {
-        "id": 229,
-        "assignment_id": 135,
-        "student_id": 34,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-12T14:53:55",
-        "updated_at": "2026-07-12T14:53:55"
+        "created_at": "2026-07-12T14:51:51",
+        "updated_at": "2026-07-12T14:51:51"
       }
     ]
   }
