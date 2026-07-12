@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:36:33+00:00",
+  "exported_at": "2026-07-12T07:36:49+00:00",
   "tables": {
     "subjects": [
       {
@@ -3662,6 +3662,21 @@
         "is_archived": false,
         "created_at": "2026-07-12T07:36:17",
         "updated_at": "2026-07-12T07:36:17"
+      },
+      {
+        "id": 84,
+        "created_by_teacher_id": 5,
+        "subject_id": 17,
+        "class_id": 7,
+        "title": "Mức nhẹ - Quản lý đồ dùng và Kế hoạch cá nhân",
+        "description": "Luyện tập kỹ năng tự chuẩn bị và lên kế hoạch cho các hoạt động cá nhân.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T07:36:49",
+        "updated_at": "2026-07-12T07:36:49"
       }
     ],
     "parent_daily_reports": [],
