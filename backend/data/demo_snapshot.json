@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:35:47+00:00",
+  "exported_at": "2026-07-12T07:35:50+00:00",
   "tables": {
     "subjects": [
       {
@@ -5520,6 +5520,20 @@
         "config_json": "{\"prompt\":\"Phân bổ tiền vào tiết kiệm và mua sắm sao cho hợp lí.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdcd-budget\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:33:33",
         "updated_at": "2026-07-12T07:33:33"
+      },
+      {
+        "id": 161,
+        "lesson_id": 82,
+        "title": "Tô mảng màu (Fill Color)",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực thẩm mĩ và phối màu",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Chọn màu và tô kín vùng tranh theo mảng rõ ràng.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=mythuat-fill\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:35:50",
+        "updated_at": "2026-07-12T07:35:50"
       }
     ],
     "lesson_assignments": [
