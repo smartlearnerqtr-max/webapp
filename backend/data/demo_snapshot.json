@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:45:41+00:00",
+  "exported_at": "2026-07-12T07:45:43+00:00",
   "tables": {
     "subjects": [
       {
@@ -5778,6 +5778,20 @@
         "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"flute\",\"label\":\"Sáo trúc\",\"media_url\":\"/lesson-media/nhe/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"},{\"id\":\"dan-bau\",\"label\":\"Đàn bầu\",\"media_url\":\"/lesson-media/nhe/photos/dan-bau.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nhe/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-12T07:45:41",
         "updated_at": "2026-07-12T07:45:41"
+      },
+      {
+        "id": 173,
+        "lesson_id": 88,
+        "title": "Đệm hát (Virtual Drum/Piano)",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng giữ nhịp điệu đa dạng",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào trống để gõ phách.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=amnhac-rhythm\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:45:43",
+        "updated_at": "2026-07-12T07:45:43"
       }
     ],
     "lesson_assignments": [
