@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:31:54+00:00",
+  "exported_at": "2026-07-12T07:32:51+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$u3comRPQQbls7VM6$cdb55e161ffcd83f24868504dd4cac6633f2bb476a068127cf9bc2997fdfc557",
+        "password_hash": "pbkdf2:sha256:1000000$SenCoAFvmczugank$314bf18d49b52f0fa493b799c24673f2ae4b398b1e67cd5f0cdb95c991ec14a0",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-12T07:29:18.238964"
+        "updated_at": "2026-07-12T07:31:52.709951"
       },
       {
         "id": 18,
@@ -3599,57 +3599,12 @@
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
-        "is_archived": true,
+        "is_archived": false,
         "created_at": "2026-07-12T07:29:50",
-        "updated_at": "2026-07-12T07:30:27.609434"
+        "updated_at": "2026-07-12T07:29:50"
       },
       {
         "id": 80,
-        "created_by_teacher_id": 5,
-        "subject_id": 9,
-        "class_id": 7,
-        "title": "Mức nhẹ - Châu lục và Phát kiến địa lí",
-        "description": "Định vị địa lý trên bản đồ 3D và tìm hiểu các mốc lịch sử thám hiểm.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-12T07:29:53",
-        "updated_at": "2026-07-12T07:30:36.626166"
-      },
-      {
-        "id": 81,
-        "created_by_teacher_id": 5,
-        "subject_id": 9,
-        "class_id": 7,
-        "title": "Mức nhẹ - Châu lục và Phát kiến địa lí",
-        "description": "Định vị địa lý trên bản đồ 3D và tìm hiểu các mốc lịch sử thám hiểm.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-12T07:29:57",
-        "updated_at": "2026-07-12T07:30:40.909944"
-      },
-      {
-        "id": 82,
-        "created_by_teacher_id": 5,
-        "subject_id": 9,
-        "class_id": 7,
-        "title": "Mức nhẹ - Châu lục và Phát kiến địa lí",
-        "description": "Định vị địa lý trên bản đồ 3D và tìm hiểu các mốc lịch sử thám hiểm.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-12T07:30:09",
-        "updated_at": "2026-07-12T07:30:09"
-      },
-      {
-        "id": 83,
         "created_by_teacher_id": 5,
         "subject_id": 10,
         "class_id": 7,
@@ -3660,23 +3615,8 @@
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-12T07:31:02",
-        "updated_at": "2026-07-12T07:31:02"
-      },
-      {
-        "id": 84,
-        "created_by_teacher_id": 5,
-        "subject_id": 11,
-        "class_id": 7,
-        "title": "Mức nhẹ - Tự hào truyền thống và Bạo lực học đường",
-        "description": "Học cách xử lý tình huống thực tế và quản lý tài chính cá nhân đơn giản.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-12T07:31:40",
-        "updated_at": "2026-07-12T07:31:40"
+        "created_at": "2026-07-12T07:32:51",
+        "updated_at": "2026-07-12T07:32:51"
       }
     ],
     "parent_daily_reports": [],
@@ -5494,146 +5434,6 @@
         "config_json": "{\"prompt\":\"Chạm từng electron để xếp vào đúng vòng nguyên tử.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=khtn-atom\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-10T06:51:52",
         "updated_at": "2026-07-10T06:51:52"
-      },
-      {
-        "id": 157,
-        "lesson_id": 80,
-        "title": "Định vị bản đồ",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng sử dụng bản đồ số",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:29:59",
-        "updated_at": "2026-07-12T07:29:59"
-      },
-      {
-        "id": 158,
-        "lesson_id": 81,
-        "title": "Định vị bản đồ",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng sử dụng bản đồ số",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:30:03",
-        "updated_at": "2026-07-12T07:30:03"
-      },
-      {
-        "id": 159,
-        "lesson_id": 80,
-        "title": "Dòng thời gian (Timeline)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực tư duy lịch sử theo trình tự",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-timeline\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:30:05",
-        "updated_at": "2026-07-12T07:30:05"
-      },
-      {
-        "id": 160,
-        "lesson_id": 81,
-        "title": "Dòng thời gian (Timeline)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực tư duy lịch sử theo trình tự",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-timeline\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:30:12",
-        "updated_at": "2026-07-12T07:30:12"
-      },
-      {
-        "id": 161,
-        "lesson_id": 82,
-        "title": "Định vị bản đồ",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng sử dụng bản đồ số",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:30:14",
-        "updated_at": "2026-07-12T07:30:14"
-      },
-      {
-        "id": 162,
-        "lesson_id": 82,
-        "title": "Dòng thời gian (Timeline)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực tư duy lịch sử theo trình tự",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-timeline\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:30:17",
-        "updated_at": "2026-07-12T07:30:17"
-      },
-      {
-        "id": 163,
-        "lesson_id": 83,
-        "title": "Sắp xếp quy trình",
-        "activity_type": "watch_answer",
-        "instruction_text": "Tư duy quy trình công nghệ",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Sắp xếp đúng quy trình trồng trọt.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=congnghe-steps\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:31:04",
-        "updated_at": "2026-07-12T07:31:04"
-      },
-      {
-        "id": 164,
-        "lesson_id": 83,
-        "title": "Phân loại nông nghiệp",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng phân tích và nhóm sự vật",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Phân loại vật nuôi vào đúng nhóm nông nghiệp.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=congnghe-animals\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:31:06",
-        "updated_at": "2026-07-12T07:31:06"
-      },
-      {
-        "id": 165,
-        "lesson_id": 84,
-        "title": "Video tình huống (A/B)",
-        "activity_type": "multiple_choice",
-        "instruction_text": "Năng lực giải quyết vấn đề xã hội",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Nếu thấy bạn bị bắt nạt, em nên làm gì?\",\"choices\":[\"Báo cô giáo\",\"Đứng xem\"],\"correct\":\"Báo cô giáo\",\"image_cards\":[{\"id\":\"card-fih8o0\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-7opizp\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdcd-bullying\"}",
-        "created_at": "2026-07-12T07:31:48",
-        "updated_at": "2026-07-12T07:31:48"
-      },
-      {
-        "id": 166,
-        "lesson_id": 84,
-        "title": "Quản lý tài chính ảo",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực quản lý bản thân và tài chính",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Phân bổ tiền vào tiết kiệm và mua sắm sao cho hợp lí.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdcd-budget\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:31:54",
-        "updated_at": "2026-07-12T07:31:54"
       }
     ],
     "lesson_assignments": [
@@ -6273,19 +6073,6 @@
         "status": "active",
         "created_at": "2026-07-10T12:40:13",
         "updated_at": "2026-07-10T12:40:13"
-      },
-      {
-        "id": 125,
-        "lesson_id": 83,
-        "class_id": 7,
-        "subject_id": 10,
-        "assigned_by_teacher_id": 5,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-12T07:31:20",
-        "updated_at": "2026-07-12T07:31:20"
       }
     ],
     "lesson_assignment_students": [
@@ -6673,20 +6460,6 @@
         "student_id": 33,
         "created_at": "2026-07-10T12:40:13",
         "updated_at": "2026-07-10T12:40:13"
-      },
-      {
-        "id": 208,
-        "assignment_id": 125,
-        "student_id": 11,
-        "created_at": "2026-07-12T07:31:20",
-        "updated_at": "2026-07-12T07:31:20"
-      },
-      {
-        "id": 209,
-        "assignment_id": 125,
-        "student_id": 33,
-        "created_at": "2026-07-12T07:31:20",
-        "updated_at": "2026-07-12T07:31:20"
       }
     ],
     "student_lesson_progress": [
@@ -7514,36 +7287,6 @@
         "completed_at": null,
         "created_at": "2026-07-10T12:40:13",
         "updated_at": "2026-07-10T12:40:13"
-      },
-      {
-        "id": 208,
-        "assignment_id": 125,
-        "student_id": 11,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-12T07:31:20",
-        "updated_at": "2026-07-12T07:31:20"
-      },
-      {
-        "id": 209,
-        "assignment_id": 125,
-        "student_id": 33,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-12T07:31:20",
-        "updated_at": "2026-07-12T07:31:20"
       }
     ]
   }
