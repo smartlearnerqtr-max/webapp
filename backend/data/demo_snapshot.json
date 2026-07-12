@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-10T12:40:13+00:00",
+  "exported_at": "2026-07-12T07:29:50+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$UtwNm6CCQBmyVixm$40bba56bfb031778b487ffbf2496997678b5870467326663da2de1b9f5db171f",
+        "password_hash": "pbkdf2:sha256:1000000$u3comRPQQbls7VM6$cdb55e161ffcd83f24868504dd4cac6633f2bb476a068127cf9bc2997fdfc557",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-10T12:31:46.514974"
+        "updated_at": "2026-07-12T07:29:18.238964"
       },
       {
         "id": 18,
@@ -3587,6 +3587,21 @@
         "is_archived": false,
         "created_at": "2026-07-10T06:51:52",
         "updated_at": "2026-07-10T06:51:52"
+      },
+      {
+        "id": 79,
+        "created_by_teacher_id": 5,
+        "subject_id": 9,
+        "class_id": 7,
+        "title": "Mức nhẹ - Châu lục và Phát kiến địa lí",
+        "description": "Định vị địa lý trên bản đồ 3D và tìm hiểu các mốc lịch sử thám hiểm.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T07:29:50",
+        "updated_at": "2026-07-12T07:29:50"
       }
     ],
     "parent_daily_reports": [],
