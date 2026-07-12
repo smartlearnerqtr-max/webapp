@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T14:53:43+00:00",
+  "exported_at": "2026-07-12T14:53:46+00:00",
   "tables": {
     "subjects": [
       {
@@ -6042,6 +6042,20 @@
         "config_json": "{\"prompt\":\"Xem thẻ Festival rồi đọc lại từ mới.\",\"media_url\":\"/lesson-media/nhe/photos/festival-viet-nam.jpg\",\"media_kind\":\"image\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T14:52:45",
         "updated_at": "2026-07-12T14:52:45"
+      },
+      {
+        "id": 184,
+        "lesson_id": 93,
+        "title": "Phân loại hình học",
+        "activity_type": "drag_drop",
+        "instruction_text": "Năng lực nhận diện hình học không gian",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Kéo từng đồ vật vào đúng nhóm hình học của nó.\",\"items\":[\"Kim tự tháp\",\"Cái lều\",\"Tủ lạnh\",\"Hộp sữa\"],\"targets\":[\"Hình chóp\",\"Hình lăng trụ\"],\"visual_style\":\"shape_3d\"}",
+        "created_at": "2026-07-12T14:53:46",
+        "updated_at": "2026-07-12T14:53:46"
       }
     ],
     "lesson_assignments": [
