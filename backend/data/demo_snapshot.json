@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T14:50:02+00:00",
+  "exported_at": "2026-07-12T14:51:41+00:00",
   "tables": {
     "subjects": [
       {
@@ -3808,6 +3808,21 @@
         "is_archived": true,
         "created_at": "2026-07-12T07:53:46",
         "updated_at": "2026-07-12T07:57:07.612982"
+      },
+      {
+        "id": 92,
+        "created_by_teacher_id": 6,
+        "subject_id": 6,
+        "class_id": 8,
+        "title": "Hình khối và mua bán đơn giản",
+        "description": "Nhận biết hình chóp, hình lăng trụ và vận dụng phép tính đơn giản qua tình huống mua bán bằng xu.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T14:51:40",
+        "updated_at": "2026-07-12T14:51:40"
       }
     ],
     "parent_daily_reports": [],
