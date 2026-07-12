@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T14:52:43+00:00",
+  "exported_at": "2026-07-12T14:52:45+00:00",
   "tables": {
     "subjects": [
       {
@@ -6013,6 +6013,20 @@
         "config_json": "{\"prompt\":\"Nghe thật kỹ rồi chọn đúng phương tiện.\",\"correct\":\"bus\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"bus\",\"label\":\"Bus\",\"media_url\":\"/lesson-media/trung-binh/bus-card.svg\",\"media_kind\":\"image\"},{\"id\":\"bicycle\",\"label\":\"Bicycle\",\"media_url\":\"/lesson-media/trung-binh/bicycle-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Bus\",\"audio_lang\":\"en-US\"}",
         "created_at": "2026-07-12T14:52:43",
         "updated_at": "2026-07-12T14:52:43"
+      },
+      {
+        "id": 183,
+        "lesson_id": 92,
+        "title": "Flashcard lật mở (Lễ hội)",
+        "activity_type": "watch_answer",
+        "instruction_text": "Ghi nhớ hình ảnh và âm thanh",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Xem thẻ Festival rồi đọc lại từ mới.\",\"media_url\":\"/lesson-media/nhe/photos/festival-viet-nam.jpg\",\"media_kind\":\"image\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T14:52:45",
+        "updated_at": "2026-07-12T14:52:45"
       }
     ],
     "lesson_assignments": [
