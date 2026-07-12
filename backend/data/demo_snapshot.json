@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:52:19+00:00",
+  "exported_at": "2026-07-12T07:52:21+00:00",
   "tables": {
     "subjects": [
       {
@@ -5807,6 +5807,20 @@
         "config_json": "{\"prompt\":\"Bạn nhỏ nào đang giúp đỡ người khác?\",\"correct\":\"choice-1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"choice-1\",\"label\":\"Giúp bà cụ qua đường\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-2\",\"label\":\"Bạn nhỏ đang chơi đồ chơi\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-3\",\"label\":\"Bạn nhỏ đang ăn cơm\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-4\",\"label\":\"Bạn nhỏ đang ngủ\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-12T07:52:19",
         "updated_at": "2026-07-12T07:52:19"
+      },
+      {
+        "id": 174,
+        "lesson_id": 85,
+        "title": "Xem và Trả lời: Kỹ năng Chia sẻ",
+        "activity_type": "watch_answer",
+        "instruction_text": "Học sinh xem một đoạn video ngắn về tình huống xã hội và trả lời câu hỏi về hành vi chia sẻ.",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Con hãy xem video và cho cô biết: Bạn nhỏ trong video đã làm gì để thể hiện sự chia sẻ với bạn của mình?\",\"answer_mode\":\"text\",\"expected_answer\":\"Bạn ấy đã chia sẻ đồ chơi với bạn.\",\"accepted_answers\":[\"Bạn ấy đã chia sẻ đồ chơi với bạn.\",\"Bạn ấy cho bạn mượn đồ chơi.\",\"Bạn ấy chơi chung đồ chơi với bạn.\"]}",
+        "created_at": "2026-07-12T07:52:21",
+        "updated_at": "2026-07-12T07:52:21"
       }
     ],
     "lesson_assignments": [
