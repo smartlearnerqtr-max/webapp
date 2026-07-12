@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:29:57+00:00",
+  "exported_at": "2026-07-12T07:29:59+00:00",
   "tables": {
     "subjects": [
       {
@@ -5449,6 +5449,20 @@
         "config_json": "{\"prompt\":\"Chạm từng electron để xếp vào đúng vòng nguyên tử.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=khtn-atom\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-10T06:51:52",
         "updated_at": "2026-07-10T06:51:52"
+      },
+      {
+        "id": 157,
+        "lesson_id": 80,
+        "title": "Định vị bản đồ",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng sử dụng bản đồ số",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:29:59",
+        "updated_at": "2026-07-12T07:29:59"
       }
     ],
     "lesson_assignments": [
