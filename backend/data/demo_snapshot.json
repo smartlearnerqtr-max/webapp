@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:54:27+00:00",
+  "exported_at": "2026-07-12T07:54:29+00:00",
   "tables": {
     "subjects": [
       {
@@ -5808,6 +5808,20 @@
         "config_json": "{\"prompt\":\"Chọn template và hoàn thiện một slide nhanh.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=tinhoc-slide\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:47:35",
         "updated_at": "2026-07-12T07:47:35"
+      },
+      {
+        "id": 173,
+        "lesson_id": 90,
+        "title": "Nghe và đoán nhạc cụ",
+        "activity_type": "listen_choose",
+        "instruction_text": "Năng lực cảm thụ và nhận diện âm thanh",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"flute\",\"label\":\"Sáo trúc\",\"media_url\":\"/lesson-media/nhe/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"},{\"id\":\"dan-bau\",\"label\":\"Đàn bầu\",\"media_url\":\"/lesson-media/nhe/photos/dan-bau.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nhe/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-12T07:54:29",
+        "updated_at": "2026-07-12T07:54:29"
       }
     ],
     "lesson_assignments": [
