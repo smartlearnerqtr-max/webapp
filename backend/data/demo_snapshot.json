@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:37:14+00:00",
+  "exported_at": "2026-07-12T07:40:44+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$AoBrH0tt5mr9WT4Q$740c9c8d8c0ee61ffa73ee13ee0ee10399d99b41b6788328866f1d2b895c2196",
+        "password_hash": "pbkdf2:sha256:1000000$u82QHIcHYVF7JCEi$31720a7eeb53091100c37bf45ad24c6ae1559718d631a5ec282d1b84bf332bb7",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-12T07:35:29.919658"
+        "updated_at": "2026-07-12T07:39:05.915024"
       },
       {
         "id": 18,
@@ -3677,6 +3677,21 @@
         "is_archived": false,
         "created_at": "2026-07-12T07:36:49",
         "updated_at": "2026-07-12T07:36:49"
+      },
+      {
+        "id": 85,
+        "created_by_teacher_id": 5,
+        "subject_id": 4,
+        "class_id": 7,
+        "title": "Thẻ Kỹ Năng Đọc Hiểu Đoạn Văn Ngắn",
+        "description": "Bài học giúp học sinh khuyết tật trí tuệ nhẹ lớp 7 rèn luyện kỹ năng đọc thành tiếng trôi chảy, ngắt nghỉ đúng dấu câu và trả lời các câu hỏi nhận biết đơn giản (Ai? Làm gì?).",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T07:40:44",
+        "updated_at": "2026-07-12T07:40:44"
       }
     ],
     "parent_daily_reports": [],
