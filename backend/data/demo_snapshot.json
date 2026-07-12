@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T14:54:17+00:00",
+  "exported_at": "2026-07-12T14:54:20+00:00",
   "tables": {
     "subjects": [
       {
@@ -6085,6 +6085,20 @@
         "config_json": "{\"prompt\":\"Kéo các ý chính vào sơ đồ để hoàn thành cốt truyện.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=ngu-van-mindmap\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T14:52:18",
         "updated_at": "2026-07-12T14:52:18"
+      },
+      {
+        "id": 186,
+        "lesson_id": 94,
+        "title": "Trắc nghiệm hình ảnh",
+        "activity_type": "image_choice",
+        "instruction_text": "Năng lực nhận diện nhân vật",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Ai đang ngồi ở đáy giếng?\",\"correct\":\"frog\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"frog\",\"label\":\"Con ếch\",\"media_url\":\"/lesson-media/trung-binh/frog-card.svg\",\"media_kind\":\"image\"},{\"id\":\"turtle\",\"label\":\"Con rùa\",\"media_url\":\"/lesson-media/trung-binh/turtle-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Ai là người ngồi ở đáy giếng?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-12T14:54:20",
+        "updated_at": "2026-07-12T14:54:20"
       }
     ],
     "lesson_assignments": [
