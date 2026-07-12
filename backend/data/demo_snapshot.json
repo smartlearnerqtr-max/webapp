@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:53:44+00:00",
+  "exported_at": "2026-07-12T07:53:46+00:00",
   "tables": {
     "subjects": [
       {
@@ -3767,6 +3767,21 @@
         "is_archived": false,
         "created_at": "2026-07-12T07:53:43",
         "updated_at": "2026-07-12T07:53:43"
+      },
+      {
+        "id": 91,
+        "created_by_teacher_id": 5,
+        "subject_id": 14,
+        "class_id": 7,
+        "title": "Mức nhẹ - Nhịp điệu và Nhạc cụ dân tộc",
+        "description": "Khám phá âm thanh của các nhạc cụ truyền thống và luyện tập giữ nhịp.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T07:53:46",
+        "updated_at": "2026-07-12T07:53:46"
       }
     ],
     "parent_daily_reports": [],
