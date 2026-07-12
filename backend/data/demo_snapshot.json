@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:52:16+00:00",
+  "exported_at": "2026-07-12T07:52:19+00:00",
   "tables": {
     "subjects": [
       {
@@ -5793,6 +5793,20 @@
         "config_json": "{\"prompt\":\"Chọn template và hoàn thiện một slide nhanh.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=tinhoc-slide\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:47:35",
         "updated_at": "2026-07-12T07:47:35"
+      },
+      {
+        "id": 173,
+        "lesson_id": 85,
+        "title": "Bạn nhỏ nào đang giúp đỡ người khác?",
+        "activity_type": "image_choice",
+        "instruction_text": "Trẻ nhận biết các hoạt động giúp đỡ người khác trong cuộc sống hàng ngày.",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Bạn nhỏ nào đang giúp đỡ người khác?\",\"correct\":\"choice-1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"choice-1\",\"label\":\"Giúp bà cụ qua đường\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-2\",\"label\":\"Bạn nhỏ đang chơi đồ chơi\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-3\",\"label\":\"Bạn nhỏ đang ăn cơm\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-4\",\"label\":\"Bạn nhỏ đang ngủ\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-12T07:52:19",
+        "updated_at": "2026-07-12T07:52:19"
       }
     ],
     "lesson_assignments": [
