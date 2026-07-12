@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:34:14+00:00",
+  "exported_at": "2026-07-12T07:34:16+00:00",
   "tables": {
     "subjects": [
       {
@@ -5706,6 +5706,20 @@
         "config_json": "{\"prompt\":\"Kéo hàm SUM vào bảng tính để tính tổng tiền.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=tinhoc-excel\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:34:14",
         "updated_at": "2026-07-12T07:34:14"
+      },
+      {
+        "id": 170,
+        "lesson_id": 86,
+        "title": "Tạo Slide nhanh (Templates)",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng thiết kế sản phẩm số cơ bản",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Chọn template và hoàn thiện một slide nhanh.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=tinhoc-slide\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:34:16",
+        "updated_at": "2026-07-12T07:34:16"
       }
     ],
     "lesson_assignments": [
