@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:56:08+00:00",
+  "exported_at": "2026-07-12T07:56:13+00:00",
   "tables": {
     "subjects": [
       {
@@ -5832,11 +5832,11 @@
         "instruction_text": "Trẻ nhận biết các hoạt động giúp đỡ người khác trong cuộc sống hàng ngày.",
         "voice_answer_enabled": false,
         "is_required": true,
-        "sort_order": 1,
+        "sort_order": 2,
         "difficulty_stage": 1,
         "config_json": "{\"prompt\":\"Bạn nhỏ nào đang giúp đỡ người khác?\",\"correct\":\"choice-1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"choice-1\",\"label\":\"Giúp bà cụ qua đường\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-2\",\"label\":\"Bạn nhỏ đang chơi đồ chơi\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-3\",\"label\":\"Bạn nhỏ đang ăn cơm\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-4\",\"label\":\"Bạn nhỏ đang ngủ\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-12T07:52:19",
-        "updated_at": "2026-07-12T07:52:19"
+        "updated_at": "2026-07-12T07:56:13.543726"
       },
       {
         "id": 174,
@@ -5846,11 +5846,11 @@
         "instruction_text": "Học sinh xem một đoạn video ngắn về tình huống xã hội và trả lời câu hỏi về hành vi chia sẻ.",
         "voice_answer_enabled": false,
         "is_required": false,
-        "sort_order": 2,
+        "sort_order": 3,
         "difficulty_stage": 1,
         "config_json": "{\"prompt\":\"Con hãy xem video và cho cô biết: Bạn nhỏ trong video đã làm gì để thể hiện sự chia sẻ với bạn của mình?\",\"answer_mode\":\"text\",\"expected_answer\":\"Bạn ấy đã chia sẻ đồ chơi với bạn.\",\"accepted_answers\":[\"Bạn ấy đã chia sẻ đồ chơi với bạn.\",\"Bạn ấy cho bạn mượn đồ chơi.\",\"Bạn ấy chơi chung đồ chơi với bạn.\"]}",
         "created_at": "2026-07-12T07:52:21",
-        "updated_at": "2026-07-12T07:52:21"
+        "updated_at": "2026-07-12T07:56:13.543729"
       },
       {
         "id": 175,
@@ -5907,6 +5907,20 @@
         "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào trống để gõ phách.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=amnhac-rhythm\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:53:51",
         "updated_at": "2026-07-12T07:53:51"
+      },
+      {
+        "id": 179,
+        "lesson_id": 85,
+        "title": "An giúp Bình",
+        "activity_type": "image_choice",
+        "instruction_text": "Học sinh đọc hiểu đoạn văn ngắn và chọn hình ảnh đúng với hành động giúp đỡ bạn bè.",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Hôm nay, bạn An thấy bạn Bình đang buồn vì làm mất bút chì. An đã lấy một cây bút chì khác của mình và đưa cho Bình mượn.\\n\\nBạn An đã làm gì để giúp bạn Bình?\",\"correct\":\"choice1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"choice1\",\"label\":\"An cho Bình mượn bút\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice2\",\"label\":\"An chơi một mình\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice3\",\"label\":\"An phớt lờ Bình\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_text\":\"Hôm nay, bạn An thấy bạn Bình đang buồn vì làm mất bút chì. An đã lấy một cây bút chì khác của mình và đưa cho Bình mượn. Bạn An đã làm gì để giúp bạn Bình?\",\"audio_lang\":\"vi\"}",
+        "created_at": "2026-07-12T07:56:13",
+        "updated_at": "2026-07-12T07:56:13.543730"
       }
     ],
     "lesson_assignments": [
