@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:52:56+00:00",
+  "exported_at": "2026-07-12T07:52:58+00:00",
   "tables": {
     "subjects": [
       {
@@ -5835,6 +5835,20 @@
         "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:52:56",
         "updated_at": "2026-07-12T07:52:56"
+      },
+      {
+        "id": 176,
+        "lesson_id": 79,
+        "title": "Dòng thời gian (Timeline)",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực tư duy lịch sử theo trình tự",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-timeline\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:52:58",
+        "updated_at": "2026-07-12T07:52:58"
       }
     ],
     "lesson_assignments": [
