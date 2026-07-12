@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:54:42+00:00",
+  "exported_at": "2026-07-12T07:56:08+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$mIoesD9YV7hkym3D$7da147370ad174b314fa0902664c6c324fd77f6be1a652107964cb05ffb95a05",
+        "password_hash": "pbkdf2:sha256:1000000$Zcmx3QJP8ZjaU7RD$48ee3b4acea54f7d7e7565b5d1b21d425a83a80d4b7d9ddcf8d6dba4f8f61dec",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-12T07:53:54.328457"
+        "updated_at": "2026-07-12T07:55:42.376099"
       },
       {
         "id": 18,
@@ -3765,8 +3765,23 @@
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-12T07:54:27",
-        "updated_at": "2026-07-12T07:54:27"
+        "created_at": "2026-07-12T07:53:43",
+        "updated_at": "2026-07-12T07:53:43"
+      },
+      {
+        "id": 91,
+        "created_by_teacher_id": 5,
+        "subject_id": 14,
+        "class_id": 7,
+        "title": "Mức nhẹ - Nhịp điệu và Nhạc cụ dân tộc",
+        "description": "Khám phá âm thanh của các nhạc cụ truyền thống và luyện tập giữ nhịp.",
+        "primary_level": "nhe",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-12T07:53:46",
+        "updated_at": "2026-07-12T07:53:46"
       }
     ],
     "parent_daily_reports": [],
@@ -5811,6 +5826,62 @@
       },
       {
         "id": 173,
+        "lesson_id": 85,
+        "title": "Bạn nhỏ nào đang giúp đỡ người khác?",
+        "activity_type": "image_choice",
+        "instruction_text": "Trẻ nhận biết các hoạt động giúp đỡ người khác trong cuộc sống hàng ngày.",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Bạn nhỏ nào đang giúp đỡ người khác?\",\"correct\":\"choice-1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"choice-1\",\"label\":\"Giúp bà cụ qua đường\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-2\",\"label\":\"Bạn nhỏ đang chơi đồ chơi\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-3\",\"label\":\"Bạn nhỏ đang ăn cơm\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"choice-4\",\"label\":\"Bạn nhỏ đang ngủ\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-12T07:52:19",
+        "updated_at": "2026-07-12T07:52:19"
+      },
+      {
+        "id": 174,
+        "lesson_id": 85,
+        "title": "Xem và Trả lời: Kỹ năng Chia sẻ",
+        "activity_type": "watch_answer",
+        "instruction_text": "Học sinh xem một đoạn video ngắn về tình huống xã hội và trả lời câu hỏi về hành vi chia sẻ.",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Con hãy xem video và cho cô biết: Bạn nhỏ trong video đã làm gì để thể hiện sự chia sẻ với bạn của mình?\",\"answer_mode\":\"text\",\"expected_answer\":\"Bạn ấy đã chia sẻ đồ chơi với bạn.\",\"accepted_answers\":[\"Bạn ấy đã chia sẻ đồ chơi với bạn.\",\"Bạn ấy cho bạn mượn đồ chơi.\",\"Bạn ấy chơi chung đồ chơi với bạn.\"]}",
+        "created_at": "2026-07-12T07:52:21",
+        "updated_at": "2026-07-12T07:52:21"
+      },
+      {
+        "id": 175,
+        "lesson_id": 79,
+        "title": "Định vị bản đồ",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng sử dụng bản đồ số",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:52:56",
+        "updated_at": "2026-07-12T07:52:56"
+      },
+      {
+        "id": 176,
+        "lesson_id": 79,
+        "title": "Dòng thời gian (Timeline)",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực tư duy lịch sử theo trình tự",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-timeline\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:52:58",
+        "updated_at": "2026-07-12T07:52:58"
+      },
+      {
+        "id": 177,
         "lesson_id": 90,
         "title": "Nghe và đoán nhạc cụ",
         "activity_type": "listen_choose",
@@ -5820,11 +5891,11 @@
         "sort_order": 1,
         "difficulty_stage": 1,
         "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"flute\",\"label\":\"Sáo trúc\",\"media_url\":\"/lesson-media/nhe/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"},{\"id\":\"dan-bau\",\"label\":\"Đàn bầu\",\"media_url\":\"/lesson-media/nhe/photos/dan-bau.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nhe/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-12T07:54:29",
-        "updated_at": "2026-07-12T07:54:29"
+        "created_at": "2026-07-12T07:53:44",
+        "updated_at": "2026-07-12T07:53:44"
       },
       {
-        "id": 174,
+        "id": 178,
         "lesson_id": 90,
         "title": "Đệm hát (Virtual Drum/Piano)",
         "activity_type": "watch_answer",
@@ -5834,8 +5905,8 @@
         "sort_order": 2,
         "difficulty_stage": 1,
         "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào trống để gõ phách.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=amnhac-rhythm\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:54:31",
-        "updated_at": "2026-07-12T07:54:31"
+        "created_at": "2026-07-12T07:53:51",
+        "updated_at": "2026-07-12T07:53:51"
       }
     ],
     "lesson_assignments": [
@@ -6569,16 +6640,16 @@
       },
       {
         "id": 132,
-        "lesson_id": 90,
+        "lesson_id": 85,
         "class_id": 7,
-        "subject_id": 14,
+        "subject_id": 4,
         "assigned_by_teacher_id": 5,
         "target_type": "class",
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-12T07:54:42",
-        "updated_at": "2026-07-12T07:54:42"
+        "created_at": "2026-07-12T07:52:32",
+        "updated_at": "2026-07-12T07:52:32"
       }
     ],
     "lesson_assignment_students": [
@@ -7069,15 +7140,15 @@
         "id": 222,
         "assignment_id": 132,
         "student_id": 11,
-        "created_at": "2026-07-12T07:54:42",
-        "updated_at": "2026-07-12T07:54:42"
+        "created_at": "2026-07-12T07:52:32",
+        "updated_at": "2026-07-12T07:52:32"
       },
       {
         "id": 223,
         "assignment_id": 132,
         "student_id": 33,
-        "created_at": "2026-07-12T07:54:42",
-        "updated_at": "2026-07-12T07:54:42"
+        "created_at": "2026-07-12T07:52:32",
+        "updated_at": "2026-07-12T07:52:32"
       }
     ],
     "student_lesson_progress": [
@@ -8128,8 +8199,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-12T07:54:42",
-        "updated_at": "2026-07-12T07:54:42"
+        "created_at": "2026-07-12T07:52:32",
+        "updated_at": "2026-07-12T07:52:32"
       },
       {
         "id": 223,
@@ -8143,8 +8214,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-12T07:54:42",
-        "updated_at": "2026-07-12T07:54:42"
+        "created_at": "2026-07-12T07:52:32",
+        "updated_at": "2026-07-12T07:52:32"
       }
     ]
   }
