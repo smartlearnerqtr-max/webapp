@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:41:00+00:00",
+  "exported_at": "2026-07-12T07:41:02+00:00",
   "tables": {
     "subjects": [
       {
@@ -5692,6 +5692,20 @@
         "config_json": "{\"prompt\":\"Đọc đoạn văn sau và chọn hình ảnh phù hợp nhất:\\n\\n\\\"Mỗi sáng, bạn Mai giúp mẹ dọn bàn ăn. Sau đó, bạn Mai và mẹ cùng nhau ăn sáng với bánh mì và sữa. Bữa sáng thật ngon và vui vẻ!\\\"\",\"correct\":\"card1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"card1\",\"label\":\"Ăn sáng\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"card2\",\"label\":\"Chơi đồ chơi\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"card3\",\"label\":\"Đọc sách\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi\"}",
         "created_at": "2026-07-12T07:41:00",
         "updated_at": "2026-07-12T07:41:00"
+      },
+      {
+        "id": 169,
+        "lesson_id": 86,
+        "title": "Xem và Trả lời: Giúp đỡ bạn bè",
+        "activity_type": "watch_answer",
+        "instruction_text": "Học sinh xem video và trả lời câu hỏi về cách thể hiện sự giúp đỡ và chia sẻ với bạn bè.",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Con hãy xem video về bạn nhỏ này và cho cô biết bạn ấy đã làm gì để giúp đỡ bạn của mình nhé!\",\"answer_mode\":\"text\",\"expected_answer\":\"Bạn nhỏ đã chia sẻ đồ chơi với bạn.\",\"accepted_answers\":[\"Bạn ấy chia sẻ đồ chơi.\",\"Chia sẻ đồ chơi.\",\"Bạn ấy cho bạn mượn đồ chơi.\",\"Bạn ấy chơi chung đồ chơi với bạn.\",\"Bạn nhỏ đã chia sẻ đồ chơi với bạn khác.\"]}",
+        "created_at": "2026-07-12T07:41:02",
+        "updated_at": "2026-07-12T07:41:02"
       }
     ],
     "lesson_assignments": [
