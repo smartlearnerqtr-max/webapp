@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:35:50+00:00",
+  "exported_at": "2026-07-12T07:35:52+00:00",
   "tables": {
     "subjects": [
       {
@@ -5534,6 +5534,20 @@
         "config_json": "{\"prompt\":\"Chọn màu và tô kín vùng tranh theo mảng rõ ràng.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=mythuat-fill\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:35:50",
         "updated_at": "2026-07-12T07:35:50"
+      },
+      {
+        "id": 162,
+        "lesson_id": 82,
+        "title": "Thiết kế thiệp điện tử",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực thiết kế và tư duy bố cục",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Kéo sticker để thiết kế thiệp điện tử.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=mythuat-card\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:35:52",
+        "updated_at": "2026-07-12T07:35:52"
       }
     ],
     "lesson_assignments": [
