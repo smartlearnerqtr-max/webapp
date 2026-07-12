@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:36:18+00:00",
+  "exported_at": "2026-07-12T07:36:24+00:00",
   "tables": {
     "subjects": [
       {
@@ -5563,6 +5563,20 @@
         "config_json": "{\"prompt\":\"Kéo sticker để thiết kế thiệp điện tử.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=mythuat-card\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:35:52",
         "updated_at": "2026-07-12T07:35:52"
+      },
+      {
+        "id": 163,
+        "lesson_id": 83,
+        "title": "Flashcard lật mở",
+        "activity_type": "watch_answer",
+        "instruction_text": "Hiểu biết di sản văn hóa địa phương",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Chạm để lật flashcard địa danh và đặc sản Đồng Nai.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=dia-phuong-flashcard\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:36:24",
+        "updated_at": "2026-07-12T07:36:24"
       }
     ],
     "lesson_assignments": [
