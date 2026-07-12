@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:34:45+00:00",
+  "exported_at": "2026-07-12T07:34:49+00:00",
   "tables": {
     "subjects": [
       {
@@ -5749,6 +5749,20 @@
         "config_json": "{\"prompt\":\"Đâu là tư thế chạy giúp em không bị đau lưng?\",\"choices\":[\"run-correct-card\",\"run-wrong-card\"],\"correct\":\"run-correct-card\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"run-correct-card\",\"label\":\"Chạy đúng tư thế\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=run-correct-card\",\"media_kind\":\"video\"},{\"id\":\"run-wrong-card\",\"label\":\"Chạy sai tư thế\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=run-wrong-card\",\"media_kind\":\"video\"}],\"audio_text\":\"Đâu là tư thế chạy giúp em không bị đau lưng?\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-12T07:34:45",
         "updated_at": "2026-07-12T07:34:45"
+      },
+      {
+        "id": 172,
+        "lesson_id": 87,
+        "title": "AR Camera - Tập theo nhạc",
+        "activity_type": "watch_answer",
+        "instruction_text": "Vận động thô và phối hợp đa giác quan",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 1,
+        "config_json": "{\"prompt\":\"Chạm hoặc vung tay để làm vỡ các vòng tròn ảo theo nhịp.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdtc-ar\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T07:34:49",
+        "updated_at": "2026-07-12T07:34:49"
       }
     ],
     "lesson_assignments": [
