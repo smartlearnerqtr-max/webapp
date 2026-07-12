@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T14:53:46+00:00",
+  "exported_at": "2026-07-12T14:53:49+00:00",
   "tables": {
     "subjects": [
       {
@@ -6056,6 +6056,20 @@
         "config_json": "{\"prompt\":\"Kéo từng đồ vật vào đúng nhóm hình học của nó.\",\"items\":[\"Kim tự tháp\",\"Cái lều\",\"Tủ lạnh\",\"Hộp sữa\"],\"targets\":[\"Hình chóp\",\"Hình lăng trụ\"],\"visual_style\":\"shape_3d\"}",
         "created_at": "2026-07-12T14:53:46",
         "updated_at": "2026-07-12T14:53:46"
+      },
+      {
+        "id": 185,
+        "lesson_id": 93,
+        "title": "Mô phỏng mua bán",
+        "activity_type": "watch_answer",
+        "instruction_text": "Vận dụng toán học vào đời sống",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Đưa đủ 4 xu vào máy tính tiền để mua 2 cái kẹo.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=toan-coins\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-12T14:53:49",
+        "updated_at": "2026-07-12T14:53:49"
       }
     ],
     "lesson_assignments": [
