@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T07:35:30+00:00",
+  "exported_at": "2026-07-12T07:35:47+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$jFVx7IAmXBtIswU3$2123e46a87e5cee7000e0be53cd9f3ea023472cf3d3de4c3f43c5686b15a9ad1",
+        "password_hash": "pbkdf2:sha256:1000000$AoBrH0tt5mr9WT4Q$740c9c8d8c0ee61ffa73ee13ee0ee10399d99b41b6788328866f1d2b895c2196",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-12T07:33:48.971665"
+        "updated_at": "2026-07-12T07:35:29.919658"
       },
       {
         "id": 18,
@@ -3599,57 +3599,12 @@
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
-        "is_archived": true,
+        "is_archived": false,
         "created_at": "2026-07-12T07:29:50",
-        "updated_at": "2026-07-12T07:30:27.609434"
+        "updated_at": "2026-07-12T07:29:50"
       },
       {
         "id": 80,
-        "created_by_teacher_id": 5,
-        "subject_id": 9,
-        "class_id": 7,
-        "title": "Mức nhẹ - Châu lục và Phát kiến địa lí",
-        "description": "Định vị địa lý trên bản đồ 3D và tìm hiểu các mốc lịch sử thám hiểm.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-12T07:29:53",
-        "updated_at": "2026-07-12T07:30:36.626166"
-      },
-      {
-        "id": 81,
-        "created_by_teacher_id": 5,
-        "subject_id": 9,
-        "class_id": 7,
-        "title": "Mức nhẹ - Châu lục và Phát kiến địa lí",
-        "description": "Định vị địa lý trên bản đồ 3D và tìm hiểu các mốc lịch sử thám hiểm.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-12T07:29:57",
-        "updated_at": "2026-07-12T07:30:40.909944"
-      },
-      {
-        "id": 82,
-        "created_by_teacher_id": 5,
-        "subject_id": 9,
-        "class_id": 7,
-        "title": "Mức nhẹ - Châu lục và Phát kiến địa lí",
-        "description": "Định vị địa lý trên bản đồ 3D và tìm hiểu các mốc lịch sử thám hiểm.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-12T07:30:09",
-        "updated_at": "2026-07-12T07:30:09"
-      },
-      {
-        "id": 83,
         "created_by_teacher_id": 5,
         "subject_id": 10,
         "class_id": 7,
@@ -3660,11 +3615,11 @@
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-12T07:31:02",
-        "updated_at": "2026-07-12T07:31:02"
+        "created_at": "2026-07-12T07:32:51",
+        "updated_at": "2026-07-12T07:32:51"
       },
       {
-        "id": 84,
+        "id": 81,
         "created_by_teacher_id": 5,
         "subject_id": 11,
         "class_id": 7,
@@ -3675,68 +3630,23 @@
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-12T07:31:40",
-        "updated_at": "2026-07-12T07:31:40"
+        "created_at": "2026-07-12T07:33:28",
+        "updated_at": "2026-07-12T07:33:28"
       },
       {
-        "id": 85,
+        "id": 82,
         "created_by_teacher_id": 5,
-        "subject_id": 12,
+        "subject_id": 15,
         "class_id": 7,
-        "title": "Mức nhẹ - Phần mềm Bảng tính và Trình chiếu",
-        "description": "Làm quen với các thao tác cơ bản trong Excel và PowerPoint qua mô phỏng.",
+        "title": "Mức nhẹ - Màu sắc, Bố cục và Tạo hình 3D",
+        "description": "Thiết kế các sản phẩm mĩ thuật số với bố cục và màu sắc hài hòa.",
         "primary_level": "nhe",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-12T07:34:04",
-        "updated_at": "2026-07-12T07:34:04"
-      },
-      {
-        "id": 86,
-        "created_by_teacher_id": 5,
-        "subject_id": 12,
-        "class_id": 7,
-        "title": "Mức nhẹ - Phần mềm Bảng tính và Trình chiếu",
-        "description": "Làm quen với các thao tác cơ bản trong Excel và PowerPoint qua mô phỏng.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-12T07:34:08",
-        "updated_at": "2026-07-12T07:34:26.192967"
-      },
-      {
-        "id": 87,
-        "created_by_teacher_id": 5,
-        "subject_id": 13,
-        "class_id": 7,
-        "title": "Mức nhẹ - Thể dục nhịp điệu và Chạy cự li ngắn",
-        "description": "Luyện tập các động tác thể dục theo nhịp điệu và tư thế chạy chuyên nghiệp.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-12T07:34:42",
-        "updated_at": "2026-07-12T07:34:42"
-      },
-      {
-        "id": 88,
-        "created_by_teacher_id": 5,
-        "subject_id": 14,
-        "class_id": 7,
-        "title": "Mức nhẹ - Nhịp điệu và Nhạc cụ dân tộc",
-        "description": "Khám phá âm thanh của các nhạc cụ truyền thống và luyện tập giữ nhịp.",
-        "primary_level": "nhe",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-12T07:35:18",
-        "updated_at": "2026-07-12T07:35:18"
+        "created_at": "2026-07-12T07:35:47",
+        "updated_at": "2026-07-12T07:35:47"
       }
     ],
     "parent_daily_reports": [],
@@ -5558,90 +5468,6 @@
       {
         "id": 157,
         "lesson_id": 80,
-        "title": "Định vị bản đồ",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng sử dụng bản đồ số",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:29:59",
-        "updated_at": "2026-07-12T07:29:59"
-      },
-      {
-        "id": 158,
-        "lesson_id": 81,
-        "title": "Định vị bản đồ",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng sử dụng bản đồ số",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:30:03",
-        "updated_at": "2026-07-12T07:30:03"
-      },
-      {
-        "id": 159,
-        "lesson_id": 80,
-        "title": "Dòng thời gian (Timeline)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực tư duy lịch sử theo trình tự",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-timeline\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:30:05",
-        "updated_at": "2026-07-12T07:30:05"
-      },
-      {
-        "id": 160,
-        "lesson_id": 81,
-        "title": "Dòng thời gian (Timeline)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực tư duy lịch sử theo trình tự",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-timeline\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:30:12",
-        "updated_at": "2026-07-12T07:30:12"
-      },
-      {
-        "id": 161,
-        "lesson_id": 82,
-        "title": "Định vị bản đồ",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng sử dụng bản đồ số",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Xoay bản đồ và chạm vào Châu Mỹ.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:30:14",
-        "updated_at": "2026-07-12T07:30:14"
-      },
-      {
-        "id": 162,
-        "lesson_id": 82,
-        "title": "Dòng thời gian (Timeline)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực tư duy lịch sử theo trình tự",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Sắp xếp các mốc phát kiến địa lí theo dòng thời gian.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=lsdl-timeline\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:30:17",
-        "updated_at": "2026-07-12T07:30:17"
-      },
-      {
-        "id": 163,
-        "lesson_id": 83,
         "title": "Sắp xếp quy trình",
         "activity_type": "watch_answer",
         "instruction_text": "Tư duy quy trình công nghệ",
@@ -5650,12 +5476,12 @@
         "sort_order": 1,
         "difficulty_stage": 1,
         "config_json": "{\"prompt\":\"Sắp xếp đúng quy trình trồng trọt.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=congnghe-steps\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:31:04",
-        "updated_at": "2026-07-12T07:31:04"
+        "created_at": "2026-07-12T07:32:54",
+        "updated_at": "2026-07-12T07:32:54"
       },
       {
-        "id": 164,
-        "lesson_id": 83,
+        "id": 158,
+        "lesson_id": 80,
         "title": "Phân loại nông nghiệp",
         "activity_type": "watch_answer",
         "instruction_text": "Kỹ năng phân tích và nhóm sự vật",
@@ -5664,12 +5490,12 @@
         "sort_order": 2,
         "difficulty_stage": 1,
         "config_json": "{\"prompt\":\"Phân loại vật nuôi vào đúng nhóm nông nghiệp.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=congnghe-animals\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:31:06",
-        "updated_at": "2026-07-12T07:31:06"
+        "created_at": "2026-07-12T07:32:56",
+        "updated_at": "2026-07-12T07:32:56"
       },
       {
-        "id": 165,
-        "lesson_id": 84,
+        "id": 159,
+        "lesson_id": 81,
         "title": "Video tình huống (A/B)",
         "activity_type": "multiple_choice",
         "instruction_text": "Năng lực giải quyết vấn đề xã hội",
@@ -5677,13 +5503,13 @@
         "is_required": true,
         "sort_order": 1,
         "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Nếu thấy bạn bị bắt nạt, em nên làm gì?\",\"choices\":[\"Báo cô giáo\",\"Đứng xem\"],\"correct\":\"Báo cô giáo\",\"image_cards\":[{\"id\":\"card-fih8o0\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-7opizp\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdcd-bullying\"}",
-        "created_at": "2026-07-12T07:31:48",
-        "updated_at": "2026-07-12T07:31:48"
+        "config_json": "{\"prompt\":\"Nếu thấy bạn bị bắt nạt, em nên làm gì?\",\"choices\":[\"Báo cô giáo\",\"Đứng xem\"],\"correct\":\"Báo cô giáo\",\"image_cards\":[{\"id\":\"card-6iyiko\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-vmjwg5\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdcd-bullying\"}",
+        "created_at": "2026-07-12T07:33:31",
+        "updated_at": "2026-07-12T07:33:31"
       },
       {
-        "id": 166,
-        "lesson_id": 84,
+        "id": 160,
+        "lesson_id": 81,
         "title": "Quản lý tài chính ảo",
         "activity_type": "watch_answer",
         "instruction_text": "Năng lực quản lý bản thân và tài chính",
@@ -5692,120 +5518,8 @@
         "sort_order": 2,
         "difficulty_stage": 1,
         "config_json": "{\"prompt\":\"Phân bổ tiền vào tiết kiệm và mua sắm sao cho hợp lí.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdcd-budget\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:31:54",
-        "updated_at": "2026-07-12T07:31:54"
-      },
-      {
-        "id": 167,
-        "lesson_id": 85,
-        "title": "Mô phỏng Excel",
-        "activity_type": "watch_answer",
-        "instruction_text": "Làm quen với dữ liệu số",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Kéo hàm SUM vào bảng tính để tính tổng tiền.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=tinhoc-excel\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:34:06",
-        "updated_at": "2026-07-12T07:34:06"
-      },
-      {
-        "id": 168,
-        "lesson_id": 85,
-        "title": "Tạo Slide nhanh (Templates)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng thiết kế sản phẩm số cơ bản",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Chọn template và hoàn thiện một slide nhanh.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=tinhoc-slide\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:34:11",
-        "updated_at": "2026-07-12T07:34:11"
-      },
-      {
-        "id": 169,
-        "lesson_id": 86,
-        "title": "Mô phỏng Excel",
-        "activity_type": "watch_answer",
-        "instruction_text": "Làm quen với dữ liệu số",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Kéo hàm SUM vào bảng tính để tính tổng tiền.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=tinhoc-excel\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:34:14",
-        "updated_at": "2026-07-12T07:34:14"
-      },
-      {
-        "id": 170,
-        "lesson_id": 86,
-        "title": "Tạo Slide nhanh (Templates)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng thiết kế sản phẩm số cơ bản",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Chọn template và hoàn thiện một slide nhanh.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=tinhoc-slide\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:34:16",
-        "updated_at": "2026-07-12T07:34:16"
-      },
-      {
-        "id": 171,
-        "lesson_id": 87,
-        "title": "Chọn tư thế chạy đúng",
-        "activity_type": "multiple_choice",
-        "instruction_text": "Nhận thức vận động",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Đâu là tư thế chạy giúp em không bị đau lưng?\",\"choices\":[\"run-correct-card\",\"run-wrong-card\"],\"correct\":\"run-correct-card\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"run-correct-card\",\"label\":\"Chạy đúng tư thế\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=run-correct-card\",\"media_kind\":\"video\"},{\"id\":\"run-wrong-card\",\"label\":\"Chạy sai tư thế\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=run-wrong-card\",\"media_kind\":\"video\"}],\"audio_text\":\"Đâu là tư thế chạy giúp em không bị đau lưng?\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-12T07:34:45",
-        "updated_at": "2026-07-12T07:34:45"
-      },
-      {
-        "id": 172,
-        "lesson_id": 87,
-        "title": "AR Camera - Tập theo nhạc",
-        "activity_type": "watch_answer",
-        "instruction_text": "Vận động thô và phối hợp đa giác quan",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Chạm hoặc vung tay để làm vỡ các vòng tròn ảo theo nhịp.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=gdtc-ar\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:34:49",
-        "updated_at": "2026-07-12T07:34:49"
-      },
-      {
-        "id": 173,
-        "lesson_id": 88,
-        "title": "Nghe và đoán nhạc cụ",
-        "activity_type": "listen_choose",
-        "instruction_text": "Năng lực cảm thụ và nhận diện âm thanh",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"flute\",\"label\":\"Sáo trúc\",\"media_url\":\"/lesson-media/nhe/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"},{\"id\":\"dan-bau\",\"label\":\"Đàn bầu\",\"media_url\":\"/lesson-media/nhe/photos/dan-bau.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nhe/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-12T07:35:20",
-        "updated_at": "2026-07-12T07:35:20"
-      },
-      {
-        "id": 174,
-        "lesson_id": 88,
-        "title": "Đệm hát (Virtual Drum/Piano)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng giữ nhịp điệu đa dạng",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 1,
-        "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào trống để gõ phách.\",\"media_url\":\"/lesson-media/nhe/light-lab.html?activity=amnhac-rhythm\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-12T07:35:22",
-        "updated_at": "2026-07-12T07:35:22"
+        "created_at": "2026-07-12T07:33:33",
+        "updated_at": "2026-07-12T07:33:33"
       }
     ],
     "lesson_assignments": [
@@ -6448,7 +6162,7 @@
       },
       {
         "id": 125,
-        "lesson_id": 83,
+        "lesson_id": 80,
         "class_id": 7,
         "subject_id": 10,
         "assigned_by_teacher_id": 5,
@@ -6456,34 +6170,21 @@
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-12T07:31:20",
-        "updated_at": "2026-07-12T07:31:20"
+        "created_at": "2026-07-12T07:33:05",
+        "updated_at": "2026-07-12T07:33:05"
       },
       {
         "id": 126,
-        "lesson_id": 87,
+        "lesson_id": 81,
         "class_id": 7,
-        "subject_id": 13,
+        "subject_id": 11,
         "assigned_by_teacher_id": 5,
         "target_type": "class",
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-12T07:35:00",
-        "updated_at": "2026-07-12T07:35:00"
-      },
-      {
-        "id": 127,
-        "lesson_id": 88,
-        "class_id": 7,
-        "subject_id": 14,
-        "assigned_by_teacher_id": 5,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-12T07:35:30",
-        "updated_at": "2026-07-12T07:35:30"
+        "created_at": "2026-07-12T07:33:41",
+        "updated_at": "2026-07-12T07:33:41"
       }
     ],
     "lesson_assignment_students": [
@@ -6876,43 +6577,29 @@
         "id": 208,
         "assignment_id": 125,
         "student_id": 11,
-        "created_at": "2026-07-12T07:31:20",
-        "updated_at": "2026-07-12T07:31:20"
+        "created_at": "2026-07-12T07:33:05",
+        "updated_at": "2026-07-12T07:33:05"
       },
       {
         "id": 209,
         "assignment_id": 125,
         "student_id": 33,
-        "created_at": "2026-07-12T07:31:20",
-        "updated_at": "2026-07-12T07:31:20"
+        "created_at": "2026-07-12T07:33:05",
+        "updated_at": "2026-07-12T07:33:05"
       },
       {
         "id": 210,
         "assignment_id": 126,
         "student_id": 11,
-        "created_at": "2026-07-12T07:35:00",
-        "updated_at": "2026-07-12T07:35:00"
+        "created_at": "2026-07-12T07:33:41",
+        "updated_at": "2026-07-12T07:33:41"
       },
       {
         "id": 211,
         "assignment_id": 126,
         "student_id": 33,
-        "created_at": "2026-07-12T07:35:00",
-        "updated_at": "2026-07-12T07:35:00"
-      },
-      {
-        "id": 212,
-        "assignment_id": 127,
-        "student_id": 11,
-        "created_at": "2026-07-12T07:35:30",
-        "updated_at": "2026-07-12T07:35:30"
-      },
-      {
-        "id": 213,
-        "assignment_id": 127,
-        "student_id": 33,
-        "created_at": "2026-07-12T07:35:30",
-        "updated_at": "2026-07-12T07:35:30"
+        "created_at": "2026-07-12T07:33:41",
+        "updated_at": "2026-07-12T07:33:41"
       }
     ],
     "student_lesson_progress": [
@@ -7753,8 +7440,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-12T07:31:20",
-        "updated_at": "2026-07-12T07:31:20"
+        "created_at": "2026-07-12T07:33:05",
+        "updated_at": "2026-07-12T07:33:05"
       },
       {
         "id": 209,
@@ -7768,8 +7455,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-12T07:31:20",
-        "updated_at": "2026-07-12T07:31:20"
+        "created_at": "2026-07-12T07:33:05",
+        "updated_at": "2026-07-12T07:33:05"
       },
       {
         "id": 210,
@@ -7783,8 +7470,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-12T07:35:00",
-        "updated_at": "2026-07-12T07:35:00"
+        "created_at": "2026-07-12T07:33:41",
+        "updated_at": "2026-07-12T07:33:41"
       },
       {
         "id": 211,
@@ -7798,38 +7485,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-12T07:35:00",
-        "updated_at": "2026-07-12T07:35:00"
-      },
-      {
-        "id": 212,
-        "assignment_id": 127,
-        "student_id": 11,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-12T07:35:30",
-        "updated_at": "2026-07-12T07:35:30"
-      },
-      {
-        "id": 213,
-        "assignment_id": 127,
-        "student_id": 33,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-12T07:35:30",
-        "updated_at": "2026-07-12T07:35:30"
+        "created_at": "2026-07-12T07:33:41",
+        "updated_at": "2026-07-12T07:33:41"
       }
     ]
   }
