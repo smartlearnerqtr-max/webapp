@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T14:52:40+00:00",
+  "exported_at": "2026-07-12T14:52:43+00:00",
   "tables": {
     "subjects": [
       {
@@ -5999,6 +5999,20 @@
         "config_json": "{\"prompt\":\"Hôm nay, bạn An thấy bạn Bình đang buồn vì làm mất bút chì. An đã lấy một cây bút chì khác của mình và đưa cho Bình mượn.\\n\\nBạn An đã làm gì để giúp bạn Bình?\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T07:56:55",
         "updated_at": "2026-07-12T07:56:55.032510"
+      },
+      {
+        "id": 182,
+        "lesson_id": 92,
+        "title": "Listen and Choose",
+        "activity_type": "listen_choose",
+        "instruction_text": "Năng lực nghe hiểu từ vựng",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Nghe thật kỹ rồi chọn đúng phương tiện.\",\"correct\":\"bus\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"bus\",\"label\":\"Bus\",\"media_url\":\"/lesson-media/trung-binh/bus-card.svg\",\"media_kind\":\"image\"},{\"id\":\"bicycle\",\"label\":\"Bicycle\",\"media_url\":\"/lesson-media/trung-binh/bicycle-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Bus\",\"audio_lang\":\"en-US\"}",
+        "created_at": "2026-07-12T14:52:43",
+        "updated_at": "2026-07-12T14:52:43"
       }
     ],
     "lesson_assignments": [
