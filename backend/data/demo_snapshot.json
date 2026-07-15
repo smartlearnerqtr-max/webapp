@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:55:01+00:00",
+  "exported_at": "2026-07-15T14:55:04+00:00",
   "tables": {
     "subjects": [
       {
@@ -6515,6 +6515,20 @@
         "config_json": "{\"prompt\":\"Tập ưu tiên bỏ tiền tiết kiệm trước rồi mới chọn món muốn mua.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=hdtn-budget\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T14:51:57",
         "updated_at": "2026-07-15T14:51:57"
+      },
+      {
+        "id": 206,
+        "lesson_id": 104,
+        "title": "Chọn cách giao tiếp đúng",
+        "activity_type": "image_choice",
+        "instruction_text": "Học sinh nhận biết và chọn được hình ảnh thể hiện hành vi giao tiếp tích cực, lịch sự.",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Khi con muốn nói chuyện với bạn trong lớp, con sẽ làm gì để bạn chú ý?\",\"correct\":\"1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"1\",\"label\":\"Giơ tay và chờ\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"2\",\"label\":\"La lớn để bạn nghe\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"3\",\"label\":\"Đẩy nhẹ bạn\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi\"}",
+        "created_at": "2026-07-15T14:55:04",
+        "updated_at": "2026-07-15T14:55:04"
       }
     ],
     "lesson_assignments": [
