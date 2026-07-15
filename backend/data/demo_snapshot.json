@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:35:48+00:00",
+  "exported_at": "2026-07-15T15:36:04+00:00",
   "tables": {
     "subjects": [
       {
@@ -4273,6 +4273,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T15:35:34",
         "updated_at": "2026-07-15T15:35:34"
+      },
+      {
+        "id": 123,
+        "created_by_teacher_id": 8,
+        "subject_id": 14,
+        "class_id": 10,
+        "title": "Nhận biết nhịp điệu",
+        "description": "Cảm thụ âm thanh và nhận diện các loại nhạc cụ phổ biến.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T15:36:04",
+        "updated_at": "2026-07-15T15:36:04"
       }
     ],
     "parent_daily_reports": [],
