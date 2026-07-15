@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:44:12+00:00",
+  "exported_at": "2026-07-15T14:44:15+00:00",
   "tables": {
     "subjects": [
       {
@@ -6257,6 +6257,20 @@
         "config_json": "{\"prompt\":\"Nối đường đi từ Châu Âu sang Châu Á cho con thuyền chạy qua.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=lsdl-route\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T14:43:40",
         "updated_at": "2026-07-15T14:43:40"
+      },
+      {
+        "id": 194,
+        "lesson_id": 98,
+        "title": "Nhận diện nông cụ",
+        "activity_type": "image_choice",
+        "instruction_text": "Kỹ năng công nghệ nông nghiệp",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Vật nào dùng để đào đất?\",\"correct\":\"shovel\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"hoe\",\"label\":\"Cái cuốc\",\"media_url\":\"/lesson-media/trung-binh/hoe-card.svg\",\"media_kind\":\"image\"},{\"id\":\"shovel\",\"label\":\"Cái xẻng\",\"media_url\":\"/lesson-media/trung-binh/shovel-card.svg\",\"media_kind\":\"image\"},{\"id\":\"knife\",\"label\":\"Con dao\",\"media_url\":\"/lesson-media/trung-binh/knife-card.svg\",\"media_kind\":\"image\"},{\"id\":\"bowl\",\"label\":\"Cái chén\",\"media_url\":\"/lesson-media/trung-binh/bowl-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Cái gì dùng để đào đất?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T14:44:15",
+        "updated_at": "2026-07-15T14:44:15"
       }
     ],
     "lesson_assignments": [
