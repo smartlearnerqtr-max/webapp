@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:08:34+00:00",
+  "exported_at": "2026-07-15T16:08:36+00:00",
   "tables": {
     "subjects": [
       {
@@ -8071,6 +8071,20 @@
         "config_json": "{\"prompt\":\"Sau khi xem video, con hãy cho biết: Khi bạn đang nói, con nên làm gì để thể hiện sự tôn trọng?\",\"answer_mode\":\"text\",\"expected_answer\":\"Lắng nghe bạn nói và nhìn vào mắt bạn.\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T16:05:12",
         "updated_at": "2026-07-15T16:05:12"
+      },
+      {
+        "id": 269,
+        "lesson_id": 142,
+        "title": "Chạm đúng nhân vật",
+        "activity_type": "image_choice",
+        "instruction_text": "Năng lực nhận diện hình ảnh",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Ai là cô Tấm?\",\"correct\":\"co-tam\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"co-tam\",\"label\":\"Cô Tấm\",\"media_url\":\"/lesson-media/nang/co-tam-card.svg\",\"media_kind\":\"image\"},{\"id\":\"con-cho\",\"label\":\"Con chó\",\"media_url\":\"/lesson-media/nang/con-cho-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Ai là cô Tấm?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T16:08:36",
+        "updated_at": "2026-07-15T16:08:36"
       }
     ],
     "lesson_assignments": [
