@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:13:07+00:00",
+  "exported_at": "2026-07-15T16:13:09+00:00",
   "tables": {
     "subjects": [
       {
@@ -8300,6 +8300,20 @@
         "config_json": "{\"prompt\":\"Canh đúng nhịp rồi gõ vào mặt trống khi nốt nhạc chạm đích.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=amnhac-rhythm\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T16:13:07",
         "updated_at": "2026-07-15T16:13:07"
+      },
+      {
+        "id": 280,
+        "lesson_id": 147,
+        "title": "Nhận diện nhạc cụ",
+        "activity_type": "listen_choose",
+        "instruction_text": "Phân biệt âm thanh",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"flute\",\"label\":\"Sáo trúc\",\"media_url\":\"/lesson-media/nang/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"},{\"id\":\"dan-bau\",\"label\":\"Đàn bầu\",\"media_url\":\"/lesson-media/nang/photos/dan-bau.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nang/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T16:13:09",
+        "updated_at": "2026-07-15T16:13:09"
       }
     ],
     "lesson_assignments": [
