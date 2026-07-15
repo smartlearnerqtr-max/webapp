@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:11:14+00:00",
+  "exported_at": "2026-07-15T16:11:17+00:00",
   "tables": {
     "subjects": [
       {
@@ -8439,6 +8439,20 @@
         "config_json": "{\"prompt\":\"Bạn vứt rác ra sân. Em chọn mặt cười hay mặt mếu?\",\"choices\":[\"😊 Mặt cười\",\"☹️ Mặt mếu\"],\"correct\":\"☹️ Mặt mếu\",\"image_cards\":[{\"id\":\"card-qn0iu1\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-jc16zp\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdcd-litter\",\"media_kind\":\"video\"}",
         "created_at": "2026-07-15T16:11:14",
         "updated_at": "2026-07-15T16:11:14"
+      },
+      {
+        "id": 292,
+        "lesson_id": 152,
+        "title": "Thực hành chào hỏi",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng giao tiếp xã hội",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Nhìn cô giáo, bấm micro và nói “ạ” để hoàn thành lời chào.\",\"media_url\":\"/lesson-media/nang/teacher-greeting-card.svg\",\"media_kind\":\"image\",\"answer_mode\":\"voice_ai_grade\",\"expected_answer\":\"ạ\",\"accepted_answers\":[\"a\",\"ạ ạ\",\"con chào cô ạ\"]}",
+        "created_at": "2026-07-15T16:11:17",
+        "updated_at": "2026-07-15T16:11:17"
       }
     ],
     "lesson_assignments": [
