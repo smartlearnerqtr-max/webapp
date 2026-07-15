@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:33:38+00:00",
+  "exported_at": "2026-07-15T15:33:41+00:00",
   "tables": {
     "subjects": [
       {
@@ -7035,6 +7035,20 @@
         "config_json": "{\"prompt\":\"Kéo con chó vào nhóm vật sống và cái ghế vào nhóm vật không sống.\",\"items\":[\"Con chó\",\"Cái ghế\",\"Cây xanh\",\"Bàn học\"],\"targets\":[\"Vật sống\",\"Vật không sống\"]}",
         "created_at": "2026-07-15T15:31:32",
         "updated_at": "2026-07-15T15:31:32"
+      },
+      {
+        "id": 228,
+        "lesson_id": 117,
+        "title": "Chọn mặt Cười/Mếu",
+        "activity_type": "multiple_choice",
+        "instruction_text": "Nhận thức hành vi đúng sai",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Bạn vứt rác ra sân. Em chọn mặt cười hay mặt mếu?\",\"choices\":[\"😊 Mặt cười\",\"☹️ Mặt mếu\"],\"correct\":\"☹️ Mặt mếu\",\"image_cards\":[{\"id\":\"card-qlk0xi\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-p58gwt\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdcd-litter\",\"media_kind\":\"video\"}",
+        "created_at": "2026-07-15T15:33:40",
+        "updated_at": "2026-07-15T15:33:40"
       }
     ],
     "lesson_assignments": [
