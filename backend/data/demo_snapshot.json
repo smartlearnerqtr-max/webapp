@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:55:55+00:00",
+  "exported_at": "2026-07-15T15:55:57+00:00",
   "tables": {
     "subjects": [
       {
@@ -7908,6 +7908,20 @@
         "config_json": "{\"prompt\":\"Kéo con chó vào nhóm vật sống và cái ghế vào nhóm vật không sống.\",\"items\":[\"Con chó\",\"Cái ghế\",\"Cây xanh\",\"Bàn học\"],\"targets\":[\"Vật sống\",\"Vật không sống\"]}",
         "created_at": "2026-07-15T15:55:31",
         "updated_at": "2026-07-15T15:55:31"
+      },
+      {
+        "id": 268,
+        "lesson_id": 139,
+        "title": "Flashcard Âm thanh",
+        "activity_type": "listen_choose",
+        "instruction_text": "Năng lực ngôn ngữ cơ bản",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Nghe màu rồi chọn đúng thẻ.\",\"correct\":\"red\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"red\",\"label\":\"Red\",\"media_url\":\"/lesson-media/nang/red-card.svg\",\"media_kind\":\"image\"},{\"id\":\"blue\",\"label\":\"Blue\",\"media_url\":\"/lesson-media/nang/blue-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Red\",\"audio_lang\":\"en-US\"}",
+        "created_at": "2026-07-15T15:55:57",
+        "updated_at": "2026-07-15T15:55:57"
       }
     ],
     "lesson_assignments": [
