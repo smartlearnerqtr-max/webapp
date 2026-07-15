@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:11:32+00:00",
+  "exported_at": "2026-07-15T15:24:04+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$RVZK8t7S2D0WMSeV$ff9163eb6f345908dc7f57f215a314e5d3cbaed81f5a0b37896bff39f0e663b5",
+        "password_hash": "pbkdf2:sha256:1000000$qyHaiBLk2gIDDG2g$5dd4b6c6bf3a0cfe61e0d8ff30286b1df5b605de9d16e82f4543c4615cd1bb3c",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-15T15:09:10.198761"
+        "updated_at": "2026-07-15T15:13:48.692020"
       },
       {
         "id": 18,
@@ -4153,6 +4153,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T15:11:15",
         "updated_at": "2026-07-15T15:11:15"
+      },
+      {
+        "id": 115,
+        "created_by_teacher_id": 7,
+        "subject_id": 4,
+        "class_id": 9,
+        "title": "Nhận diện và cất giữ đồ dùng cá nhân khi đến lớp",
+        "description": "Giúp học sinh khuyết tật trí tuệ mức độ nặng nhận biết được ba lô, bình nước của bản thân và thực hiện được hành động cất chúng vào đúng nơi quy định (tủ cá nhân/ngăn bàn) khi bước vào lớp học dưới sự hỗ trợ tối thiểu.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T15:24:04",
+        "updated_at": "2026-07-15T15:24:04"
       }
     ],
     "parent_daily_reports": [],
