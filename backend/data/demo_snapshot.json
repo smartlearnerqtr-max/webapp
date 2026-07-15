@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:31:26+00:00",
+  "exported_at": "2026-07-15T15:31:29+00:00",
   "tables": {
     "subjects": [
       {
@@ -6992,6 +6992,20 @@
         "config_json": "{\"prompt\":\"Bấm vào thẻ để app nói thay em câu em muốn.\",\"cards\":[\"Con muốn uống nước\",\"Con muốn ăn cơm\",\"Con mệt\"],\"image_cards\":[{\"id\":\"aac-food\",\"label\":\"Cơm\",\"media_url\":\"/lesson-media/nang/aac-com.svg\",\"media_kind\":\"image\"},{\"id\":\"aac-play\",\"label\":\"Chơi\",\"media_url\":\"/lesson-media/nang/aac-choi.svg\",\"media_kind\":\"image\"}]}",
         "created_at": "2026-07-15T15:11:21",
         "updated_at": "2026-07-15T15:11:21"
+      },
+      {
+        "id": 226,
+        "lesson_id": 116,
+        "title": "Ghép bộ phận",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực khoa học, nhận biết bản thân",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Chạm để đặt mắt, mũi, miệng vào đúng vị trí trên khuôn mặt.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=khtn-face\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T15:31:29",
+        "updated_at": "2026-07-15T15:31:29"
       }
     ],
     "lesson_assignments": [
