@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:32:36+00:00",
+  "exported_at": "2026-07-15T15:32:38+00:00",
   "tables": {
     "subjects": [
       {
@@ -7146,6 +7146,20 @@
         "config_json": "{\"prompt\":\"Mưa rồi, lấy gì đây?\",\"correct\":\"umbrella\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"umbrella\",\"label\":\"Cái ô\",\"media_url\":\"/lesson-media/nang/umbrella-card.svg\",\"media_kind\":\"image\"},{\"id\":\"sunglasses\",\"label\":\"Kính râm\",\"media_url\":\"/lesson-media/nang/sunglasses-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Mưa rồi, lấy gì đây?\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-15T15:32:36",
         "updated_at": "2026-07-15T15:32:36"
+      },
+      {
+        "id": 235,
+        "lesson_id": 119,
+        "title": "Ghép đúng đường đi",
+        "activity_type": "drag_drop",
+        "instruction_text": "Nhận diện không gian",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Kéo thuyền xuống nước và kéo ô tô lên đường bộ.\",\"items\":[\"Thuyền\",\"Ô tô\",\"Xe máy\",\"Ca nô\"],\"targets\":[\"Đường thủy\",\"Đường bộ\"]}",
+        "created_at": "2026-07-15T15:32:38",
+        "updated_at": "2026-07-15T15:32:38"
       }
     ],
     "lesson_assignments": [
