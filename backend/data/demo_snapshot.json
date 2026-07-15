@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:57:36+00:00",
+  "exported_at": "2026-07-15T15:57:39+00:00",
   "tables": {
     "subjects": [
       {
@@ -7806,6 +7806,20 @@
         "config_json": "{\"prompt\":\"Xếp bát to ở kệ dưới và bát nhỏ ở kệ trên.\",\"items\":[\"Bát to\",\"Bát nhỏ\",\"Bát vừa\"],\"targets\":[\"Kệ dưới\",\"Kệ trên\"]}",
         "created_at": "2026-07-15T15:57:14",
         "updated_at": "2026-07-15T15:57:14"
+      },
+      {
+        "id": 259,
+        "lesson_id": 136,
+        "title": "Chọn mặt Cười/Mếu",
+        "activity_type": "multiple_choice",
+        "instruction_text": "Nhận thức hành vi đúng sai",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Bạn vứt rác ra sân. Em chọn mặt cười hay mặt mếu?\",\"choices\":[\"😊 Mặt cười\",\"☹️ Mặt mếu\"],\"correct\":\"☹️ Mặt mếu\",\"image_cards\":[{\"id\":\"card-kytddg\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-g7u4bs\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdcd-litter\",\"media_kind\":\"video\"}",
+        "created_at": "2026-07-15T15:57:39",
+        "updated_at": "2026-07-15T15:57:39"
       }
     ],
     "lesson_assignments": [
