@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:09:06+00:00",
+  "exported_at": "2026-07-15T16:09:13+00:00",
   "tables": {
     "subjects": [
       {
@@ -9366,6 +9366,19 @@
         "status": "active",
         "created_at": "2026-07-15T16:08:45",
         "updated_at": "2026-07-15T16:08:45"
+      },
+      {
+        "id": 170,
+        "lesson_id": 143,
+        "class_id": 13,
+        "subject_id": 3,
+        "assigned_by_teacher_id": 11,
+        "target_type": "class",
+        "due_at": null,
+        "required_completion_percent": 80,
+        "status": "active",
+        "created_at": "2026-07-15T16:09:13",
+        "updated_at": "2026-07-15T16:09:13"
       }
     ],
     "lesson_assignment_students": [
@@ -10243,6 +10256,20 @@
         "student_id": 32,
         "created_at": "2026-07-15T16:08:45",
         "updated_at": "2026-07-15T16:08:45"
+      },
+      {
+        "id": 278,
+        "assignment_id": 170,
+        "student_id": 17,
+        "created_at": "2026-07-15T16:09:13",
+        "updated_at": "2026-07-15T16:09:13"
+      },
+      {
+        "id": 279,
+        "assignment_id": 170,
+        "student_id": 32,
+        "created_at": "2026-07-15T16:09:13",
+        "updated_at": "2026-07-15T16:09:13"
       }
     ],
     "student_lesson_progress": [
@@ -12120,6 +12147,36 @@
         "completed_at": null,
         "created_at": "2026-07-15T16:08:45",
         "updated_at": "2026-07-15T16:08:45"
+      },
+      {
+        "id": 278,
+        "assignment_id": 170,
+        "student_id": 17,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-15T16:09:13",
+        "updated_at": "2026-07-15T16:09:13"
+      },
+      {
+        "id": 279,
+        "assignment_id": 170,
+        "student_id": 32,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-15T16:09:13",
+        "updated_at": "2026-07-15T16:09:13"
       }
     ]
   }
