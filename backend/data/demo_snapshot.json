@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:09:13+00:00",
+  "exported_at": "2026-07-15T16:09:29+00:00",
   "tables": {
     "subjects": [
       {
@@ -4656,6 +4656,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T16:09:01",
         "updated_at": "2026-07-15T16:09:01"
+      },
+      {
+        "id": 144,
+        "created_by_teacher_id": 11,
+        "subject_id": 7,
+        "class_id": 13,
+        "title": "Nhận biết Màu sắc (Red, Blue) và Khẩu lệnh (Stand up)",
+        "description": "Học tiếng Anh cơ bản qua màu sắc và các hành động bắt chước.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T16:09:29",
+        "updated_at": "2026-07-15T16:09:29"
       }
     ],
     "parent_daily_reports": [],
