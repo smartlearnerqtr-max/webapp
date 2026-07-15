@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:47:52+00:00",
+  "exported_at": "2026-07-15T14:47:54+00:00",
   "tables": {
     "subjects": [
       {
@@ -6443,6 +6443,20 @@
         "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"drum\",\"label\":\"Trống\",\"media_url\":\"/lesson-media/trung-binh/drum-card.svg\",\"media_kind\":\"image\"},{\"id\":\"flute\",\"label\":\"Sáo\",\"media_url\":\"/lesson-media/nhe/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nhe/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-15T14:47:52",
         "updated_at": "2026-07-15T14:47:52"
+      },
+      {
+        "id": 203,
+        "lesson_id": 102,
+        "title": "Trống ảo theo nhịp",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng giữ nhịp",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào mặt trống khi nốt nhạc chạm đích.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=amnhac-drum\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:47:54",
+        "updated_at": "2026-07-15T14:47:54"
       }
     ],
     "lesson_assignments": [
