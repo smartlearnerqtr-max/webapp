@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:14:17+00:00",
+  "exported_at": "2026-07-15T16:14:20+00:00",
   "tables": {
     "subjects": [
       {
@@ -8540,6 +8540,20 @@
         "config_json": "{\"prompt\":\"Xem thầy làm mẫu chậm rồi bắt chước động tác vươn vai, nhún gối theo nhịp.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdtc-warmup\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T16:12:18",
         "updated_at": "2026-07-15T16:12:18"
+      },
+      {
+        "id": 296,
+        "lesson_id": 155,
+        "title": "Flashcard Hình ảnh lớn",
+        "activity_type": "watch_answer",
+        "instruction_text": "Hiểu biết môi trường sống",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Chạm để lật thẻ và xem ruột quả bưởi Tân Triều.\",\"media_url\":\"/lesson-media/nang/photos/buoi.jpg\",\"media_kind\":\"image\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T16:14:20",
+        "updated_at": "2026-07-15T16:14:20"
       }
     ],
     "lesson_assignments": [
