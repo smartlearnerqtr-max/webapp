@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:59:28+00:00",
+  "exported_at": "2026-07-15T15:59:30+00:00",
   "tables": {
     "subjects": [
       {
@@ -8051,6 +8051,20 @@
         "config_json": "{\"prompt\":\"Xem thầy làm mẫu chậm rồi bắt chước động tác vươn vai, nhún gối theo nhịp.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdtc-warmup\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T15:59:28",
         "updated_at": "2026-07-15T15:59:28"
+      },
+      {
+        "id": 275,
+        "lesson_id": 142,
+        "title": "AR Camera (Thực tế ảo)",
+        "activity_type": "watch_answer",
+        "instruction_text": "Vận động thô",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Đứng trước màn hình và vung tay đập các vòng tròn ảo.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdtc-ar\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T15:59:30",
+        "updated_at": "2026-07-15T15:59:30"
       }
     ],
     "lesson_assignments": [
