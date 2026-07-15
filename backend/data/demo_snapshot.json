@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:24:28+00:00",
+  "exported_at": "2026-07-15T15:27:01+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$qyHaiBLk2gIDDG2g$5dd4b6c6bf3a0cfe61e0d8ff30286b1df5b605de9d16e82f4543c4615cd1bb3c",
+        "password_hash": "pbkdf2:sha256:1000000$oJDmCJFRJ4zS7wu2$6ee490980aa3b6d4e8636e73948c06437281d4453da231a075420d2fb026daf3",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-15T15:13:48.692020"
+        "updated_at": "2026-07-15T15:25:56.270038"
       },
       {
         "id": 18,
@@ -2748,6 +2748,14 @@
         "status": "active",
         "created_at": "2026-07-12T14:50:01",
         "updated_at": "2026-07-12T14:50:01"
+      },
+      {
+        "id": 29,
+        "class_id": 10,
+        "student_id": 29,
+        "status": "active",
+        "created_at": "2026-07-15T15:27:01",
+        "updated_at": "2026-07-15T15:27:01"
       }
     ],
     "class_subjects": [
@@ -4620,6 +4628,15 @@
         "source": "class_join",
         "created_at": "2026-07-12T14:50:01",
         "updated_at": "2026-07-12T14:50:01"
+      },
+      {
+        "id": 21,
+        "teacher_id": 8,
+        "student_id": 29,
+        "status": "active",
+        "source": "class_join",
+        "created_at": "2026-07-15T15:27:01",
+        "updated_at": "2026-07-15T15:27:01"
       }
     ],
     "lesson_activities": [
@@ -6960,34 +6977,6 @@
         "config_json": "{\"prompt\":\"Bấm vào thẻ để app nói thay em câu em muốn.\",\"cards\":[\"Con muốn uống nước\",\"Con muốn ăn cơm\",\"Con mệt\"],\"image_cards\":[{\"id\":\"aac-food\",\"label\":\"Cơm\",\"media_url\":\"/lesson-media/nang/aac-com.svg\",\"media_kind\":\"image\"},{\"id\":\"aac-play\",\"label\":\"Chơi\",\"media_url\":\"/lesson-media/nang/aac-choi.svg\",\"media_kind\":\"image\"}]}",
         "created_at": "2026-07-15T15:11:21",
         "updated_at": "2026-07-15T15:11:21"
-      },
-      {
-        "id": 226,
-        "lesson_id": 115,
-        "title": "Ai là chủ nhân?",
-        "activity_type": "image_choice",
-        "instruction_text": "Học sinh nhận ra ba lô và bình nước của mình trong số 2 - 3 đồ dùng khác.",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Đâu là ba lô của con? Hãy chỉ vào ba lô của mình nhé!\",\"correct\":\"card-mwj5zp\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"card-pcx5h3\",\"label\":\"Lựa chọn 1\",\"media_url\":\"http://ban-hoc-backend-v2.onrender.com/api/v1/media/files/teacher_7/33a835b0730249b69d0224c5fd4e62bc.png\",\"media_kind\":\"image\"},{\"id\":\"card-mwj5zp\",\"label\":\"Lựa chọn 2\",\"media_url\":\"http://ban-hoc-backend-v2.onrender.com/api/v1/media/files/teacher_7/8e5ba7d8a4ab46c7a644a218a9fb40b1.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Đâu là ba lô của con? Hãy chỉ vào ba lô của mình nhé!\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T15:24:07",
-        "updated_at": "2026-07-15T15:24:07"
-      },
-      {
-        "id": 227,
-        "lesson_id": 115,
-        "title": "Xem và trả lời: Cất đồ dùng cá nhân",
-        "activity_type": "watch_answer",
-        "instruction_text": "Học sinh nhận biết cách cất giữ đồ dùng cá nhân gọn gàng khi đến lớp thông qua việc quan sát video.",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Sau khi xem video, con hãy kể tên 2-3 đồ dùng cá nhân mà bạn nhỏ đã cất giữ và cho biết bạn ấy đã cất chúng ở đâu để bàn học luôn gọn gàng?\",\"answer_mode\":\"text\",\"expected_answer\":\"Bạn cất sách vào ngăn bàn, bút vào hộp bút, cặp sách treo lên móc.\",\"accepted_answers\":[\"Sách vào ngăn bàn.\",\"Bút vào hộp bút.\",\"Cặp sách treo lên móc.\",\"Hộp bút vào ngăn bàn.\",\"Vở vào ngăn bàn.\",\"Đồ dùng học tập được cất vào đúng chỗ.\",\"Bạn cất đồ dùng gọn gàng.\"]}",
-        "created_at": "2026-07-15T15:24:11",
-        "updated_at": "2026-07-15T15:24:11"
       }
     ],
     "lesson_assignments": [
@@ -7952,19 +7941,6 @@
         "status": "active",
         "created_at": "2026-07-15T15:11:32",
         "updated_at": "2026-07-15T15:11:32"
-      },
-      {
-        "id": 150,
-        "lesson_id": 115,
-        "class_id": 9,
-        "subject_id": 4,
-        "assigned_by_teacher_id": 7,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T15:24:27",
-        "updated_at": "2026-07-15T15:24:27"
       }
     ],
     "lesson_assignment_students": [
@@ -8653,13 +8629,6 @@
         "student_id": 13,
         "created_at": "2026-07-15T15:11:32",
         "updated_at": "2026-07-15T15:11:32"
-      },
-      {
-        "id": 251,
-        "assignment_id": 150,
-        "student_id": 13,
-        "created_at": "2026-07-15T15:24:27",
-        "updated_at": "2026-07-15T15:24:27"
       }
     ],
     "student_lesson_progress": [
@@ -10132,21 +10101,6 @@
         "completed_at": null,
         "created_at": "2026-07-15T15:11:32",
         "updated_at": "2026-07-15T15:11:32"
-      },
-      {
-        "id": 251,
-        "assignment_id": 150,
-        "student_id": 13,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T15:24:27",
-        "updated_at": "2026-07-15T15:24:27"
       }
     ]
   }
