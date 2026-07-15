@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:44:43+00:00",
+  "exported_at": "2026-07-15T14:44:46+00:00",
   "tables": {
     "subjects": [
       {
@@ -6300,6 +6300,20 @@
         "config_json": "{\"prompt\":\"Kéo các bước vào đúng thứ tự để cây lớn lên.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=congnghe-grow\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T14:44:18",
         "updated_at": "2026-07-15T14:44:18"
+      },
+      {
+        "id": 196,
+        "lesson_id": 99,
+        "title": "Góc bình tĩnh",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực quản lý bản thân",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Làm theo nhịp thở để bình tĩnh lại trước khi học tiếp.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=gdcd-calm\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:44:46",
+        "updated_at": "2026-07-15T14:44:46"
       }
     ],
     "lesson_assignments": [
