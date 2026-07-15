@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:56:27+00:00",
+  "exported_at": "2026-07-15T15:56:30+00:00",
   "tables": {
     "subjects": [
       {
@@ -7692,6 +7692,20 @@
         "config_json": "{\"prompt\":\"Con hãy xem video và kể tên 3 đồ dùng cá nhân mà bạn nhỏ trong video đã mang đến lớp nhé!\",\"answer_mode\":\"text\",\"expected_answer\":\"Cặp sách, hộp bút, bình nước\",\"accepted_answers\":[\"cặp sách, hộp bút, bình nước\",\"sách, vở, bút\",\"balo, hộp bút, thước kẻ\",\"hộp bút, tẩy, bút chì\",\"bình nước, hộp cơm, khăn mặt\",\"bút chì, cục tẩy, thước kẻ\",\"sách, vở, bút màu\"]}",
         "created_at": "2026-07-15T15:52:05",
         "updated_at": "2026-07-15T15:52:05"
+      },
+      {
+        "id": 253,
+        "lesson_id": 133,
+        "title": "Chọn đồ vật theo thời tiết",
+        "activity_type": "image_choice",
+        "instruction_text": "Năng lực thích ứng tự nhiên",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Mưa rồi, lấy gì đây?\",\"correct\":\"umbrella\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"umbrella\",\"label\":\"Cái ô\",\"media_url\":\"/lesson-media/nang/umbrella-card.svg\",\"media_kind\":\"image\"},{\"id\":\"sunglasses\",\"label\":\"Kính râm\",\"media_url\":\"/lesson-media/nang/sunglasses-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Mưa rồi, lấy gì đây?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T15:56:30",
+        "updated_at": "2026-07-15T15:56:30"
       }
     ],
     "lesson_assignments": [
