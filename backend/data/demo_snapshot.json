@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:07:35+00:00",
+  "exported_at": "2026-07-15T16:07:37+00:00",
   "tables": {
     "subjects": [
       {
@@ -8282,6 +8282,20 @@
         "config_json": "{\"prompt\":\"Khi con muốn chơi cùng bạn, con sẽ làm gì?\",\"correct\":\"ask-politely\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"ask-politely\",\"label\":\"Con nói: 'Bạn ơi, cho mình chơi cùng nhé!'\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"grab-toy\",\"label\":\"Con giật đồ chơi của bạn.\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"turn-away\",\"label\":\"Con quay lưng đi chỗ khác.\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi\"}",
         "created_at": "2026-07-15T16:04:43",
         "updated_at": "2026-07-15T16:04:43"
+      },
+      {
+        "id": 284,
+        "lesson_id": 148,
+        "title": "Kéo thả đếm số",
+        "activity_type": "drag_drop",
+        "instruction_text": "Năng lực tính toán cơ bản (số lượng nhỏ)",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Kéo đúng 2 quả táo vào rổ của cô, quả còn lại để trên bàn.\",\"items\":[\"Táo đỏ\",\"Táo xanh\",\"Táo vàng\"],\"targets\":[\"Rổ của cô\",\"Để trên bàn\"],\"visual_style\":\"shape_3d\"}",
+        "created_at": "2026-07-15T16:07:37",
+        "updated_at": "2026-07-15T16:07:37"
       }
     ],
     "lesson_assignments": [
