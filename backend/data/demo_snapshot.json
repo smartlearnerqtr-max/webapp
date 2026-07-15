@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:46:18+00:00",
+  "exported_at": "2026-07-15T15:46:33+00:00",
   "tables": {
     "subjects": [
       {
@@ -4408,6 +4408,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T15:46:06",
         "updated_at": "2026-07-15T15:46:06"
+      },
+      {
+        "id": 132,
+        "created_by_teacher_id": 9,
+        "subject_id": 11,
+        "class_id": 11,
+        "title": "Hành vi đạo đức (Chào hỏi, Bỏ rác)",
+        "description": "Hình thành thói quen tốt và nhận biết hành vi đúng sai.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T15:46:33",
+        "updated_at": "2026-07-15T15:46:33"
       }
     ],
     "parent_daily_reports": [],
