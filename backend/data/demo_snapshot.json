@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:51:59+00:00",
+  "exported_at": "2026-07-15T15:52:02+00:00",
   "tables": {
     "subjects": [
       {
@@ -7599,6 +7599,20 @@
         "config_json": "{\"prompt\":\"Kéo 2 mảnh lại gần nhau để ghép thành quả bưởi hoàn chỉnh.\",\"image_url\":\"/lesson-media/nang/photos/buoi.jpg\",\"rows\":1,\"cols\":2,\"piece_count\":2}",
         "created_at": "2026-07-15T15:49:41",
         "updated_at": "2026-07-15T15:49:41"
+      },
+      {
+        "id": 251,
+        "lesson_id": 132,
+        "title": "Nhận diện đồ dùng cá nhân",
+        "activity_type": "image_choice",
+        "instruction_text": "Học sinh nhận biết được một số đồ dùng cá nhân cần mang đến lớp thông qua hình ảnh.",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Con hãy chọn hình ảnh chiếc cặp sách của mình nhé!\",\"correct\":\"1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"1\",\"label\":\"Cặp sách\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"2\",\"label\":\"Hộp bút\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"3\",\"label\":\"Bình nước\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T15:52:02",
+        "updated_at": "2026-07-15T15:52:02"
       }
     ],
     "lesson_assignments": [
