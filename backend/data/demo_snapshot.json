@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:14:52+00:00",
+  "exported_at": "2026-07-15T16:14:55+00:00",
   "tables": {
     "subjects": [
       {
@@ -8597,6 +8597,20 @@
         "config_json": "{\"prompt\":\"Sắp xếp đúng thứ tự rửa tay.\",\"steps\":[\"Mở vòi nước\",\"Lấy xà phòng\",\"Rửa tay\"]}",
         "created_at": "2026-07-15T16:14:52",
         "updated_at": "2026-07-15T16:14:52"
+      },
+      {
+        "id": 299,
+        "lesson_id": 156,
+        "title": "Bảng AAC Giao tiếp",
+        "activity_type": "aac",
+        "instruction_text": "Hỗ trợ ngôn ngữ",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Bấm vào thẻ để app nói thay em câu em muốn.\",\"cards\":[\"Con muốn uống nước\",\"Con muốn ăn cơm\",\"Con mệt\"],\"image_cards\":[{\"id\":\"aac-food\",\"label\":\"Cơm\",\"media_url\":\"/lesson-media/nang/aac-com.svg\",\"media_kind\":\"image\"},{\"id\":\"aac-play\",\"label\":\"Chơi\",\"media_url\":\"/lesson-media/nang/aac-choi.svg\",\"media_kind\":\"image\"}]}",
+        "created_at": "2026-07-15T16:14:55",
+        "updated_at": "2026-07-15T16:14:55"
       }
     ],
     "lesson_assignments": [
