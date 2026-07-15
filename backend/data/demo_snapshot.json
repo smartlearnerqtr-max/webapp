@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:49:14+00:00",
+  "exported_at": "2026-07-15T14:49:16+00:00",
   "tables": {
     "subjects": [
       {
@@ -6358,6 +6358,20 @@
         "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào mặt trống khi nốt nhạc chạm đích.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=amnhac-drum\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T14:46:24",
         "updated_at": "2026-07-15T14:46:24"
+      },
+      {
+        "id": 198,
+        "lesson_id": 101,
+        "title": "Tìm bưởi Tân Triều",
+        "activity_type": "image_choice",
+        "instruction_text": "Hiểu biết đặc sản quê hương",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Đâu là hình Bưởi Tân Triều?\",\"correct\":\"buoi\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"buoi\",\"label\":\"Bưởi Tân Triều\",\"media_url\":\"/lesson-media/nhe/photos/buoi.jpg\",\"media_kind\":\"image\"},{\"id\":\"vai\",\"label\":\"Vải thiều\",\"media_url\":\"/lesson-media/trung-binh/vai-card.svg\",\"media_kind\":\"image\"},{\"id\":\"nhan\",\"label\":\"Nhãn\",\"media_url\":\"/lesson-media/trung-binh/nhan-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Tìm cho cô hình Bưởi Tân Triều\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T14:49:16",
+        "updated_at": "2026-07-15T14:49:16"
       }
     ],
     "lesson_assignments": [
