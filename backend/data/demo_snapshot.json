@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:35:34+00:00",
+  "exported_at": "2026-07-15T15:35:38+00:00",
   "tables": {
     "subjects": [
       {
@@ -7233,6 +7233,20 @@
         "config_json": "{\"prompt\":\"Xếp bát to ở kệ dưới và bát nhỏ ở kệ trên.\",\"items\":[\"Bát to\",\"Bát nhỏ\",\"Bát vừa\"],\"targets\":[\"Kệ dưới\",\"Kệ trên\"]}",
         "created_at": "2026-07-15T15:33:05",
         "updated_at": "2026-07-15T15:33:05"
+      },
+      {
+        "id": 238,
+        "lesson_id": 122,
+        "title": "Video làm mẫu chậm",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực thể chất, bắt chước hành động",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Xem thầy làm mẫu chậm rồi bắt chước động tác vươn vai, nhún gối theo nhịp.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdtc-warmup\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T15:35:38",
+        "updated_at": "2026-07-15T15:35:38"
       }
     ],
     "lesson_assignments": [
