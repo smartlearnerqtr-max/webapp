@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:10:05+00:00",
+  "exported_at": "2026-07-15T15:10:08+00:00",
   "tables": {
     "subjects": [
       {
@@ -6845,6 +6845,20 @@
         "config_json": "{\"prompt\":\"Chọn màu cam rồi tô kín hình quả cam.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=mythuat-fill\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T15:10:05",
         "updated_at": "2026-07-15T15:10:05"
+      },
+      {
+        "id": 221,
+        "lesson_id": 112,
+        "title": "Bóc dán Sticker ảo",
+        "activity_type": "watch_answer",
+        "instruction_text": "Khéo léo ngón tay, tư duy bố cục",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Thêm sticker con ong và bươm bướm vào bức tranh vườn hoa.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=mythuat-card\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T15:10:08",
+        "updated_at": "2026-07-15T15:10:08"
       }
     ],
     "lesson_assignments": [
