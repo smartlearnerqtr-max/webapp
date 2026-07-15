@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:59:18+00:00",
+  "exported_at": "2026-07-15T14:59:22+00:00",
   "tables": {
     "subjects": [
       {
@@ -6558,6 +6558,20 @@
         "config_json": "{\"prompt\":\"Sau khi xem video, con hãy kể tên 2 điều con có thể làm để giao tiếp thân thiện hơn với bạn bè nhé!\",\"answer_mode\":\"text\",\"expected_answer\":\"Mỉm cười và nói lời chào.\",\"accepted_answers\":[\"Mỉm cười\",\"Nói lời chào\",\"Lắng nghe bạn nói\",\"Không ngắt lời\",\"Nhìn vào mắt bạn khi nói chuyện\",\"Sử dụng từ ngữ lịch sự\",\"Giúp đỡ bạn bè\"]}",
         "created_at": "2026-07-15T14:55:07",
         "updated_at": "2026-07-15T14:55:07"
+      },
+      {
+        "id": 208,
+        "lesson_id": 105,
+        "title": "Kéo thả đếm số",
+        "activity_type": "drag_drop",
+        "instruction_text": "Năng lực tính toán cơ bản (số lượng nhỏ)",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Kéo đúng 2 quả táo vào rổ của cô, quả còn lại để trên bàn.\",\"items\":[\"Táo đỏ\",\"Táo xanh\",\"Táo vàng\"],\"targets\":[\"Rổ của cô\",\"Để trên bàn\"],\"visual_style\":\"shape_3d\"}",
+        "created_at": "2026-07-15T14:59:22",
+        "updated_at": "2026-07-15T14:59:22"
       }
     ],
     "lesson_assignments": [
