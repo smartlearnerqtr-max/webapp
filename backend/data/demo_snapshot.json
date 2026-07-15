@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:02:02+00:00",
+  "exported_at": "2026-07-15T16:02:05+00:00",
   "tables": {
     "subjects": [
       {
@@ -8123,6 +8123,20 @@
         "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"flute\",\"label\":\"Sáo trúc\",\"media_url\":\"/lesson-media/nang/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"},{\"id\":\"dan-bau\",\"label\":\"Đàn bầu\",\"media_url\":\"/lesson-media/nang/photos/dan-bau.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nang/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-15T16:00:01",
         "updated_at": "2026-07-15T16:00:01"
+      },
+      {
+        "id": 278,
+        "lesson_id": 144,
+        "title": "Flashcard Hình ảnh lớn",
+        "activity_type": "watch_answer",
+        "instruction_text": "Hiểu biết môi trường sống",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Chạm để lật thẻ và xem ruột quả bưởi Tân Triều.\",\"media_url\":\"/lesson-media/nang/photos/buoi.jpg\",\"media_kind\":\"image\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T16:02:05",
+        "updated_at": "2026-07-15T16:02:05"
       }
     ],
     "lesson_assignments": [
