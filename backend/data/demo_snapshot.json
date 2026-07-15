@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:05:06+00:00",
+  "exported_at": "2026-07-15T16:05:09+00:00",
   "tables": {
     "subjects": [
       {
@@ -7993,6 +7993,20 @@
         "config_json": "{\"prompt\":\"Thêm sticker con ong và bươm bướm vào bức tranh vườn hoa.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=mythuat-card\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T16:01:38",
         "updated_at": "2026-07-15T16:01:38"
+      },
+      {
+        "id": 267,
+        "lesson_id": 141,
+        "title": "Chọn cách giao tiếp đúng",
+        "activity_type": "image_choice",
+        "instruction_text": "Học sinh nhận biết và chọn cách giao tiếp phù hợp, lịch sự khi muốn chơi cùng bạn bè.",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Khi con muốn chơi cùng bạn, con sẽ làm gì?\",\"correct\":\"ask-politely\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"ask-politely\",\"label\":\"Con nói: 'Bạn ơi, cho mình chơi cùng nhé!'\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"grab-toy\",\"label\":\"Con giật đồ chơi của bạn.\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"turn-away\",\"label\":\"Con quay lưng đi chỗ khác.\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi\"}",
+        "created_at": "2026-07-15T16:05:09",
+        "updated_at": "2026-07-15T16:05:09"
       }
     ],
     "lesson_assignments": [
