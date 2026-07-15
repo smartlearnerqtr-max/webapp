@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:05:09+00:00",
+  "exported_at": "2026-07-15T16:05:12+00:00",
   "tables": {
     "subjects": [
       {
@@ -8007,6 +8007,20 @@
         "config_json": "{\"prompt\":\"Khi con muốn chơi cùng bạn, con sẽ làm gì?\",\"correct\":\"ask-politely\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"ask-politely\",\"label\":\"Con nói: 'Bạn ơi, cho mình chơi cùng nhé!'\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"grab-toy\",\"label\":\"Con giật đồ chơi của bạn.\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"turn-away\",\"label\":\"Con quay lưng đi chỗ khác.\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi\"}",
         "created_at": "2026-07-15T16:05:09",
         "updated_at": "2026-07-15T16:05:09"
+      },
+      {
+        "id": 268,
+        "lesson_id": 141,
+        "title": "Cùng xem và học cách giao tiếp!",
+        "activity_type": "watch_answer",
+        "instruction_text": "Học cách lắng nghe và nói chuyện lịch sự với bạn bè.",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Sau khi xem video, con hãy cho biết: Khi bạn đang nói, con nên làm gì để thể hiện sự tôn trọng?\",\"answer_mode\":\"text\",\"expected_answer\":\"Lắng nghe bạn nói và nhìn vào mắt bạn.\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T16:05:12",
+        "updated_at": "2026-07-15T16:05:12"
       }
     ],
     "lesson_assignments": [
