@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:58:14+00:00",
+  "exported_at": "2026-07-15T14:59:18+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$Q9Gbk7MConkknhZx$c2d5d59a4783ba0d90ed58a535e871577890cedddadefdefc0a6edbb6f75aa5b",
+        "password_hash": "pbkdf2:sha256:1000000$kpsUaCcHmkgPcxjf$fa7e1b786f9e385ce7a37fd571d28c28e2958307a57f73aae3ddf71c539561a6",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-15T14:57:12.217592"
+        "updated_at": "2026-07-15T14:58:57.286901"
       },
       {
         "id": 18,
@@ -1539,7 +1539,7 @@
         "id": 28,
         "user_id": 53,
         "full_name": "Trần Thanh Quý",
-        "disability_level": "nang",
+        "disability_level": "trung_binh",
         "support_note": "Tài khoản import từ lô QQSSQY2KJ",
         "preferred_input": "touch",
         "preferred_read_speed": null,
@@ -1548,7 +1548,7 @@
         "avatar_url": null,
         "created_by_teacher_id": null,
         "created_at": "2026-07-05T12:38:45",
-        "updated_at": "2026-07-15T14:57:44.052478"
+        "updated_at": "2026-07-05T12:38:45"
       },
       {
         "id": 29,
@@ -2748,14 +2748,6 @@
         "status": "active",
         "created_at": "2026-07-12T14:50:01",
         "updated_at": "2026-07-12T14:50:01"
-      },
-      {
-        "id": 29,
-        "class_id": 9,
-        "student_id": 28,
-        "status": "active",
-        "created_at": "2026-07-15T14:58:14",
-        "updated_at": "2026-07-15T14:58:14"
       }
     ],
     "class_subjects": [
@@ -4011,6 +4003,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T14:55:01",
         "updated_at": "2026-07-15T14:55:01"
+      },
+      {
+        "id": 105,
+        "created_by_teacher_id": 7,
+        "subject_id": 6,
+        "class_id": 9,
+        "title": "Nhận biết số lượng 1-3 và Hình khối cơ bản",
+        "description": "Làm quen với các con số nhỏ và hình khối cơ bản qua thao tác kéo thả.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T14:59:18",
+        "updated_at": "2026-07-15T14:59:18"
       }
     ],
     "parent_daily_reports": [],
@@ -4463,15 +4470,6 @@
         "source": "class_join",
         "created_at": "2026-07-12T14:50:01",
         "updated_at": "2026-07-12T14:50:01"
-      },
-      {
-        "id": 21,
-        "teacher_id": 7,
-        "student_id": 28,
-        "status": "active",
-        "source": "class_join",
-        "created_at": "2026-07-15T14:58:14",
-        "updated_at": "2026-07-15T14:58:14"
       }
     ],
     "lesson_activities": [
@@ -6532,6 +6530,34 @@
         "config_json": "{\"prompt\":\"Tập ưu tiên bỏ tiền tiết kiệm trước rồi mới chọn món muốn mua.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=hdtn-budget\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T14:51:57",
         "updated_at": "2026-07-15T14:51:57"
+      },
+      {
+        "id": 206,
+        "lesson_id": 104,
+        "title": "Chọn cách giao tiếp đúng",
+        "activity_type": "image_choice",
+        "instruction_text": "Học sinh nhận biết và chọn được hình ảnh thể hiện hành vi giao tiếp tích cực, lịch sự.",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Khi con muốn nói chuyện với bạn trong lớp, con sẽ làm gì để bạn chú ý?\",\"correct\":\"1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"1\",\"label\":\"Giơ tay và chờ\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"2\",\"label\":\"La lớn để bạn nghe\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"3\",\"label\":\"Đẩy nhẹ bạn\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi\"}",
+        "created_at": "2026-07-15T14:55:04",
+        "updated_at": "2026-07-15T14:55:04"
+      },
+      {
+        "id": 207,
+        "lesson_id": 104,
+        "title": "Xem và Trả lời: Giao tiếp thân thiện",
+        "activity_type": "watch_answer",
+        "instruction_text": "Học sinh nhận biết được các hành vi giao tiếp thân thiện và tích cực qua video.",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Sau khi xem video, con hãy kể tên 2 điều con có thể làm để giao tiếp thân thiện hơn với bạn bè nhé!\",\"answer_mode\":\"text\",\"expected_answer\":\"Mỉm cười và nói lời chào.\",\"accepted_answers\":[\"Mỉm cười\",\"Nói lời chào\",\"Lắng nghe bạn nói\",\"Không ngắt lời\",\"Nhìn vào mắt bạn khi nói chuyện\",\"Sử dụng từ ngữ lịch sự\",\"Giúp đỡ bạn bè\"]}",
+        "created_at": "2026-07-15T14:55:07",
+        "updated_at": "2026-07-15T14:55:07"
       }
     ],
     "lesson_assignments": [
@@ -7392,6 +7418,19 @@
         "status": "active",
         "created_at": "2026-07-15T14:52:07",
         "updated_at": "2026-07-15T14:52:07"
+      },
+      {
+        "id": 142,
+        "lesson_id": 104,
+        "class_id": 8,
+        "subject_id": 4,
+        "assigned_by_teacher_id": 6,
+        "target_type": "class",
+        "due_at": null,
+        "required_completion_percent": 80,
+        "status": "active",
+        "created_at": "2026-07-15T14:55:20",
+        "updated_at": "2026-07-15T14:55:20"
       }
     ],
     "lesson_assignment_students": [
@@ -8017,6 +8056,20 @@
         "student_id": 34,
         "created_at": "2026-07-15T14:52:07",
         "updated_at": "2026-07-15T14:52:07"
+      },
+      {
+        "id": 242,
+        "assignment_id": 142,
+        "student_id": 12,
+        "created_at": "2026-07-15T14:55:20",
+        "updated_at": "2026-07-15T14:55:20"
+      },
+      {
+        "id": 243,
+        "assignment_id": 142,
+        "student_id": 34,
+        "created_at": "2026-07-15T14:55:20",
+        "updated_at": "2026-07-15T14:55:20"
       }
     ],
     "student_lesson_progress": [
@@ -9354,6 +9407,36 @@
         "completed_at": null,
         "created_at": "2026-07-15T14:52:07",
         "updated_at": "2026-07-15T14:52:07"
+      },
+      {
+        "id": 242,
+        "assignment_id": 142,
+        "student_id": 12,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-15T14:55:20",
+        "updated_at": "2026-07-15T14:55:20"
+      },
+      {
+        "id": 243,
+        "assignment_id": 142,
+        "student_id": 34,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-15T14:55:20",
+        "updated_at": "2026-07-15T14:55:20"
       }
     ]
   }
