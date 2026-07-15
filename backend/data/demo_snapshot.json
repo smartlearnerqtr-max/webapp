@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:14:31+00:00",
+  "exported_at": "2026-07-15T16:14:49+00:00",
   "tables": {
     "subjects": [
       {
@@ -4768,6 +4768,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T16:14:17",
         "updated_at": "2026-07-15T16:14:17"
+      },
+      {
+        "id": 156,
+        "created_by_teacher_id": 11,
+        "subject_id": 17,
+        "class_id": 13,
+        "title": "Kỹ năng tự phục vụ cơ bản (Rửa tay, giao tiếp)",
+        "description": "Rèn luyện các thói quen tự phục vụ và kỹ năng giao tiếp cơ bản.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T16:14:49",
+        "updated_at": "2026-07-15T16:14:49"
       }
     ],
     "parent_daily_reports": [],
