@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:00:34+00:00",
+  "exported_at": "2026-07-15T15:00:38+00:00",
   "tables": {
     "subjects": [
       {
@@ -6658,6 +6658,20 @@
         "config_json": "{\"prompt\":\"Chạm để đặt mắt, mũi, miệng vào đúng vị trí trên khuôn mặt.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=khtn-face\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T15:00:34",
         "updated_at": "2026-07-15T15:00:34"
+      },
+      {
+        "id": 213,
+        "lesson_id": 107,
+        "title": "Phân loại Sinh học",
+        "activity_type": "drag_drop",
+        "instruction_text": "Phân biệt tính chất sự vật",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Kéo con chó vào nhóm vật sống và cái ghế vào nhóm vật không sống.\",\"items\":[\"Con chó\",\"Cái ghế\",\"Cây xanh\",\"Bàn học\"],\"targets\":[\"Vật sống\",\"Vật không sống\"]}",
+        "created_at": "2026-07-15T15:00:38",
+        "updated_at": "2026-07-15T15:00:38"
       }
     ],
     "lesson_assignments": [
