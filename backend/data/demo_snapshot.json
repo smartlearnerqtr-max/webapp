@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:00:38+00:00",
+  "exported_at": "2026-07-15T15:02:49+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$kpsUaCcHmkgPcxjf$fa7e1b786f9e385ce7a37fd571d28c28e2958307a57f73aae3ddf71c539561a6",
+        "password_hash": "pbkdf2:sha256:1000000$jHNmz2JnOg67INOH$e407421843e79c1e49f9d63b9f3379ed8d177ccf4e33ad352121c960ea3a9ee3",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-15T14:58:57.286901"
+        "updated_at": "2026-07-15T15:02:45.459737"
       },
       {
         "id": 18,
@@ -4048,6 +4048,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T15:00:31",
         "updated_at": "2026-07-15T15:00:31"
+      },
+      {
+        "id": 108,
+        "created_by_teacher_id": 7,
+        "subject_id": 7,
+        "class_id": 9,
+        "title": "Nhận biết Màu sắc (Red, Blue) và Khẩu lệnh (Stand up)",
+        "description": "Học tiếng Anh cơ bản qua màu sắc và các hành động bắt chước.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T15:02:49",
+        "updated_at": "2026-07-15T15:02:49"
       }
     ],
     "parent_daily_reports": [],
