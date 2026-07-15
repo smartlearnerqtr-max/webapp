@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:59:55+00:00",
+  "exported_at": "2026-07-15T15:59:58+00:00",
   "tables": {
     "subjects": [
       {
@@ -8080,6 +8080,20 @@
         "config_json": "{\"prompt\":\"Đứng trước màn hình và vung tay đập các vòng tròn ảo.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdtc-ar\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T15:59:30",
         "updated_at": "2026-07-15T15:59:30"
+      },
+      {
+        "id": 276,
+        "lesson_id": 143,
+        "title": "Gõ phách ảo",
+        "activity_type": "watch_answer",
+        "instruction_text": "Cảm thụ âm thanh",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Canh đúng nhịp rồi gõ vào mặt trống khi nốt nhạc chạm đích.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=amnhac-rhythm\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T15:59:58",
+        "updated_at": "2026-07-15T15:59:58"
       }
     ],
     "lesson_assignments": [
