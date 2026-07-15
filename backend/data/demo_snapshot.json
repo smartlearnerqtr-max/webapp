@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:09:03+00:00",
+  "exported_at": "2026-07-15T15:09:21+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$Akv1AFyYOMwGTlqV$99585a4bf365c250e4cfd6baa6c24c73d39df187007328b697a53b12eb2a8abc",
+        "password_hash": "pbkdf2:sha256:1000000$RVZK8t7S2D0WMSeV$ff9163eb6f345908dc7f57f215a314e5d3cbaed81f5a0b37896bff39f0e663b5",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-15T15:06:29.542308"
+        "updated_at": "2026-07-15T15:09:10.198761"
       },
       {
         "id": 18,
@@ -4067,51 +4067,6 @@
       {
         "id": 109,
         "created_by_teacher_id": 7,
-        "subject_id": 9,
-        "class_id": 9,
-        "title": "Thời tiết (Nắng/Mưa) và Phương tiện giao thông",
-        "description": "Tìm hiểu về thời tiết và các loại phương tiện giao thông cơ bản.",
-        "primary_level": "nang",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-15T15:03:19",
-        "updated_at": "2026-07-15T15:03:19"
-      },
-      {
-        "id": 110,
-        "created_by_teacher_id": 7,
-        "subject_id": 10,
-        "class_id": 9,
-        "title": "Nhận diện vật cấm/nguy hiểm trong nhà",
-        "description": "Dạy học sinh nhận biết và tránh xa các vật dụng nguy hiểm trong nhà.",
-        "primary_level": "nang",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-15T15:03:55",
-        "updated_at": "2026-07-15T15:04:31.320614"
-      },
-      {
-        "id": 111,
-        "created_by_teacher_id": 7,
-        "subject_id": 10,
-        "class_id": 9,
-        "title": "Nhận diện vật cấm/nguy hiểm trong nhà",
-        "description": "Dạy học sinh nhận biết và tránh xa các vật dụng nguy hiểm trong nhà.",
-        "primary_level": "nang",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-15T15:04:07",
-        "updated_at": "2026-07-15T15:04:07"
-      },
-      {
-        "id": 112,
-        "created_by_teacher_id": 7,
         "subject_id": 11,
         "class_id": 9,
         "title": "Hành vi đạo đức (Chào hỏi, Bỏ rác)",
@@ -4121,11 +4076,11 @@
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-15T15:04:49",
-        "updated_at": "2026-07-15T15:04:49"
+        "created_at": "2026-07-15T15:05:39",
+        "updated_at": "2026-07-15T15:05:39"
       },
       {
-        "id": 113,
+        "id": 110,
         "created_by_teacher_id": 7,
         "subject_id": 12,
         "class_id": 9,
@@ -4136,38 +4091,23 @@
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-15T15:07:56",
-        "updated_at": "2026-07-15T15:07:56"
+        "created_at": "2026-07-15T15:06:14",
+        "updated_at": "2026-07-15T15:06:14"
       },
       {
-        "id": 114,
+        "id": 111,
         "created_by_teacher_id": 7,
-        "subject_id": 13,
+        "subject_id": 14,
         "class_id": 9,
-        "title": "Vận động định hướng",
-        "description": "Phát triển năng lực thể chất qua việc bắt chước và trò chơi vận động.",
-        "primary_level": "nang",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": true,
-        "created_at": "2026-07-15T15:08:29",
-        "updated_at": "2026-07-15T15:09:03.023662"
-      },
-      {
-        "id": 115,
-        "created_by_teacher_id": 7,
-        "subject_id": 13,
-        "class_id": 9,
-        "title": "Vận động định hướng",
-        "description": "Phát triển năng lực thể chất qua việc bắt chước và trò chơi vận động.",
+        "title": "Nhận biết nhịp điệu",
+        "description": "Cảm thụ âm thanh và nhận diện các loại nhạc cụ phổ biến.",
         "primary_level": "nang",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-15T15:08:42",
-        "updated_at": "2026-07-15T15:08:42"
+        "created_at": "2026-07-15T15:09:21",
+        "updated_at": "2026-07-15T15:09:21"
       }
     ],
     "parent_daily_reports": [],
@@ -6795,105 +6735,7 @@
       },
       {
         "id": 214,
-        "lesson_id": 108,
-        "title": "Flashcard Âm thanh",
-        "activity_type": "listen_choose",
-        "instruction_text": "Năng lực ngôn ngữ cơ bản",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Nghe màu rồi chọn đúng thẻ.\",\"correct\":\"red\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"red\",\"label\":\"Red\",\"media_url\":\"/lesson-media/nang/red-card.svg\",\"media_kind\":\"image\"},{\"id\":\"blue\",\"label\":\"Blue\",\"media_url\":\"/lesson-media/nang/blue-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Red\",\"audio_lang\":\"en-US\"}",
-        "created_at": "2026-07-15T15:02:52",
-        "updated_at": "2026-07-15T15:02:52"
-      },
-      {
-        "id": 215,
-        "lesson_id": 108,
-        "title": "Học qua bắt chước hành động (TPR)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng phản xạ xã hội",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Nhìn chữ Stand up, đứng lên theo mẫu rồi bấm xác nhận.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=tienganh-standup\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T15:02:54",
-        "updated_at": "2026-07-15T15:02:54"
-      },
-      {
-        "id": 216,
         "lesson_id": 109,
-        "title": "Chọn đồ vật theo thời tiết",
-        "activity_type": "image_choice",
-        "instruction_text": "Năng lực thích ứng tự nhiên",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Mưa rồi, lấy gì đây?\",\"correct\":\"umbrella\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"umbrella\",\"label\":\"Cái ô\",\"media_url\":\"/lesson-media/nang/umbrella-card.svg\",\"media_kind\":\"image\"},{\"id\":\"sunglasses\",\"label\":\"Kính râm\",\"media_url\":\"/lesson-media/nang/sunglasses-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Mưa rồi, lấy gì đây?\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T15:03:22",
-        "updated_at": "2026-07-15T15:03:22"
-      },
-      {
-        "id": 217,
-        "lesson_id": 109,
-        "title": "Ghép đúng đường đi",
-        "activity_type": "drag_drop",
-        "instruction_text": "Nhận diện không gian",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Kéo thuyền xuống nước và kéo ô tô lên đường bộ.\",\"items\":[\"Thuyền\",\"Ô tô\",\"Xe máy\",\"Ca nô\"],\"targets\":[\"Đường thủy\",\"Đường bộ\"]}",
-        "created_at": "2026-07-15T15:03:25",
-        "updated_at": "2026-07-15T15:03:25"
-      },
-      {
-        "id": 218,
-        "lesson_id": 110,
-        "title": "Thẻ cảnh báo AAC",
-        "activity_type": "drag_drop",
-        "instruction_text": "Kỹ năng tự bảo vệ an toàn",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Kéo thẻ cảnh báo lên các vật nguy hiểm trong nhà.\",\"items\":[\"Dấu X cho ổ điện\",\"Dấu X cho dao\",\"Nhãn an toàn cho bát cơm\"],\"targets\":[\"Nguy hiểm\",\"An toàn\"]}",
-        "created_at": "2026-07-15T15:03:58",
-        "updated_at": "2026-07-15T15:03:58"
-      },
-      {
-        "id": 219,
-        "lesson_id": 111,
-        "title": "Thẻ cảnh báo AAC",
-        "activity_type": "drag_drop",
-        "instruction_text": "Kỹ năng tự bảo vệ an toàn",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Kéo thẻ cảnh báo lên các vật nguy hiểm trong nhà.\",\"items\":[\"Dấu X cho ổ điện\",\"Dấu X cho dao\",\"Nhãn an toàn cho bát cơm\"],\"targets\":[\"Nguy hiểm\",\"An toàn\"]}",
-        "created_at": "2026-07-15T15:04:10",
-        "updated_at": "2026-07-15T15:04:10"
-      },
-      {
-        "id": 220,
-        "lesson_id": 111,
-        "title": "Sắp xếp đồ dùng nhà bếp",
-        "activity_type": "drag_drop",
-        "instruction_text": "Năng lực công nghệ gia đình",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Xếp bát to ở kệ dưới và bát nhỏ ở kệ trên.\",\"items\":[\"Bát to\",\"Bát nhỏ\",\"Bát vừa\"],\"targets\":[\"Kệ dưới\",\"Kệ trên\"]}",
-        "created_at": "2026-07-15T15:04:13",
-        "updated_at": "2026-07-15T15:04:13"
-      },
-      {
-        "id": 221,
-        "lesson_id": 112,
         "title": "Chọn mặt Cười/Mếu",
         "activity_type": "multiple_choice",
         "instruction_text": "Nhận thức hành vi đúng sai",
@@ -6902,12 +6744,26 @@
         "sort_order": 1,
         "difficulty_stage": 3,
         "config_json": "{\"prompt\":\"Bạn vứt rác ra sân. Em chọn mặt cười hay mặt mếu?\",\"choices\":[\"😊 Mặt cười\",\"☹️ Mặt mếu\"],\"correct\":\"☹️ Mặt mếu\",\"image_cards\":[{\"id\":\"card-su3148\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-fsm40s\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdcd-litter\",\"media_kind\":\"video\"}",
-        "created_at": "2026-07-15T15:04:52",
-        "updated_at": "2026-07-15T15:04:52"
+        "created_at": "2026-07-15T15:05:42",
+        "updated_at": "2026-07-15T15:05:42"
       },
       {
-        "id": 222,
-        "lesson_id": 113,
+        "id": 215,
+        "lesson_id": 109,
+        "title": "Thực hành chào hỏi",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng giao tiếp xã hội",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Nhìn cô giáo, bấm micro và nói “ạ” để hoàn thành lời chào.\",\"media_url\":\"/lesson-media/nang/teacher-greeting-card.svg\",\"media_kind\":\"image\",\"answer_mode\":\"voice_ai_grade\",\"expected_answer\":\"ạ\",\"accepted_answers\":[\"a\",\"ạ ạ\",\"con chào cô ạ\"]}",
+        "created_at": "2026-07-15T15:05:44",
+        "updated_at": "2026-07-15T15:05:44"
+      },
+      {
+        "id": 216,
+        "lesson_id": 110,
         "title": "Ghép cặp (Matching)",
         "activity_type": "image_choice",
         "instruction_text": "Nhận diện công nghệ",
@@ -6916,12 +6772,12 @@
         "sort_order": 1,
         "difficulty_stage": 3,
         "config_json": "{\"prompt\":\"Chuột máy tính đâu?\",\"correct\":\"computer-mouse\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"computer-mouse\",\"label\":\"Chuột máy tính\",\"media_url\":\"/lesson-media/nang/computer-mouse-card.svg\",\"media_kind\":\"image\"},{\"id\":\"animal-mouse\",\"label\":\"Con chuột\",\"media_url\":\"/lesson-media/nang/animal-mouse-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Chuột máy tính đâu?\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T15:07:59",
-        "updated_at": "2026-07-15T15:07:59"
+        "created_at": "2026-07-15T15:06:17",
+        "updated_at": "2026-07-15T15:06:17"
       },
       {
-        "id": 223,
-        "lesson_id": 113,
+        "id": 217,
+        "lesson_id": 110,
         "title": "Thực hành Tap/Swipe",
         "activity_type": "watch_answer",
         "instruction_text": "Làm chủ thiết bị số đơn giản (Tablet)",
@@ -6930,50 +6786,8 @@
         "sort_order": 2,
         "difficulty_stage": 3,
         "config_json": "{\"prompt\":\"Vuốt trái phải để lật trang và chạm để bật sáng màn hình máy tính bảng.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=tinhoc-swipe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T15:08:02",
-        "updated_at": "2026-07-15T15:08:02"
-      },
-      {
-        "id": 224,
-        "lesson_id": 114,
-        "title": "Video làm mẫu chậm",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực thể chất, bắt chước hành động",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Xem thầy làm mẫu chậm rồi bắt chước động tác vươn vai, nhún gối theo nhịp.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdtc-warmup\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T15:08:33",
-        "updated_at": "2026-07-15T15:08:33"
-      },
-      {
-        "id": 225,
-        "lesson_id": 115,
-        "title": "Video làm mẫu chậm",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực thể chất, bắt chước hành động",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Xem thầy làm mẫu chậm rồi bắt chước động tác vươn vai, nhún gối theo nhịp.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdtc-warmup\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T15:08:44",
-        "updated_at": "2026-07-15T15:08:44"
-      },
-      {
-        "id": 226,
-        "lesson_id": 115,
-        "title": "AR Camera (Thực tế ảo)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Vận động thô",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Đứng trước màn hình và vung tay đập các vòng tròn ảo.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=gdtc-ar\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T15:08:47",
-        "updated_at": "2026-07-15T15:08:47"
+        "created_at": "2026-07-15T15:06:20",
+        "updated_at": "2026-07-15T15:06:20"
       }
     ],
     "lesson_assignments": [
@@ -7876,68 +7690,16 @@
       },
       {
         "id": 145,
-        "lesson_id": 108,
-        "class_id": 9,
-        "subject_id": 7,
-        "assigned_by_teacher_id": 7,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T15:03:01",
-        "updated_at": "2026-07-15T15:03:01"
-      },
-      {
-        "id": 146,
         "lesson_id": 109,
         "class_id": 9,
-        "subject_id": 9,
+        "subject_id": 11,
         "assigned_by_teacher_id": 7,
         "target_type": "class",
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-15T15:03:33",
-        "updated_at": "2026-07-15T15:03:33"
-      },
-      {
-        "id": 147,
-        "lesson_id": 111,
-        "class_id": 9,
-        "subject_id": 10,
-        "assigned_by_teacher_id": 7,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T15:04:23",
-        "updated_at": "2026-07-15T15:04:23"
-      },
-      {
-        "id": 148,
-        "lesson_id": 113,
-        "class_id": 9,
-        "subject_id": 12,
-        "assigned_by_teacher_id": 7,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T15:08:11",
-        "updated_at": "2026-07-15T15:08:11"
-      },
-      {
-        "id": 149,
-        "lesson_id": 115,
-        "class_id": 9,
-        "subject_id": 13,
-        "assigned_by_teacher_id": 7,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T15:08:55",
-        "updated_at": "2026-07-15T15:08:55"
+        "created_at": "2026-07-15T15:05:54",
+        "updated_at": "2026-07-15T15:05:54"
       }
     ],
     "lesson_assignment_students": [
@@ -8596,36 +8358,8 @@
         "id": 246,
         "assignment_id": 145,
         "student_id": 13,
-        "created_at": "2026-07-15T15:03:01",
-        "updated_at": "2026-07-15T15:03:01"
-      },
-      {
-        "id": 247,
-        "assignment_id": 146,
-        "student_id": 13,
-        "created_at": "2026-07-15T15:03:33",
-        "updated_at": "2026-07-15T15:03:33"
-      },
-      {
-        "id": 248,
-        "assignment_id": 147,
-        "student_id": 13,
-        "created_at": "2026-07-15T15:04:23",
-        "updated_at": "2026-07-15T15:04:23"
-      },
-      {
-        "id": 249,
-        "assignment_id": 148,
-        "student_id": 13,
-        "created_at": "2026-07-15T15:08:11",
-        "updated_at": "2026-07-15T15:08:11"
-      },
-      {
-        "id": 250,
-        "assignment_id": 149,
-        "student_id": 13,
-        "created_at": "2026-07-15T15:08:55",
-        "updated_at": "2026-07-15T15:08:55"
+        "created_at": "2026-07-15T15:05:54",
+        "updated_at": "2026-07-15T15:05:54"
       }
     ],
     "student_lesson_progress": [
@@ -10036,68 +9770,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-15T15:03:01",
-        "updated_at": "2026-07-15T15:03:01"
-      },
-      {
-        "id": 247,
-        "assignment_id": 146,
-        "student_id": 13,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T15:03:33",
-        "updated_at": "2026-07-15T15:03:33"
-      },
-      {
-        "id": 248,
-        "assignment_id": 147,
-        "student_id": 13,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T15:04:23",
-        "updated_at": "2026-07-15T15:04:23"
-      },
-      {
-        "id": 249,
-        "assignment_id": 148,
-        "student_id": 13,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T15:08:11",
-        "updated_at": "2026-07-15T15:08:11"
-      },
-      {
-        "id": 250,
-        "assignment_id": 149,
-        "student_id": 13,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T15:08:55",
-        "updated_at": "2026-07-15T15:08:55"
+        "created_at": "2026-07-15T15:05:54",
+        "updated_at": "2026-07-15T15:05:54"
       }
     ]
   }
