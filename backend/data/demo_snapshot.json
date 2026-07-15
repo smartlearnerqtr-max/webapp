@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:07:42+00:00",
+  "exported_at": "2026-07-15T16:07:44+00:00",
   "tables": {
     "subjects": [
       {
@@ -8324,6 +8324,20 @@
         "config_json": "{\"prompt\":\"Chia các khối vào đúng hộp hình Tròn hoặc hình Vuông.\",\"items\":[\"Đĩa tròn\",\"Khung vuông\",\"Bóng tròn\",\"Khối vuông\"],\"targets\":[\"Hộp hình Tròn\",\"Hộp hình Vuông\"]}",
         "created_at": "2026-07-15T16:07:42",
         "updated_at": "2026-07-15T16:07:42"
+      },
+      {
+        "id": 287,
+        "lesson_id": 148,
+        "title": "Phân loại hình khối",
+        "activity_type": "drag_drop",
+        "instruction_text": "Nhận thức tư duy cụ thể",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Chia các khối vào đúng hộp hình Tròn hoặc hình Vuông.\",\"items\":[\"Đĩa tròn\",\"Khung vuông\",\"Bóng tròn\",\"Khối vuông\"],\"targets\":[\"Hộp hình Tròn\",\"Hộp hình Vuông\"]}",
+        "created_at": "2026-07-15T16:07:44",
+        "updated_at": "2026-07-15T16:07:44"
       }
     ],
     "lesson_assignments": [
