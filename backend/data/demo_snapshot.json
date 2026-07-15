@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:44:15+00:00",
+  "exported_at": "2026-07-15T14:44:18+00:00",
   "tables": {
     "subjects": [
       {
@@ -6271,6 +6271,20 @@
         "config_json": "{\"prompt\":\"Vật nào dùng để đào đất?\",\"correct\":\"shovel\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"hoe\",\"label\":\"Cái cuốc\",\"media_url\":\"/lesson-media/trung-binh/hoe-card.svg\",\"media_kind\":\"image\"},{\"id\":\"shovel\",\"label\":\"Cái xẻng\",\"media_url\":\"/lesson-media/trung-binh/shovel-card.svg\",\"media_kind\":\"image\"},{\"id\":\"knife\",\"label\":\"Con dao\",\"media_url\":\"/lesson-media/trung-binh/knife-card.svg\",\"media_kind\":\"image\"},{\"id\":\"bowl\",\"label\":\"Cái chén\",\"media_url\":\"/lesson-media/trung-binh/bowl-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Cái gì dùng để đào đất?\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-15T14:44:15",
         "updated_at": "2026-07-15T14:44:15"
+      },
+      {
+        "id": 195,
+        "lesson_id": 98,
+        "title": "Sắp xếp quy trình trồng cây",
+        "activity_type": "watch_answer",
+        "instruction_text": "Tư duy quy trình",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Kéo các bước vào đúng thứ tự để cây lớn lên.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=congnghe-grow\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:44:18",
+        "updated_at": "2026-07-15T14:44:18"
       }
     ],
     "lesson_assignments": [
