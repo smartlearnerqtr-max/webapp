@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:46:22+00:00",
+  "exported_at": "2026-07-15T14:46:24+00:00",
   "tables": {
     "subjects": [
       {
@@ -6329,6 +6329,20 @@
         "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào mặt trống khi nốt nhạc chạm đích.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=amnhac-drum\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T14:46:22",
         "updated_at": "2026-07-15T14:46:22"
+      },
+      {
+        "id": 197,
+        "lesson_id": 100,
+        "title": "Trống ảo theo nhịp",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng giữ nhịp",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào mặt trống khi nốt nhạc chạm đích.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=amnhac-drum\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:46:24",
+        "updated_at": "2026-07-15T14:46:24"
       }
     ],
     "lesson_assignments": [
