@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:00:53+00:00",
+  "exported_at": "2026-07-15T16:00:55+00:00",
   "tables": {
     "subjects": [
       {
@@ -7879,6 +7879,20 @@
         "config_json": "{\"prompt\":\"Nhìn cô giáo, bấm micro và nói “ạ” để hoàn thành lời chào.\",\"media_url\":\"/lesson-media/nang/teacher-greeting-card.svg\",\"media_kind\":\"image\",\"answer_mode\":\"voice_ai_grade\",\"expected_answer\":\"ạ\",\"accepted_answers\":[\"a\",\"ạ ạ\",\"con chào cô ạ\"]}",
         "created_at": "2026-07-15T15:57:42",
         "updated_at": "2026-07-15T15:57:42"
+      },
+      {
+        "id": 261,
+        "lesson_id": 138,
+        "title": "Gõ phách ảo",
+        "activity_type": "watch_answer",
+        "instruction_text": "Cảm thụ âm thanh",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Canh đúng nhịp rồi gõ vào mặt trống khi nốt nhạc chạm đích.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=amnhac-rhythm\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T16:00:55",
+        "updated_at": "2026-07-15T16:00:55"
       }
     ],
     "lesson_assignments": [
