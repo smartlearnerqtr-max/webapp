@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:10:43+00:00",
+  "exported_at": "2026-07-15T16:10:46+00:00",
   "tables": {
     "subjects": [
       {
@@ -8396,6 +8396,20 @@
         "config_json": "{\"prompt\":\"Kéo thẻ cảnh báo lên các vật nguy hiểm trong nhà.\",\"items\":[\"Dấu X cho ổ điện\",\"Dấu X cho dao\",\"Nhãn an toàn cho bát cơm\"],\"targets\":[\"Nguy hiểm\",\"An toàn\"]}",
         "created_at": "2026-07-15T16:10:43",
         "updated_at": "2026-07-15T16:10:43"
+      },
+      {
+        "id": 290,
+        "lesson_id": 151,
+        "title": "Sắp xếp đồ dùng nhà bếp",
+        "activity_type": "drag_drop",
+        "instruction_text": "Năng lực công nghệ gia đình",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Xếp bát to ở kệ dưới và bát nhỏ ở kệ trên.\",\"items\":[\"Bát to\",\"Bát nhỏ\",\"Bát vừa\"],\"targets\":[\"Kệ dưới\",\"Kệ trên\"]}",
+        "created_at": "2026-07-15T16:10:45",
+        "updated_at": "2026-07-15T16:10:45"
       }
     ],
     "lesson_assignments": [
