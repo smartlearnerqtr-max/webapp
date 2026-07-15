@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:03:55+00:00",
+  "exported_at": "2026-07-15T15:03:58+00:00",
   "tables": {
     "subjects": [
       {
@@ -6773,6 +6773,20 @@
         "config_json": "{\"prompt\":\"Kéo thuyền xuống nước và kéo ô tô lên đường bộ.\",\"items\":[\"Thuyền\",\"Ô tô\",\"Xe máy\",\"Ca nô\"],\"targets\":[\"Đường thủy\",\"Đường bộ\"]}",
         "created_at": "2026-07-15T15:03:25",
         "updated_at": "2026-07-15T15:03:25"
+      },
+      {
+        "id": 218,
+        "lesson_id": 110,
+        "title": "Thẻ cảnh báo AAC",
+        "activity_type": "drag_drop",
+        "instruction_text": "Kỹ năng tự bảo vệ an toàn",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Kéo thẻ cảnh báo lên các vật nguy hiểm trong nhà.\",\"items\":[\"Dấu X cho ổ điện\",\"Dấu X cho dao\",\"Nhãn an toàn cho bát cơm\"],\"targets\":[\"Nguy hiểm\",\"An toàn\"]}",
+        "created_at": "2026-07-15T15:03:58",
+        "updated_at": "2026-07-15T15:03:58"
       }
     ],
     "lesson_assignments": [
