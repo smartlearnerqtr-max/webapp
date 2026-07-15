@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:02:35+00:00",
+  "exported_at": "2026-07-15T16:02:38+00:00",
   "tables": {
     "subjects": [
       {
@@ -8166,6 +8166,20 @@
         "config_json": "{\"prompt\":\"Kéo 2 mảnh lại gần nhau để ghép thành quả bưởi hoàn chỉnh.\",\"image_url\":\"/lesson-media/nang/photos/buoi.jpg\",\"rows\":1,\"cols\":2,\"piece_count\":2}",
         "created_at": "2026-07-15T16:02:08",
         "updated_at": "2026-07-15T16:02:08"
+      },
+      {
+        "id": 280,
+        "lesson_id": 145,
+        "title": "Task Analysis (Phân tích bước)",
+        "activity_type": "step_by_step",
+        "instruction_text": "Duy trì thói quen cá nhân",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Sắp xếp đúng thứ tự rửa tay.\",\"steps\":[\"Mở vòi nước\",\"Lấy xà phòng\",\"Rửa tay\"]}",
+        "created_at": "2026-07-15T16:02:38",
+        "updated_at": "2026-07-15T16:02:38"
       }
     ],
     "lesson_assignments": [
