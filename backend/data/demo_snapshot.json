@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:35:41+00:00",
+  "exported_at": "2026-07-15T15:35:48+00:00",
   "tables": {
     "subjects": [
       {
@@ -8290,6 +8290,19 @@
         "status": "active",
         "created_at": "2026-07-15T15:33:12",
         "updated_at": "2026-07-15T15:33:12"
+      },
+      {
+        "id": 155,
+        "lesson_id": 122,
+        "class_id": 10,
+        "subject_id": 13,
+        "assigned_by_teacher_id": 8,
+        "target_type": "class",
+        "due_at": null,
+        "required_completion_percent": 80,
+        "status": "active",
+        "created_at": "2026-07-15T15:35:48",
+        "updated_at": "2026-07-15T15:35:48"
       }
     ],
     "lesson_assignment_students": [
@@ -9013,6 +9026,13 @@
         "student_id": 14,
         "created_at": "2026-07-15T15:33:12",
         "updated_at": "2026-07-15T15:33:12"
+      },
+      {
+        "id": 256,
+        "assignment_id": 155,
+        "student_id": 14,
+        "created_at": "2026-07-15T15:35:48",
+        "updated_at": "2026-07-15T15:35:48"
       }
     ],
     "student_lesson_progress": [
@@ -10560,6 +10580,21 @@
         "completed_at": null,
         "created_at": "2026-07-15T15:33:12",
         "updated_at": "2026-07-15T15:33:12"
+      },
+      {
+        "id": 256,
+        "assignment_id": 155,
+        "student_id": 14,
+        "status": "not_started",
+        "progress_percent": 0,
+        "total_learning_seconds": 0,
+        "retry_count": 0,
+        "help_count": 0,
+        "reward_star_count": 0,
+        "completion_score": 0,
+        "completed_at": null,
+        "created_at": "2026-07-15T15:35:48",
+        "updated_at": "2026-07-15T15:35:48"
       }
     ]
   }
