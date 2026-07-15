@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:16:38+00:00",
+  "exported_at": "2026-07-15T16:16:41+00:00",
   "tables": {
     "subjects": [
       {
@@ -8640,6 +8640,20 @@
         "config_json": "{\"prompt\":\"Con chọn hình ảnh thể hiện cách giao tiếp tốt với bạn bè nhé!\",\"correct\":\"ask-play\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"ask-play\",\"label\":\"Mời bạn chơi\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"push-friend\",\"label\":\"Đẩy bạn\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"shout-friend\",\"label\":\"La hét với bạn\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-15T16:16:38",
         "updated_at": "2026-07-15T16:16:38"
+      },
+      {
+        "id": 301,
+        "lesson_id": 157,
+        "title": "Giao tiếp thân thiện với bạn bè",
+        "activity_type": "watch_answer",
+        "instruction_text": "Giúp học sinh nhận biết và thực hành các cách giao tiếp tích cực để chơi vui vẻ với bạn bè.",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Sau khi xem video, con hãy cho biết, chúng ta nên làm gì để có thể chơi cùng bạn vui vẻ?\",\"answer_mode\":\"text\",\"expected_answer\":\"Nói chuyện vui vẻ, chia sẻ đồ chơi, giúp đỡ bạn.\",\"accepted_answers\":[\"Nói chuyện vui vẻ\",\"Chia sẻ đồ chơi\",\"Giúp đỡ bạn\",\"Cùng chơi với bạn\",\"Không tranh giành đồ chơi\",\"Cùng nhau làm việc\",\"Hỏi bạn có muốn chơi cùng không\"]}",
+        "created_at": "2026-07-15T16:16:41",
+        "updated_at": "2026-07-15T16:16:41"
       }
     ],
     "lesson_assignments": [
