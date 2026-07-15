@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:43:01+00:00",
+  "exported_at": "2026-07-15T14:43:04+00:00",
   "tables": {
     "subjects": [
       {
@@ -6171,6 +6171,20 @@
         "config_json": "{\"prompt\":\"Xem thẻ Festival rồi đọc lại từ mới.\",\"media_url\":\"/lesson-media/nhe/photos/festival-viet-nam.jpg\",\"media_kind\":\"image\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T14:55:07",
         "updated_at": "2026-07-12T14:55:07"
+      },
+      {
+        "id": 190,
+        "lesson_id": 96,
+        "title": "Đúng/Sai về nam châm",
+        "activity_type": "multiple_choice",
+        "instruction_text": "Năng lực tìm hiểu tự nhiên",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Nam châm có hút sắt không?\",\"choices\":[\"Đúng\",\"Sai\"],\"correct\":\"Đúng\",\"image_cards\":[{\"id\":\"card-en54yr\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-3njek3\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_text\":\"Nam châm có hút sắt không?\",\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=khtn-magnet\"}",
+        "created_at": "2026-07-15T14:43:04",
+        "updated_at": "2026-07-15T14:43:04"
       }
     ],
     "lesson_assignments": [
