@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:32:04+00:00",
+  "exported_at": "2026-07-15T15:32:07+00:00",
   "tables": {
     "subjects": [
       {
@@ -7103,6 +7103,20 @@
         "config_json": "{\"prompt\":\"Nghe màu rồi chọn đúng thẻ.\",\"correct\":\"red\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"red\",\"label\":\"Red\",\"media_url\":\"/lesson-media/nang/red-card.svg\",\"media_kind\":\"image\"},{\"id\":\"blue\",\"label\":\"Blue\",\"media_url\":\"/lesson-media/nang/blue-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Red\",\"audio_lang\":\"en-US\"}",
         "created_at": "2026-07-15T15:32:04",
         "updated_at": "2026-07-15T15:32:04"
+      },
+      {
+        "id": 233,
+        "lesson_id": 118,
+        "title": "Học qua bắt chước hành động (TPR)",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng phản xạ xã hội",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Nhìn chữ Stand up, đứng lên theo mẫu rồi bấm xác nhận.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=tienganh-standup\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T15:32:07",
+        "updated_at": "2026-07-15T15:32:07"
       }
     ],
     "lesson_assignments": [
