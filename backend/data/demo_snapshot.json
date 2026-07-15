@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:28:23+00:00",
+  "exported_at": "2026-07-15T15:28:26+00:00",
   "tables": {
     "subjects": [
       {
@@ -7003,6 +7003,20 @@
         "config_json": "{\"prompt\":\"Sau khi xem video, con hãy kể tên 2-3 đồ dùng cá nhân mà bạn nhỏ đã cất giữ và cho biết bạn ấy đã cất chúng ở đâu để bàn học luôn gọn gàng?\",\"answer_mode\":\"text\",\"expected_answer\":\"Bạn cất sách vào ngăn bàn, bút vào hộp bút, cặp sách treo lên móc.\",\"accepted_answers\":[\"Sách vào ngăn bàn.\",\"Bút vào hộp bút.\",\"Cặp sách treo lên móc.\",\"Hộp bút vào ngăn bàn.\",\"Vở vào ngăn bàn.\",\"Đồ dùng học tập được cất vào đúng chỗ.\",\"Bạn cất đồ dùng gọn gàng.\"]}",
         "created_at": "2026-07-15T15:24:11",
         "updated_at": "2026-07-15T15:24:11"
+      },
+      {
+        "id": 228,
+        "lesson_id": 116,
+        "title": "Kéo thả đếm số",
+        "activity_type": "drag_drop",
+        "instruction_text": "Năng lực tính toán cơ bản (số lượng nhỏ)",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Kéo đúng 2 quả táo vào rổ của cô, quả còn lại để trên bàn.\",\"items\":[\"Táo đỏ\",\"Táo xanh\",\"Táo vàng\"],\"targets\":[\"Rổ của cô\",\"Để trên bàn\"],\"visual_style\":\"shape_3d\"}",
+        "created_at": "2026-07-15T15:28:26",
+        "updated_at": "2026-07-15T15:28:26"
       }
     ],
     "lesson_assignments": [
