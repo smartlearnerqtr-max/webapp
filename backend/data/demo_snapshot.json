@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:36:37+00:00",
+  "exported_at": "2026-07-15T15:36:45+00:00",
   "tables": {
     "subjects": [
       {
@@ -4303,6 +4303,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T15:36:33",
         "updated_at": "2026-07-15T15:36:33"
+      },
+      {
+        "id": 125,
+        "created_by_teacher_id": 8,
+        "subject_id": 15,
+        "class_id": 10,
+        "title": "Tô màu và tạo hình đơn giản",
+        "description": "Phát triển khiếu thẩm mĩ và sự khéo léo qua việc tô màu và dán sticker.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T15:36:45",
+        "updated_at": "2026-07-15T15:36:45"
       }
     ],
     "parent_daily_reports": [],
