@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:39:55+00:00",
+  "exported_at": "2026-07-15T15:39:57+00:00",
   "tables": {
     "subjects": [
       {
@@ -7463,6 +7463,20 @@
         "config_json": "{\"prompt\":\"Con hãy chọn hình ảnh chiếc cặp sách của mình nhé!\",\"correct\":\"1\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"1\",\"label\":\"Cặp sách\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"2\",\"label\":\"Hộp bút\",\"media_url\":\"\",\"media_kind\":\"image\"},{\"id\":\"3\",\"label\":\"Bình nước\",\"media_url\":\"\",\"media_kind\":\"image\"}],\"audio_lang\":\"vi\"}",
         "created_at": "2026-07-15T15:39:55",
         "updated_at": "2026-07-15T15:39:55"
+      },
+      {
+        "id": 248,
+        "lesson_id": 128,
+        "title": "Hoạt động Kỹ năng sống",
+        "activity_type": "watch_answer",
+        "instruction_text": "Học sinh nhận biết được tầm quan trọng của việc cất giữ đồ dùng cá nhân gọn gàng và đúng chỗ.",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Sau khi xem video, con hãy cho biết: Tại sao chúng ta cần cất giữ đồ dùng cá nhân gọn gàng và đúng chỗ?\",\"answer_mode\":\"text\",\"expected_answer\":\"Để đồ dùng không bị mất và dễ tìm thấy khi cần.\",\"accepted_answers\":[\"Để không bị mất đồ.\",\"Để dễ tìm đồ.\",\"Để lớp học sạch đẹp.\",\"Để đồ dùng không bị mất và dễ tìm thấy.\"]}",
+        "created_at": "2026-07-15T15:39:57",
+        "updated_at": "2026-07-15T15:39:57"
       }
     ],
     "lesson_assignments": [
