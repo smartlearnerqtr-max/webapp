@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:49:27+00:00",
+  "exported_at": "2026-07-15T14:51:52+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$1pgGrWLlEoBpxWkX$ee3ecb067ee24c85a4ad8ff3e44541161a0f8a5b9ade8cd2b9305dd1da2d090f",
+        "password_hash": "pbkdf2:sha256:1000000$Kuoq467YprZnmwxt$33815ccc305fc402421eaa829742ca1786362ecc3ee14ad8461206ae2aecd79f",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-15T14:48:40.147001"
+        "updated_at": "2026-07-15T14:50:19.997663"
       },
       {
         "id": 18,
@@ -3887,77 +3887,107 @@
       {
         "id": 97,
         "created_by_teacher_id": 6,
-        "subject_id": 12,
+        "subject_id": 9,
         "class_id": 8,
-        "title": "Thiết bị số và An toàn mạng",
-        "description": "Nhận biết các thiết bị đầu vào/đầu ra và học cách bảo mật thông tin cá nhân.",
+        "title": "Châu lục và Phát kiến địa lí",
+        "description": "Làm quen với các châu lục và các cuộc thám hiểm lịch sử qua bản đồ 3D.",
         "primary_level": "trung_binh",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-15T14:45:09",
-        "updated_at": "2026-07-15T14:45:09"
+        "created_at": "2026-07-15T14:43:35",
+        "updated_at": "2026-07-15T14:43:35"
       },
       {
         "id": 98,
         "created_by_teacher_id": 6,
-        "subject_id": 13,
+        "subject_id": 10,
         "class_id": 8,
-        "title": "Chạy cự li ngắn và Vận động theo nhạc",
-        "description": "Luyện tập tư thế chạy đúng và tham gia các trò chơi vận động ảo.",
+        "title": "Nông cụ và quy trình trồng cây",
+        "description": "Nhận biết nông cụ quen thuộc và sắp xếp đúng các bước cơ bản trong quy trình trồng cây.",
         "primary_level": "trung_binh",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-15T14:45:44",
-        "updated_at": "2026-07-15T14:45:44"
+        "created_at": "2026-07-15T14:44:12",
+        "updated_at": "2026-07-15T14:44:12"
       },
       {
         "id": 99,
         "created_by_teacher_id": 6,
-        "subject_id": 14,
+        "subject_id": 11,
         "class_id": 8,
-        "title": "Gõ phách và Nhạc cụ dân tộc",
-        "description": "Nghe và nhận diện các loại nhạc cụ dân tộc Việt Nam.",
+        "title": "Quản lý cảm xúc và Ứng xử học đường",
+        "description": "Học cách bình tĩnh và xử lý các tình huống bắt nạt học đường.",
         "primary_level": "trung_binh",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-15T14:46:12",
-        "updated_at": "2026-07-15T14:46:12"
+        "created_at": "2026-07-15T14:44:43",
+        "updated_at": "2026-07-15T14:44:43"
       },
       {
         "id": 100,
         "created_by_teacher_id": 6,
-        "subject_id": 14,
+        "subject_id": 15,
         "class_id": 8,
-        "title": "Gõ phách và Nhạc cụ dân tộc",
-        "description": "Nghe và nhận diện các loại nhạc cụ dân tộc Việt Nam.",
+        "title": "Tạo hình, Đường nét and Màu sắc",
+        "description": "Sáng tạo các tác phẩm nghệ thuật qua việc tạo hình gốm and phối màu.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T14:46:57",
+        "updated_at": "2026-07-15T14:46:57"
+      },
+      {
+        "id": 101,
+        "created_by_teacher_id": 6,
+        "subject_id": 15,
+        "class_id": 8,
+        "title": "Tạo hình, Đường nét and Màu sắc",
+        "description": "Sáng tạo các tác phẩm nghệ thuật qua việc tạo hình gốm and phối màu.",
         "primary_level": "trung_binh",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": true,
-        "created_at": "2026-07-15T14:46:14",
-        "updated_at": "2026-07-15T14:46:35.587495"
+        "created_at": "2026-07-15T14:47:00",
+        "updated_at": "2026-07-15T14:47:20.752760"
       },
       {
-        "id": 101,
+        "id": 102,
         "created_by_teacher_id": 6,
-        "subject_id": 16,
+        "subject_id": 14,
         "class_id": 8,
-        "title": "Đặc sản Đồng Nai",
-        "description": "Nhận biết and tìm hiểu về các loại bưởi, sầu riêng đặc sản vùng Đồng Nai.",
+        "title": "Gõ phách và Nhạc cụ dân tộc",
+        "description": "Nghe và nhận diện các loại nhạc cụ dân tộc Việt Nam.",
         "primary_level": "trung_binh",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-15T14:49:14",
-        "updated_at": "2026-07-15T14:49:14"
+        "created_at": "2026-07-15T14:47:49",
+        "updated_at": "2026-07-15T14:47:49"
+      },
+      {
+        "id": 103,
+        "created_by_teacher_id": 6,
+        "subject_id": 17,
+        "class_id": 8,
+        "title": "Soạn cặp sách and Chi tiêu cá nhân",
+        "description": "Học cách tự chuẩn bị đồ dùng học tập and quản lý tiền tiết kiệm ảo.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T14:51:51",
+        "updated_at": "2026-07-15T14:51:51"
       }
     ],
     "parent_daily_reports": [],
@@ -6249,143 +6279,199 @@
       },
       {
         "id": 190,
-        "lesson_id": 97,
-        "title": "Chọn thiết bị đầu vào",
-        "activity_type": "image_choice",
-        "instruction_text": "Năng lực tin học cơ bản",
+        "lesson_id": 96,
+        "title": "Đúng/Sai về nam châm",
+        "activity_type": "multiple_choice",
+        "instruction_text": "Năng lực tìm hiểu tự nhiên",
         "voice_answer_enabled": false,
         "is_required": true,
         "sort_order": 1,
         "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Thiết bị nào dùng để gõ chữ?\",\"correct\":\"keyboard\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"keyboard\",\"label\":\"Bàn phím\",\"media_url\":\"/lesson-media/trung-binh/keyboard-card.svg\",\"media_kind\":\"image\"},{\"id\":\"monitor\",\"label\":\"Màn hình\",\"media_url\":\"/lesson-media/trung-binh/monitor-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Cái nào dùng để gõ chữ?\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T14:45:13",
-        "updated_at": "2026-07-15T14:45:13"
+        "config_json": "{\"prompt\":\"Nam châm có hút sắt không?\",\"choices\":[\"Đúng\",\"Sai\"],\"correct\":\"Đúng\",\"image_cards\":[{\"id\":\"card-en54yr\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-3njek3\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_text\":\"Nam châm có hút sắt không?\",\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=khtn-magnet\"}",
+        "created_at": "2026-07-15T14:43:04",
+        "updated_at": "2026-07-15T14:43:04"
       },
       {
         "id": 191,
-        "lesson_id": 97,
-        "title": "Đóng vai an toàn mạng",
-        "activity_type": "multiple_choice",
-        "instruction_text": "Kỹ năng tự bảo vệ không gian số",
+        "lesson_id": 96,
+        "title": "Thí nghiệm ảo kéo thả",
+        "activity_type": "watch_answer",
+        "instruction_text": "Tư duy thực nghiệm trực quan",
         "voice_answer_enabled": false,
         "is_required": false,
         "sort_order": 2,
         "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Nếu có người xin mật khẩu, em nên làm gì?\",\"choices\":[\"Không cho\",\"Báo người lớn\",\"Gửi ngay mật khẩu\"],\"correct\":\"Không cho\",\"image_cards\":[{\"id\":\"card-ulbrtj\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-osdjex\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_text\":\"Bạn đã bảo vệ máy tính rất tốt\",\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=tinhoc-safe\"}",
-        "created_at": "2026-07-15T14:45:16",
-        "updated_at": "2026-07-15T14:45:16"
+        "config_json": "{\"prompt\":\"Đưa nam châm lại gần từng vật để quan sát vật nào bị hút.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=khtn-magnet\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:43:06",
+        "updated_at": "2026-07-15T14:43:06"
       },
       {
         "id": 192,
-        "lesson_id": 98,
-        "title": "So sánh tư thế chạy",
-        "activity_type": "image_choice",
-        "instruction_text": "Nhận thức vận động đúng",
+        "lesson_id": 97,
+        "title": "Tìm Châu Mỹ trên quả địa cầu",
+        "activity_type": "watch_answer",
+        "instruction_text": "Định vị không gian địa lý",
         "voice_answer_enabled": false,
         "is_required": true,
         "sort_order": 1,
         "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Hình nào là tư thế chạy đúng?\",\"correct\":\"running-correct\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"running-correct\",\"label\":\"Chạy đúng tư thế\",\"media_url\":\"/lesson-media/nhe/running-correct.svg\",\"media_kind\":\"image\"},{\"id\":\"running-wrong\",\"label\":\"Chạy sai tư thế\",\"media_url\":\"/lesson-media/nhe/running-wrong.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Bạn nào chạy đúng tư thế?\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T14:45:46",
-        "updated_at": "2026-07-15T14:45:46"
+        "config_json": "{\"prompt\":\"Chạm vào Châu Mỹ trên quả địa cầu mô phỏng.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:43:37",
+        "updated_at": "2026-07-15T14:43:37"
       },
       {
         "id": 193,
-        "lesson_id": 98,
-        "title": "Tập theo nhạc ảo",
+        "lesson_id": 97,
+        "title": "Dấu chân thám hiểm",
         "activity_type": "watch_answer",
-        "instruction_text": "Vận động tinh và phối hợp",
+        "instruction_text": "Năng lực lịch sử trực quan",
         "voice_answer_enabled": false,
         "is_required": false,
         "sort_order": 2,
         "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Chạm lần lượt vào các vòng sáng theo nhịp 1 2 3 4.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=gdtc-ar\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T14:45:49",
-        "updated_at": "2026-07-15T14:45:49"
+        "config_json": "{\"prompt\":\"Nối đường đi từ Châu Âu sang Châu Á cho con thuyền chạy qua.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=lsdl-route\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:43:40",
+        "updated_at": "2026-07-15T14:43:40"
       },
       {
         "id": 194,
-        "lesson_id": 99,
-        "title": "Nghe đoán nhạc cụ",
-        "activity_type": "listen_choose",
-        "instruction_text": "Năng lực cảm thụ âm nhạc",
+        "lesson_id": 98,
+        "title": "Nhận diện nông cụ",
+        "activity_type": "image_choice",
+        "instruction_text": "Kỹ năng công nghệ nông nghiệp",
         "voice_answer_enabled": false,
         "is_required": true,
         "sort_order": 1,
         "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"drum\",\"label\":\"Trống\",\"media_url\":\"/lesson-media/trung-binh/drum-card.svg\",\"media_kind\":\"image\"},{\"id\":\"flute\",\"label\":\"Sáo\",\"media_url\":\"/lesson-media/nhe/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nhe/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T14:46:17",
-        "updated_at": "2026-07-15T14:46:17"
+        "config_json": "{\"prompt\":\"Vật nào dùng để đào đất?\",\"correct\":\"shovel\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"hoe\",\"label\":\"Cái cuốc\",\"media_url\":\"/lesson-media/trung-binh/hoe-card.svg\",\"media_kind\":\"image\"},{\"id\":\"shovel\",\"label\":\"Cái xẻng\",\"media_url\":\"/lesson-media/trung-binh/shovel-card.svg\",\"media_kind\":\"image\"},{\"id\":\"knife\",\"label\":\"Con dao\",\"media_url\":\"/lesson-media/trung-binh/knife-card.svg\",\"media_kind\":\"image\"},{\"id\":\"bowl\",\"label\":\"Cái chén\",\"media_url\":\"/lesson-media/trung-binh/bowl-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Cái gì dùng để đào đất?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T14:44:15",
+        "updated_at": "2026-07-15T14:44:15"
       },
       {
         "id": 195,
-        "lesson_id": 100,
-        "title": "Nghe đoán nhạc cụ",
-        "activity_type": "listen_choose",
-        "instruction_text": "Năng lực cảm thụ âm nhạc",
+        "lesson_id": 98,
+        "title": "Sắp xếp quy trình trồng cây",
+        "activity_type": "watch_answer",
+        "instruction_text": "Tư duy quy trình",
         "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
+        "is_required": false,
+        "sort_order": 2,
         "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"drum\",\"label\":\"Trống\",\"media_url\":\"/lesson-media/trung-binh/drum-card.svg\",\"media_kind\":\"image\"},{\"id\":\"flute\",\"label\":\"Sáo\",\"media_url\":\"/lesson-media/nhe/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nhe/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T14:46:19",
-        "updated_at": "2026-07-15T14:46:19"
+        "config_json": "{\"prompt\":\"Kéo các bước vào đúng thứ tự để cây lớn lên.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=congnghe-grow\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:44:18",
+        "updated_at": "2026-07-15T14:44:18"
       },
       {
         "id": 196,
         "lesson_id": 99,
-        "title": "Trống ảo theo nhịp",
+        "title": "Góc bình tĩnh",
         "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng giữ nhịp",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào mặt trống khi nốt nhạc chạm đích.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=amnhac-drum\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T14:46:22",
-        "updated_at": "2026-07-15T14:46:22"
-      },
-      {
-        "id": 197,
-        "lesson_id": 100,
-        "title": "Trống ảo theo nhịp",
-        "activity_type": "watch_answer",
-        "instruction_text": "Kỹ năng giữ nhịp",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào mặt trống khi nốt nhạc chạm đích.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=amnhac-drum\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T14:46:24",
-        "updated_at": "2026-07-15T14:46:24"
-      },
-      {
-        "id": 198,
-        "lesson_id": 101,
-        "title": "Tìm bưởi Tân Triều",
-        "activity_type": "image_choice",
-        "instruction_text": "Hiểu biết đặc sản quê hương",
+        "instruction_text": "Năng lực quản lý bản thân",
         "voice_answer_enabled": false,
         "is_required": true,
         "sort_order": 1,
         "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Đâu là hình Bưởi Tân Triều?\",\"correct\":\"buoi\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"buoi\",\"label\":\"Bưởi Tân Triều\",\"media_url\":\"/lesson-media/nhe/photos/buoi.jpg\",\"media_kind\":\"image\"},{\"id\":\"vai\",\"label\":\"Vải thiều\",\"media_url\":\"/lesson-media/trung-binh/vai-card.svg\",\"media_kind\":\"image\"},{\"id\":\"nhan\",\"label\":\"Nhãn\",\"media_url\":\"/lesson-media/trung-binh/nhan-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Tìm cho cô hình Bưởi Tân Triều\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T14:49:16",
-        "updated_at": "2026-07-15T14:49:16"
+        "config_json": "{\"prompt\":\"Làm theo nhịp thở để bình tĩnh lại trước khi học tiếp.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=gdcd-calm\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:44:46",
+        "updated_at": "2026-07-15T14:44:46"
       },
       {
-        "id": 199,
-        "lesson_id": 101,
-        "title": "Video tương tác",
+        "id": 197,
+        "lesson_id": 99,
+        "title": "Xử lý tình huống bắt nạt",
         "activity_type": "multiple_choice",
-        "instruction_text": "Kỹ năng quan sát địa điểm",
+        "instruction_text": "Phẩm chất nhân ái, kỹ năng bảo vệ",
         "voice_answer_enabled": false,
         "is_required": false,
         "sort_order": 2,
         "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Sau khi xem clip, em chọn đúng đặc sản đang được giới thiệu.\",\"choices\":[\"Bưởi Tân Triều\",\"Vải thiều\",\"Nhãn\"],\"correct\":\"Bưởi Tân Triều\",\"image_cards\":[{\"id\":\"card-b0jxpc\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-y10syo\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"https://www.youtube.com/embed/DQhT-cBk7Vo?rel=0&playsinline=1\"}",
-        "created_at": "2026-07-15T14:49:18",
-        "updated_at": "2026-07-15T14:49:18"
+        "config_json": "{\"prompt\":\"Nếu thấy bạn bị bắt nạt, em nên làm gì?\",\"choices\":[\"Báo cô giáo\",\"Đánh lại\",\"Đứng xem\"],\"correct\":\"Báo cô giáo\",\"image_cards\":[{\"id\":\"card-evda8j\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-09b8rw\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"https://www.youtube.com/embed/plU2JksBYV0?rel=0&playsinline=1\"}",
+        "created_at": "2026-07-15T14:44:48",
+        "updated_at": "2026-07-15T14:44:48"
+      },
+      {
+        "id": 198,
+        "lesson_id": 100,
+        "title": "Đổ màu hình vẽ",
+        "activity_type": "watch_answer",
+        "instruction_text": "Sáng tạo màu sắc",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Chọn màu rồi tô kín quả cam cho nổi bật.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=mythuat-fill\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:47:02",
+        "updated_at": "2026-07-15T14:47:02"
+      },
+      {
+        "id": 199,
+        "lesson_id": 101,
+        "title": "Đổ màu hình vẽ",
+        "activity_type": "watch_answer",
+        "instruction_text": "Sáng tạo màu sắc",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Chọn màu rồi tô kín quả cam cho nổi bật.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=mythuat-fill\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:47:05",
+        "updated_at": "2026-07-15T14:47:05"
+      },
+      {
+        "id": 200,
+        "lesson_id": 100,
+        "title": "Tạo hình gốm ảo",
+        "activity_type": "watch_answer",
+        "instruction_text": "Tư duy hình khối 3D",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Nắn khối đất sét ảo để tạo thành chiếc bình đơn giản.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=mythuat-pottery\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:47:08",
+        "updated_at": "2026-07-15T14:47:08"
+      },
+      {
+        "id": 201,
+        "lesson_id": 101,
+        "title": "Tạo hình gốm ảo",
+        "activity_type": "watch_answer",
+        "instruction_text": "Tư duy hình khối 3D",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Nắn khối đất sét ảo để tạo thành chiếc bình đơn giản.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=mythuat-pottery\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:47:10",
+        "updated_at": "2026-07-15T14:47:10"
+      },
+      {
+        "id": 202,
+        "lesson_id": 102,
+        "title": "Nghe đoán nhạc cụ",
+        "activity_type": "listen_choose",
+        "instruction_text": "Năng lực cảm thụ âm nhạc",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"drum\",\"label\":\"Trống\",\"media_url\":\"/lesson-media/trung-binh/drum-card.svg\",\"media_kind\":\"image\"},{\"id\":\"flute\",\"label\":\"Sáo\",\"media_url\":\"/lesson-media/nhe/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nhe/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T14:47:52",
+        "updated_at": "2026-07-15T14:47:52"
+      },
+      {
+        "id": 203,
+        "lesson_id": 102,
+        "title": "Trống ảo theo nhịp",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng giữ nhịp",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Canh đúng nhịp rồi chạm vào mặt trống khi nốt nhạc chạm đích.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=amnhac-drum\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T14:47:54",
+        "updated_at": "2026-07-15T14:47:54"
       }
     ],
     "lesson_assignments": [
@@ -7184,68 +7270,55 @@
       },
       {
         "id": 137,
-        "lesson_id": 97,
+        "lesson_id": 96,
         "class_id": 8,
-        "subject_id": 12,
+        "subject_id": 8,
         "assigned_by_teacher_id": 6,
         "target_type": "class",
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-15T14:45:24",
-        "updated_at": "2026-07-15T14:45:24"
+        "created_at": "2026-07-15T14:43:13",
+        "updated_at": "2026-07-15T14:43:13"
       },
       {
         "id": 138,
-        "lesson_id": 98,
+        "lesson_id": 97,
         "class_id": 8,
-        "subject_id": 13,
+        "subject_id": 9,
         "assigned_by_teacher_id": 6,
         "target_type": "class",
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-15T14:45:57",
-        "updated_at": "2026-07-15T14:45:57"
+        "created_at": "2026-07-15T14:43:54",
+        "updated_at": "2026-07-15T14:43:54"
       },
       {
         "id": 139,
-        "lesson_id": 99,
+        "lesson_id": 98,
         "class_id": 8,
-        "subject_id": 14,
+        "subject_id": 10,
         "assigned_by_teacher_id": 6,
         "target_type": "class",
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-15T14:46:41",
-        "updated_at": "2026-07-15T14:46:41"
+        "created_at": "2026-07-15T14:44:26",
+        "updated_at": "2026-07-15T14:44:26"
       },
       {
         "id": 140,
-        "lesson_id": 99,
+        "lesson_id": 100,
         "class_id": 8,
-        "subject_id": 14,
+        "subject_id": 15,
         "assigned_by_teacher_id": 6,
         "target_type": "class",
         "due_at": null,
         "required_completion_percent": 80,
         "status": "active",
-        "created_at": "2026-07-15T14:48:58",
-        "updated_at": "2026-07-15T14:48:58"
-      },
-      {
-        "id": 141,
-        "lesson_id": 101,
-        "class_id": 8,
-        "subject_id": 16,
-        "assigned_by_teacher_id": 6,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T14:49:27",
-        "updated_at": "2026-07-15T14:49:27"
+        "created_at": "2026-07-15T14:47:25",
+        "updated_at": "2026-07-15T14:47:25"
       }
     ],
     "lesson_assignment_students": [
@@ -7806,71 +7879,57 @@
         "id": 232,
         "assignment_id": 137,
         "student_id": 12,
-        "created_at": "2026-07-15T14:45:24",
-        "updated_at": "2026-07-15T14:45:24"
+        "created_at": "2026-07-15T14:43:13",
+        "updated_at": "2026-07-15T14:43:13"
       },
       {
         "id": 233,
         "assignment_id": 137,
         "student_id": 34,
-        "created_at": "2026-07-15T14:45:24",
-        "updated_at": "2026-07-15T14:45:24"
+        "created_at": "2026-07-15T14:43:13",
+        "updated_at": "2026-07-15T14:43:13"
       },
       {
         "id": 234,
         "assignment_id": 138,
         "student_id": 12,
-        "created_at": "2026-07-15T14:45:57",
-        "updated_at": "2026-07-15T14:45:57"
+        "created_at": "2026-07-15T14:43:54",
+        "updated_at": "2026-07-15T14:43:54"
       },
       {
         "id": 235,
         "assignment_id": 138,
         "student_id": 34,
-        "created_at": "2026-07-15T14:45:57",
-        "updated_at": "2026-07-15T14:45:57"
+        "created_at": "2026-07-15T14:43:54",
+        "updated_at": "2026-07-15T14:43:54"
       },
       {
         "id": 236,
         "assignment_id": 139,
         "student_id": 12,
-        "created_at": "2026-07-15T14:46:41",
-        "updated_at": "2026-07-15T14:46:41"
+        "created_at": "2026-07-15T14:44:26",
+        "updated_at": "2026-07-15T14:44:26"
       },
       {
         "id": 237,
         "assignment_id": 139,
         "student_id": 34,
-        "created_at": "2026-07-15T14:46:41",
-        "updated_at": "2026-07-15T14:46:41"
+        "created_at": "2026-07-15T14:44:26",
+        "updated_at": "2026-07-15T14:44:26"
       },
       {
         "id": 238,
         "assignment_id": 140,
         "student_id": 12,
-        "created_at": "2026-07-15T14:48:58",
-        "updated_at": "2026-07-15T14:48:58"
+        "created_at": "2026-07-15T14:47:25",
+        "updated_at": "2026-07-15T14:47:25"
       },
       {
         "id": 239,
         "assignment_id": 140,
         "student_id": 34,
-        "created_at": "2026-07-15T14:48:58",
-        "updated_at": "2026-07-15T14:48:58"
-      },
-      {
-        "id": 240,
-        "assignment_id": 141,
-        "student_id": 12,
-        "created_at": "2026-07-15T14:49:27",
-        "updated_at": "2026-07-15T14:49:27"
-      },
-      {
-        "id": 241,
-        "assignment_id": 141,
-        "student_id": 34,
-        "created_at": "2026-07-15T14:49:27",
-        "updated_at": "2026-07-15T14:49:27"
+        "created_at": "2026-07-15T14:47:25",
+        "updated_at": "2026-07-15T14:47:25"
       }
     ],
     "student_lesson_progress": [
@@ -9071,8 +9130,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-15T14:45:24",
-        "updated_at": "2026-07-15T14:45:24"
+        "created_at": "2026-07-15T14:43:13",
+        "updated_at": "2026-07-15T14:43:13"
       },
       {
         "id": 233,
@@ -9086,8 +9145,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-15T14:45:24",
-        "updated_at": "2026-07-15T14:45:24"
+        "created_at": "2026-07-15T14:43:13",
+        "updated_at": "2026-07-15T14:43:13"
       },
       {
         "id": 234,
@@ -9101,8 +9160,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-15T14:45:57",
-        "updated_at": "2026-07-15T14:45:57"
+        "created_at": "2026-07-15T14:43:54",
+        "updated_at": "2026-07-15T14:43:54"
       },
       {
         "id": 235,
@@ -9116,8 +9175,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-15T14:45:57",
-        "updated_at": "2026-07-15T14:45:57"
+        "created_at": "2026-07-15T14:43:54",
+        "updated_at": "2026-07-15T14:43:54"
       },
       {
         "id": 236,
@@ -9131,8 +9190,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-15T14:46:41",
-        "updated_at": "2026-07-15T14:46:41"
+        "created_at": "2026-07-15T14:44:26",
+        "updated_at": "2026-07-15T14:44:26"
       },
       {
         "id": 237,
@@ -9146,8 +9205,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-15T14:46:41",
-        "updated_at": "2026-07-15T14:46:41"
+        "created_at": "2026-07-15T14:44:26",
+        "updated_at": "2026-07-15T14:44:26"
       },
       {
         "id": 238,
@@ -9161,8 +9220,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-15T14:48:58",
-        "updated_at": "2026-07-15T14:48:58"
+        "created_at": "2026-07-15T14:47:25",
+        "updated_at": "2026-07-15T14:47:25"
       },
       {
         "id": 239,
@@ -9176,38 +9235,8 @@
         "reward_star_count": 0,
         "completion_score": 0,
         "completed_at": null,
-        "created_at": "2026-07-15T14:48:58",
-        "updated_at": "2026-07-15T14:48:58"
-      },
-      {
-        "id": 240,
-        "assignment_id": 141,
-        "student_id": 12,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T14:49:27",
-        "updated_at": "2026-07-15T14:49:27"
-      },
-      {
-        "id": 241,
-        "assignment_id": 141,
-        "student_id": 34,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T14:49:27",
-        "updated_at": "2026-07-15T14:49:27"
+        "created_at": "2026-07-15T14:47:25",
+        "updated_at": "2026-07-15T14:47:25"
       }
     ]
   }
