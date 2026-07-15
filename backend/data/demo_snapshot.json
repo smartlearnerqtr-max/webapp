@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T14:44:48+00:00",
+  "exported_at": "2026-07-15T14:45:09+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$9j9M1yTJSSjeZkP4$292fef0aef56e7a7b43cccfe988cf7bbdc8ef6c4f741d0a64f07e03c72def2ad",
+        "password_hash": "pbkdf2:sha256:1000000$7KlQZQOqET7lg4po$40de77bdb5f67c16353983803627a76059e2bca3a1d0da5d6f63078e8d38ec7d",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-15T14:41:05.023267"
+        "updated_at": "2026-07-15T14:44:49.662694"
       },
       {
         "id": 18,
@@ -3887,47 +3887,17 @@
       {
         "id": 97,
         "created_by_teacher_id": 6,
-        "subject_id": 9,
+        "subject_id": 12,
         "class_id": 8,
-        "title": "Châu lục và Phát kiến địa lí",
-        "description": "Làm quen với các châu lục và các cuộc thám hiểm lịch sử qua bản đồ 3D.",
+        "title": "Thiết bị số và An toàn mạng",
+        "description": "Nhận biết các thiết bị đầu vào/đầu ra và học cách bảo mật thông tin cá nhân.",
         "primary_level": "trung_binh",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-15T14:43:35",
-        "updated_at": "2026-07-15T14:43:35"
-      },
-      {
-        "id": 98,
-        "created_by_teacher_id": 6,
-        "subject_id": 10,
-        "class_id": 8,
-        "title": "Nông cụ và quy trình trồng cây",
-        "description": "Nhận biết nông cụ quen thuộc và sắp xếp đúng các bước cơ bản trong quy trình trồng cây.",
-        "primary_level": "trung_binh",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-15T14:44:12",
-        "updated_at": "2026-07-15T14:44:12"
-      },
-      {
-        "id": 99,
-        "created_by_teacher_id": 6,
-        "subject_id": 11,
-        "class_id": 8,
-        "title": "Quản lý cảm xúc và Ứng xử học đường",
-        "description": "Học cách bình tĩnh và xử lý các tình huống bắt nạt học đường.",
-        "primary_level": "trung_binh",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-15T14:44:43",
-        "updated_at": "2026-07-15T14:44:43"
+        "created_at": "2026-07-15T14:45:09",
+        "updated_at": "2026-07-15T14:45:09"
       }
     ],
     "parent_daily_reports": [],
@@ -6216,118 +6186,6 @@
         "config_json": "{\"prompt\":\"Xem thẻ Festival rồi đọc lại từ mới.\",\"media_url\":\"/lesson-media/nhe/photos/festival-viet-nam.jpg\",\"media_kind\":\"image\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-12T14:55:07",
         "updated_at": "2026-07-12T14:55:07"
-      },
-      {
-        "id": 190,
-        "lesson_id": 96,
-        "title": "Đúng/Sai về nam châm",
-        "activity_type": "multiple_choice",
-        "instruction_text": "Năng lực tìm hiểu tự nhiên",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Nam châm có hút sắt không?\",\"choices\":[\"Đúng\",\"Sai\"],\"correct\":\"Đúng\",\"image_cards\":[{\"id\":\"card-en54yr\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-3njek3\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_text\":\"Nam châm có hút sắt không?\",\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=khtn-magnet\"}",
-        "created_at": "2026-07-15T14:43:04",
-        "updated_at": "2026-07-15T14:43:04"
-      },
-      {
-        "id": 191,
-        "lesson_id": 96,
-        "title": "Thí nghiệm ảo kéo thả",
-        "activity_type": "watch_answer",
-        "instruction_text": "Tư duy thực nghiệm trực quan",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Đưa nam châm lại gần từng vật để quan sát vật nào bị hút.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=khtn-magnet\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T14:43:06",
-        "updated_at": "2026-07-15T14:43:06"
-      },
-      {
-        "id": 192,
-        "lesson_id": 97,
-        "title": "Tìm Châu Mỹ trên quả địa cầu",
-        "activity_type": "watch_answer",
-        "instruction_text": "Định vị không gian địa lý",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Chạm vào Châu Mỹ trên quả địa cầu mô phỏng.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T14:43:37",
-        "updated_at": "2026-07-15T14:43:37"
-      },
-      {
-        "id": 193,
-        "lesson_id": 97,
-        "title": "Dấu chân thám hiểm",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực lịch sử trực quan",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Nối đường đi từ Châu Âu sang Châu Á cho con thuyền chạy qua.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=lsdl-route\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T14:43:40",
-        "updated_at": "2026-07-15T14:43:40"
-      },
-      {
-        "id": 194,
-        "lesson_id": 98,
-        "title": "Nhận diện nông cụ",
-        "activity_type": "image_choice",
-        "instruction_text": "Kỹ năng công nghệ nông nghiệp",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Vật nào dùng để đào đất?\",\"correct\":\"shovel\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"hoe\",\"label\":\"Cái cuốc\",\"media_url\":\"/lesson-media/trung-binh/hoe-card.svg\",\"media_kind\":\"image\"},{\"id\":\"shovel\",\"label\":\"Cái xẻng\",\"media_url\":\"/lesson-media/trung-binh/shovel-card.svg\",\"media_kind\":\"image\"},{\"id\":\"knife\",\"label\":\"Con dao\",\"media_url\":\"/lesson-media/trung-binh/knife-card.svg\",\"media_kind\":\"image\"},{\"id\":\"bowl\",\"label\":\"Cái chén\",\"media_url\":\"/lesson-media/trung-binh/bowl-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Cái gì dùng để đào đất?\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T14:44:15",
-        "updated_at": "2026-07-15T14:44:15"
-      },
-      {
-        "id": 195,
-        "lesson_id": 98,
-        "title": "Sắp xếp quy trình trồng cây",
-        "activity_type": "watch_answer",
-        "instruction_text": "Tư duy quy trình",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Kéo các bước vào đúng thứ tự để cây lớn lên.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=congnghe-grow\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T14:44:18",
-        "updated_at": "2026-07-15T14:44:18"
-      },
-      {
-        "id": 196,
-        "lesson_id": 99,
-        "title": "Góc bình tĩnh",
-        "activity_type": "watch_answer",
-        "instruction_text": "Năng lực quản lý bản thân",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Làm theo nhịp thở để bình tĩnh lại trước khi học tiếp.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=gdcd-calm\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T14:44:46",
-        "updated_at": "2026-07-15T14:44:46"
-      },
-      {
-        "id": 197,
-        "lesson_id": 99,
-        "title": "Xử lý tình huống bắt nạt",
-        "activity_type": "multiple_choice",
-        "instruction_text": "Phẩm chất nhân ái, kỹ năng bảo vệ",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 2,
-        "config_json": "{\"prompt\":\"Nếu thấy bạn bị bắt nạt, em nên làm gì?\",\"choices\":[\"Báo cô giáo\",\"Đánh lại\",\"Đứng xem\"],\"correct\":\"Báo cô giáo\",\"image_cards\":[{\"id\":\"card-evda8j\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-09b8rw\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"https://www.youtube.com/embed/plU2JksBYV0?rel=0&playsinline=1\"}",
-        "created_at": "2026-07-15T14:44:48",
-        "updated_at": "2026-07-15T14:44:48"
       }
     ],
     "lesson_assignments": [
@@ -7123,45 +6981,6 @@
         "status": "active",
         "created_at": "2026-07-12T14:55:14",
         "updated_at": "2026-07-12T14:55:14"
-      },
-      {
-        "id": 137,
-        "lesson_id": 96,
-        "class_id": 8,
-        "subject_id": 8,
-        "assigned_by_teacher_id": 6,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T14:43:13",
-        "updated_at": "2026-07-15T14:43:13"
-      },
-      {
-        "id": 138,
-        "lesson_id": 97,
-        "class_id": 8,
-        "subject_id": 9,
-        "assigned_by_teacher_id": 6,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T14:43:54",
-        "updated_at": "2026-07-15T14:43:54"
-      },
-      {
-        "id": 139,
-        "lesson_id": 98,
-        "class_id": 8,
-        "subject_id": 10,
-        "assigned_by_teacher_id": 6,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T14:44:26",
-        "updated_at": "2026-07-15T14:44:26"
       }
     ],
     "lesson_assignment_students": [
@@ -7717,48 +7536,6 @@
         "student_id": 34,
         "created_at": "2026-07-12T14:55:14",
         "updated_at": "2026-07-12T14:55:14"
-      },
-      {
-        "id": 232,
-        "assignment_id": 137,
-        "student_id": 12,
-        "created_at": "2026-07-15T14:43:13",
-        "updated_at": "2026-07-15T14:43:13"
-      },
-      {
-        "id": 233,
-        "assignment_id": 137,
-        "student_id": 34,
-        "created_at": "2026-07-15T14:43:13",
-        "updated_at": "2026-07-15T14:43:13"
-      },
-      {
-        "id": 234,
-        "assignment_id": 138,
-        "student_id": 12,
-        "created_at": "2026-07-15T14:43:54",
-        "updated_at": "2026-07-15T14:43:54"
-      },
-      {
-        "id": 235,
-        "assignment_id": 138,
-        "student_id": 34,
-        "created_at": "2026-07-15T14:43:54",
-        "updated_at": "2026-07-15T14:43:54"
-      },
-      {
-        "id": 236,
-        "assignment_id": 139,
-        "student_id": 12,
-        "created_at": "2026-07-15T14:44:26",
-        "updated_at": "2026-07-15T14:44:26"
-      },
-      {
-        "id": 237,
-        "assignment_id": 139,
-        "student_id": 34,
-        "created_at": "2026-07-15T14:44:26",
-        "updated_at": "2026-07-15T14:44:26"
       }
     ],
     "student_lesson_progress": [
@@ -8946,96 +8723,6 @@
         "completed_at": null,
         "created_at": "2026-07-12T14:55:14",
         "updated_at": "2026-07-12T14:55:14"
-      },
-      {
-        "id": 232,
-        "assignment_id": 137,
-        "student_id": 12,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T14:43:13",
-        "updated_at": "2026-07-15T14:43:13"
-      },
-      {
-        "id": 233,
-        "assignment_id": 137,
-        "student_id": 34,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T14:43:13",
-        "updated_at": "2026-07-15T14:43:13"
-      },
-      {
-        "id": 234,
-        "assignment_id": 138,
-        "student_id": 12,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T14:43:54",
-        "updated_at": "2026-07-15T14:43:54"
-      },
-      {
-        "id": 235,
-        "assignment_id": 138,
-        "student_id": 34,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T14:43:54",
-        "updated_at": "2026-07-15T14:43:54"
-      },
-      {
-        "id": 236,
-        "assignment_id": 139,
-        "student_id": 12,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T14:44:26",
-        "updated_at": "2026-07-15T14:44:26"
-      },
-      {
-        "id": 237,
-        "assignment_id": 139,
-        "student_id": 34,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T14:44:26",
-        "updated_at": "2026-07-15T14:44:26"
       }
     ]
   }
