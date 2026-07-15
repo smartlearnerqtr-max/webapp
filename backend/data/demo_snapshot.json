@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:21:50+00:00",
+  "exported_at": "2026-07-15T16:23:00+00:00",
   "tables": {
     "subjects": [
       {
@@ -1674,7 +1674,7 @@
         "id": 37,
         "user_id": 62,
         "full_name": "Nguyễn Ngọc Kim Ngân",
-        "disability_level": "trung_binh",
+        "disability_level": "nhe",
         "support_note": "Tài khoản import từ lô FZTF6Y38T",
         "preferred_input": "touch",
         "preferred_read_speed": null,
@@ -1683,7 +1683,7 @@
         "avatar_url": null,
         "created_by_teacher_id": null,
         "created_at": "2026-07-05T12:41:29",
-        "updated_at": "2026-07-05T12:41:29"
+        "updated_at": "2026-07-15T16:22:35.195685"
       },
       {
         "id": 38,
@@ -2850,6 +2850,14 @@
         "status": "active",
         "created_at": "2026-07-15T16:21:50",
         "updated_at": "2026-07-15T16:21:50"
+      },
+      {
+        "id": 35,
+        "class_id": 18,
+        "student_id": 37,
+        "status": "active",
+        "created_at": "2026-07-15T16:23:00",
+        "updated_at": "2026-07-15T16:23:00"
       }
     ],
     "class_subjects": [
@@ -5271,6 +5279,15 @@
         "source": "class_join",
         "created_at": "2026-07-15T16:21:50",
         "updated_at": "2026-07-15T16:21:50"
+      },
+      {
+        "id": 27,
+        "teacher_id": 16,
+        "student_id": 37,
+        "status": "active",
+        "source": "class_join",
+        "created_at": "2026-07-15T16:23:00",
+        "updated_at": "2026-07-15T16:23:00"
       }
     ],
     "lesson_activities": [
