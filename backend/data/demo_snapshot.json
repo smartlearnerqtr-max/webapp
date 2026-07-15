@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-12T14:55:14+00:00",
+  "exported_at": "2026-07-15T14:43:01+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$t92XPd7Y19VhtEVi$a8839d3cc878c95b436887eddd5a0a115084b5690e8494a020a02864568aaf19",
+        "password_hash": "pbkdf2:sha256:1000000$9j9M1yTJSSjeZkP4$292fef0aef56e7a7b43cccfe988cf7bbdc8ef6c4f741d0a64f07e03c72def2ad",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-12T14:54:03.105312"
+        "updated_at": "2026-07-15T14:41:05.023267"
       },
       {
         "id": 18,
@@ -3868,6 +3868,21 @@
         "is_archived": false,
         "created_at": "2026-07-12T14:55:02",
         "updated_at": "2026-07-12T14:55:02"
+      },
+      {
+        "id": 96,
+        "created_by_teacher_id": 6,
+        "subject_id": 8,
+        "class_id": 8,
+        "title": "Nam châm và lực hút",
+        "description": "Tìm hiểu tính chất của nam châm qua câu hỏi đúng sai và thí nghiệm kéo thả trực quan.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T14:43:01",
+        "updated_at": "2026-07-15T14:43:01"
       }
     ],
     "parent_daily_reports": [],
