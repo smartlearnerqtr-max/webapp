@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:28:59+00:00",
+  "exported_at": "2026-07-15T15:31:26+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$57S4AEmLkajm6jXv$ef47c90ad3542a5977e7da08131a427ea33b22d5e98824162e2a6969feea6548",
+        "password_hash": "pbkdf2:sha256:1000000$7O46lLnE6e8UJZnf$4eb0b51a865f81f14ad89e5df5cb354d437d78a591c2d3fcfc772ad415cd25ef",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-15T15:27:47.012373"
+        "updated_at": "2026-07-15T15:29:49.592357"
       },
       {
         "id": 18,
@@ -2748,6 +2748,14 @@
         "status": "active",
         "created_at": "2026-07-12T14:50:01",
         "updated_at": "2026-07-12T14:50:01"
+      },
+      {
+        "id": 29,
+        "class_id": 10,
+        "student_id": 29,
+        "status": "active",
+        "created_at": "2026-07-15T15:27:01",
+        "updated_at": "2026-07-15T15:27:01"
       }
     ],
     "class_subjects": [
@@ -4172,32 +4180,17 @@
       {
         "id": 116,
         "created_by_teacher_id": 8,
-        "subject_id": 6,
+        "subject_id": 3,
         "class_id": 10,
-        "title": "Nhận biết số lượng 1-3 và Hình khối cơ bản",
-        "description": "Làm quen với các con số nhỏ và hình khối cơ bản qua thao tác kéo thả.",
+        "title": "Cơ thể người (Mắt, mũi, miệng) và Vật sống / Không sống",
+        "description": "Nhận biết các bộ phận cơ thể và phân biệt vật sống quanh ta.",
         "primary_level": "nang",
         "estimated_minutes": null,
         "difficulty_stage": 1,
         "is_published": false,
         "is_archived": false,
-        "created_at": "2026-07-15T15:28:23",
-        "updated_at": "2026-07-15T15:28:23"
-      },
-      {
-        "id": 117,
-        "created_by_teacher_id": 8,
-        "subject_id": 5,
-        "class_id": 10,
-        "title": "Nhận biết nhân vật trong truyện cổ tích",
-        "description": "Giúp học sinh nhận biết các nhân vật quen thuộc qua hình ảnh và âm thanh sinh động.",
-        "primary_level": "nang",
-        "estimated_minutes": null,
-        "difficulty_stage": 1,
-        "is_published": false,
-        "is_archived": false,
-        "created_at": "2026-07-15T15:28:53",
-        "updated_at": "2026-07-15T15:28:53"
+        "created_at": "2026-07-15T15:31:26",
+        "updated_at": "2026-07-15T15:31:26"
       }
     ],
     "parent_daily_reports": [],
@@ -4650,6 +4643,15 @@
         "source": "class_join",
         "created_at": "2026-07-12T14:50:01",
         "updated_at": "2026-07-12T14:50:01"
+      },
+      {
+        "id": 21,
+        "teacher_id": 8,
+        "student_id": 29,
+        "status": "active",
+        "source": "class_join",
+        "created_at": "2026-07-15T15:27:01",
+        "updated_at": "2026-07-15T15:27:01"
       }
     ],
     "lesson_activities": [
@@ -6990,90 +6992,6 @@
         "config_json": "{\"prompt\":\"Bấm vào thẻ để app nói thay em câu em muốn.\",\"cards\":[\"Con muốn uống nước\",\"Con muốn ăn cơm\",\"Con mệt\"],\"image_cards\":[{\"id\":\"aac-food\",\"label\":\"Cơm\",\"media_url\":\"/lesson-media/nang/aac-com.svg\",\"media_kind\":\"image\"},{\"id\":\"aac-play\",\"label\":\"Chơi\",\"media_url\":\"/lesson-media/nang/aac-choi.svg\",\"media_kind\":\"image\"}]}",
         "created_at": "2026-07-15T15:11:21",
         "updated_at": "2026-07-15T15:11:21"
-      },
-      {
-        "id": 226,
-        "lesson_id": 115,
-        "title": "Ai là chủ nhân?",
-        "activity_type": "image_choice",
-        "instruction_text": "Học sinh nhận ra ba lô và bình nước của mình trong số 2 - 3 đồ dùng khác.",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Đâu là ba lô của con? Hãy chỉ vào ba lô của mình nhé!\",\"correct\":\"card-mwj5zp\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"card-pcx5h3\",\"label\":\"Lựa chọn 1\",\"media_url\":\"http://ban-hoc-backend-v2.onrender.com/api/v1/media/files/teacher_7/33a835b0730249b69d0224c5fd4e62bc.png\",\"media_kind\":\"image\"},{\"id\":\"card-mwj5zp\",\"label\":\"Lựa chọn 2\",\"media_url\":\"http://ban-hoc-backend-v2.onrender.com/api/v1/media/files/teacher_7/8e5ba7d8a4ab46c7a644a218a9fb40b1.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Đâu là ba lô của con? Hãy chỉ vào ba lô của mình nhé!\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T15:24:07",
-        "updated_at": "2026-07-15T15:24:07"
-      },
-      {
-        "id": 227,
-        "lesson_id": 115,
-        "title": "Xem và trả lời: Cất đồ dùng cá nhân",
-        "activity_type": "watch_answer",
-        "instruction_text": "Học sinh nhận biết cách cất giữ đồ dùng cá nhân gọn gàng khi đến lớp thông qua việc quan sát video.",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Sau khi xem video, con hãy kể tên 2-3 đồ dùng cá nhân mà bạn nhỏ đã cất giữ và cho biết bạn ấy đã cất chúng ở đâu để bàn học luôn gọn gàng?\",\"answer_mode\":\"text\",\"expected_answer\":\"Bạn cất sách vào ngăn bàn, bút vào hộp bút, cặp sách treo lên móc.\",\"accepted_answers\":[\"Sách vào ngăn bàn.\",\"Bút vào hộp bút.\",\"Cặp sách treo lên móc.\",\"Hộp bút vào ngăn bàn.\",\"Vở vào ngăn bàn.\",\"Đồ dùng học tập được cất vào đúng chỗ.\",\"Bạn cất đồ dùng gọn gàng.\"]}",
-        "created_at": "2026-07-15T15:24:11",
-        "updated_at": "2026-07-15T15:24:11"
-      },
-      {
-        "id": 228,
-        "lesson_id": 116,
-        "title": "Kéo thả đếm số",
-        "activity_type": "drag_drop",
-        "instruction_text": "Năng lực tính toán cơ bản (số lượng nhỏ)",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Kéo đúng 2 quả táo vào rổ của cô, quả còn lại để trên bàn.\",\"items\":[\"Táo đỏ\",\"Táo xanh\",\"Táo vàng\"],\"targets\":[\"Rổ của cô\",\"Để trên bàn\"],\"visual_style\":\"shape_3d\"}",
-        "created_at": "2026-07-15T15:28:26",
-        "updated_at": "2026-07-15T15:28:26"
-      },
-      {
-        "id": 229,
-        "lesson_id": 116,
-        "title": "Phân loại hình khối",
-        "activity_type": "drag_drop",
-        "instruction_text": "Nhận thức tư duy cụ thể",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Chia các khối vào đúng hộp hình Tròn hoặc hình Vuông.\",\"items\":[\"Đĩa tròn\",\"Khung vuông\",\"Bóng tròn\",\"Khối vuông\"],\"targets\":[\"Hộp hình Tròn\",\"Hộp hình Vuông\"]}",
-        "created_at": "2026-07-15T15:28:29",
-        "updated_at": "2026-07-15T15:28:29"
-      },
-      {
-        "id": 230,
-        "lesson_id": 117,
-        "title": "Chạm đúng nhân vật",
-        "activity_type": "image_choice",
-        "instruction_text": "Năng lực nhận diện hình ảnh",
-        "voice_answer_enabled": false,
-        "is_required": true,
-        "sort_order": 1,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Ai là cô Tấm?\",\"correct\":\"co-tam\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"co-tam\",\"label\":\"Cô Tấm\",\"media_url\":\"/lesson-media/nang/co-tam-card.svg\",\"media_kind\":\"image\"},{\"id\":\"con-cho\",\"label\":\"Con chó\",\"media_url\":\"/lesson-media/nang/con-cho-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Ai là cô Tấm?\",\"audio_lang\":\"vi-VN\"}",
-        "created_at": "2026-07-15T15:28:56",
-        "updated_at": "2026-07-15T15:28:56"
-      },
-      {
-        "id": 231,
-        "lesson_id": 117,
-        "title": "Nghe truyện bằng Tranh động (Animation)",
-        "activity_type": "watch_answer",
-        "instruction_text": "Phẩm chất chăm chỉ, tập trung nghe 3 phút",
-        "voice_answer_enabled": false,
-        "is_required": false,
-        "sort_order": 2,
-        "difficulty_stage": 3,
-        "config_json": "{\"prompt\":\"Xem truyện tranh động rồi bấm xác nhận khi em nghe xong.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=nguvan-story\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
-        "created_at": "2026-07-15T15:28:59",
-        "updated_at": "2026-07-15T15:28:59"
       }
     ],
     "lesson_assignments": [
@@ -8038,32 +7956,6 @@
         "status": "active",
         "created_at": "2026-07-15T15:11:32",
         "updated_at": "2026-07-15T15:11:32"
-      },
-      {
-        "id": 150,
-        "lesson_id": 115,
-        "class_id": 9,
-        "subject_id": 4,
-        "assigned_by_teacher_id": 7,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T15:24:27",
-        "updated_at": "2026-07-15T15:24:27"
-      },
-      {
-        "id": 151,
-        "lesson_id": 116,
-        "class_id": 10,
-        "subject_id": 6,
-        "assigned_by_teacher_id": 8,
-        "target_type": "class",
-        "due_at": null,
-        "required_completion_percent": 80,
-        "status": "active",
-        "created_at": "2026-07-15T15:28:36",
-        "updated_at": "2026-07-15T15:28:36"
       }
     ],
     "lesson_assignment_students": [
@@ -8752,20 +8644,6 @@
         "student_id": 13,
         "created_at": "2026-07-15T15:11:32",
         "updated_at": "2026-07-15T15:11:32"
-      },
-      {
-        "id": 251,
-        "assignment_id": 150,
-        "student_id": 13,
-        "created_at": "2026-07-15T15:24:27",
-        "updated_at": "2026-07-15T15:24:27"
-      },
-      {
-        "id": 252,
-        "assignment_id": 151,
-        "student_id": 14,
-        "created_at": "2026-07-15T15:28:36",
-        "updated_at": "2026-07-15T15:28:36"
       }
     ],
     "student_lesson_progress": [
@@ -10238,36 +10116,6 @@
         "completed_at": null,
         "created_at": "2026-07-15T15:11:32",
         "updated_at": "2026-07-15T15:11:32"
-      },
-      {
-        "id": 251,
-        "assignment_id": 150,
-        "student_id": 13,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T15:24:27",
-        "updated_at": "2026-07-15T15:24:27"
-      },
-      {
-        "id": 252,
-        "assignment_id": 151,
-        "student_id": 14,
-        "status": "not_started",
-        "progress_percent": 0,
-        "total_learning_seconds": 0,
-        "retry_count": 0,
-        "help_count": 0,
-        "reward_star_count": 0,
-        "completion_score": 0,
-        "completed_at": null,
-        "created_at": "2026-07-15T15:28:36",
-        "updated_at": "2026-07-15T15:28:36"
       }
     ]
   }
