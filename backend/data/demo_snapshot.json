@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:37:56+00:00",
+  "exported_at": "2026-07-15T15:37:59+00:00",
   "tables": {
     "subjects": [
       {
@@ -7179,6 +7179,20 @@
         "config_json": "{\"prompt\":\"Vuốt trái phải để lật trang và chạm để bật sáng màn hình máy tính bảng.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=tinhoc-swipe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T15:35:01",
         "updated_at": "2026-07-15T15:35:01"
+      },
+      {
+        "id": 234,
+        "lesson_id": 121,
+        "title": "Task Analysis (Phân tích bước)",
+        "activity_type": "step_by_step",
+        "instruction_text": "Duy trì thói quen cá nhân",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Sắp xếp đúng thứ tự rửa tay.\",\"steps\":[\"Mở vòi nước\",\"Lấy xà phòng\",\"Rửa tay\"]}",
+        "created_at": "2026-07-15T15:37:59",
+        "updated_at": "2026-07-15T15:37:59"
       }
     ],
     "lesson_assignments": [
