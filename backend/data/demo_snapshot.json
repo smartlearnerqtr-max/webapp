@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:47:26+00:00",
+  "exported_at": "2026-07-15T15:47:29+00:00",
   "tables": {
     "subjects": [
       {
@@ -7693,6 +7693,20 @@
         "config_json": "{\"prompt\":\"Chuột máy tính đâu?\",\"correct\":\"computer-mouse\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"computer-mouse\",\"label\":\"Chuột máy tính\",\"media_url\":\"/lesson-media/nang/computer-mouse-card.svg\",\"media_kind\":\"image\"},{\"id\":\"animal-mouse\",\"label\":\"Con chuột\",\"media_url\":\"/lesson-media/nang/animal-mouse-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Chuột máy tính đâu?\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-15T15:47:17",
         "updated_at": "2026-07-15T15:47:17"
+      },
+      {
+        "id": 258,
+        "lesson_id": 134,
+        "title": "Ghép cặp (Matching)",
+        "activity_type": "image_choice",
+        "instruction_text": "Nhận diện công nghệ",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Chuột máy tính đâu?\",\"correct\":\"computer-mouse\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"computer-mouse\",\"label\":\"Chuột máy tính\",\"media_url\":\"/lesson-media/nang/computer-mouse-card.svg\",\"media_kind\":\"image\"},{\"id\":\"animal-mouse\",\"label\":\"Con chuột\",\"media_url\":\"/lesson-media/nang/animal-mouse-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Chuột máy tính đâu?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T15:47:29",
+        "updated_at": "2026-07-15T15:47:29"
       }
     ],
     "lesson_assignments": [
