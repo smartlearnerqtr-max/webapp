@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:09:01+00:00",
+  "exported_at": "2026-07-15T16:09:04+00:00",
   "tables": {
     "subjects": [
       {
@@ -8114,6 +8114,20 @@
         "config_json": "{\"prompt\":\"Xem truyện tranh động rồi bấm xác nhận khi em nghe xong.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=nguvan-story\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T16:08:38",
         "updated_at": "2026-07-15T16:08:38"
+      },
+      {
+        "id": 271,
+        "lesson_id": 143,
+        "title": "Ghép bộ phận",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực khoa học, nhận biết bản thân",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Chạm để đặt mắt, mũi, miệng vào đúng vị trí trên khuôn mặt.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=khtn-face\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T16:09:03",
+        "updated_at": "2026-07-15T16:09:03"
       }
     ],
     "lesson_assignments": [
