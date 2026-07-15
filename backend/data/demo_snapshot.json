@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:13:38+00:00",
+  "exported_at": "2026-07-15T16:13:41+00:00",
   "tables": {
     "subjects": [
       {
@@ -8329,6 +8329,20 @@
         "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"flute\",\"label\":\"Sáo trúc\",\"media_url\":\"/lesson-media/nang/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"},{\"id\":\"dan-bau\",\"label\":\"Đàn bầu\",\"media_url\":\"/lesson-media/nang/photos/dan-bau.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nang/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-15T16:13:09",
         "updated_at": "2026-07-15T16:13:09"
+      },
+      {
+        "id": 281,
+        "lesson_id": 148,
+        "title": "Tô mảng màu (Fill Color)",
+        "activity_type": "watch_answer",
+        "instruction_text": "Năng lực thẩm mĩ",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Chọn màu cam rồi tô kín hình quả cam.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=mythuat-fill\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T16:13:40",
+        "updated_at": "2026-07-15T16:13:40"
       }
     ],
     "lesson_assignments": [
