@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:56:30+00:00",
+  "exported_at": "2026-07-15T15:56:32+00:00",
   "tables": {
     "subjects": [
       {
@@ -7706,6 +7706,20 @@
         "config_json": "{\"prompt\":\"Mưa rồi, lấy gì đây?\",\"correct\":\"umbrella\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"umbrella\",\"label\":\"Cái ô\",\"media_url\":\"/lesson-media/nang/umbrella-card.svg\",\"media_kind\":\"image\"},{\"id\":\"sunglasses\",\"label\":\"Kính râm\",\"media_url\":\"/lesson-media/nang/sunglasses-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Mưa rồi, lấy gì đây?\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-15T15:56:30",
         "updated_at": "2026-07-15T15:56:30"
+      },
+      {
+        "id": 254,
+        "lesson_id": 134,
+        "title": "Chọn đồ vật theo thời tiết",
+        "activity_type": "image_choice",
+        "instruction_text": "Năng lực thích ứng tự nhiên",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Mưa rồi, lấy gì đây?\",\"correct\":\"umbrella\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"umbrella\",\"label\":\"Cái ô\",\"media_url\":\"/lesson-media/nang/umbrella-card.svg\",\"media_kind\":\"image\"},{\"id\":\"sunglasses\",\"label\":\"Kính râm\",\"media_url\":\"/lesson-media/nang/sunglasses-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Mưa rồi, lấy gì đây?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T15:56:32",
+        "updated_at": "2026-07-15T15:56:32"
       }
     ],
     "lesson_assignments": [
