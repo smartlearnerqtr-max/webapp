@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:43:38+00:00",
+  "exported_at": "2026-07-15T15:43:41+00:00",
   "tables": {
     "subjects": [
       {
@@ -7297,6 +7297,20 @@
         "config_json": "{\"prompt\":\"Chia các khối vào đúng hộp hình Tròn hoặc hình Vuông.\",\"items\":[\"Đĩa tròn\",\"Khung vuông\",\"Bóng tròn\",\"Khối vuông\"],\"targets\":[\"Hộp hình Tròn\",\"Hộp hình Vuông\"]}",
         "created_at": "2026-07-15T15:42:58",
         "updated_at": "2026-07-15T15:42:58"
+      },
+      {
+        "id": 238,
+        "lesson_id": 124,
+        "title": "Chạm đúng nhân vật",
+        "activity_type": "image_choice",
+        "instruction_text": "Năng lực nhận diện hình ảnh",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Ai là cô Tấm?\",\"correct\":\"co-tam\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"co-tam\",\"label\":\"Cô Tấm\",\"media_url\":\"/lesson-media/nang/co-tam-card.svg\",\"media_kind\":\"image\"},{\"id\":\"con-cho\",\"label\":\"Con chó\",\"media_url\":\"/lesson-media/nang/con-cho-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Ai là cô Tấm?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-15T15:43:41",
+        "updated_at": "2026-07-15T15:43:41"
       }
     ],
     "lesson_assignments": [
