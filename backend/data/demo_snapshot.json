@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:28:56+00:00",
+  "exported_at": "2026-07-15T15:28:59+00:00",
   "tables": {
     "subjects": [
       {
@@ -7060,6 +7060,20 @@
         "config_json": "{\"prompt\":\"Ai là cô Tấm?\",\"correct\":\"co-tam\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"co-tam\",\"label\":\"Cô Tấm\",\"media_url\":\"/lesson-media/nang/co-tam-card.svg\",\"media_kind\":\"image\"},{\"id\":\"con-cho\",\"label\":\"Con chó\",\"media_url\":\"/lesson-media/nang/con-cho-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Ai là cô Tấm?\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-15T15:28:56",
         "updated_at": "2026-07-15T15:28:56"
+      },
+      {
+        "id": 231,
+        "lesson_id": 117,
+        "title": "Nghe truyện bằng Tranh động (Animation)",
+        "activity_type": "watch_answer",
+        "instruction_text": "Phẩm chất chăm chỉ, tập trung nghe 3 phút",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 3,
+        "config_json": "{\"prompt\":\"Xem truyện tranh động rồi bấm xác nhận khi em nghe xong.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=nguvan-story\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-15T15:28:59",
+        "updated_at": "2026-07-15T15:28:59"
       }
     ],
     "lesson_assignments": [
