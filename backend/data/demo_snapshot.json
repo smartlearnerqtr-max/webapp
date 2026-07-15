@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:08:46+00:00",
+  "exported_at": "2026-07-15T16:09:01+00:00",
   "tables": {
     "subjects": [
       {
@@ -4641,6 +4641,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T16:08:33",
         "updated_at": "2026-07-15T16:08:33"
+      },
+      {
+        "id": 143,
+        "created_by_teacher_id": 11,
+        "subject_id": 3,
+        "class_id": 13,
+        "title": "Cơ thể người (Mắt, mũi, miệng) và Vật sống / Không sống",
+        "description": "Nhận biết các bộ phận cơ thể và phân biệt vật sống quanh ta.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T16:09:01",
+        "updated_at": "2026-07-15T16:09:01"
       }
     ],
     "parent_daily_reports": [],
