@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:05:21+00:00",
+  "exported_at": "2026-07-15T16:06:35+00:00",
   "tables": {
     "subjects": [
       {
@@ -1599,7 +1599,7 @@
         "id": 32,
         "user_id": 57,
         "full_name": "Vũ Đức Anh",
-        "disability_level": "trung_binh",
+        "disability_level": "nang",
         "support_note": "Tài khoản import từ lô QQSSQY2KJ",
         "preferred_input": "touch",
         "preferred_read_speed": null,
@@ -1608,7 +1608,7 @@
         "avatar_url": null,
         "created_by_teacher_id": null,
         "created_at": "2026-07-05T12:38:54",
-        "updated_at": "2026-07-05T12:38:54"
+        "updated_at": "2026-07-15T16:06:11.051892"
       },
       {
         "id": 33,
@@ -1932,6 +1932,24 @@
         "sort_order": 10,
         "created_at": "2026-07-15T15:52:28",
         "updated_at": "2026-07-15T15:52:28"
+      },
+      {
+        "id": 13,
+        "teacher_id": 10,
+        "title": "Làm vườn cơ bản",
+        "description": "Làm quen với việc tưới cây, quan sát lá và giữ khu vườn gọn gàng.",
+        "cover_image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Gardening.jpg",
+        "meaning_title": "Ý nghĩa công việc",
+        "meaning_text": "Làm vườn giúp học sinh rèn sự kiên nhẫn, biết chăm sóc cây xanh và nhận ra mỗi hành động nhỏ đều có thể làm môi trường đẹp hơn.",
+        "video_url": "https://www.youtube.com/watch?v=MJMO7LjWMFQ",
+        "video_note": "Video thật về làm vườn sinh thái, giúp học sinh quan sát công việc chăm cây và khu vườn.",
+        "steps_json": "[{\"title\": \"Chuẩn bị bình tưới\", \"description\": \"Lấy bình tưới vừa tay và đổ nước vừa đủ.\"}, {\"title\": \"Tưới quanh gốc\", \"description\": \"Tưới nhẹ vào gốc cây, tránh làm đất bắn ra ngoài.\"}, {\"title\": \"Cất dụng cụ\", \"description\": \"Đặt bình tưới về đúng chỗ và lau phần nước rơi nếu có.\"}]",
+        "skills_json": "[\"Quan sát\", \"Tưới cây\", \"Kiên nhẫn\", \"Giữ khu vực sạch\"]",
+        "levels_json": "[\"nhe\", \"trung_binh\", \"nang\"]",
+        "status": "active",
+        "sort_order": 10,
+        "created_at": "2026-07-15T16:05:34",
+        "updated_at": "2026-07-15T16:05:34"
       }
     ],
     "teacher_simulation_quiz_questions": [
@@ -2790,6 +2808,14 @@
         "status": "active",
         "created_at": "2026-07-15T15:53:37",
         "updated_at": "2026-07-15T15:53:37"
+      },
+      {
+        "id": 32,
+        "class_id": 13,
+        "student_id": 32,
+        "status": "active",
+        "created_at": "2026-07-15T16:06:35",
+        "updated_at": "2026-07-15T16:06:35"
       }
     ],
     "class_subjects": [
@@ -5079,6 +5105,15 @@
         "source": "class_join",
         "created_at": "2026-07-15T15:53:37",
         "updated_at": "2026-07-15T15:53:37"
+      },
+      {
+        "id": 24,
+        "teacher_id": 11,
+        "student_id": 32,
+        "status": "active",
+        "source": "class_join",
+        "created_at": "2026-07-15T16:06:35",
+        "updated_at": "2026-07-15T16:06:35"
       }
     ],
     "lesson_activities": [
