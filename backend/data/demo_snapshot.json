@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:34:33+00:00",
+  "exported_at": "2026-07-15T15:34:57+00:00",
   "tables": {
     "subjects": [
       {
@@ -4221,6 +4221,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T15:34:16",
         "updated_at": "2026-07-15T15:34:16"
+      },
+      {
+        "id": 119,
+        "created_by_teacher_id": 8,
+        "subject_id": 12,
+        "class_id": 10,
+        "title": "Nhận biết thiết bị máy tính",
+        "description": "Nhận diện các bộ phận cơ bản của máy tính và cách sử dụng máy tính bảng.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T15:34:57",
+        "updated_at": "2026-07-15T15:34:57"
       }
     ],
     "parent_daily_reports": [],
