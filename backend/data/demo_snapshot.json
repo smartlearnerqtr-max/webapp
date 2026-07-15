@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T15:32:17+00:00",
+  "exported_at": "2026-07-15T15:32:34+00:00",
   "tables": {
     "subjects": [
       {
@@ -4213,6 +4213,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T15:32:01",
         "updated_at": "2026-07-15T15:32:01"
+      },
+      {
+        "id": 119,
+        "created_by_teacher_id": 8,
+        "subject_id": 9,
+        "class_id": 10,
+        "title": "Thời tiết (Nắng/Mưa) và Phương tiện giao thông",
+        "description": "Tìm hiểu về thời tiết và các loại phương tiện giao thông cơ bản.",
+        "primary_level": "nang",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-15T15:32:33",
+        "updated_at": "2026-07-15T15:32:33"
       }
     ],
     "parent_daily_reports": [],
