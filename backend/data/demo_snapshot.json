@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:05:19+00:00",
+  "exported_at": "2026-07-16T08:05:22+00:00",
   "tables": {
     "subjects": [
       {
@@ -4833,6 +4833,21 @@
         "is_archived": false,
         "created_at": "2026-07-16T08:05:19",
         "updated_at": "2026-07-16T08:05:19"
+      },
+      {
+        "id": 153,
+        "created_by_teacher_id": 12,
+        "subject_id": 12,
+        "class_id": 14,
+        "title": "Thiết bị số và An toàn mạng",
+        "description": "Nhận biết các thiết bị đầu vào/đầu ra và học cách bảo mật thông tin cá nhân.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-16T08:05:22",
+        "updated_at": "2026-07-16T08:05:22"
       }
     ],
     "parent_daily_reports": [],
