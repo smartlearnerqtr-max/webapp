@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:06:50+00:00",
+  "exported_at": "2026-07-16T08:06:53+00:00",
   "tables": {
     "subjects": [
       {
@@ -8785,6 +8785,20 @@
         "config_json": "{\"prompt\":\"Chọn màu rồi tô kín quả cam cho nổi bật.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=mythuat-fill\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-16T08:06:50",
         "updated_at": "2026-07-16T08:06:50"
+      },
+      {
+        "id": 299,
+        "lesson_id": 156,
+        "title": "Tạo hình gốm ảo",
+        "activity_type": "watch_answer",
+        "instruction_text": "Tư duy hình khối 3D",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Nắn khối đất sét ảo để tạo thành chiếc bình đơn giản.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=mythuat-pottery\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-16T08:06:53",
+        "updated_at": "2026-07-16T08:06:53"
       }
     ],
     "lesson_assignments": [
