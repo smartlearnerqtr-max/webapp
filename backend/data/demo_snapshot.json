@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:05:29+00:00",
+  "exported_at": "2026-07-16T08:05:32+00:00",
   "tables": {
     "subjects": [
       {
@@ -8599,6 +8599,20 @@
         "config_json": "{\"prompt\":\"Nếu có người xin mật khẩu, em nên làm gì?\",\"choices\":[\"Không cho\",\"Báo người lớn\",\"Gửi ngay mật khẩu\"],\"correct\":\"Không cho\",\"image_cards\":[{\"id\":\"card-102nlc\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-s1nyh5\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_text\":\"Bạn đã bảo vệ máy tính rất tốt\",\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=tinhoc-safe\"}",
         "created_at": "2026-07-16T08:05:29",
         "updated_at": "2026-07-16T08:05:29"
+      },
+      {
+        "id": 290,
+        "lesson_id": 153,
+        "title": "Đóng vai an toàn mạng",
+        "activity_type": "multiple_choice",
+        "instruction_text": "Kỹ năng tự bảo vệ không gian số",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Nếu có người xin mật khẩu, em nên làm gì?\",\"choices\":[\"Không cho\",\"Báo người lớn\",\"Gửi ngay mật khẩu\"],\"correct\":\"Không cho\",\"image_cards\":[{\"id\":\"card-102nlc\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-s1nyh5\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_text\":\"Bạn đã bảo vệ máy tính rất tốt\",\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=tinhoc-safe\"}",
+        "created_at": "2026-07-16T08:05:32",
+        "updated_at": "2026-07-16T08:05:32"
       }
     ],
     "lesson_assignments": [
