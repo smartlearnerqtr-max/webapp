@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:05:57+00:00",
+  "exported_at": "2026-07-16T08:05:59+00:00",
   "tables": {
     "subjects": [
       {
@@ -8642,6 +8642,20 @@
         "config_json": "{\"prompt\":\"Hình nào là tư thế chạy đúng?\",\"correct\":\"running-correct\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"running-correct\",\"label\":\"Chạy đúng tư thế\",\"media_url\":\"/lesson-media/nhe/running-correct.svg\",\"media_kind\":\"image\"},{\"id\":\"running-wrong\",\"label\":\"Chạy sai tư thế\",\"media_url\":\"/lesson-media/nhe/running-wrong.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Bạn nào chạy đúng tư thế?\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-16T08:05:57",
         "updated_at": "2026-07-16T08:05:57"
+      },
+      {
+        "id": 292,
+        "lesson_id": 154,
+        "title": "Tập theo nhạc ảo",
+        "activity_type": "watch_answer",
+        "instruction_text": "Vận động tinh và phối hợp",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Chạm lần lượt vào các vòng sáng theo nhịp 1 2 3 4.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=gdtc-ar\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-16T08:05:59",
+        "updated_at": "2026-07-16T08:05:59"
       }
     ],
     "lesson_assignments": [
