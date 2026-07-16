@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:04:13+00:00",
+  "exported_at": "2026-07-16T08:04:16+00:00",
   "tables": {
     "subjects": [
       {
@@ -8699,6 +8699,20 @@
         "config_json": "{\"prompt\":\"Xem thẻ Festival rồi đọc lại từ mới.\",\"media_url\":\"/lesson-media/nhe/photos/festival-viet-nam.jpg\",\"media_kind\":\"image\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-16T08:03:53",
         "updated_at": "2026-07-16T08:03:53"
+      },
+      {
+        "id": 295,
+        "lesson_id": 155,
+        "title": "Tìm Châu Mỹ trên quả địa cầu",
+        "activity_type": "watch_answer",
+        "instruction_text": "Định vị không gian địa lý",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Chạm vào Châu Mỹ trên quả địa cầu mô phỏng.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=lsdl-globe\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-16T08:04:16",
+        "updated_at": "2026-07-16T08:04:16"
       }
     ],
     "lesson_assignments": [
