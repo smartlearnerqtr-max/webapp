@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:03:38+00:00",
+  "exported_at": "2026-07-16T08:03:48+00:00",
   "tables": {
     "subjects": [
       {
@@ -4848,6 +4848,21 @@
         "is_archived": true,
         "created_at": "2026-07-16T08:03:24",
         "updated_at": "2026-07-16T08:03:38.473512"
+      },
+      {
+        "id": 154,
+        "created_by_teacher_id": 12,
+        "subject_id": 7,
+        "class_id": 14,
+        "title": "Health, Traffic and Festival",
+        "description": "Mở rộng vốn từ vựng về các chủ đề quen thuộc và luyện nghe cơ bản.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-16T08:03:48",
+        "updated_at": "2026-07-16T08:03:48"
       }
     ],
     "parent_daily_reports": [],
