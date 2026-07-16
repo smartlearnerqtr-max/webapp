@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-15T16:23:00+00:00",
+  "exported_at": "2026-07-16T08:02:23+00:00",
   "tables": {
     "subjects": [
       {
@@ -259,11 +259,11 @@
         "id": 17,
         "email": "admin@example.com",
         "phone": null,
-        "password_hash": "pbkdf2:sha256:1000000$Jn99dW1uAJaMj6Yc$1f3a59b3f922f70e579ca9cf43c88ef459c3e302216257e09329d4156f4bc17f",
+        "password_hash": "pbkdf2:sha256:1000000$yQCEoy4QKvtx3OsA$6d79754937bc6aaec354a24817c76797354ba0ba3dabda173d13c9ad8f76caa0",
         "role": "admin",
         "status": "active",
         "created_at": "2026-05-26T11:13:03",
-        "updated_at": "2026-07-15T16:20:16.937915"
+        "updated_at": "2026-07-16T07:58:53.537319"
       },
       {
         "id": 18,
@@ -4773,6 +4773,21 @@
         "is_archived": false,
         "created_at": "2026-07-15T16:13:38",
         "updated_at": "2026-07-15T16:13:38"
+      },
+      {
+        "id": 149,
+        "created_by_teacher_id": 12,
+        "subject_id": 6,
+        "class_id": 14,
+        "title": "Hình khối và mua bán đơn giản",
+        "description": "Nhận biết hình chóp, hình lăng trụ và vận dụng phép tính đơn giản qua tình huống mua bán bằng xu.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-16T08:02:23",
+        "updated_at": "2026-07-16T08:02:23"
       }
     ],
     "parent_daily_reports": [],
