@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:06:42+00:00",
+  "exported_at": "2026-07-16T08:06:45+00:00",
   "tables": {
     "subjects": [
       {
@@ -4893,6 +4893,21 @@
         "is_archived": false,
         "created_at": "2026-07-16T08:06:42",
         "updated_at": "2026-07-16T08:06:42"
+      },
+      {
+        "id": 157,
+        "created_by_teacher_id": 12,
+        "subject_id": 15,
+        "class_id": 14,
+        "title": "Tạo hình, Đường nét and Màu sắc",
+        "description": "Sáng tạo các tác phẩm nghệ thuật qua việc tạo hình gốm and phối màu.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-16T08:06:45",
+        "updated_at": "2026-07-16T08:06:45"
       }
     ],
     "parent_daily_reports": [],
