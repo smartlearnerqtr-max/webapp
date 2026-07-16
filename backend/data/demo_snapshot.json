@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:07:51+00:00",
+  "exported_at": "2026-07-16T08:08:03+00:00",
   "tables": {
     "subjects": [
       {
@@ -4953,6 +4953,21 @@
         "is_archived": true,
         "created_at": "2026-07-16T08:07:33",
         "updated_at": "2026-07-16T08:07:51.651842"
+      },
+      {
+        "id": 161,
+        "created_by_teacher_id": 12,
+        "subject_id": 17,
+        "class_id": 14,
+        "title": "Soạn cặp sách and Chi tiêu cá nhân",
+        "description": "Học cách tự chuẩn bị đồ dùng học tập and quản lý tiền tiết kiệm ảo.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-16T08:08:03",
+        "updated_at": "2026-07-16T08:08:03"
       }
     ],
     "parent_daily_reports": [],
