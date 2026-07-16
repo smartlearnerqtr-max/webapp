@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:08:03+00:00",
+  "exported_at": "2026-07-16T08:08:05+00:00",
   "tables": {
     "subjects": [
       {
@@ -8957,6 +8957,20 @@
         "config_json": "{\"prompt\":\"Sau khi xem clip, em chọn đúng đặc sản đang được giới thiệu.\",\"choices\":[\"Bưởi Tân Triều\",\"Vải thiều\",\"Nhãn\"],\"correct\":\"Bưởi Tân Triều\",\"image_cards\":[{\"id\":\"card-ibt7h1\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-m4gh04\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"https://www.youtube.com/embed/DQhT-cBk7Vo?rel=0&playsinline=1\"}",
         "created_at": "2026-07-16T08:07:43",
         "updated_at": "2026-07-16T08:07:43"
+      },
+      {
+        "id": 307,
+        "lesson_id": 161,
+        "title": "Soạn cặp sách",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng tự phục vụ",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Soạn đúng sách đi học và để đồ chơi ở ngoài balo.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=hdtn-bag\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-16T08:08:05",
+        "updated_at": "2026-07-16T08:08:05"
       }
     ],
     "lesson_assignments": [
