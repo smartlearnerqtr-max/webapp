@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:02:23+00:00",
+  "exported_at": "2026-07-16T08:02:26+00:00",
   "tables": {
     "subjects": [
       {
@@ -8441,6 +8441,20 @@
         "config_json": "{\"prompt\":\"Thêm sticker con ong và bươm bướm vào bức tranh vườn hoa.\",\"media_url\":\"/lesson-media/nang/heavy-lab.html?activity=mythuat-card\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-15T16:13:43",
         "updated_at": "2026-07-15T16:13:43"
+      },
+      {
+        "id": 283,
+        "lesson_id": 149,
+        "title": "Phân loại hình học",
+        "activity_type": "drag_drop",
+        "instruction_text": "Năng lực nhận diện hình học không gian",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Kéo từng đồ vật vào đúng nhóm hình học của nó.\",\"items\":[\"Kim tự tháp\",\"Cái lều\",\"Tủ lạnh\",\"Hộp sữa\"],\"targets\":[\"Hình chóp\",\"Hình lăng trụ\"],\"visual_style\":\"shape_3d\"}",
+        "created_at": "2026-07-16T08:02:26",
+        "updated_at": "2026-07-16T08:02:26"
       }
     ],
     "lesson_assignments": [
