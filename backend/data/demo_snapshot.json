@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:02:55+00:00",
+  "exported_at": "2026-07-16T08:02:58+00:00",
   "tables": {
     "subjects": [
       {
@@ -8527,6 +8527,20 @@
         "config_json": "{\"prompt\":\"Đưa đủ 4 xu vào máy tính tiền để mua 2 cái kẹo.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=toan-coins\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-16T08:02:37",
         "updated_at": "2026-07-16T08:02:37"
+      },
+      {
+        "id": 287,
+        "lesson_id": 151,
+        "title": "Trắc nghiệm hình ảnh",
+        "activity_type": "image_choice",
+        "instruction_text": "Năng lực nhận diện nhân vật",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Ai đang ngồi ở đáy giếng?\",\"correct\":\"frog\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"frog\",\"label\":\"Con ếch\",\"media_url\":\"/lesson-media/trung-binh/frog-card.svg\",\"media_kind\":\"image\"},{\"id\":\"turtle\",\"label\":\"Con rùa\",\"media_url\":\"/lesson-media/trung-binh/turtle-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Ai là người ngồi ở đáy giếng?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-16T08:02:58",
+        "updated_at": "2026-07-16T08:02:58"
       }
     ],
     "lesson_assignments": [
