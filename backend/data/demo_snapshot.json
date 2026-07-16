@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:06:05+00:00",
+  "exported_at": "2026-07-16T08:06:18+00:00",
   "tables": {
     "subjects": [
       {
@@ -4863,6 +4863,21 @@
         "is_archived": false,
         "created_at": "2026-07-16T08:05:54",
         "updated_at": "2026-07-16T08:05:54"
+      },
+      {
+        "id": 155,
+        "created_by_teacher_id": 12,
+        "subject_id": 14,
+        "class_id": 14,
+        "title": "Gõ phách và Nhạc cụ dân tộc",
+        "description": "Nghe và nhận diện các loại nhạc cụ dân tộc Việt Nam.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-16T08:06:18",
+        "updated_at": "2026-07-16T08:06:18"
       }
     ],
     "parent_daily_reports": [],
