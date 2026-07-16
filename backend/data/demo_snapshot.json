@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:07:37+00:00",
+  "exported_at": "2026-07-16T08:07:40+00:00",
   "tables": {
     "subjects": [
       {
@@ -8914,6 +8914,20 @@
         "config_json": "{\"prompt\":\"Sau khi xem clip, em chọn đúng đặc sản đang được giới thiệu.\",\"choices\":[\"Bưởi Tân Triều\",\"Vải thiều\",\"Nhãn\"],\"correct\":\"Bưởi Tân Triều\",\"image_cards\":[{\"id\":\"card-ibt7h1\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-m4gh04\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_lang\":\"vi-VN\",\"media_url\":\"https://www.youtube.com/embed/DQhT-cBk7Vo?rel=0&playsinline=1\"}",
         "created_at": "2026-07-16T08:07:31",
         "updated_at": "2026-07-16T08:07:31"
+      },
+      {
+        "id": 305,
+        "lesson_id": 160,
+        "title": "Tìm bưởi Tân Triều",
+        "activity_type": "image_choice",
+        "instruction_text": "Hiểu biết đặc sản quê hương",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Đâu là hình Bưởi Tân Triều?\",\"correct\":\"buoi\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"buoi\",\"label\":\"Bưởi Tân Triều\",\"media_url\":\"/lesson-media/nhe/photos/buoi.jpg\",\"media_kind\":\"image\"},{\"id\":\"vai\",\"label\":\"Vải thiều\",\"media_url\":\"/lesson-media/trung-binh/vai-card.svg\",\"media_kind\":\"image\"},{\"id\":\"nhan\",\"label\":\"Nhãn\",\"media_url\":\"/lesson-media/trung-binh/nhan-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Tìm cho cô hình Bưởi Tân Triều\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-16T08:07:40",
+        "updated_at": "2026-07-16T08:07:40"
       }
     ],
     "lesson_assignments": [
