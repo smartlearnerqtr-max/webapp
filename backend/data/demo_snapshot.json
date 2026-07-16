@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:02:31+00:00",
+  "exported_at": "2026-07-16T08:02:33+00:00",
   "tables": {
     "subjects": [
       {
@@ -8484,6 +8484,20 @@
         "config_json": "{\"prompt\":\"Đưa đủ 4 xu vào máy tính tiền để mua 2 cái kẹo.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=toan-coins\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-16T08:02:29",
         "updated_at": "2026-07-16T08:02:29"
+      },
+      {
+        "id": 285,
+        "lesson_id": 150,
+        "title": "Phân loại hình học",
+        "activity_type": "drag_drop",
+        "instruction_text": "Năng lực nhận diện hình học không gian",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Kéo từng đồ vật vào đúng nhóm hình học của nó.\",\"items\":[\"Kim tự tháp\",\"Cái lều\",\"Tủ lạnh\",\"Hộp sữa\"],\"targets\":[\"Hình chóp\",\"Hình lăng trụ\"],\"visual_style\":\"shape_3d\"}",
+        "created_at": "2026-07-16T08:02:33",
+        "updated_at": "2026-07-16T08:02:33"
       }
     ],
     "lesson_assignments": [
