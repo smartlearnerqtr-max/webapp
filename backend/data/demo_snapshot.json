@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:03:20+00:00",
+  "exported_at": "2026-07-16T08:03:22+00:00",
   "tables": {
     "subjects": [
       {
@@ -8584,6 +8584,20 @@
         "config_json": "{\"prompt\":\"Nam châm có hút sắt không?\",\"choices\":[\"Đúng\",\"Sai\"],\"correct\":\"Đúng\",\"image_cards\":[{\"id\":\"card-ig8ozs\",\"label\":\"Lựa chọn 1\",\"media_url\":\"\"},{\"id\":\"card-dhiyif\",\"label\":\"Lựa chọn 2\",\"media_url\":\"\"}],\"audio_text\":\"Nam châm có hút sắt không?\",\"audio_lang\":\"vi-VN\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=khtn-magnet\"}",
         "created_at": "2026-07-16T08:03:20",
         "updated_at": "2026-07-16T08:03:20"
+      },
+      {
+        "id": 290,
+        "lesson_id": 152,
+        "title": "Thí nghiệm ảo kéo thả",
+        "activity_type": "watch_answer",
+        "instruction_text": "Tư duy thực nghiệm trực quan",
+        "voice_answer_enabled": false,
+        "is_required": false,
+        "sort_order": 2,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Đưa nam châm lại gần từng vật để quan sát vật nào bị hút.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=khtn-magnet\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-16T08:03:22",
+        "updated_at": "2026-07-16T08:03:22"
       }
     ],
     "lesson_assignments": [
