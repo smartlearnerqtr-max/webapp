@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:06:18+00:00",
+  "exported_at": "2026-07-16T08:06:21+00:00",
   "tables": {
     "subjects": [
       {
@@ -8671,6 +8671,20 @@
         "config_json": "{\"prompt\":\"Chạm lần lượt vào các vòng sáng theo nhịp 1 2 3 4.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=gdtc-ar\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-16T08:05:59",
         "updated_at": "2026-07-16T08:05:59"
+      },
+      {
+        "id": 293,
+        "lesson_id": 155,
+        "title": "Nghe đoán nhạc cụ",
+        "activity_type": "listen_choose",
+        "instruction_text": "Năng lực cảm thụ âm nhạc",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"correct\":\"flute\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"drum\",\"label\":\"Trống\",\"media_url\":\"/lesson-media/trung-binh/drum-card.svg\",\"media_kind\":\"image\"},{\"id\":\"flute\",\"label\":\"Sáo\",\"media_url\":\"/lesson-media/nhe/photos/bamboo-flute.jpg\",\"media_kind\":\"image\"}],\"audio_text\":\"Nghe âm thanh rồi chọn đúng nhạc cụ.\",\"audio_url\":\"/lesson-media/nhe/audio/flute.ogg\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-16T08:06:21",
+        "updated_at": "2026-07-16T08:06:21"
       }
     ],
     "lesson_assignments": [
