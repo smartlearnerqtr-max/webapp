@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:08:07+00:00",
+  "exported_at": "2026-07-16T08:08:11+00:00",
   "tables": {
     "subjects": [
       {
@@ -8986,6 +8986,20 @@
         "config_json": "{\"prompt\":\"Soạn đúng sách đi học và để đồ chơi ở ngoài balo.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=hdtn-bag\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
         "created_at": "2026-07-16T08:08:05",
         "updated_at": "2026-07-16T08:08:05"
+      },
+      {
+        "id": 308,
+        "lesson_id": 162,
+        "title": "Soạn cặp sách",
+        "activity_type": "watch_answer",
+        "instruction_text": "Kỹ năng tự phục vụ",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Soạn đúng sách đi học và để đồ chơi ở ngoài balo.\",\"media_url\":\"/lesson-media/trung-binh/medium-lab.html?activity=hdtn-bag\",\"answer_mode\":\"none\",\"accepted_answers\":[]}",
+        "created_at": "2026-07-16T08:08:11",
+        "updated_at": "2026-07-16T08:08:11"
       }
     ],
     "lesson_assignments": [
