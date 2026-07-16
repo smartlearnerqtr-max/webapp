@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:05:24+00:00",
+  "exported_at": "2026-07-16T08:05:27+00:00",
   "tables": {
     "subjects": [
       {
@@ -8571,6 +8571,20 @@
         "config_json": "{\"prompt\":\"Thiết bị nào dùng để gõ chữ?\",\"correct\":\"keyboard\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"keyboard\",\"label\":\"Bàn phím\",\"media_url\":\"/lesson-media/trung-binh/keyboard-card.svg\",\"media_kind\":\"image\"},{\"id\":\"monitor\",\"label\":\"Màn hình\",\"media_url\":\"/lesson-media/trung-binh/monitor-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Cái nào dùng để gõ chữ?\",\"audio_lang\":\"vi-VN\"}",
         "created_at": "2026-07-16T08:05:24",
         "updated_at": "2026-07-16T08:05:24"
+      },
+      {
+        "id": 288,
+        "lesson_id": 153,
+        "title": "Chọn thiết bị đầu vào",
+        "activity_type": "image_choice",
+        "instruction_text": "Năng lực tin học cơ bản",
+        "voice_answer_enabled": false,
+        "is_required": true,
+        "sort_order": 1,
+        "difficulty_stage": 2,
+        "config_json": "{\"prompt\":\"Thiết bị nào dùng để gõ chữ?\",\"correct\":\"keyboard\",\"image_selection_mode\":\"carousel_find\",\"image_cards\":[{\"id\":\"keyboard\",\"label\":\"Bàn phím\",\"media_url\":\"/lesson-media/trung-binh/keyboard-card.svg\",\"media_kind\":\"image\"},{\"id\":\"monitor\",\"label\":\"Màn hình\",\"media_url\":\"/lesson-media/trung-binh/monitor-card.svg\",\"media_kind\":\"image\"}],\"audio_text\":\"Cái nào dùng để gõ chữ?\",\"audio_lang\":\"vi-VN\"}",
+        "created_at": "2026-07-16T08:05:27",
+        "updated_at": "2026-07-16T08:05:27"
       }
     ],
     "lesson_assignments": [
