@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-07-16T08:07:20+00:00",
+  "exported_at": "2026-07-16T08:07:22+00:00",
   "tables": {
     "subjects": [
       {
@@ -4923,6 +4923,21 @@
         "is_archived": false,
         "created_at": "2026-07-16T08:07:20",
         "updated_at": "2026-07-16T08:07:20"
+      },
+      {
+        "id": 159,
+        "created_by_teacher_id": 12,
+        "subject_id": 16,
+        "class_id": 14,
+        "title": "Đặc sản Đồng Nai",
+        "description": "Nhận biết and tìm hiểu về các loại bưởi, sầu riêng đặc sản vùng Đồng Nai.",
+        "primary_level": "trung_binh",
+        "estimated_minutes": null,
+        "difficulty_stage": 1,
+        "is_published": false,
+        "is_archived": false,
+        "created_at": "2026-07-16T08:07:22",
+        "updated_at": "2026-07-16T08:07:22"
       }
     ],
     "parent_daily_reports": [],
